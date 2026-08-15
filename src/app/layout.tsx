@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ShellFooter } from "@/components/layouts/ShellFooter";
+import { ShellNav } from "@/components/layouts/ShellNav";
+import { AppProviders } from "./providers";
 import "./globals.css";
+
+const DEFAULT_LOCALE = "vi";
+const DEFAULT_MESSAGES: Record<string, unknown> = {};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,10 +26,17 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang={DEFAULT_LOCALE}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AppProviders locale={DEFAULT_LOCALE} messages={DEFAULT_MESSAGES}>
+          <ShellNav />
+          {children}
+          <ShellFooter />
+        </AppProviders>
+      </body>
     </html>
   );
 }
