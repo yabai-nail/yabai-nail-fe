@@ -75,10 +75,10 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     id: "payments",
     href: "/admin/payments",
     label: "Thanh toán",
-    title: "Quản lý thanh toán",
-    description: "Theo dõi giao dịch và doanh thu của tiệm.",
+    title: "Thanh toán tại quán",
+    description: "Xác nhận dịch vụ, tính tiền và hoàn tất thanh toán cho khách.",
     icon: BanknotesIcon,
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     id: "staff",
