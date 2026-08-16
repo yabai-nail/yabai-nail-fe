@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BanknotesIcon,
   BellAlertIcon,
@@ -7,13 +9,14 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { notifications } from "./data";
 
 const quickActions = [
-  { id: "appointment", label: "Tạo lịch hẹn", icon: CalendarDaysIcon },
+  { id: "appointment", label: "Tạo lịch hẹn", icon: CalendarDaysIcon, href: "/admin/appointments?create=1" },
   { id: "payment", label: "Thanh toán", icon: BanknotesIcon },
-  { id: "customer", label: "Thêm khách", icon: UserPlusIcon },
-  { id: "message", label: "Gửi tin nhắn", icon: ChatBubbleLeftEllipsisIcon },
+  { id: "customer", label: "Thêm khách", icon: UserPlusIcon, href: "/admin/customers" },
+  { id: "message", label: "Gửi tin nhắn", icon: ChatBubbleLeftEllipsisIcon, href: "/admin/messages" },
 ] as const;
 
 const notificationIcons = {
@@ -23,6 +26,8 @@ const notificationIcons = {
 } as const;
 
 export function UtilityPanel() {
+  const router = useRouter();
+
   return (
     <div className="space-y-4 xl:col-span-3">
       <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
@@ -30,12 +35,14 @@ export function UtilityPanel() {
           <h2 className="text-sm font-bold text-admin-ink">Thao tác nhanh</h2>
         </Card.Header>
         <Card.Content className="grid grid-cols-2 gap-2 px-4 pb-4 pt-3">
-          {quickActions.map(({ id, label, icon: Icon }) => (
+          {quickActions.map(({ id, label, icon: Icon, ...action }) => (
             <Button
               key={id}
               variant="outline"
               className="h-auto min-h-16 flex-col gap-1 rounded-lg border-admin-border px-2 py-2 text-xs text-admin-ink"
-              aria-label={`${label}, chức năng minh họa chưa kết nối dữ liệu`}
+              aria-label={"href" in action ? label : `${label}, chức năng chưa khả dụng`}
+              isDisabled={!("href" in action)}
+              onPress={() => { if ("href" in action) router.push(action.href); }}
             >
               <Icon aria-hidden="true" className="size-6 text-admin-accent" />
               {label}

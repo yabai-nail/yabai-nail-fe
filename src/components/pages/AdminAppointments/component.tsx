@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -36,12 +36,13 @@ import {
 
 export function AdminAppointmentsComponent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [appointments, setAppointments] = useState<ReadonlyArray<Appointment>>(initialAppointments);
   const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
   const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
   const [selectedId, setSelectedId] = useState(initialAppointments[0]?.id ?? "");
-  const [formMode, setFormMode] = useState<"create" | "edit" | null>(null);
+  const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => searchParams.get("create") === "1" ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const localId = useRef(initialAppointments.length + 1);
   const visibleDayAppointments = useMemo(

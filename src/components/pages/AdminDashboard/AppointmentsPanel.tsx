@@ -1,13 +1,18 @@
+"use client";
+
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { appointments } from "./data";
 
 export function AppointmentsPanel() {
+  const router = useRouter();
+
   return (
     <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-5">
       <Card.Header className="flex w-full flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">Lịch hẹn hôm nay</h2>
-        <Button size="sm" variant="outline" className="rounded-lg border-admin-border">
+        <Button size="sm" variant="outline" className="rounded-lg border-admin-border" onPress={() => router.push("/admin/appointments")}>
           Xem lịch
         </Button>
       </Card.Header>
@@ -41,7 +46,7 @@ export function AppointmentsPanel() {
           })}
         </ol>
 
-        <Button fullWidth variant="primary" className="mt-3 rounded-lg">
+        <Button fullWidth variant="primary" className="mt-3 rounded-lg" onPress={() => router.push("/admin/appointments?create=1")}>
           <PlusIcon aria-hidden="true" className="size-5" />
           Thêm lịch hẹn
         </Button>
