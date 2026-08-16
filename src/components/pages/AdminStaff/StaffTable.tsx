@@ -1,0 +1,62 @@
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { Avatar, Button, Chip } from "@heroui/react";
+import { calculateCommission } from "@/lib/admin-commission";
+import { formatVnd } from "@/lib/admin-format";
+import type { StaffMember } from "./data";
+
+type StaffTableProps = {
+  readonly staff: ReadonlyArray<StaffMember>;
+  readonly selectedId: string | null;
+  readonly onSelect: (id: string) => void;
+};
+
+export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[680px] text-left text-sm">
+        <caption className="sr-only">Danh sách nhân viên và doanh thu</caption>
+        <thead className="border-b border-admin-border text-xs text-admin-muted">
+          <tr>
+            <th scope="col" className="px-4 py-3">Nhân viên</th>
+            <th scope="col" className="px-3 py-3">Trạng thái</th>
+            <th scope="col" className="px-3 py-3">Doanh thu</th>
+            <th scope="col" className="px-3 py-3">Hoa hồng</th>
+            <th scope="col" className="px-3 py-3">Nhận được</th>
+            <th scope="col" className="px-3 py-3">Số đơn</th>
+            <th scope="col"><span className="sr-only">Thao tác</span></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-admin-border">
+          {staff.map((member) => {
+            const payout = calculateCommission(member.revenue, member.commissionRate);
+
+            return (
+              <tr key={member.id} className={selectedId === member.id ? "bg-admin-soft" : ""}>
+                <td className="px-3 py-2">
+                  <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
+                    <Avatar size="sm" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
+                    <strong>{member.name}</strong>
+                  </Button>
+                </td>
+                <td className="px-3 py-2">
+                  <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>
+                    <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
+                  </Chip>
+                </td>
+                <td className="px-3 py-2 font-medium">{formatVnd(member.revenue)}</td>
+                <td className="px-3 py-2">{member.commissionRate}%</td>
+                <td className="px-3 py-2 font-bold text-admin-accent">{formatVnd(payout)}</td>
+                <td className="px-3 py-2">{member.orders}</td>
+                <td className="px-3 py-2">
+                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Thao tác cho ${member.name}`}>
+                    <EllipsisHorizontalIcon className="size-4" />
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
