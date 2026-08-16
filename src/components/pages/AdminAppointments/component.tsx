@@ -1,15 +1,17 @@
 "use client";
 
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   filterAppointments,
+  getAppointmentsInRange,
   getAppointmentSummary,
 } from "./appointment-state";
+import { AppointmentCalendar } from "./AppointmentCalendar";
+import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
 import { AppointmentToolbar } from "./AppointmentToolbar";
@@ -21,10 +23,12 @@ import {
 } from "./data";
 import {
   formatAppointmentDateLabel,
+  getAppointmentViewRange,
   shiftAppointmentDate,
 } from "./date-utils";
 
 export function AdminAppointmentsComponent() {
+  const router = useRouter();
   const [appointments] = useState(initialAppointments);
   const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
   const [view, setView] = useState<AppointmentView>("day");
@@ -34,7 +38,15 @@ export function AdminAppointmentsComponent() {
     () => filterAppointments(appointments, { date: selectedDate, status }),
     [appointments, selectedDate, status],
   );
-  const selectedAppointment = resolveVisibleSelection(visibleDayAppointments, selectedId);
+  const viewRange = useMemo(
+    () => getAppointmentViewRange(selectedDate, view),
+    [selectedDate, view],
+  );
+  const visibleCalendarAppointments = useMemo(() => {
+    const inRange = getAppointmentsInRange(appointments, viewRange.start, viewRange.end);
+    return status === "all" ? inRange : inRange.filter((appointment) => appointment.status === status);
+  }, [appointments, status, viewRange]);
+  const selectedAppointment = resolveVisibleSelection(visibleCalendarAppointments, selectedId);
   const summary = useMemo(
     () => getAppointmentSummary(filterAppointments(appointments, { date: selectedDate, status: "all" })),
     [appointments, selectedDate],
@@ -64,21 +76,25 @@ export function AdminAppointmentsComponent() {
           <AppointmentSummary summary={summary} />
         </section>
 
-        <Card className="min-h-[32rem] rounded-lg border-admin-border bg-admin-surface shadow-none">
-          <Card.Content className="grid place-items-center p-6">
-            <div className="text-center">
-              <CalendarDaysIcon className="mx-auto size-10 text-admin-accent" />
-              <h2 className="mt-3 font-bold text-admin-ink">Lịch {view === "day" ? "ngày" : view === "week" ? "tuần" : "tháng"}</h2>
-              <p className="mt-1 text-sm text-admin-muted">Khung lịch đang được hoàn thiện ở lát cắt tiếp theo.</p>
-            </div>
-          </Card.Content>
-        </Card>
+        <AppointmentCalendar
+          view={view}
+          appointments={visibleCalendarAppointments}
+          selectedDate={selectedDate}
+          selectedId={selectedAppointment?.id ?? null}
+          onSelect={setSelectedId}
+        />
 
         <div className="2xl:block">
-          <AdminEmptySelection
-            title={selectedAppointment ? selectedAppointment.customer.name : "Chưa chọn lịch hẹn"}
-            description={selectedAppointment ? `${selectedAppointment.startTime} - ${selectedAppointment.endTime} · ${selectedAppointment.service.name}` : "Chọn một lịch hẹn để xem đầy đủ thông tin."}
-          />
+          {selectedAppointment ? (
+            <AppointmentDetailPanel
+              appointment={selectedAppointment}
+              onEdit={() => undefined}
+              onCancel={() => undefined}
+              onMessage={() => router.push("/admin/messages")}
+            />
+          ) : (
+            <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
+          )}
         </div>
       </div>
     </AdminPageLayout>

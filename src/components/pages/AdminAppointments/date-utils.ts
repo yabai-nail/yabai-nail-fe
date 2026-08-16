@@ -113,4 +113,3 @@ export function formatShortWeekday(value: string) {
   const date = parseDate(value);
   return `${dayNames[date.getDay()].replace("Thứ ", "T")}, ${date.getDate()}/${date.getMonth() + 1}`;
 }
-
