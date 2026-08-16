@@ -5,6 +5,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import { initialCheckoutInvoice, type CheckoutInvoice } from "./data";
 import { calculatePaymentTotals } from "./payment-state";
+import { ServiceCheckoutPanel } from "./ServiceCheckoutPanel";
 
 export function AdminPaymentsComponent() {
   const [invoice, setInvoice] = useState<CheckoutInvoice>(initialCheckoutInvoice);
@@ -26,15 +27,12 @@ export function AdminPaymentsComponent() {
           }))}
           onCancel={() => setIsAppointmentCancelled(true)}
         />
-        <section className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-5" aria-label="Chi tiết thanh toán">
-          <h2 className="text-base font-bold text-admin-ink">Cấu thành hóa đơn</h2>
-          <p className="mt-2 text-sm text-admin-muted">Phần chọn dịch vụ và phương thức thanh toán đang được kết nối.</p>
-          <p className="mt-6 text-2xl font-bold text-admin-accent">{totals.grandTotal.toLocaleString("vi-VN")} ₫</p>
-        </section>
+        <ServiceCheckoutPanel invoice={invoice} onChange={setInvoice}>
+          <div className="border-t border-admin-border px-4 py-4 text-right"><span className="text-sm text-admin-muted">Tạm tính </span><strong className="ml-3 text-lg text-admin-accent">{totals.subtotal.toLocaleString("vi-VN")} ₫</strong></div>
+        </ServiceCheckoutPanel>
       </div>
     </AdminPageLayout>
   );
 }
 
 export const meta = { world: "connected", domain: "admin-payments" } as const;
-
