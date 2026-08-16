@@ -1,3 +1,4 @@
+import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AppointmentsPanel } from "./AppointmentsPanel";
 import { MetricCard } from "./MetricCard";
 import { MonthlySummaryPanel } from "./MonthlySummaryPanel";
@@ -8,9 +9,7 @@ import { dashboardMetrics } from "./data";
 
 export function _AdminDashboard() {
   return (
-    <main id="main-content" className="px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
-      <h1 className="sr-only">Tổng quan cửa hàng YABAI Nail Salon</h1>
-
+    <AdminPageLayout>
       <section aria-labelledby="today-overview-heading">
         <h2 id="today-overview-heading" className="sr-only">Tổng quan hôm nay</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -30,7 +29,7 @@ export function _AdminDashboard() {
         <StaffPanel />
         <MonthlySummaryPanel />
       </section>
-    </main>
+    </AdminPageLayout>
   );
 }
 
