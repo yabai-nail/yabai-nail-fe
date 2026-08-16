@@ -2,10 +2,10 @@
 
 ## Trạng thái
 
-- Spec: `docs/specs/SPEC-admin-payments.md` — đề xuất, chờ duyệt.
+- Spec: `docs/specs/SPEC-admin-payments.md` — đã duyệt ngày 2026-08-16.
 - Task target: `docs/plans/admin-payments-todo.md`.
 - Capability id: `admin-payments`.
-- Implementation: Chưa bắt đầu; chỉ triển khai sau khi người dùng duyệt spec và plan.
+- Implementation: Chưa bắt đầu; được phép bắt đầu từ `AP-01`.
 
 ## Mục tiêu
 
@@ -149,4 +149,4 @@ Mỗi commit chỉ tạo sau focused tests và TypeScript; full lint/build/brows
 
 ## Open questions
 
-- Chờ duyệt các giả định trong spec, đặc biệt route đơn `/admin/payments`, discount VND và phạm vi local-only.
+- Không còn câu hỏi chặn implementation.

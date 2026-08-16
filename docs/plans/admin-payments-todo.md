@@ -2,8 +2,8 @@
 
 ## Trạng thái
 
-- Chưa implement.
-- Chỉ bắt đầu `AP-01` sau khi người dùng duyệt `docs/specs/SPEC-admin-payments.md` và `docs/plans/admin-payments-plan.md`.
+- Đã duyệt ngày 2026-08-16; chưa implement.
+- Bắt đầu implementation từ `AP-01` và giữ đúng dependency order trong plan.
 
 ## Phase 1 — Domain foundation
 

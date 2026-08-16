@@ -3,12 +3,12 @@
 ## Trạng thái
 
 - Capability id: `admin-payments`
-- Trạng thái: Đề xuất — chờ duyệt trước khi implement
+- Trạng thái: Đã duyệt ngày 2026-08-16 — chưa implement
 - URL: `/admin/payments`
 - Phụ thuộc: `admin-foundation`, `admin-appointments`, `admin-services`, `admin-settings`
 - Ảnh tham chiếu: màn “Thanh toán tại quán” do người dùng cung cấp ngày 2026-08-16
 
-## Giả định cần duyệt
+## Giả định đã duyệt
 
 1. Dùng route `/admin/payments` đã có trong `AdminShell`; chưa tạo route động theo appointment hoặc invoice id.
 2. Đây là fixture prototype: mọi thay đổi dịch vụ, giảm giá, tỷ lệ chia và trạng thái thanh toán chỉ nằm trong local state, mất sau khi reload.
@@ -266,4 +266,4 @@ const totals = calculatePaymentTotals(invoice);
 
 ## Open questions
 
-- Chờ người dùng duyệt tám giả định đầu spec. Nếu cần thanh toán theo appointment cụ thể ngay từ URL, đổi route contract trước khi implement.
+- Không còn câu hỏi chặn implementation; route đơn `/admin/payments`, discount VND và phạm vi local-only đã được duyệt.
