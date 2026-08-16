@@ -15,7 +15,7 @@ export const _SectionPage = ({
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-soft-foreground">
         {eyebrow}
       </p>
-      <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+      <h1 className="font-display mt-3 max-w-3xl text-5xl font-medium italic leading-tight tracking-tight text-foreground sm:text-6xl">
         {title}
       </h1>
       <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:text-lg">

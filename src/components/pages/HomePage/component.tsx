@@ -1,75 +1,112 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export function _HomePage() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center ">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16  sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+/** Draw the customer-facing Atelier Story introduction. */
+export const _HomePage = () => (
+  <main className="flex flex-1 flex-col">
+    <section className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-20">
+      <div className="max-w-xl">
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-accent-soft-foreground">
+          Nail atelier · Sài Gòn
+        </p>
+        <h1 className="font-display mt-5 text-6xl font-medium italic leading-[0.94] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
+          Dịu dàng,
+          <span className="block text-brand">theo cách của bạn.</span>
+        </h1>
+        <p className="mt-7 max-w-lg text-base leading-7 text-muted sm:text-lg sm:leading-8">
+          YABAI biến mỗi buổi làm móng thành một khoảng nghỉ riêng tư — nơi
+          kỹ thuật chỉn chu gặp cảm hứng thiết kế dành riêng cho bạn.
+        </p>
+
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/booking/services"
+            className="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-6 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Đặt lịch trải nghiệm
+          </Link>
+          <Link
+            href="/designs"
+            className="inline-flex min-h-12 items-center justify-center rounded-lg border border-border px-6 text-sm font-semibold text-foreground transition-colors hover:bg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Khám phá bộ sưu tập
+          </Link>
+        </div>
+
+        <dl className="mt-12 grid grid-cols-3 border-y border-separator py-5">
+          <div>
+            <dt className="text-xs text-muted">Phong cách</dt>
+            <dd className="mt-1 text-sm font-semibold text-foreground">
+              Cá nhân
+            </dd>
+          </div>
+          <div className="border-x border-separator px-4">
+            <dt className="text-xs text-muted">Chăm sóc</dt>
+            <dd className="mt-1 text-sm font-semibold text-foreground">
+              Chỉn chu
+            </dd>
+          </div>
+          <div className="pl-4">
+            <dt className="text-xs text-muted">Không gian</dt>
+            <dd className="mt-1 text-sm font-semibold text-foreground">
+              Thư giãn
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="relative min-h-[30rem] overflow-hidden rounded-4xl bg-brand shadow-atelier sm:min-h-[36rem]"
+      >
+        <div className="absolute -right-20 -top-24 size-80 rounded-full border border-accent-foreground/20" />
+        <div className="absolute right-8 top-8 size-44 rounded-full bg-brand-blush opacity-75 blur-3xl" />
+        <div className="absolute left-8 top-10 max-w-52 text-accent-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] opacity-70">
+            Collection 01
+          </p>
+          <p className="font-display mt-3 text-5xl font-medium italic leading-none">
+            Quiet Bloom
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <p className="max-w-[158px] text-center text-sm leading-6 text-red-500 dark:text-red-400 sm:text-left">
-            lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
-            quod.
-          </p>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="absolute -bottom-14 right-2 flex rotate-[-8deg] items-end gap-2 sm:right-10">
+          <span className="h-64 w-14 rounded-t-full rounded-b-3xl bg-brand-soft shadow-xl sm:h-72 sm:w-16" />
+          <span className="h-72 w-14 rounded-t-full rounded-b-3xl bg-brand-blush shadow-xl sm:h-80 sm:w-16" />
+          <span className="h-80 w-14 rounded-t-full rounded-b-3xl bg-surface shadow-xl sm:h-96 sm:w-16" />
+          <span className="h-72 w-14 rounded-t-full rounded-b-3xl bg-brand-hover shadow-xl sm:h-80 sm:w-16" />
         </div>
-      </main>
-    </div>
-  );
-}
+
+        <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between border-t border-accent-foreground/20 pt-5 text-accent-foreground">
+          <p className="max-w-40 text-xs leading-5 opacity-75">
+            Một bộ móng nhẹ như cánh hoa đầu mùa.
+          </p>
+          <span className="font-display text-3xl italic">YABAI</span>
+        </div>
+      </div>
+    </section>
+
+    <section className="border-t border-separator bg-surface">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center lg:px-8">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-soft-foreground">
+            Khoảnh khắc dành cho bạn
+          </p>
+          <h2 className="font-display mt-2 text-3xl font-medium italic text-foreground sm:text-4xl">
+            Chọn dịch vụ, chi nhánh và thời gian phù hợp.
+          </h2>
+        </div>
+        <Link
+          href="/services"
+          className="inline-flex min-h-11 shrink-0 items-center border-b border-brand pb-1 text-sm font-semibold text-brand transition-colors hover:text-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          Xem dịch vụ
+          <span aria-hidden="true" className="ml-2">
+            →
+          </span>
+        </Link>
+      </div>
+    </section>
+  </main>
+);
 
 export const meta = { world: "pure", domain: "home" } as const;

@@ -43,7 +43,7 @@ export type ShellNavProps = {
 
 const navLinkClassName = (isCurrent: boolean) =>
   [
-    "flex min-h-11 items-center rounded-full px-4 text-sm font-medium",
+    "flex min-h-11 items-center rounded-lg px-4 text-sm font-medium",
     "transition-colors focus-visible:outline-none focus-visible:ring-2",
     "focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     isCurrent
@@ -62,12 +62,12 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
       >
         <span
           aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+          className="font-display grid size-10 shrink-0 place-items-center rounded-full bg-accent text-xl font-semibold text-accent-foreground"
         >
           Y
         </span>
         <span className="min-w-0 leading-none">
-          <span className="block truncate text-sm font-bold tracking-[0.2em] text-foreground">
+          <span className="font-display block truncate text-base font-semibold tracking-[0.18em] text-foreground">
             {props.brand}
           </span>
           <span className="mt-1 block truncate text-xs text-muted">
@@ -98,7 +98,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
           onClick={on.toggleTheme}
           aria-label={props.themeLabel}
           title={props.themeLabel}
-          className="grid size-11 place-items-center rounded-full text-muted transition-colors hover:bg-default hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="grid size-11 place-items-center rounded-lg text-muted transition-colors hover:bg-default hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {props.isThemeReady && props.isDark ? (
             <SunIcon aria-hidden="true" className="size-5" />
@@ -110,7 +110,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
         <Link
           href={props.bookingHref}
           aria-current={props.isBookingCurrent ? "page" : undefined}
-          className="hidden min-h-11 items-center rounded-full bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex"
+          className="hidden min-h-11 items-center rounded-lg bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex"
         >
           {props.bookingLabel}
         </Link>
@@ -121,7 +121,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
           aria-label={props.menuLabel}
           aria-expanded={props.isMenuOpen}
           aria-controls="shell-nav-mobile-menu"
-          className="grid size-11 place-items-center rounded-full text-foreground transition-colors hover:bg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:hidden"
+          className="grid size-11 place-items-center rounded-lg text-foreground transition-colors hover:bg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:hidden"
         >
           {props.isMenuOpen ? (
             <XMarkIcon aria-hidden="true" className="size-6" />
@@ -154,7 +154,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
             href={props.bookingHref}
             aria-current={props.isBookingCurrent ? "page" : undefined}
             onNavigate={on.closeMenu}
-            className="mt-2 flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
+            className="mt-2 flex min-h-11 items-center justify-center rounded-lg bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
           >
             {props.bookingLabel}
           </Link>
