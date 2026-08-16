@@ -3,7 +3,7 @@
 ## Trạng thái
 
 - Capability id: `admin-payments`
-- Trạng thái: Đã duyệt ngày 2026-08-16 — chưa implement
+- Trạng thái: Đã implement và kiểm chứng ngày 2026-08-16
 - URL: `/admin/payments`
 - Phụ thuộc: `admin-foundation`, `admin-appointments`, `admin-services`, `admin-settings`
 - Ảnh tham chiếu: màn “Thanh toán tại quán” do người dùng cung cấp ngày 2026-08-16
@@ -254,15 +254,15 @@ const totals = calculatePaymentTotals(invoice);
 
 ## Success criteria
 
-- [ ] `/admin/payments` bám hierarchy ba vùng của ảnh và sidebar active.
-- [ ] Dịch vụ chính, add-ons, custom item và discount cập nhật một totals source chính xác.
-- [ ] Payment method, revenue split và confirmation flow hoạt động bằng local state.
-- [ ] Invoice paid bị khóa mutation; preview/in hóa đơn có nội dung đúng.
-- [ ] Appointment context actions hoạt động bằng HeroUI overlay và không reload.
-- [ ] Dashboard/sidebar entry points chuyển SPA tới route sau khi page tồn tại.
-- [ ] Accessibility và responsive contract đạt tại bốn viewport.
-- [ ] Unit tests, typecheck, lint, production build và browser QA pass.
-- [ ] Review cuối không còn finding Critical/Required.
+- [x] `/admin/payments` bám hierarchy ba vùng của ảnh và sidebar active.
+- [x] Dịch vụ chính, add-ons, custom item và discount cập nhật một totals source chính xác.
+- [x] Payment method, revenue split và confirmation flow hoạt động bằng local state.
+- [x] Invoice paid bị khóa mutation; preview/in hóa đơn có nội dung đúng.
+- [x] Appointment context actions hoạt động bằng HeroUI overlay và không reload.
+- [x] Dashboard/sidebar entry points chuyển SPA tới route sau khi page tồn tại.
+- [x] Accessibility và responsive contract đạt tại bốn viewport.
+- [x] Unit tests, typecheck, lint, production build và browser QA pass.
+- [x] Review cuối không còn finding Critical/Required.
 
 ## Open questions
 

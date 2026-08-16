@@ -5,7 +5,16 @@
 - Spec: `docs/specs/SPEC-admin-payments.md` — đã duyệt ngày 2026-08-16.
 - Task target: `docs/plans/admin-payments-todo.md`.
 - Capability id: `admin-payments`.
-- Implementation: Chưa bắt đầu; được phép bắt đầu từ `AP-01`.
+- Implementation: Hoàn thành và kiểm chứng ngày 2026-08-16.
+
+## Verification record
+
+- `pnpm test`: 9 test files, 39 tests pass.
+- `pnpm exec next typegen`: pass; route `/admin/payments` được nhận diện.
+- `pnpm exec tsc --noEmit`, `pnpm run lint`, `pnpm run build`: pass.
+- Browser: route trả `200`; service swap, custom item, discount validation, payment method, confirm paid, paid lock và invoice preview pass.
+- Responsive: không có page-level horizontal overflow tại 320×800, 768×1024, 1024×768 và 1440×900.
+- Review năm trục: các Required finding về discount invariant, custom id collision và confirm validation đã được sửa và có regression tests.
 
 ## Mục tiêu
 
