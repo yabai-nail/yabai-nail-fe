@@ -20,6 +20,7 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin appointments](./specs/SPEC-admin-appointments.md)
 - [Admin customers](./specs/SPEC-admin-customers.md)
 - [Admin messages](./specs/SPEC-admin-messages.md)
+- [Admin payments](./specs/SPEC-admin-payments.md)
 - [Admin staff](./specs/SPEC-admin-staff.md)
 - [Admin services](./specs/SPEC-admin-services.md)
 - [Admin settings](./specs/SPEC-admin-settings.md)
@@ -32,6 +33,8 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin foundation tasks](./plans/admin-foundation-todo.md)
 - [Admin appointments plan](./plans/admin-appointments-plan.md)
 - [Admin appointments tasks](./plans/admin-appointments-todo.md)
+- [Admin payments plan](./plans/admin-payments-plan.md)
+- [Admin payments tasks](./plans/admin-payments-todo.md)
 - [Admin operations plan](./plans/admin-operations-plan.md)
 - [Admin operations tasks](./plans/admin-operations-todo.md)
 
