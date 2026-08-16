@@ -3,12 +3,12 @@
 ## Trạng thái
 
 - Capability id: `admin-appointments`
-- Trạng thái: Đề xuất — chờ duyệt trước khi implement
+- Trạng thái: Hoàn tất — đã duyệt, implement và kiểm chứng ngày 2026-08-16
 - URL: `/admin/appointments`
 - Phụ thuộc: `admin-foundation`
 - Ảnh tham chiếu: màn “Quản lý lịch hẹn” do người dùng cung cấp ngày 2026-08-16
 
-## Giả định cần duyệt
+## Giả định đã duyệt
 
 1. Route thực là `/admin/appointments`, khớp metadata đã có trong `AdminShell`.
 2. Đây là fixture prototype: thêm, sửa, hủy chỉ cập nhật local state và mất sau khi reload.
@@ -220,16 +220,22 @@ const selectedAppointment = resolveVisibleSelection(
 
 ## Success criteria
 
-- [ ] Route `/admin/appointments` render đúng hierarchy ba vùng và sidebar active.
-- [ ] Ngày/Tuần/Tháng, date navigation và status filter hoạt động bằng local state.
-- [ ] List, calendar, detail và summary luôn nhất quán từ một appointment source.
-- [ ] Selection fallback và empty state không rò detail cũ.
-- [ ] Create/edit/cancel local hoạt động; time/conflict validation đúng.
-- [ ] Dashboard “Xem lịch” và sidebar chuyển SPA tới route mới.
-- [ ] HeroUI/Heroicons, accessibility và responsive contract đạt tại bốn viewport.
-- [ ] Unit tests, typecheck, lint, production build và browser verification đều pass.
-- [ ] Review cuối không còn finding mức Critical/Required.
+- [x] Route `/admin/appointments` render đúng hierarchy ba vùng và sidebar active.
+- [x] Ngày/Tuần/Tháng, date navigation và status filter hoạt động bằng local state.
+- [x] List, calendar, detail và summary luôn nhất quán từ một appointment source.
+- [x] Selection fallback và empty state không rò detail cũ.
+- [x] Create/edit/cancel local hoạt động; time/conflict validation đúng.
+- [x] Dashboard “Xem lịch” và sidebar chuyển SPA tới route mới.
+- [x] HeroUI/Heroicons, accessibility và responsive contract đạt tại bốn viewport.
+- [x] Unit tests, typecheck, lint, production build và browser verification đều pass.
+- [x] Review cuối không còn finding mức Critical/Required.
 
-## Open questions
+## Verification record
 
-- Chờ người dùng duyệt sáu giả định đầu spec. Sau khi duyệt, phạm vi implementation không tự mở rộng sang backend, drag/drop hoặc recurring appointments.
+- Người dùng duyệt spec và plan trước khi implement.
+- `pnpm test`: 8 files, 28 tests pass.
+- `pnpm exec next typegen`, `pnpm exec tsc --noEmit`, `pnpm run lint` và `pnpm run build`: pass.
+- Browser QA: route, status/view controls, create/conflict/cancel, dashboard navigation và focus return đã kiểm tra.
+- Responsive QA: 320×800, 768×1024, 1024×768 và 1440×900 không có page-level horizontal overflow.
+- Console không có lỗi ứng dụng; hydration message quan sát được do extension trình duyệt chèn thuộc tính `bis_*` trước hydrate.
+- Review năm trục: không còn finding Critical/Required.

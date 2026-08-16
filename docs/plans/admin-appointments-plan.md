@@ -2,10 +2,10 @@
 
 ## Trạng thái
 
-- Spec: `docs/specs/SPEC-admin-appointments.md` — đề xuất, chờ duyệt.
+- Spec: `docs/specs/SPEC-admin-appointments.md` — đã duyệt và hoàn tất.
 - Task target: `docs/plans/admin-appointments-todo.md`.
 - Capability id: `admin-appointments`.
-- Implementation: Chưa bắt đầu; chỉ triển khai sau khi người dùng duyệt spec và plan.
+- Implementation: Hoàn tất và đã kiểm chứng ngày 2026-08-16.
 
 ## Mục tiêu
 
@@ -137,12 +137,12 @@ Mỗi commit chỉ được tạo sau focused tests và TypeScript; full lint/bu
 
 ## Completion gate
 
-- Người dùng đã duyệt spec và plan.
-- Tất cả task checklist đạt bằng bằng chứng test/runtime/browser thật.
-- Không còn hard-coded derived count hoặc stale selection.
-- Không thêm runtime dependency hoặc backend call.
-- Spec, plan và docs index phản ánh đúng trạng thái triển khai.
+- [x] Người dùng đã duyệt spec và plan.
+- [x] Tất cả task checklist đạt bằng bằng chứng test/runtime/browser thật.
+- [x] Không còn hard-coded derived count hoặc stale selection.
+- [x] Không thêm runtime dependency hoặc backend call.
+- [x] Spec, plan và docs index phản ánh đúng trạng thái triển khai.
 
-## Open questions
+## Kết quả
 
-- Chờ duyệt các giả định trong spec, đặc biệt phạm vi local CRUD và cách hiển thị Week/Month không có drag-and-drop.
+Plan đã hoàn thành theo đúng thứ tự domain tests → route/daily flow → calendar/detail → local CRUD → dashboard integration → responsive/review. Phạm vi vẫn là fixture prototype; không thêm backend, persistence, drag-and-drop hoặc recurring appointment.
