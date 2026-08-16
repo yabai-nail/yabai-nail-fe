@@ -36,16 +36,19 @@ export function AppointmentToolbar({
     <div className="mb-4 space-y-3 border-b border-admin-border pb-4">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label="Khoảng thời gian trước" onPress={onPrevious}>
-            <ChevronLeftIcon className="size-4" />
-          </Button>
-          <div className="flex min-h-10 min-w-0 items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm font-semibold text-admin-ink">
-            <CalendarDaysIcon className="size-4 shrink-0 text-admin-muted" />
-            <span className="truncate">{dateLabel}</span>
+          <div className="grid w-full min-w-0 flex-none grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 sm:flex sm:w-auto">
+            <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label="Khoảng thời gian trước" onPress={onPrevious}>
+              <ChevronLeftIcon className="size-4" />
+            </Button>
+            <div className="flex min-h-10 min-w-0 items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm font-semibold text-admin-ink">
+              <CalendarDaysIcon className="size-4 shrink-0 text-admin-muted" />
+              <span className="truncate sm:hidden">{dateLabel.split(" (")[0]}</span>
+              <span className="hidden truncate sm:inline">{dateLabel}</span>
+            </div>
+            <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label="Khoảng thời gian tiếp theo" onPress={onNext}>
+              <ChevronRightIcon className="size-4" />
+            </Button>
           </div>
-          <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label="Khoảng thời gian tiếp theo" onPress={onNext}>
-            <ChevronRightIcon className="size-4" />
-          </Button>
           <Button variant="outline" className="rounded-lg border-admin-border" onPress={onToday}>Hôm nay</Button>
         </div>
 

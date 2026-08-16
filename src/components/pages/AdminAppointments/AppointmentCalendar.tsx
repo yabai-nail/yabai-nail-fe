@@ -6,6 +6,10 @@ import {
   getAppointmentViewRange,
   getDateKeysInRange,
 } from "./date-utils";
+import {
+  appointmentStatusColor,
+  appointmentStatusLabel,
+} from "./status";
 
 function AppointmentPill({
   appointment,
@@ -29,9 +33,16 @@ function AppointmentPill({
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
           <strong className="truncate text-xs text-admin-accent">{appointment.customer.name}</strong>
-          <time className="shrink-0 text-[0.65rem] text-admin-muted">{appointment.startTime}</time>
+          <time className="shrink-0 text-[0.65rem] text-admin-muted">{appointment.startTime} - {appointment.endTime}</time>
         </span>
-        <span className="mt-1 block truncate text-[0.7rem] text-admin-ink">{appointment.service.name}</span>
+        <span className="mt-1 flex items-center justify-between gap-2">
+          <span className="truncate text-[0.7rem] text-admin-ink">{appointment.service.name}</span>
+          {!compact ? (
+            <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]} className="shrink-0">
+              <Chip.Label>{appointmentStatusLabel[appointment.status]}</Chip.Label>
+            </Chip>
+          ) : null}
+        </span>
       </span>
     </Button>
   );
@@ -102,11 +113,16 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
               <>
                 <span className={`text-xs font-semibold ${date === selectedDate ? "text-admin-accent" : "text-admin-muted"}`}>{Number(date.slice(-2))}</span>
                 <div className="mt-1 space-y-1">
-                  {appointments.filter((appointment) => appointment.date === date).slice(0, 2).map((appointment) => (
+                  {appointments.filter((appointment) => appointment.date === date).slice(0, 3).map((appointment) => (
                     <Button key={appointment.id} variant="ghost" className={`h-auto min-h-7 w-full justify-start truncate rounded-md px-1.5 py-1 text-[0.65rem] ${selectedId === appointment.id ? "bg-admin-accent text-white" : "bg-admin-soft text-admin-accent"}`} onPress={() => onSelect(appointment.id)}>
                       {appointment.startTime} {appointment.customer.name}
                     </Button>
                   ))}
+                  {appointments.filter((appointment) => appointment.date === date).length > 3 ? (
+                    <p className="px-1 text-[0.65rem] font-semibold text-admin-muted">
+                      +{appointments.filter((appointment) => appointment.date === date).length - 3} lịch khác
+                    </p>
+                  ) : null}
                 </div>
               </>
             ) : null}

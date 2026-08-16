@@ -9,7 +9,7 @@ export function CancelAppointmentDialog({ appointment, onClose, onConfirm }: Rea
 }>) {
   return (
     <AlertDialog isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
-      <AlertDialog.Backdrop>
+      <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
         <AlertDialog.Container size="sm" placement="center">
           <AlertDialog.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
             <AlertDialog.Header className="flex items-center gap-3 px-5 pt-5">

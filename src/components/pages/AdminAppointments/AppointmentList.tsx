@@ -37,6 +37,7 @@ export function AppointmentList({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-admin-ink">{appointment.customer.name}</span>
                     <span className="mt-1 block truncate text-xs text-admin-muted">{appointment.service.name}</span>
+                    <span className="mt-1 block text-[0.65rem] text-admin-accent sm:hidden">{appointmentStatusLabel[appointment.status]}</span>
                   </span>
                   <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
                     <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]}>

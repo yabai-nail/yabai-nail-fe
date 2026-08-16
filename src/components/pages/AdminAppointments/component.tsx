@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -34,15 +34,14 @@ import {
   shiftAppointmentDate,
 } from "./date-utils";
 
-export function AdminAppointmentsComponent() {
+export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{ initialCreate?: boolean }>) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [appointments, setAppointments] = useState<ReadonlyArray<Appointment>>(initialAppointments);
   const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
   const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
   const [selectedId, setSelectedId] = useState(initialAppointments[0]?.id ?? "");
-  const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => searchParams.get("create") === "1" ? "create" : null);
+  const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const localId = useRef(initialAppointments.length + 1);
   const visibleDayAppointments = useMemo(
@@ -99,7 +98,7 @@ export function AdminAppointmentsComponent() {
         onCreate={() => setFormMode("create")}
       />
 
-      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(18rem,21rem)_minmax(0,1fr)] 2xl:grid-cols-[20rem_minmax(0,1fr)_20rem]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[19rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)_19rem]">
         <section className="min-w-0" aria-label="Danh sách và tổng quan lịch hẹn">
           <AppointmentList appointments={visibleDayAppointments} selectedId={selectedAppointment?.id ?? null} onSelect={setSelectedId} />
           <AppointmentSummary summary={summary} />
@@ -113,7 +112,7 @@ export function AdminAppointmentsComponent() {
           onSelect={setSelectedId}
         />
 
-        <div className="2xl:block">
+        <aside className="lg:col-span-2 xl:col-span-1" aria-label="Chi tiết lịch hẹn đang chọn">
           {selectedAppointment ? (
             <AppointmentDetailPanel
               appointment={selectedAppointment}
@@ -124,7 +123,7 @@ export function AdminAppointmentsComponent() {
           ) : (
             <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
           )}
-        </div>
+        </aside>
       </div>
 
       {formMode ? (

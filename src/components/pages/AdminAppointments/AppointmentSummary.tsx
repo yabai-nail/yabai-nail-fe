@@ -5,7 +5,7 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { Card } from "@heroui/react";
-import type { ReturnTypeOfSummary } from "./types";
+import type { getAppointmentSummary } from "./appointment-state";
 
 const metrics = [
   { key: "total", label: "Tổng lịch hẹn", icon: CalendarDaysIcon, color: "text-admin-accent" },
@@ -14,7 +14,7 @@ const metrics = [
   { key: "cancelled", label: "Đã hủy", icon: XCircleIcon, color: "text-admin-muted" },
 ] as const;
 
-export function AppointmentSummary({ summary }: Readonly<{ summary: ReturnTypeOfSummary }>) {
+export function AppointmentSummary({ summary }: Readonly<{ summary: ReturnType<typeof getAppointmentSummary> }>) {
   return (
     <Card className="mt-4 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="border-b border-admin-border px-4 py-3">

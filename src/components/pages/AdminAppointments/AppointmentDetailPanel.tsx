@@ -9,6 +9,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { formatNumber, formatVnd } from "@/lib/admin-format";
 import type { Appointment } from "./data";
 import {
   appointmentStatusColor,
@@ -28,7 +29,7 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
   onMessage: () => void;
 }>) {
   const details = [
-    { icon: ClockIcon, label: "Thời gian", value: `${appointment.startTime} - ${appointment.endTime}` },
+    { icon: ClockIcon, label: "Thời gian", value: `${appointment.startTime} - ${appointment.endTime} (${appointment.service.durationMinutes} phút)` },
     { icon: CalendarDaysIcon, label: "Ngày", value: appointment.date.split("-").reverse().join("/") },
     { icon: ScissorsIcon, label: "Dịch vụ", value: appointment.service.name },
     { icon: UserIcon, label: "Nhân viên", value: appointment.staff.name },
@@ -48,8 +49,14 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
 
         <div className="space-y-3 border-b border-admin-border pb-4 text-sm">
           <p className="flex items-center gap-2 text-admin-ink"><PhoneIcon className="size-4 text-admin-muted" />{appointment.customer.phone}</p>
+          <p className="text-xs text-admin-muted">Ngày sinh: {appointment.customer.birthday}</p>
           <p className="text-xs leading-5 text-admin-muted">{appointment.customer.preference}</p>
         </div>
+
+        <dl className="grid grid-cols-2 gap-2 rounded-lg bg-admin-soft p-3 text-center">
+          <div><dt className="text-[0.65rem] text-admin-muted">Số lần đến</dt><dd className="mt-1 text-sm font-bold text-admin-accent">{formatNumber(appointment.customer.visits)}</dd></div>
+          <div><dt className="text-[0.65rem] text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 text-sm font-bold text-admin-accent">{formatVnd(appointment.customer.totalSpend)}</dd></div>
+        </dl>
 
         <dl className="space-y-3">
           {details.map(({ icon: Icon, label, value }) => (
@@ -66,7 +73,7 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
           </div>
         </dl>
 
-        {appointment.note ? <div className="rounded-lg bg-admin-soft p-3 text-xs leading-5 text-admin-muted"><strong className="block text-admin-ink">Ghi chú</strong>{appointment.note}</div> : null}
+        {appointment.note ? <div className="rounded-lg border border-admin-border p-3 text-xs leading-5 text-admin-muted"><strong className="block text-admin-ink">Ghi chú</strong>{appointment.note}</div> : null}
       </Card.Content>
       <Card.Footer className="flex flex-col gap-2 border-t border-admin-border p-4">
         <Button fullWidth variant="primary" className="rounded-lg" onPress={onEdit}><PencilSquareIcon className="size-4" />Chỉnh sửa lịch hẹn</Button>
