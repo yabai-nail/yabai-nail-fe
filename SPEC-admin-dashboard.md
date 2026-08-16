@@ -112,7 +112,7 @@ pnpm run build
 pnpm start
 ```
 
-Project hiện không có test runner riêng. Verification bắt buộc gồm typecheck, ESLint, production build, HTTP runtime checks và visual checks ở các viewport quy định.
+Project dùng Vitest cho pure/domain regression tests. Verification bắt buộc gồm test, typecheck, ESLint, production build, HTTP runtime checks và visual checks ở các viewport quy định.
 
 ## Project structure
 
@@ -257,14 +257,14 @@ Tất cả fixture phải readonly và có stable id; không dùng array index l
 
 ## Success criteria
 
-- [ ] `/admin` tồn tại và không hiển thị public navigation/footer.
-- [ ] Desktop dashboard có đủ sidebar, header, 4 KPI và 5 khu vực nội dung như ảnh.
-- [ ] HeroUI được dùng cho toàn bộ primitive phù hợp; không có custom raw button.
-- [ ] Responsive không overflow tại 4 viewport mục tiêu.
-- [ ] Public routes và giao diện public không bị regression.
-- [ ] Typecheck, lint và production build đều pass.
-- [ ] Runtime checks đều trả `200` và không phát sinh Turbopack panic mới.
-- [ ] Visual review không còn finding mức Critical/Required.
+- [x] `/admin` tồn tại và không hiển thị public navigation/footer.
+- [x] Desktop dashboard có đủ sidebar, header, 4 KPI và 5 khu vực nội dung như ảnh.
+- [x] HeroUI được dùng cho toàn bộ primitive phù hợp; không có custom raw button.
+- [x] Responsive không overflow tại 4 viewport mục tiêu.
+- [x] Public routes và giao diện public không bị regression.
+- [x] Test, typecheck, lint và production build đều pass.
+- [x] Runtime checks đều trả `200` và không phát sinh Turbopack panic mới.
+- [x] Visual review không còn finding mức Critical/Required.
 
 ## Resolved decisions
 
