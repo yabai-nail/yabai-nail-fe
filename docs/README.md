@@ -17,6 +17,7 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin operations capability map](./specs/CAPABILITY-MAP-admin-operations.md)
 - [Admin dashboard](./specs/SPEC-admin-dashboard.md)
 - [Admin foundation](./specs/SPEC-admin-foundation.md)
+- [Admin appointments](./specs/SPEC-admin-appointments.md)
 - [Admin customers](./specs/SPEC-admin-customers.md)
 - [Admin messages](./specs/SPEC-admin-messages.md)
 - [Admin staff](./specs/SPEC-admin-staff.md)
@@ -29,6 +30,8 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin dashboard tasks](./plans/admin-dashboard-todo.md)
 - [Admin foundation plan](./plans/admin-foundation-plan.md)
 - [Admin foundation tasks](./plans/admin-foundation-todo.md)
+- [Admin appointments plan](./plans/admin-appointments-plan.md)
+- [Admin appointments tasks](./plans/admin-appointments-todo.md)
 - [Admin operations plan](./plans/admin-operations-plan.md)
 - [Admin operations tasks](./plans/admin-operations-todo.md)
 
