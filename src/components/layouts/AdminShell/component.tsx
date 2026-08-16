@@ -7,7 +7,9 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Badge, Button, Drawer, Dropdown } from "@heroui/react";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
 
 function NotificationButton() {
@@ -56,6 +58,9 @@ function OwnerMenu() {
 }
 
 export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
+  const pathname = usePathname();
+  const currentRoute = getAdminRoute(pathname);
+
   return (
     <div className="admin-shell min-h-screen bg-admin-canvas text-admin-ink">
       <a
@@ -102,11 +107,11 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
             </Drawer>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-base font-bold text-admin-ink sm:text-lg">
-                Chào buổi sáng, Chủ tiệm! <span aria-hidden="true">🌸</span>
-              </p>
+              <h1 className="truncate text-base font-bold text-admin-ink sm:text-lg">
+                {currentRoute.title}
+              </h1>
               <p className="mt-1 hidden text-xs text-admin-muted sm:block">
-                Hôm nay là Chủ nhật, 16/08/2026
+                {currentRoute.description}
               </p>
             </div>
 
