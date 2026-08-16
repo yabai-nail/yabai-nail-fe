@@ -50,7 +50,7 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Quản lý lịch hẹn",
     description: "Xem, quản lý và sắp xếp tất cả lịch hẹn của tiệm.",
     icon: CalendarDaysIcon,
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     id: "customers",
