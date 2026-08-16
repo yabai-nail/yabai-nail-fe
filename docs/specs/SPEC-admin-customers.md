@@ -21,7 +21,7 @@ Dựng màn quản lý khách hàng bám sát ảnh tham chiếu: nhóm khách h
 
 ## Tech stack and commands
 
-- Kế thừa Next.js, React, TypeScript, HeroUI, Heroicons và Tailwind từ `SPEC-admin-foundation.md`.
+- Kế thừa Next.js, React, TypeScript, HeroUI, Heroicons và Tailwind từ `docs/specs/SPEC-admin-foundation.md`.
 - Không thêm dependency.
 
 ```powershell

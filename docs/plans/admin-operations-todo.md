@@ -68,7 +68,7 @@
 - [x] `AO-12` Full responsive verification and review
   - Depends on: `AO-03`, `AO-05`, `AO-07`, `AO-09`, `AO-11`.
   - Acceptance: Tất cả routes/build/checks đạt; không có review finding bắt buộc.
-  - Verify: Full matrix trong `tasks/admin-operations-plan.md`.
+  - Verify: Full matrix trong `docs/plans/admin-operations-plan.md`.
   - Files: docs/task status và targeted fixes nếu cần.
 
 ## Verification record — 2026-08-16

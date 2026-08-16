@@ -21,7 +21,7 @@ Dựng màn quản lý dịch vụ gồm tab phân loại, search, bảng dịch
 
 ## Tech stack and commands
 
-- Kế thừa stack từ `SPEC-admin-foundation.md`; không thêm dependency hoặc tải ảnh ngoài.
+- Kế thừa stack từ `docs/specs/SPEC-admin-foundation.md`; không thêm dependency hoặc tải ảnh ngoài.
 
 ```powershell
 pnpm exec next typegen

@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-- Spec: Đã duyệt và triển khai — `SPEC-admin-foundation.md`.
+- Spec: Đã duyệt và triển khai — `docs/specs/SPEC-admin-foundation.md`.
 - Verification: Vitest, type generation, TypeScript, ESLint, production build và browser checks đều đạt ngày 2026-08-16.
 - Browser console chỉ có lỗi do extension Edge chèn thuộc tính vào HTML; không có lỗi xuất phát từ source ứng dụng.
 

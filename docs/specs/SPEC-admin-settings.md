@@ -21,7 +21,7 @@ Dựng màn Cài đặt tập trung vào tab “Nhân viên & Hoa hồng”: sum
 
 ## Tech stack and commands
 
-- Kế thừa stack từ `SPEC-admin-foundation.md`; tái sử dụng type/fixture contract phù hợp từ `admin-staff`; không thêm dependency.
+- Kế thừa stack từ `docs/specs/SPEC-admin-foundation.md`; tái sử dụng type/fixture contract phù hợp từ `admin-staff`; không thêm dependency.
 
 ```powershell
 pnpm exec next typegen

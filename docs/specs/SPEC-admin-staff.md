@@ -21,7 +21,7 @@ Dựng màn quản lý nhân viên với KPI doanh thu/hoa hồng/thực nhận,
 
 ## Tech stack and commands
 
-- Kế thừa stack từ `SPEC-admin-foundation.md`; không thêm dependency.
+- Kế thừa stack từ `docs/specs/SPEC-admin-foundation.md`; không thêm dependency.
 
 ```powershell
 pnpm exec next typegen

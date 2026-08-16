@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-- Capability map: `CAPABILITY-MAP-admin-operations.md` — đã duyệt.
+- Capability map: `docs/specs/CAPABILITY-MAP-admin-operations.md` — đã duyệt.
 - Specs: Customers, Messages, Staff, Services, Settings — đã duyệt.
 - Plan: Đã triển khai và kiểm chứng ngày 2026-08-16.
 

@@ -249,9 +249,9 @@
 
 **Files likely touched:**
 
-- `SPEC-admin-dashboard.md`
-- `tasks/plan.md`
-- `tasks/todo.md`
+- `docs/specs/SPEC-admin-dashboard.md`
+- `docs/plans/admin-dashboard-plan.md`
+- `docs/plans/admin-dashboard-todo.md`
 
 **Estimated scope:** Small — verification and documentation only.
 

@@ -21,7 +21,7 @@ Dựng màn Tin nhắn gồm inbox, cuộc hội thoại đang chọn và panel 
 
 ## Tech stack and commands
 
-- Kế thừa stack từ `SPEC-admin-foundation.md`; không thêm dependency.
+- Kế thừa stack từ `docs/specs/SPEC-admin-foundation.md`; không thêm dependency.
 
 ```powershell
 pnpm exec next typegen

@@ -2,9 +2,9 @@
 
 ## Status
 
-- Spec: Approved — `SPEC-admin-dashboard.md`
+- Spec: Approved — `docs/specs/SPEC-admin-dashboard.md`
 - Plan: Approved and implemented on 2026-08-16
-- Task target: `tasks/todo.md`
+- Task target: `docs/plans/admin-dashboard-todo.md`
 - Capability id: `admin-dashboard`
 
 ## Overview
