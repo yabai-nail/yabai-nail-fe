@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminCustomers } from "@/components/pages/AdminCustomers";
+import { AdminCustomers } from "@/components/pages/admin/AdminCustomers";
 
 export const metadata: Metadata = {
   title: "Quản lý khách hàng | YABAI Nail Salon",

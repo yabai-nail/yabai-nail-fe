@@ -119,7 +119,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/appointments/page.tsx
-src/components/pages/AdminAppointments/
+src/components/pages/admin/AdminAppointments/
 ├── component.tsx
 ├── data.ts
 ├── appointment-state.ts

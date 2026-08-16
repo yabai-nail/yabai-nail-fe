@@ -34,7 +34,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/messages/page.tsx
-src/components/pages/AdminMessages/
+src/components/pages/admin/AdminMessages/
 ├── component.tsx
 ├── data.ts
 ├── ConversationList.tsx

@@ -34,7 +34,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/settings/page.tsx
-src/components/pages/AdminSettings/
+src/components/pages/admin/AdminSettings/
 ├── component.tsx
 ├── data.ts
 ├── CommissionTable.tsx

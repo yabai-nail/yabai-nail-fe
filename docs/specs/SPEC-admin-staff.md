@@ -34,7 +34,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/staff/page.tsx
-src/components/pages/AdminStaff/
+src/components/pages/admin/AdminStaff/
 ├── component.tsx
 ├── data.ts
 ├── StaffTable.tsx

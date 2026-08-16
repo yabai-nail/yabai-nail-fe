@@ -35,7 +35,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/customers/page.tsx
-src/components/pages/AdminCustomers/
+src/components/pages/admin/AdminCustomers/
 ├── component.tsx
 ├── data.ts
 ├── CustomerTable.tsx

@@ -135,7 +135,7 @@ src/components/layouts/AdminShell/
 ├─ component.tsx                      # Pure presentation
 └─ index.tsx                          # Connected/client interactions
 
-src/components/pages/AdminDashboard/
+src/components/pages/admin/AdminDashboard/
 ├─ component.tsx                      # Dashboard composition
 ├─ data.ts                            # Typed fixture data
 └─ index.tsx                          # Public component export

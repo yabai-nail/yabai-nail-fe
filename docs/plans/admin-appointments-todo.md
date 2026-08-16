@@ -9,7 +9,7 @@
 
 - [x] `AA-01` Viết appointment domain tests
   - Acceptance: Có failing tests cho filter/sort/range, summary, conflict và create/edit/cancel immutable state.
-  - Verify: `pnpm test -- src/components/pages/AdminAppointments/appointment-state.test.ts` fail đúng vì implementation chưa có.
+  - Verify: `pnpm test -- src/components/pages/admin/AdminAppointments/appointment-state.test.ts` fail đúng vì implementation chưa có.
   - Files: `appointment-state.test.ts`, `data.ts`.
   - Scope: Small — 2 files.
 

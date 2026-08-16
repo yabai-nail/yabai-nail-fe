@@ -34,7 +34,7 @@ pnpm run build
 
 ```text
 src/app/(admin)/admin/services/page.tsx
-src/components/pages/AdminServices/
+src/components/pages/admin/AdminServices/
 ├── component.tsx
 ├── data.ts
 ├── ServiceTable.tsx

@@ -15,13 +15,13 @@
   - Depends on: `AF-01`.
   - Acceptance: Header hiển thị đúng metadata; bell và owner menu không lệch; mỗi route có một `h1`.
   - Verify: DOM và viewport 320/1440px pass.
-  - Files: `src/components/layouts/AdminShell/component.tsx`, `src/components/layouts/AdminShell/config.ts`, `src/components/pages/AdminDashboard/component.tsx`.
+  - Files: `src/components/layouts/AdminShell/component.tsx`, `src/components/layouts/AdminShell/config.ts`, `src/components/pages/admin/AdminDashboard/component.tsx`.
 
 - [x] `AF-04` Tạo `AdminPageLayout` và migrate dashboard
   - Depends on: `AF-03`.
   - Acceptance: `main#main-content` và padding được tái sử dụng; dashboard giữ hierarchy và spacing.
   - Verify: Visual/runtime comparison `/admin` pass.
-  - Files: `src/components/blocks/admin/AdminPageLayout/component.tsx`, `src/components/blocks/admin/AdminPageLayout/index.tsx`, `src/components/pages/AdminDashboard/component.tsx`.
+  - Files: `src/components/blocks/admin/AdminPageLayout/component.tsx`, `src/components/blocks/admin/AdminPageLayout/index.tsx`, `src/components/pages/admin/AdminDashboard/component.tsx`.
 
 - [x] `AF-05` Kiểm chứng foundation
   - Depends on: `AF-02`, `AF-04`.

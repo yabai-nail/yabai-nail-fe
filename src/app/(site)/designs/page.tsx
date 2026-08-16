@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/pages/SectionPage";
+import { SectionPage } from "@/components/pages/client/SectionPage";
 
 export const metadata: Metadata = {
   title: "Bộ sưu tập | YABAI",

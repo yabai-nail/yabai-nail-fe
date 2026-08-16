@@ -134,10 +134,10 @@
 
 **Files likely touched:**
 
-- `src/components/pages/AdminDashboard/data.ts`
-- `src/components/pages/AdminDashboard/MetricCard.tsx`
-- `src/components/pages/AdminDashboard/component.tsx`
-- `src/components/pages/AdminDashboard/index.tsx`
+- `src/components/pages/admin/AdminDashboard/data.ts`
+- `src/components/pages/admin/AdminDashboard/MetricCard.tsx`
+- `src/components/pages/admin/AdminDashboard/component.tsx`
+- `src/components/pages/admin/AdminDashboard/index.tsx`
 - `src/app/(admin)/admin/page.tsx`
 
 **Estimated scope:** Medium — 5 files.
@@ -161,9 +161,9 @@
 
 **Files likely touched:**
 
-- `src/components/pages/AdminDashboard/AppointmentsPanel.tsx`
-- `src/components/pages/AdminDashboard/RevenuePanel.tsx`
-- `src/components/pages/AdminDashboard/component.tsx`
+- `src/components/pages/admin/AdminDashboard/AppointmentsPanel.tsx`
+- `src/components/pages/admin/AdminDashboard/RevenuePanel.tsx`
+- `src/components/pages/admin/AdminDashboard/component.tsx`
 
 **Estimated scope:** Medium — 3 files.
 
@@ -186,10 +186,10 @@
 
 **Files likely touched:**
 
-- `src/components/pages/AdminDashboard/UtilityPanel.tsx`
-- `src/components/pages/AdminDashboard/StaffPanel.tsx`
-- `src/components/pages/AdminDashboard/MonthlySummaryPanel.tsx`
-- `src/components/pages/AdminDashboard/component.tsx`
+- `src/components/pages/admin/AdminDashboard/UtilityPanel.tsx`
+- `src/components/pages/admin/AdminDashboard/StaffPanel.tsx`
+- `src/components/pages/admin/AdminDashboard/MonthlySummaryPanel.tsx`
+- `src/components/pages/admin/AdminDashboard/component.tsx`
 
 **Estimated scope:** Medium — 4 files.
 
@@ -223,7 +223,7 @@
 - `src/app/globals.css`
 - `src/components/layouts/AdminShell/component.tsx`
 - `src/components/layouts/AdminShell/index.tsx`
-- `src/components/pages/AdminDashboard/component.tsx`
+- `src/components/pages/admin/AdminDashboard/component.tsx`
 
 **Estimated scope:** Medium — 4 files.
 
