@@ -38,12 +38,12 @@ export const _ShellFooter = ({ props }: ShellFooterProps) => (
         >
           <span
             aria-hidden="true"
-            className="grid size-10 place-items-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+            className="font-display grid size-10 place-items-center rounded-full bg-accent text-xl font-semibold text-accent-foreground"
           >
             Y
           </span>
           <span>
-            <span className="block text-sm font-bold tracking-[0.2em] text-foreground">
+            <span className="font-display block text-base font-semibold tracking-[0.18em] text-foreground">
               {props.brand}
             </span>
             <span className="mt-1 block text-xs text-muted">
@@ -78,7 +78,7 @@ export const _ShellFooter = ({ props }: ShellFooterProps) => (
         <p className="mt-4 text-sm leading-6 text-muted">{props.location}</p>
         <Link
           href={props.bookingHref}
-          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {props.bookingLabel}
         </Link>
