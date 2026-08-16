@@ -35,7 +35,7 @@ export function LineItemModal({ item, onClose, onSubmit }: Readonly<{
         <form onSubmit={submit}><Modal.Body className="space-y-4 px-5 py-5">
           {!item ? <label className="block text-sm font-semibold text-admin-ink">Nguồn dịch vụ<select className={`${fieldClassName} mt-2`} value={selectedId} onChange={(event) => { const value = event.target.value; setSelectedId(value); const service = catalog.find((entry) => entry.id === value); if (service) { setName(service.name); setPrice(String(service.price)); } }}><option value="custom">Khoản tùy chỉnh</option>{catalog.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label> : null}
           <label className="block text-sm font-semibold text-admin-ink">Tên dịch vụ<input className={`${fieldClassName} mt-2`} value={name} onChange={(event) => setName(event.target.value)} disabled={!isCustom} maxLength={80} required /></label>
-          <label className="block text-sm font-semibold text-admin-ink">Giá (VND)<input className={`${fieldClassName} mt-2`} type="number" min="0" step="1" value={price} onChange={(event) => setPrice(event.target.value)} disabled={!isCustom && !item} required /></label>
+          <label className="block text-sm font-semibold text-admin-ink">Giá (VND)<input className={`${fieldClassName} mt-2`} type="number" min="0" step="1" value={price} onChange={(event) => setPrice(event.target.value)} disabled={!isCustom} required /></label>
           <label className="block text-sm font-semibold text-admin-ink">Ghi chú<textarea className={`${fieldClassName} mt-2 min-h-20 py-2`} value={note} onChange={(event) => setNote(event.target.value)} maxLength={160} /></label>
           {error ? <p role="alert" className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger">{error}</p> : null}
         </Modal.Body><Modal.Footer className="border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" className="rounded-lg border-admin-border" onPress={onClose}>Đóng</Button><Button type="submit" variant="primary" className="rounded-lg">{item ? "Lưu thay đổi" : "Thêm dịch vụ"}</Button></Modal.Footer></form>
@@ -43,4 +43,3 @@ export function LineItemModal({ item, onClose, onSubmit }: Readonly<{
     </Modal>
   );
 }
-

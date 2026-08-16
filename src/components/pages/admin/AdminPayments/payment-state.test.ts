@@ -53,6 +53,15 @@ describe("payment transitions", () => {
     expect(initialCheckoutInvoice.currentService.id).not.toBe(paymentServiceCatalog[2].id);
   });
 
+  it("keeps discount within the new subtotal when composition becomes cheaper", () => {
+    const fullyDiscounted = { ...initialCheckoutInvoice, discount: 12_100 };
+    const result = replaceCurrentService(fullyDiscounted, paymentServiceCatalog[0]);
+
+    expect(result).toMatchObject({ ok: true });
+    if (!result.ok) return;
+    expect(result.value.discount).toBe(11_100);
+  });
+
   it("adds, updates, and removes line items immutably", () => {
     const added = addLineItem(initialCheckoutInvoice, paymentServiceCatalog[6]);
     expect(added).toMatchObject({ ok: true });
@@ -79,6 +88,23 @@ describe("payment transitions", () => {
     expect(addLineItem(initialCheckoutInvoice, { id: "custom", name: "Phụ kiện", price: -1 })).toMatchObject({ ok: false });
   });
 
+  it("generates a unique custom id after an earlier custom row was removed", () => {
+    const invoice = {
+      ...initialCheckoutInvoice,
+      additionalItems: [
+        ...initialCheckoutInvoice.additionalItems,
+        { id: "custom-4", name: "Mẫu 4", price: 100, note: "", source: "custom" as const },
+        { id: "custom-5", name: "Mẫu 5", price: 100, note: "", source: "custom" as const },
+      ].filter((item) => item.id !== "custom-4"),
+    };
+
+    const result = addLineItem(invoice, { id: "custom", name: "Mẫu mới", price: 100 });
+
+    expect(result).toMatchObject({ ok: true });
+    if (!result.ok) return;
+    expect(new Set(result.value.additionalItems.map((item) => item.id)).size).toBe(result.value.additionalItems.length);
+  });
+
   it("rejects invalid percentages and all money mutations after payment", () => {
     expect(updateStaffPercent(initialCheckoutInvoice, 101)).toMatchObject({ ok: false });
 
@@ -95,5 +121,10 @@ describe("payment transitions", () => {
     expect(result).toMatchObject({ ok: true });
     if (!result.ok) return;
     expect(result.value).toMatchObject({ status: "paid", paidAt: "2026-08-16T14:30:00.000Z" });
+  });
+
+  it("rejects confirmation when the invoice totals are invalid", () => {
+    expect(confirmPayment({ ...initialCheckoutInvoice, discount: 20_000 }, "2026-08-16T14:30:00.000Z")).toMatchObject({ ok: false });
+    expect(confirmPayment({ ...initialCheckoutInvoice, currentService: { ...initialCheckoutInvoice.currentService, price: -1 } }, "2026-08-16T14:30:00.000Z")).toMatchObject({ ok: false });
   });
 });
