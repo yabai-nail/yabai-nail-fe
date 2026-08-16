@@ -24,7 +24,7 @@ export function AdminPaymentsComponent() {
       <p className="mb-4 rounded-lg border border-admin-border bg-admin-soft px-4 py-3 text-xs leading-5 text-admin-muted">
         Bản mô phỏng nội bộ: thao tác chỉ lưu trong phiên hiện tại và không tạo giao dịch thật.
       </p>
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] 2xl:grid-cols-[17rem_minmax(31rem,1fr)_19rem]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(28rem,1fr)_18rem]">
         <CustomerAppointmentPanel
           invoice={invoice}
           isCancelled={isAppointmentCancelled}

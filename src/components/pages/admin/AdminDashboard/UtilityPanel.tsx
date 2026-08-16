@@ -14,7 +14,7 @@ import { notifications } from "./data";
 
 const quickActions = [
   { id: "appointment", label: "Tạo lịch hẹn", icon: CalendarDaysIcon, href: "/admin/appointments?create=1" },
-  { id: "payment", label: "Thanh toán", icon: BanknotesIcon },
+  { id: "payment", label: "Thanh toán", icon: BanknotesIcon, href: "/admin/payments" },
   { id: "customer", label: "Thêm khách", icon: UserPlusIcon, href: "/admin/customers" },
   { id: "message", label: "Gửi tin nhắn", icon: ChatBubbleLeftEllipsisIcon, href: "/admin/messages" },
 ] as const;
