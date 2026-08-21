@@ -2,7 +2,8 @@
 
 ```text
 service/
-  api/          # Axios client, BE envelopes/errors, route map, SWR fetcher
+  api/          # Axios client, 164-operation catalog, executor, SWR fetcher
+  admin/        # Typed queries/hooks for the current admin UI
   branches/     # One feature: types, imperative service, reactive SWR hooks
 ```
 
@@ -20,3 +21,10 @@ they reach components, while backend error envelopes become `ApiClientError`.
 Access tokens are kept in memory and are only attached to relative backend URLs.
 For session persistence across reloads, prefer a backend-issued `httpOnly` cookie;
 do not move bearer tokens to `localStorage`.
+
+`apiOperations` mirrors all 164 canonical operations from the backend registry.
+`runtimeApiOperations` also includes 19 concrete compatibility routes discovered
+from runtime Swagger (183 unique method/path pairs total). The 174 app-facing
+routes can be called through `executeApiOperation` and queried through
+`useApiOperation`. Nine provider webhook/internal job routes remain in the
+inventory for coverage but are deliberately rejected by the browser client.
