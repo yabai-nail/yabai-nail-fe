@@ -137,7 +137,7 @@ body {
   --admin-soft: #fff0f5;
   --admin-ink: #251b20;
   --admin-muted: #70656a;
-  --admin-border: #f0e5e9;
+  --admin-border: #dfccd4;
   --admin-success: #1aa35c;
   --admin-info: #1686cd;
   --admin-violet: #a640e8;
@@ -172,6 +172,10 @@ body {
   --border: var(--admin-border);
   --separator: var(--admin-border);
   --focus: var(--admin-accent);
+}
+
+.admin-shell .card:not(.border-0) {
+  border: 1px solid var(--admin-border);
 }
 
 body:has(.admin-shell) {

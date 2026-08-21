@@ -242,7 +242,7 @@ Tất cả fixture phải readonly và có stable id; không dùng array index l
 ### Ask first
 
 - Thêm hoặc nâng cấp dependency.
-- Kết nối backend, Apollo, SWR hoặc Axios.
+- Kết nối REST backend bằng Axios và SWR.
 - Thêm authentication/authorization thật.
 - Tạo các route con như `/admin/appointments` hoặc `/admin/customers`.
 - Thay đổi global theme tokens của public website.
