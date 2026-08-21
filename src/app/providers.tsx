@@ -4,6 +4,9 @@ import { I18nProvider } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+import { SWRConfig } from "swr";
+
+import { apiFetcher, AuthProvider } from "@/service";
 
 export interface AppProvidersProps {
   locale: string;
@@ -19,9 +22,13 @@ export function AppProviders({
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <I18nProvider locale={locale}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        <SWRConfig value={{ fetcher: apiFetcher }}>
+          <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
+        </SWRConfig>
       </I18nProvider>
     </NextIntlClientProvider>
   );

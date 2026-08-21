@@ -1,41 +1,69 @@
 "use client";
 
 import {
-  EnvelopeIcon,
   EyeIcon,
   EyeSlashIcon,
   LockClosedIcon,
+  PhoneIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+
+import { ApiClientError, useAuth } from "@/service";
 
 export interface LoginModalProps {
   readonly triggerClassName: string;
   readonly onDismiss?: () => void;
 }
 
-const EMAIL_ID = "login-email";
+const PHONE_ID = "login-phone";
 const PASSWORD_ID = "login-password";
+const FEEDBACK_ID = "login-feedback";
 
-/** Draw the client login surface without persisting or transmitting credentials. */
+interface Feedback {
+  readonly kind: "error" | "info";
+  readonly message: string;
+}
+
 export function LoginModal({
   triggerClassName,
   onDismiss,
 }: LoginModalProps) {
+  const router = useRouter();
+  const { login } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const dismiss = () => {
     setIsPasswordVisible(false);
-    setStatusMessage("");
+    setFeedback(null);
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setStatusMessage(
-      "Giao diện đã sẵn sàng. API xác thực sẽ được kết nối ở bước tiếp theo.",
-    );
+    const form = new FormData(event.currentTarget);
+    const phone = String(form.get("phone") ?? "");
+    const password = String(form.get("password") ?? "");
+
+    setFeedback(null);
+    setIsSubmitting(true);
+    try {
+      await login({ phone, password });
+      router.push("/admin");
+    } catch (error) {
+      const message =
+        error instanceof ApiClientError && error.code === "INVALID_CREDENTIALS"
+          ? "Số điện thoại hoặc mật khẩu không đúng."
+          : error instanceof ApiClientError
+            ? error.message
+            : "Không thể đăng nhập. Vui lòng thử lại.";
+      setFeedback({ kind: "error", message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -65,36 +93,38 @@ export function LoginModal({
               </span>
               <div>
                 <Modal.Heading className="text-xl font-bold text-foreground">
-                  Chào mừng bạn trở lại
+                  Đăng nhập quản trị
                 </Modal.Heading>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Đăng nhập để quản lý lịch hẹn và trải nghiệm tại YABAI.
+                  Dành cho quản lý và chủ chuỗi YABAI.
                 </p>
               </div>
             </Modal.Header>
 
             <Modal.Body className="px-6 py-5">
-              <form className="space-y-4" onSubmit={submit}>
+              <form className="space-y-4" onSubmit={submit} aria-busy={isSubmitting}>
                 <div>
                   <label
-                    htmlFor={EMAIL_ID}
+                    htmlFor={PHONE_ID}
                     className="mb-2 block text-sm font-semibold text-foreground"
                   >
-                    Email
+                    Email hoặc số điện thoại
                   </label>
                   <div className="relative">
-                    <EnvelopeIcon
+                    <PhoneIcon
                       aria-hidden="true"
                       className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted"
                     />
                     <input
-                      id={EMAIL_ID}
-                      name="email"
-                      type="email"
-                      autoComplete="email"
+                      id={PHONE_ID}
+                      name="phone"
+                      type="text"
+                      autoComplete="username"
                       required
-                      placeholder="ban@example.com"
-                      className="min-h-11 w-full rounded-lg border border-border bg-field-background px-10 text-sm text-field-foreground outline-none transition-colors placeholder:text-field-placeholder focus:border-accent focus:ring-2 focus:ring-focus/20"
+                      placeholder="Email hoặc số điện thoại"
+                      disabled={isSubmitting}
+                      aria-describedby={feedback ? FEEDBACK_ID : undefined}
+                      className="min-h-11 w-full rounded-lg border border-border bg-field-background px-10 text-sm text-field-foreground outline-none transition-colors placeholder:text-field-placeholder focus:border-accent focus:ring-2 focus:ring-focus/20 disabled:cursor-wait disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -110,9 +140,10 @@ export function LoginModal({
                     <button
                       type="button"
                       onClick={() =>
-                        setStatusMessage(
-                          "Khôi phục mật khẩu sẽ được kết nối cùng API xác thực.",
-                        )
+                        setFeedback({
+                          kind: "info",
+                          message: "Tính năng khôi phục mật khẩu chưa được hỗ trợ.",
+                        })
                       }
                       className="min-h-11 rounded-lg px-2 text-xs font-semibold text-brand transition-colors hover:text-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                     >
@@ -131,7 +162,9 @@ export function LoginModal({
                       autoComplete="current-password"
                       required
                       placeholder="Nhập mật khẩu"
-                      className="min-h-11 w-full rounded-lg border border-border bg-field-background px-10 pr-12 text-sm text-field-foreground outline-none transition-colors placeholder:text-field-placeholder focus:border-accent focus:ring-2 focus:ring-focus/20"
+                      disabled={isSubmitting}
+                      aria-describedby={feedback ? FEEDBACK_ID : undefined}
+                      className="min-h-11 w-full rounded-lg border border-border bg-field-background px-10 pr-12 text-sm text-field-foreground outline-none transition-colors placeholder:text-field-placeholder focus:border-accent focus:ring-2 focus:ring-focus/20 disabled:cursor-wait disabled:opacity-60"
                     />
                     <button
                       type="button"
@@ -148,18 +181,29 @@ export function LoginModal({
                   </div>
                 </div>
 
-                {statusMessage ? (
+                {feedback ? (
                   <p
-                    role="status"
+                    id={FEEDBACK_ID}
+                    role={feedback.kind === "error" ? "alert" : "status"}
                     aria-live="polite"
-                    className="rounded-lg bg-accent-soft px-3 py-2 text-xs leading-5 text-accent-soft-foreground"
+                    className={
+                      feedback.kind === "error"
+                        ? "rounded-lg bg-danger/10 px-3 py-2 text-xs leading-5 text-danger"
+                        : "rounded-lg bg-accent-soft px-3 py-2 text-xs leading-5 text-accent-soft-foreground"
+                    }
                   >
-                    {statusMessage}
+                    {feedback.message}
                   </p>
                 ) : null}
 
-                <Button type="submit" variant="primary" fullWidth className="rounded-lg">
-                  Đăng nhập
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isDisabled={isSubmitting}
+                  className="rounded-lg"
+                >
+                  {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
                 </Button>
               </form>
             </Modal.Body>
@@ -169,13 +213,14 @@ export function LoginModal({
               <button
                 type="button"
                 onClick={() =>
-                  setStatusMessage(
-                    "Đăng ký tài khoản sẽ được bổ sung cùng luồng xác thực.",
-                  )
+                  setFeedback({
+                    kind: "info",
+                    message: "Tài khoản quản trị được cấp bởi chủ hệ thống.",
+                  })
                 }
                 className="min-h-11 rounded-lg px-2 font-semibold text-brand transition-colors hover:text-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
-                Đăng ký
+                Liên hệ quản trị
               </button>
             </Modal.Footer>
           </Modal.Dialog>
