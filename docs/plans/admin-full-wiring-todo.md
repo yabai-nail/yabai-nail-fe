@@ -44,7 +44,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: BE 200 → detail panel hiển thị nhân viên mới.
   - Files: `AppointmentDetailPanel.tsx`, new `AssignStaffModal.tsx`, `component.tsx`.
 
-- [ ] **T1.3** Wire actual-services + photos
+- [x] **T1.3** Wire actual-services + photos
   - Acceptance: chỉnh dịch vụ thực tế qua modal → PUT 200; upload URL ảnh → POST 200; danh sách render sau revalidate.
   - Verify: BE local, kiểm tra `AppointmentServiceEntity` có row mới.
   - Files: `AppointmentDetailPanel.tsx`, `ActualServicesModal.tsx` (new), `PhotosPanel.tsx` (new hoặc inline).

@@ -25,6 +25,8 @@ import {
 import { AppointmentCalendar } from "./AppointmentCalendar";
 import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
 import { AssignStaffModal } from "./AssignStaffModal";
+import { ActualServicesModal } from "./ActualServicesModal";
+import { AttachPhotoModal } from "./AttachPhotoModal";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
@@ -363,6 +365,56 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
     }
   }
 
+  // Actual-services modal state. Uses the appointment.version for If-Match
+  // so a concurrent lifecycle transition doesn't silently overwrite the
+  // planner's edit.
+  const [isActualOpen, setIsActualOpen] = useState(false);
+  const [actualSubmitting, setActualSubmitting] = useState(false);
+  const [actualError, setActualError] = useState<string | null>(null);
+  async function confirmActualServices(serviceIds: ReadonlyArray<string>) {
+    if (!branchId || !selectedAppointment) return;
+    setActualSubmitting(true);
+    setActualError(null);
+    try {
+      await adminService.setAppointmentActualServices(
+        branchId,
+        selectedAppointment.id,
+        { serviceIds: [...serviceIds] },
+        selectedAppointment.version,
+      );
+      setIsActualOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setActualError(
+        thrown instanceof Error ? thrown.message : "Không lưu được dịch vụ thực tế.",
+      );
+    } finally {
+      setActualSubmitting(false);
+    }
+  }
+
+  // Attach-photo modal state. Version is not sent on POST photos; the
+  // endpoint appends, not updates.
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+  const [photoSubmitting, setPhotoSubmitting] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  async function confirmAttachPhoto(input: { mediaId: string; kind?: string; note?: string }) {
+    if (!branchId || !selectedAppointment) return;
+    setPhotoSubmitting(true);
+    setPhotoError(null);
+    try {
+      await adminService.attachAppointmentPhoto(branchId, selectedAppointment.id, input);
+      setIsPhotoOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setPhotoError(
+        thrown instanceof Error ? thrown.message : "Không đính kèm được ảnh.",
+      );
+    } finally {
+      setPhotoSubmitting(false);
+    }
+  }
+
   function confirmCancel() {
     if (!selectedAppointment) return;
     const appointmentId = selectedAppointment.id;
@@ -453,6 +505,22 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
                     }
                   : undefined
               }
+              onEditActualServices={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setActualError(null);
+                      setIsActualOpen(true);
+                    }
+                  : undefined
+              }
+              onAttachPhoto={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setPhotoError(null);
+                      setIsPhotoOpen(true);
+                    }
+                  : undefined
+              }
             />
           ) : (
             <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
@@ -481,6 +549,24 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
           onConfirm={confirmAssign}
           submitting={assignSubmitting}
           error={assignError}
+        />
+      ) : null}
+      {isActualOpen && selectedAppointment ? (
+        <ActualServicesModal
+          appointment={selectedAppointment}
+          onClose={() => setIsActualOpen(false)}
+          onConfirm={confirmActualServices}
+          submitting={actualSubmitting}
+          error={actualError}
+        />
+      ) : null}
+      {isPhotoOpen && selectedAppointment ? (
+        <AttachPhotoModal
+          appointment={selectedAppointment}
+          onClose={() => setIsPhotoOpen(false)}
+          onConfirm={confirmAttachPhoto}
+          submitting={photoSubmitting}
+          error={photoError}
         />
       ) : null}
     </AdminPageLayout>

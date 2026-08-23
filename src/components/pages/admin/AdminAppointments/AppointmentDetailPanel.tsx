@@ -8,9 +8,11 @@ import {
   NoSymbolIcon,
   PencilSquareIcon,
   PhoneIcon,
+  PhotoIcon,
   PlayCircleIcon,
   ScissorsIcon,
   UserIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
@@ -52,6 +54,8 @@ export function AppointmentDetailPanel({
   onCancel,
   onMessage,
   onAssignStaff,
+  onEditActualServices,
+  onAttachPhoto,
 }: Readonly<{
   appointment: Appointment;
   /** BE lifecycle transitions enabled for the current serverStatus. */
@@ -67,6 +71,10 @@ export function AppointmentDetailPanel({
   onMessage: () => void;
   /** Opens the assign-staff modal; hidden when omitted (local overlays). */
   onAssignStaff?: () => void;
+  /** Opens the actual-services modal; hidden when omitted (local overlays). */
+  onEditActualServices?: () => void;
+  /** Opens the attach-photo modal; hidden when omitted (local overlays). */
+  onAttachPhoto?: () => void;
 }>) {
   const router = useRouter();
   const details = [
@@ -161,6 +169,16 @@ export function AppointmentDetailPanel({
         {onAssignStaff && appointment.status !== "cancelled" ? (
           <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onAssignStaff}>
             <ArrowsRightLeftIcon className="size-4" />Đổi nhân viên
+          </Button>
+        ) : null}
+        {onEditActualServices && appointment.status !== "cancelled" ? (
+          <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEditActualServices}>
+            <WrenchScrewdriverIcon className="size-4" />Cập nhật dịch vụ thực tế
+          </Button>
+        ) : null}
+        {onAttachPhoto && appointment.status !== "cancelled" ? (
+          <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onAttachPhoto}>
+            <PhotoIcon className="size-4" />Đính kèm ảnh
           </Button>
         ) : null}
         {appointment.status !== "cancelled" ? <Button fullWidth variant="outline" className="rounded-lg border-admin-accent text-admin-accent" onPress={onCancel}><XMarkIcon className="size-4" />Hủy lịch hẹn</Button> : null}
