@@ -49,6 +49,14 @@ import type {
   AdminStaffShiftDraft,
   AdminStaffSkill,
   AdminStaffSkillsInput,
+  AdminAuditLog,
+  AdminPaymentRefund,
+  AdminPaymentRefundInput,
+  AdminReport,
+  AdminReportExport,
+  AdminReportExportDownloadInput,
+  AdminReportExportDownloadUrl,
+  AdminReportExportInput,
   BackendList,
   RevenueReport,
   StaffCompensation,
@@ -426,4 +434,49 @@ export const adminService = {
       "GET /api/v1/admin/reports/revenue-summary",
       { query: { from, to } },
     ),
+  branchesReport: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<AdminReport>("GET /api/v1/admin/reports/branches", { query }),
+  customersReport: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<AdminReport>("GET /api/v1/admin/reports/customers", { query }),
+  staffPerformanceReport: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<AdminReport>("GET /api/v1/admin/reports/staff-performance", { query }),
+  createReportExport: (input: AdminReportExportInput, idempotencyKey?: string) =>
+    executeApiOperation<AdminReportExport>("POST /api/v1/admin/report-exports", {
+      body: input,
+      idempotencyKey,
+    }),
+  reportExport: (exportId: string) =>
+    executeApiOperation<AdminReportExport>("GET /api/v1/admin/report-exports/{exportId}", {
+      path: { exportId },
+    }),
+  reportExportDownloadUrl: (
+    exportId: string,
+    input?: AdminReportExportDownloadInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminReportExportDownloadUrl>(
+      "POST /api/v1/admin/report-exports/{exportId}/download-url",
+      { path: { exportId }, body: input ?? {}, idempotencyKey },
+    ),
+  refundPayment: (
+    branchId: string,
+    paymentId: string,
+    input: AdminPaymentRefundInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminPaymentRefund>(
+      "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
+      { path: { branchId, paymentId }, body: input, idempotencyKey },
+    ),
+  paymentRefund: (branchId: string, paymentId: string, refundId: string) =>
+    executeApiOperation<AdminPaymentRefund>(
+      "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds/{refundId}",
+      { path: { branchId, paymentId, refundId } },
+    ),
+  auditLogs: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminAuditLog>>("GET /api/v1/admin/audit-logs", { query }),
+  auditLog: (logId: string) =>
+    executeApiOperation<AdminAuditLog>("GET /api/v1/admin/audit-logs/{logId}", {
+      path: { logId },
+    }),
 };

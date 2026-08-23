@@ -27,6 +27,20 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const FINANCE_OPERATION_IDS = [
+  "GET /api/v1/admin/reports/revenue-summary",
+  "GET /api/v1/admin/reports/branches",
+  "GET /api/v1/admin/reports/customers",
+  "GET /api/v1/admin/reports/staff-performance",
+  "POST /api/v1/admin/report-exports",
+  "GET /api/v1/admin/report-exports/{exportId}",
+  "POST /api/v1/admin/report-exports/{exportId}/download-url",
+  "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
+  "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds/{refundId}",
+  "GET /api/v1/admin/audit-logs",
+  "GET /api/v1/admin/audit-logs/{logId}",
+] as const;
+
 const CATALOG_OPERATION_IDS = [
   "GET /api/v1/admin/services",
   "POST /api/v1/admin/services",
@@ -96,6 +110,32 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService finance and audit surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of FINANCE_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each finance and audit operation", () => {
+    for (const fn of [
+      adminService.revenueReport,
+      adminService.branchesReport,
+      adminService.customersReport,
+      adminService.staffPerformanceReport,
+      adminService.createReportExport,
+      adminService.reportExport,
+      adminService.reportExportDownloadUrl,
+      adminService.refundPayment,
+      adminService.paymentRefund,
+      adminService.auditLogs,
+      adminService.auditLog,
     ]) {
       expect(typeof fn).toBe("function");
     }

@@ -473,3 +473,79 @@ export interface AdminSurchargePatch {
   readonly active?: boolean;
   readonly [field: string]: unknown;
 }
+
+// -- Admin payments / refunds ----------------------------------------------------
+
+export interface AdminPaymentRefund {
+  readonly id: string;
+  readonly paymentId: string;
+  readonly amountVnd: number;
+  readonly reason: string;
+  readonly status: string;
+  readonly createdAt: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPaymentRefundInput {
+  readonly amountVnd: number;
+  readonly reason: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+// -- Admin reports & exports -----------------------------------------------------
+
+export interface AdminReportRow {
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReport {
+  readonly metricVersion: string;
+  readonly from?: string;
+  readonly toExclusive?: string;
+  readonly generatedAt: string;
+  readonly rows: ReadonlyArray<AdminReportRow>;
+  readonly totals?: Readonly<Record<string, number | null>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReportExport {
+  readonly id: string;
+  readonly reportKind: string;
+  readonly status: string;
+  readonly requestedAt: string;
+  readonly completedAt?: string;
+  readonly downloadUrl?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReportExportInput {
+  readonly reportKind: string;
+  readonly params?: Readonly<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReportExportDownloadInput {
+  readonly ttlSeconds?: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReportExportDownloadUrl {
+  readonly url: string;
+  readonly expiresAt: string;
+}
+
+// -- Admin audit -----------------------------------------------------------------
+
+export interface AdminAuditLog {
+  readonly id: string;
+  readonly actorId?: string;
+  readonly actorType?: string;
+  readonly action: string;
+  readonly targetType?: string;
+  readonly targetId?: string;
+  readonly createdAt: string;
+  readonly branchId?: string;
+  readonly diff?: Readonly<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}

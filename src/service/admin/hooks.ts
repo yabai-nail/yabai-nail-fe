@@ -19,6 +19,10 @@ import type {
   AdminStaffPerformance,
   AdminStaffShift,
   AdminStaffSkill,
+  AdminAuditLog,
+  AdminPaymentRefund,
+  AdminReport,
+  AdminReportExport,
   BackendList,
   RevenueReport,
   StaffCompensation,
@@ -208,5 +212,61 @@ export function useRevenueReport(from?: string, to?: string) {
   return useApiOperation<RevenueReport>(
     "GET /api/v1/admin/reports/revenue-summary",
     { query: { from, to } },
+  );
+}
+
+export function useAdminBranchesReport(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/branches", { query });
+}
+
+export function useAdminCustomersReport(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/customers", { query });
+}
+
+export function useAdminStaffPerformanceReport(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/staff-performance", { query });
+}
+
+export function useAdminReportExport(exportId: string | null) {
+  return useApiOperation<AdminReportExport>(
+    exportId ? "GET /api/v1/admin/report-exports/{exportId}" : null,
+    { path: exportId ? { exportId } : undefined },
+  );
+}
+
+export function useAdminPaymentRefund(
+  branchId: string | null,
+  paymentId: string | null,
+  refundId: string | null,
+) {
+  return useApiOperation<AdminPaymentRefund>(
+    branchId && paymentId && refundId
+      ? "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds/{refundId}"
+      : null,
+    {
+      path:
+        branchId && paymentId && refundId
+          ? { branchId, paymentId, refundId }
+          : undefined,
+    },
+  );
+}
+
+export function useAdminAuditLogs(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminAuditLog>>("GET /api/v1/admin/audit-logs", { query });
+}
+
+export function useAdminAuditLog(logId: string | null) {
+  return useApiOperation<AdminAuditLog>(
+    logId ? "GET /api/v1/admin/audit-logs/{logId}" : null,
+    { path: logId ? { logId } : undefined },
   );
 }
