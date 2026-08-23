@@ -19,6 +19,7 @@ export {
   apiOperations,
   buildOperationPath,
   compatibilityApiOperations,
+  featureApiOperations,
   getApiOperation,
   runtimeApiOperations,
 } from "./operations";

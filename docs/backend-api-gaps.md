@@ -1,5 +1,8 @@
 # Báo cáo API còn thiếu cho Backend
 
+> Lưu ý: đây là snapshot phân tích ngày 2026-08-21, không phải nguồn inventory
+> hiện hành. Bản đồ method/path mới nhất nằm tại `docs/frontend-api-map.md`.
+
 Cập nhật: 2026-08-21
 
 Consumer: `yabai-nail-fe`
