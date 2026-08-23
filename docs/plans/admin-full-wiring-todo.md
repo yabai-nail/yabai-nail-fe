@@ -58,7 +58,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 2 — Customers CRM
 
-- [ ] **T2.1** Wire customer detail + update
+- [x] **T2.1** Wire customer detail + update (edit modal; useAdminCustomer defer — list row đủ)
   - Acceptance: `CustomerDetailPanel` render từ `useAdminCustomer`; nút "Lưu" gọi `updateCustomer` với version; success revalidate.
   - Verify: sửa displayName → BE lưu, list refresh.
   - Files: `AdminCustomers/CustomerDetailPanel.tsx`, `component.tsx`.

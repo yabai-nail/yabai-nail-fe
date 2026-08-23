@@ -4,14 +4,26 @@ import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
 import { getCustomerHistory, type Customer } from "./data";
 
-export function CustomerDetailPanel({ customer }: Readonly<{ customer: Customer }>) {
+export function CustomerDetailPanel({
+  customer,
+  onEdit,
+}: Readonly<{ customer: Customer; onEdit?: () => void }>) {
   const customerHistory = getCustomerHistory(customer.id);
 
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between px-4 pt-4">
         <h2 className="font-bold">Thông tin khách hàng</h2>
-        <Button isIconOnly size="sm" variant="ghost" aria-label={`Chỉnh sửa ${customer.name}`}><PencilSquareIcon className="size-4" /></Button>
+        <Button
+          isIconOnly
+          size="sm"
+          variant="ghost"
+          aria-label={`Chỉnh sửa ${customer.name}`}
+          isDisabled={!onEdit}
+          onPress={onEdit}
+        >
+          <PencilSquareIcon className="size-4" />
+        </Button>
       </Card.Header>
       <Card.Content className="space-y-4 p-4">
         <div className="flex items-center gap-3">
@@ -35,7 +47,14 @@ export function CustomerDetailPanel({ customer }: Readonly<{ customer: Customer 
           <ul className="mt-2 space-y-2 text-xs">{customerHistory.map((item) => <li key={item.id} className="grid grid-cols-[5rem_1fr_auto] gap-2"><span className="text-admin-muted">{item.date}</span><span>{item.service}</span><strong>{formatVnd(item.amount)}</strong></li>)}</ul>
         </section>
         <section aria-labelledby="customer-note-heading" className="border-t border-admin-border pt-3"><h3 id="customer-note-heading" className="text-sm font-bold">Ghi chú của khách hàng</h3><p className="mt-2 text-xs leading-5 text-admin-muted">{customer.note}</p></section>
-        <div className="grid gap-2"><Button variant="primary" className="rounded-lg"><PencilSquareIcon className="size-4" />Chỉnh sửa thông tin</Button><Button variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách</Button></div>
+        <div className="grid gap-2">
+          <Button variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
+            <PencilSquareIcon className="size-4" />Chỉnh sửa thông tin
+          </Button>
+          <Button variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent">
+            <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
+          </Button>
+        </div>
       </Card.Content>
     </Card>
   );
