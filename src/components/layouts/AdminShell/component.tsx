@@ -9,6 +9,7 @@ import {
 import { Avatar, Badge, Button, Drawer, Dropdown } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { BranchSelector } from "@/components/blocks/admin/BranchSelector";
 import { getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
 
@@ -115,6 +116,7 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
               </p>
             </div>
 
+            <BranchSelector />
             <NotificationButton />
             <OwnerMenu />
           </div>
