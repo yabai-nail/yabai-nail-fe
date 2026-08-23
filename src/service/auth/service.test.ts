@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { executeApiOperation, setAccessToken } = vi.hoisted(() => ({
+const { executeApiOperation, setAdminAccessToken } = vi.hoisted(() => ({
   executeApiOperation: vi.fn(),
-  setAccessToken: vi.fn(),
+  setAdminAccessToken: vi.fn(),
 }));
 
 vi.mock("../api", () => ({
   executeApiOperation,
-  setAccessToken,
+  setAdminAccessToken,
 }));
 
 import { authService } from "./service";
@@ -15,7 +15,7 @@ import { authService } from "./service";
 describe("authService.loginAdmin", () => {
   beforeEach(() => {
     executeApiOperation.mockReset();
-    setAccessToken.mockReset();
+    setAdminAccessToken.mockReset();
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
       "1cbaa0aa-0325-4b2e-8cd1-43ce8328afcd",
     );
@@ -52,7 +52,7 @@ describe("authService.loginAdmin", () => {
         idempotencyKey: undefined,
       },
     );
-    expect(setAccessToken).toHaveBeenCalledWith("access-token");
+    expect(setAdminAccessToken).toHaveBeenCalledWith("access-token");
   });
 
   it("does not change the current token when login fails", async () => {
@@ -61,6 +61,6 @@ describe("authService.loginAdmin", () => {
     await expect(
       authService.loginAdmin({ phone: "0900000003", password: "wrong" }),
     ).rejects.toThrow("Invalid credentials");
-    expect(setAccessToken).not.toHaveBeenCalled();
+    expect(setAdminAccessToken).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from "axios";
 
-import { getAccessToken } from "./auth-token";
+import { getAccessTokenForUrl } from "./auth-token";
 import { normalizeApiError } from "./contracts";
 
 export const API_BASE_URL =
@@ -8,12 +8,12 @@ export const API_BASE_URL =
 
 interface CreateApiClientOptions {
   readonly baseURL?: string;
-  readonly getAccessToken?: () => string | null;
+  readonly getAccessToken?: (url: string) => string | null;
 }
 
 export function createApiClient({
   baseURL = API_BASE_URL,
-  getAccessToken: resolveAccessToken = getAccessToken,
+  getAccessToken: resolveAccessToken = getAccessTokenForUrl,
 }: CreateApiClientOptions = {}): AxiosInstance {
   const client = axios.create({
     baseURL,
@@ -22,8 +22,9 @@ export function createApiClient({
   });
 
   client.interceptors.request.use((config) => {
-    const token = resolveAccessToken();
-    const isRelativeBackendUrl = !/^[a-z][a-z\d+.-]*:\/\//i.test(config.url ?? "");
+    const url = config.url ?? "";
+    const isRelativeBackendUrl = !/^[a-z][a-z\d+.-]*:\/\//i.test(url);
+    const token = isRelativeBackendUrl ? resolveAccessToken(url) : null;
     if (token && isRelativeBackendUrl) {
       config.headers.set("Authorization", `Bearer ${token}`);
     }

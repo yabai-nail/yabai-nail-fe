@@ -1,4 +1,12 @@
-export { getAccessToken, setAccessToken } from "./auth-token";
+export {
+  getAccessToken,
+  setAccessToken,
+  getAdminAccessToken,
+  setAdminAccessToken,
+  getCustomerAccessToken,
+  setCustomerAccessToken,
+  getAccessTokenForUrl,
+} from "./auth-token";
 export { API_BASE_URL, apiClient, createApiClient } from "./client";
 export {
   ApiClientError,

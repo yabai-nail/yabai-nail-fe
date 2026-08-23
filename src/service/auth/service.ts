@@ -1,4 +1,4 @@
-import { executeApiOperation, setAccessToken } from "../api";
+import { executeApiOperation, setAdminAccessToken } from "../api";
 import type {
   AccountMergeInput,
   AccountMergeResult,
@@ -35,7 +35,7 @@ export const authService = {
       },
     );
 
-    setAccessToken(session.accessToken);
+    setAdminAccessToken(session.accessToken);
     return session;
   },
   adminSession: () =>

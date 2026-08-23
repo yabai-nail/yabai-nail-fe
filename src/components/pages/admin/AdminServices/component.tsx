@@ -8,6 +8,7 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { useAdminServices, type AdminServiceItem as ServerService } from "@/service";
+import { ServiceCreateModal } from "./ServiceCreateModal";
 import { ServiceSidebar } from "./ServiceSidebar";
 import { ServiceTable } from "./ServiceTable";
 import {
@@ -43,7 +44,8 @@ function toFixtureService(server: ServerService): SalonService {
 }
 
 export function AdminServicesComponent() {
-  const { data, isLoading, error } = useAdminServices();
+  const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const source = useMemo<ReadonlyArray<SalonService>>(() => {
     if (!data?.items) return fixtureServices;
     if (data.items.length === 0) return [];
@@ -94,7 +96,13 @@ export function AdminServicesComponent() {
         </Tabs>
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label="Tìm dịch vụ" placeholder="Tìm kiếm dịch vụ..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-          <Button variant="primary" className="rounded-lg"><PlusIcon className="size-4" />Thêm dịch vụ</Button>
+          <Button
+            variant="primary"
+            className="rounded-lg"
+            onPress={() => setIsCreateOpen(true)}
+          >
+            <PlusIcon className="size-4" />Thêm dịch vụ
+          </Button>
         </div>
       </div>
       {isLoading ? (
@@ -115,6 +123,12 @@ export function AdminServicesComponent() {
           </Card.Footer>
         </Card>
       </AdminSplitLayout>
+      {isCreateOpen ? (
+        <ServiceCreateModal
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => void mutateServices()}
+        />
+      ) : null}
     </AdminPageLayout>
   );
 }
