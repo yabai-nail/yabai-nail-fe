@@ -104,7 +104,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 4 — Staff depth
 
-- [ ] **T4.1** Wire staff update + compensation write
+- [x] **T4.1** Wire staff update + compensation write
   - Acceptance: form edit trong detail panel; save gọi `updateStaff` + `setStaffCompensation`.
   - Verify: compensation config lưu, `useStaffCompensation` trả về giá trị mới.
   - Files: `AdminStaff/StaffDetailPanel.tsx`, `StaffEditForm.tsx` (new).

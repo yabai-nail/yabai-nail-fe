@@ -10,6 +10,11 @@ export type StaffMember = {
   readonly revenue: number;
   readonly commissionRate: number;
   readonly orders: number;
+  // Present when adapted from useAdminStaff; absent for fixture rows so
+  // the mutation buttons stay hidden in design preview.
+  readonly version?: number;
+  readonly branchId?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
 };
 
 export type RecentOrder = {

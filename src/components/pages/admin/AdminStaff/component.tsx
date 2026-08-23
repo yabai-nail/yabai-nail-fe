@@ -18,6 +18,7 @@ import {
 import { RecentOrdersTable } from "./RecentOrdersTable";
 import { StaffCreateModal } from "./StaffCreateModal";
 import { StaffDetailPanel } from "./StaffDetailPanel";
+import { StaffEditModal } from "./StaffEditModal";
 import { StaffTable } from "./StaffTable";
 import { staffMembers as fixtureStaff, type StaffMember, type StaffStatus } from "./data";
 
@@ -45,6 +46,9 @@ function toFixtureStaff(server: ServerStaff): StaffMember {
     revenue: 0,
     commissionRate: 60,
     orders: 0,
+    version: server.version,
+    branchId: server.branchId,
+    serviceIds: server.serviceIds,
   };
 }
 
@@ -52,6 +56,7 @@ export function AdminStaffComponent() {
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<StaffMember | null>(null);
   const source = useMemo<ReadonlyArray<StaffMember>>(() => {
     if (!data?.items) return fixtureStaff;
     if (data.items.length === 0) return [];
@@ -129,7 +134,10 @@ export function AdminStaffComponent() {
         <AdminSplitLayout
           aside={
             selected ? (
-              <StaffDetailPanel member={selected} />
+              <StaffDetailPanel
+                member={selected}
+                onEdit={selected.version !== undefined ? () => setEditing(selected) : undefined}
+              />
             ) : (
               <AdminEmptySelection
                 title="Không có nhân viên"
@@ -149,6 +157,13 @@ export function AdminStaffComponent() {
           branchId={branchId}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateStaff()}
+        />
+      ) : null}
+      {editing ? (
+        <StaffEditModal
+          member={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => void mutateStaff()}
         />
       ) : null}
     </AdminPageLayout>

@@ -2,9 +2,13 @@ import { CalendarDaysIcon, PencilSquareIcon, PhoneIcon } from "@heroicons/react/
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
+import { StaffCompensationForm } from "./StaffCompensationForm";
 import type { StaffMember } from "./data";
 
-export function StaffDetailPanel({ member }: Readonly<{ member: StaffMember }>) {
+export function StaffDetailPanel({
+  member,
+  onEdit,
+}: Readonly<{ member: StaffMember; onEdit?: () => void }>) {
   const payout = calculateCommission(member.revenue, member.commissionRate);
 
   return (
@@ -41,10 +45,18 @@ export function StaffDetailPanel({ member }: Readonly<{ member: StaffMember }>) 
           <h3 className="font-bold">Thống kê tháng này</h3>
           <p className="mt-3 flex justify-between text-sm"><span className="text-admin-muted">Số đơn hoàn thành</span><strong>54 đơn</strong></p>
         </section>
+        {member.version !== undefined ? <StaffCompensationForm staffId={member.id} /> : null}
         <div className="grid gap-2">
           <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử đơn hàng</Button>
           <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử thanh toán</Button>
-          <Button variant="primary" className="rounded-lg"><PencilSquareIcon className="size-4" />Xem báo cáo chi tiết</Button>
+          <Button
+            variant="primary"
+            className="rounded-lg"
+            isDisabled={!onEdit}
+            onPress={onEdit}
+          >
+            <PencilSquareIcon className="size-4" />Chỉnh sửa nhân viên
+          </Button>
         </div>
       </Card.Content>
     </Card>
