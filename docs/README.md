@@ -14,6 +14,8 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 
 ## Specs
 
+- [FE-BE API map capability](./specs/CAPABILITY-MAP-fe-be-api-map.md)
+- [FE-BE API map](./specs/SPEC-fe-be-api-map.md)
 - [Admin operations capability map](./specs/CAPABILITY-MAP-admin-operations.md)
 - [Admin dashboard](./specs/SPEC-admin-dashboard.md)
 - [Admin foundation](./specs/SPEC-admin-foundation.md)
@@ -27,6 +29,8 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 
 ## Plans
 
+- [FE-BE API map plan](./plans/fe-be-api-map-plan.md)
+- [FE-BE API map tasks](./plans/fe-be-api-map-todo.md)
 - [Admin dashboard plan](./plans/admin-dashboard-plan.md)
 - [Admin dashboard tasks](./plans/admin-dashboard-todo.md)
 - [Admin foundation plan](./plans/admin-foundation-plan.md)

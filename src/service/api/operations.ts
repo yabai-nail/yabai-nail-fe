@@ -6,7 +6,7 @@ export interface ApiOperation {
   readonly method: ApiMethod;
   readonly path: string;
   readonly audience: ApiAudience;
-  readonly stability: "canonical" | "legacy";
+  readonly stability: "canonical" | "feature" | "legacy";
 }
 
 const operationSource = `
@@ -176,6 +176,19 @@ POST /internal/v1/integrations/sms/webhooks/{provider}
 POST /internal/v1/jobs/membership-evaluation/runs
 `;
 
+// Accepted product operations exposed by the backend runtime in addition to the
+// frozen 164-operation SRS catalog.
+const featureOperationSource = `
+GET /api/v1/admin/auth/session
+GET /api/v1/admin/branches/{branchId}/conversations
+GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
+POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
+PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}
+GET /api/v1/admin/branches/{branchId}/staff-performance
+GET /api/v1/admin/branches/{branchId}/settings
+PATCH /api/v1/admin/branches/{branchId}/settings
+`;
+
 // Concrete NestJS controller routes present in runtime Swagger but absent from
 // the canonical 164-operation SRS registry. New FE work should prefer a
 // canonical operation when both contracts cover the same use case.
@@ -228,12 +241,17 @@ function parseOperations(
 }
 
 export const apiOperations = parseOperations(operationSource, "canonical");
+export const featureApiOperations = parseOperations(
+  featureOperationSource,
+  "feature",
+);
 export const compatibilityApiOperations = parseOperations(
   compatibilityOperationSource,
   "legacy",
 );
 export const runtimeApiOperations: ReadonlyArray<ApiOperation> = [
   ...apiOperations,
+  ...featureApiOperations,
   ...compatibilityApiOperations,
 ];
 

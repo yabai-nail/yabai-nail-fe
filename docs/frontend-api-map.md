@@ -1,59 +1,59 @@
-# Bản đồ API Backend -> Frontend
+# Bản đồ API Backend → Frontend
 
-Cập nhật: 2026-08-21
+Cập nhật: 2026-08-22
 
-## Nguồn đối chiếu
+## Phạm vi
 
-- Registry chuẩn của BE: `apps/api/src/platform/operation-registry.ts` — 164 operation.
-- Swagger runtime: `http://localhost:4000/docs-json` — phát hiện thêm 19 route controller tương thích.
-- Tổng inventory runtime không trùng `method + path`: **183 operation**.
-- App-facing: **174 operation**.
-- Webhook/internal server-only: **9 operation**, FE chỉ lưu inventory và không cho browser gọi.
+Tài liệu này ghi nhận parity 1:1 giữa runtime API của
+`yabai-nail-platform` và operation catalog trong `yabai-nail-fe`. Đây là map
+contract; không có nghĩa mọi operation đã được component UI fetch.
 
-## Code FE
+Backend chỉ được đọc để đối chiếu. Thay đổi mapping nằm hoàn toàn trong FE.
 
-| File | Vai trò |
-|---|---|
-| `src/service/api/operations.ts` | Catalog 164 canonical + 19 legacy/compatibility. |
-| `src/service/api/operation-client.ts` | Gọi mọi app-facing operation; resolve path/query/body, idempotency và version. |
-| `src/service/api/operation-hooks.ts` | SWR hook chung cho GET operation. |
-| `src/service/admin/` | Typed service/hook cho các khu admin hiện có. |
+## Nguồn đối chiếu và kết quả
 
-Ví dụ query:
+| Nhóm | Nguồn BE | Export FE | Số lượng | Trạng thái |
+|---|---|---|---:|---|
+| Canonical | `CANONICAL_OPERATIONS` | `apiOperations` | 164 | Khớp 1:1 |
+| Accepted feature | `FEATURE_OPERATIONS` | `featureApiOperations` | 8 | Khớp 1:1 |
+| Controller compatibility | Runtime Swagger/controllers | `compatibilityApiOperations` | 19 | Khớp 1:1 |
+| Tổng runtime | Ba nhóm trên | `runtimeApiOperations` | 191 | Unique `method + path` |
+| Browser-facing | Audience `app` | Generic executor | 182 | Cho phép resolve/call |
+| Server-only | Audience `provider/internal` | Inventory only | 9 | Browser bị chặn |
 
-```ts
-const result = useApiOperation(
-  "GET /api/v1/admin/branches/{branchId}/appointments",
-  { path: { branchId }, query: { from, to, status: "CONFIRMED" } },
-);
+Source map đầy đủ nằm tại `src/service/api/operations.ts`; mỗi dòng trong ba
+source list tương ứng đúng một backend `METHOD /path`.
+
+## 8 accepted feature operations
+
+```http
+GET   /api/v1/admin/auth/session
+GET   /api/v1/admin/branches/{branchId}/conversations
+GET   /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
+POST  /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
+PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}
+GET   /api/v1/admin/branches/{branchId}/staff-performance
+GET   /api/v1/admin/branches/{branchId}/settings
+PATCH /api/v1/admin/branches/{branchId}/settings
 ```
 
-Ví dụ mutation:
+Đây là tám operation trước đây có ở BE nhưng thiếu trong FE catalog.
 
-```ts
-await executeApiOperation(
-  "PATCH /api/v1/admin/services/{serviceId}",
-  {
-    path: { serviceId },
-    body: formValue,
-    version: service.version,
-    idempotencyKey: submitIntentId,
-  },
-);
-```
+## Ranh giới thực thi
 
-## Map UI admin hiện tại
+- `getApiOperation(id)` resolve toàn bộ 191 operation.
+- `buildOperationPath()` chỉ tạo browser path cho 182 operation audience `app`.
+- 9 webhook/internal operation được giữ để kiểm tra coverage nhưng luôn bị từ
+  chối khi browser client cố gọi.
+- Mutation tiếp tục dùng `Idempotency-Key`; `If-Match` được truyền khi caller
+  cung cấp version.
 
-| Màn hình FE | API BE đã map | Trạng thái dữ liệu |
-|---|---|---|
-| `/admin` | `GET /admin/branches/{branchId}/dashboard`, `GET /admin/reports/revenue-summary`, `GET /admin/reports/staff-performance` | Route có, dashboard response chưa đủ field UI. |
-| `/admin/appointments` | calendar, list/detail/create, assignment, reschedule, cancel, check-in, start, complete, no-show, actual-services, photos | Đủ command chính; list chưa lọc/phân trang và chưa có display snapshot. |
-| `/admin/customers` | list/lookup/detail/create/update, notes, nail-history, benefits, points, coupon | Route đủ; list chưa hỗ trợ search/segment và thiếu customer summary. |
-| `/admin/payments` | payment-quote, actual-services, capture payment, list payments, refund | Command đủ; thiếu checkout read-model và receipt/invoice contract. |
-| `/admin/services` | services, categories, reorder, surcharges CRUD | Route đủ; list service chưa có category/filter/count bán. |
-| `/admin/staff` | staff CRUD, skills, compensation, shifts, leave requests, staff-performance | Route đủ; thiếu aggregate read-model cho bảng doanh thu/hoa hồng hiện tại. |
-| `/admin/messages` | Không có route tương ứng | Blocked bởi BE. |
-| `/admin/settings` | branch, system-config, loyalty-config, compensation | Chỉ map được một phần; các nhóm cấu hình theo chi nhánh chưa có contract riêng. |
+## Ngoài phạm vi
 
-Chi tiết các phần thiếu hoặc response chưa đáp ứng UI nằm trong
-`docs/backend-api-gaps.md`.
+- Không chỉnh source backend.
+- Không thêm DTO suy đoán.
+- Không thêm wrapper/hook cho từng operation.
+- Không thay mock/local state hoặc nối API vào component UI.
+
+Mức độ UI thực sự fetch API là một báo cáo khác với contract parity và không
+được dùng để thay đổi con số 191 của runtime operation map.
