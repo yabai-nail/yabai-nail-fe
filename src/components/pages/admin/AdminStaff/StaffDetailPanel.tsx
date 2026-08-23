@@ -3,13 +3,19 @@ import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { StaffCompensationForm } from "./StaffCompensationForm";
+import { StaffShiftsPanel } from "./StaffShiftsPanel";
 import { StaffSkillsPanel } from "./StaffSkillsPanel";
 import type { StaffMember } from "./data";
 
 export function StaffDetailPanel({
   member,
+  branchId,
   onEdit,
-}: Readonly<{ member: StaffMember; onEdit?: () => void }>) {
+}: Readonly<{
+  member: StaffMember;
+  branchId?: string | null;
+  onEdit?: () => void;
+}>) {
   const payout = calculateCommission(member.revenue, member.commissionRate);
 
   return (
@@ -50,6 +56,7 @@ export function StaffDetailPanel({
           <>
             <StaffCompensationForm staffId={member.id} />
             <StaffSkillsPanel staffId={member.id} staffVersion={member.version} />
+            {branchId ? <StaffShiftsPanel branchId={branchId} staffId={member.id} /> : null}
           </>
         ) : null}
         <div className="grid gap-2">

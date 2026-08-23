@@ -136,6 +136,7 @@ export function AdminStaffComponent() {
             selected ? (
               <StaffDetailPanel
                 member={selected}
+                branchId={branchId}
                 onEdit={selected.version !== undefined ? () => setEditing(selected) : undefined}
               />
             ) : (

@@ -114,7 +114,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: cùng nhân viên xuất hiện trong allocation-candidates của service mới tick.
   - Files: `StaffDetailPanel.tsx`, `StaffSkillsTab.tsx` (new).
 
-- [ ] **T4.3** Wire shifts + leave
+- [x] **T4.3** Wire shifts + leave (create + list; decide-leave defer — needs manager approval UI)
   - Acceptance: list shifts tuần hiện tại; nút "Thêm ca" + "Xin nghỉ"; owner có nút "Duyệt/Từ chối" leave.
   - Verify: shift entry trong `staff_shifts`.
   - Files: `StaffDetailPanel.tsx`, `ShiftsPanel.tsx`, `LeaveDialog.tsx` (new).
