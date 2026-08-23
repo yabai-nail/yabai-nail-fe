@@ -165,7 +165,14 @@ const LIFECYCLE_BY_STATUS: Record<string, ReadonlyArray<AppointmentLifecycleActi
   IN_SERVICE: ["service-complete"],
 };
 
-export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{ initialCreate?: boolean }>) {
+export function AdminAppointmentsComponent({
+  initialCreate = false,
+  initialSelectedId,
+}: Readonly<{
+  initialCreate?: boolean;
+  /** Deep-link target from dashboard drill-down; overrides the first-row default. */
+  initialSelectedId?: string;
+}>) {
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateAppointments } = useAdminAppointments(branchId);
@@ -210,7 +217,18 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
   const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
   const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
-  const [selectedId, setSelectedId] = useState(initialAppointments[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState(initialSelectedId ?? initialAppointments[0]?.id ?? "");
+  // Deep-link: when the drill-down targets an appointment, jump the calendar
+  // to its day so the detail panel resolves once the row loads. React 19
+  // adjust-state-on-input pattern instead of useEffect + setState.
+  const [drilldownConsumed, setDrilldownConsumed] = useState(false);
+  if (initialSelectedId && !drilldownConsumed) {
+    const target = (data?.items ?? []).find((row) => row.id === initialSelectedId);
+    if (target) {
+      setDrilldownConsumed(true);
+      setSelectedDate(toDatePart(target.startsAt));
+    }
+  }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const localId = useRef(initialAppointments.length + 1);

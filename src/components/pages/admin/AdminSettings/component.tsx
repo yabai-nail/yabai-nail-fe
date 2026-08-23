@@ -8,7 +8,8 @@ import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
-import { useAdminStaff } from "@/service";
+import { useAdminBranch, useAdminStaff } from "@/service";
+import { BranchSettingsForm } from "./BranchSettingsForm";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
 import { commissionPolicies as fixturePolicies, type CommissionPolicy } from "./data";
@@ -32,6 +33,7 @@ function deriveInitials(name: string): string {
 }
 
 export function AdminSettingsComponent() {
+  const { branchId } = useAdminBranch();
   const [activeTab, setActiveTab] = useState("commission");
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [showRate, setShowRate] = useState(true);
@@ -96,7 +98,9 @@ export function AdminSettingsComponent() {
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
-      {activeTab !== "commission" ? (
+      {activeTab === "booking" && branchId ? (
+        <BranchSettingsForm branchId={branchId} />
+      ) : activeTab !== "commission" ? (
         <Card className="mt-4 rounded-lg border-admin-border bg-admin-surface shadow-none">
           <Card.Content className="p-12 text-center">
             <h2 className="font-bold">{settingsTabs.find((tab) => tab.id === activeTab)?.label}</h2>

@@ -158,12 +158,12 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 7 — Settings + Dashboard drill-down
 
-- [ ] **T7.1** Wire branch settings read/write
+- [x] **T7.1** Wire branch settings read/write (booking tab, 3 fields)
   - Acceptance: `useAdminBranchSettings` render form; save gọi `updateBranchSettings` với version; giới hạn 3–5 field ban đầu (booking window, cancellation policy, message templates on/off).
   - Verify: BE settings đổi, load lại đúng.
   - Files: `AdminSettings/component.tsx`, `SettingsForm.tsx` (new).
 
-- [ ] **T7.2** Dashboard drill-down
+- [x] **T7.2** Dashboard drill-down — Phase 7 done
   - Acceptance: card upcoming appointment click → navigate `/admin/appointments?id={id}`; page appointments đọc query, select đúng detail.
   - Verify: click từ dashboard → detail panel hiện đúng appointment.
   - Files: `AdminDashboard/AppointmentsPanel.tsx`, `AdminAppointments/component.tsx`.
