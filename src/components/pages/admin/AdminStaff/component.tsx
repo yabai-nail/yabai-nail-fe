@@ -10,8 +10,13 @@ import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
-import { useAdminStaff, type AdminStaffMember as ServerStaff } from "@/service";
+import {
+  useAdminBranch,
+  useAdminStaff,
+  type AdminStaffMember as ServerStaff,
+} from "@/service";
 import { RecentOrdersTable } from "./RecentOrdersTable";
+import { StaffCreateModal } from "./StaffCreateModal";
 import { StaffDetailPanel } from "./StaffDetailPanel";
 import { StaffTable } from "./StaffTable";
 import { staffMembers as fixtureStaff, type StaffMember, type StaffStatus } from "./data";
@@ -44,7 +49,9 @@ function toFixtureStaff(server: ServerStaff): StaffMember {
 }
 
 export function AdminStaffComponent() {
-  const { data, isLoading, error } = useAdminStaff();
+  const { branchId } = useAdminBranch();
+  const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const source = useMemo<ReadonlyArray<StaffMember>>(() => {
     if (!data?.items) return fixtureStaff;
     if (data.items.length === 0) return [];
@@ -103,7 +110,14 @@ export function AdminStaffComponent() {
         </Tabs>
         <div className="flex gap-2">
           <Button variant="outline" className="rounded-lg border-admin-border">Hôm nay</Button>
-          <Button variant="primary" className="rounded-lg"><PlusIcon className="size-4" />Thêm nhân viên</Button>
+          <Button
+            variant="primary"
+            className="rounded-lg"
+            isDisabled={!branchId}
+            onPress={() => setIsCreateOpen(true)}
+          >
+            <PlusIcon className="size-4" />Thêm nhân viên
+          </Button>
         </div>
       </div>
       {isLoading ? (
@@ -130,6 +144,13 @@ export function AdminStaffComponent() {
           <RecentOrdersTable />
         </AdminSplitLayout>
       </div>
+      {isCreateOpen && branchId ? (
+        <StaffCreateModal
+          branchId={branchId}
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => void mutateStaff()}
+        />
+      ) : null}
     </AdminPageLayout>
   );
 }

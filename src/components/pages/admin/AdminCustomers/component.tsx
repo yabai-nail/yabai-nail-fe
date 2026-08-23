@@ -10,6 +10,7 @@ import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import { useAdminBranch, useAdminCustomers, type AdminCustomer } from "@/service";
+import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerTable } from "./CustomerTable";
 import { customers as fixtureCustomers, type Customer, type CustomerRank, type CustomerSegment } from "./data";
@@ -61,7 +62,8 @@ function toFixtureCustomer(server: AdminCustomer): Customer {
 
 export function AdminCustomersComponent() {
   const { branchId } = useAdminBranch();
-  const { data, isLoading, error } = useAdminCustomers(branchId);
+  const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   // Fixture is the fallback while there is no branch (unauthenticated), the
   // request is in flight, or the endpoint errored. This keeps the layout
   // useful for design review; a real branch replaces the sample rows.
@@ -109,7 +111,14 @@ export function AdminCustomersComponent() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label="Tìm khách hàng" placeholder="Tìm tên, SĐT..." value={query} onChange={setQuery} />
           <Button variant="outline" className="rounded-lg border-admin-border"><FunnelIcon className="size-4" />Bộ lọc</Button>
-          <Button variant="primary" className="rounded-lg"><PlusIcon className="size-4" />Thêm khách hàng</Button>
+          <Button
+            variant="primary"
+            className="rounded-lg"
+            isDisabled={!branchId}
+            onPress={() => setIsCreateOpen(true)}
+          >
+            <PlusIcon className="size-4" />Thêm khách hàng
+          </Button>
         </div>
       </div>
       {isLoading ? (
@@ -134,6 +143,13 @@ export function AdminCustomersComponent() {
           <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
         </Card>
       </AdminSplitLayout>
+      {isCreateOpen && branchId ? (
+        <CustomerCreateModal
+          branchId={branchId}
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => void mutateCustomers()}
+        />
+      ) : null}
     </AdminPageLayout>
   );
 }

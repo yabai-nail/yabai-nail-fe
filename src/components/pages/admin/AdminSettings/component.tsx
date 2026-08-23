@@ -2,15 +2,16 @@
 
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Switch, Tabs } from "@heroui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
+import { useAdminStaff } from "@/service";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
-import { commissionPolicies } from "./data";
+import { commissionPolicies as fixturePolicies, type CommissionPolicy } from "./data";
 
 const settingsTabs = [
   { id: "overview", label: "Tổng quan" },
@@ -23,16 +24,57 @@ const settingsTabs = [
   { id: "backup", label: "Sao lưu dữ liệu" },
 ] as const;
 
+function deriveInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
 export function AdminSettingsComponent() {
   const [activeTab, setActiveTab] = useState("commission");
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [showRate, setShowRate] = useState(true);
+
+  // Wire the commission tab against the real staff roster. Rate + revenue
+  // are not exposed on the staff endpoint — those live on the per-staff
+  // `useStaffCompensation` reads and would need N parallel calls to fill
+  // the table. Fixture values remain until a batched compensation endpoint
+  // (or a client-side fan-out) lands. Names / status / count are real.
+  const { data: staffData, error: staffError } = useAdminStaff();
+  const commissionPolicies = useMemo<ReadonlyArray<CommissionPolicy>>(() => {
+    const staffItems = staffData?.items;
+    if (!staffItems) return fixturePolicies;
+    if (staffItems.length === 0) return [];
+    return staffItems.map((staff) => {
+      // Preserve any existing fixture rate for a matching staff id so the
+      // commission table's numbers stay coherent for design review; new
+      // staff default to 40%.
+      const existing = fixturePolicies.find((p) => p.staffId === staff.id);
+      const name = staff.displayName || `Nhân viên #${staff.id.slice(0, 6)}`;
+      return {
+        id: existing?.id ?? `policy-${staff.id}`,
+        staffId: staff.id,
+        name,
+        initials: deriveInitials(name),
+        role: existing?.role,
+        status: staff.active ? "working" : "leave",
+        rate: existing?.rate ?? 40,
+        previousRate: existing?.previousRate,
+        effectiveFrom: existing?.effectiveFrom ?? "01/01/2026",
+        personalRevenue: existing?.personalRevenue ?? 0,
+      } satisfies CommissionPolicy;
+    });
+  }, [staffData]);
+
   const totalRevenue = commissionPolicies.reduce((sum, policy) => sum + policy.personalRevenue, 0);
   const totalCommission = commissionPolicies.reduce(
     (sum, policy) => sum + calculateCommission(policy.personalRevenue, policy.rate),
     0,
   );
-  const averageRate = commissionPolicies.reduce((sum, policy) => sum + policy.rate, 0) / commissionPolicies.length;
+  const averageRate = commissionPolicies.length === 0
+    ? 0
+    : commissionPolicies.reduce((sum, policy) => sum + policy.rate, 0) / commissionPolicies.length;
   const metrics = [
     { id: "staff", label: "Tổng nhân viên", value: String(commissionPolicies.length), detail: "Đang làm việc: 3", icon: UserGroupIcon, tone: "bg-admin-soft text-admin-accent" },
     { id: "rate", label: "Tỷ lệ hoa hồng TB", value: `${averageRate}%`, detail: "Trung bình", icon: BanknotesIcon, tone: "bg-amber-50 text-admin-warning" },
@@ -64,6 +106,8 @@ export function AdminSettingsComponent() {
       ) : (
         <CommissionSettings
           metrics={metrics}
+          policies={commissionPolicies}
+          hasStaffError={Boolean(staffError)}
           autoCalculate={autoCalculate}
           showRate={showRate}
           onAutoCalculateChange={setAutoCalculate}
@@ -83,8 +127,10 @@ type CommissionMetric = {
   readonly tone: string;
 };
 
-function CommissionSettings({ metrics, autoCalculate, showRate, onAutoCalculateChange, onShowRateChange }: Readonly<{
+function CommissionSettings({ metrics, policies, hasStaffError, autoCalculate, showRate, onAutoCalculateChange, onShowRateChange }: Readonly<{
   metrics: ReadonlyArray<CommissionMetric>;
+  policies: ReadonlyArray<CommissionPolicy>;
+  hasStaffError: boolean;
   autoCalculate: boolean;
   showRate: boolean;
   onAutoCalculateChange: (value: boolean) => void;
@@ -109,7 +155,15 @@ function CommissionSettings({ metrics, autoCalculate, showRate, onAutoCalculateC
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
             <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên & tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
-            <Card.Content className="min-w-0 p-0 pt-2"><CommissionTable policies={commissionPolicies} /><CommissionGuide /></Card.Content>
+            <Card.Content className="min-w-0 p-0 pt-2">
+              {hasStaffError ? (
+                <p className="mx-4 mb-2 text-xs text-admin-danger">
+                  Không tải được danh sách nhân viên — hiển thị dữ liệu mẫu.
+                </p>
+              ) : null}
+              <CommissionTable policies={policies} />
+              <CommissionGuide />
+            </Card.Content>
           </Card>
         </AdminSplitLayout>
       </div>

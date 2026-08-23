@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { setAccessToken } from "../api";
+import { setAdminAccessToken } from "../api";
 import { authService } from "./service";
 import type {
   AdminLoginInput,
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, []);
 
   const logout = useCallback(() => {
-    setAccessToken(null);
+    setAdminAccessToken(null);
     setUser(null);
   }, []);
 
