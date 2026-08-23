@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { StaffCompensationForm } from "./StaffCompensationForm";
+import { StaffSkillsPanel } from "./StaffSkillsPanel";
 import type { StaffMember } from "./data";
 
 export function StaffDetailPanel({
@@ -45,7 +46,12 @@ export function StaffDetailPanel({
           <h3 className="font-bold">Thống kê tháng này</h3>
           <p className="mt-3 flex justify-between text-sm"><span className="text-admin-muted">Số đơn hoàn thành</span><strong>54 đơn</strong></p>
         </section>
-        {member.version !== undefined ? <StaffCompensationForm staffId={member.id} /> : null}
+        {member.version !== undefined ? (
+          <>
+            <StaffCompensationForm staffId={member.id} />
+            <StaffSkillsPanel staffId={member.id} staffVersion={member.version} />
+          </>
+        ) : null}
         <div className="grid gap-2">
           <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử đơn hàng</Button>
           <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử thanh toán</Button>

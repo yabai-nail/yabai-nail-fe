@@ -109,7 +109,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: compensation config lưu, `useStaffCompensation` trả về giá trị mới.
   - Files: `AdminStaff/StaffDetailPanel.tsx`, `StaffEditForm.tsx` (new).
 
-- [ ] **T4.2** Wire staff skills
+- [x] **T4.2** Wire staff skills
   - Acceptance: tab "Kỹ năng" list services (từ `useAdminServices`) với checkbox; save gọi `setStaffSkills`.
   - Verify: cùng nhân viên xuất hiện trong allocation-candidates của service mới tick.
   - Files: `StaffDetailPanel.tsx`, `StaffSkillsTab.tsx` (new).
