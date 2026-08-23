@@ -655,3 +655,138 @@ export interface AdminBranchSettingsPatch {
   readonly backup?: Readonly<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
+
+// -- Admin promotions ------------------------------------------------------------
+
+export interface AdminPromotion {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly status: string;
+  readonly discountVnd?: number;
+  readonly percentage?: number;
+  readonly startsAt?: string;
+  readonly endsAt?: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPromotionDraft {
+  readonly code: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly discountVnd?: number;
+  readonly percentage?: number;
+  readonly startsAt?: string;
+  readonly endsAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPromotionPatch {
+  readonly name?: string;
+  readonly status?: string;
+  readonly discountVnd?: number;
+  readonly percentage?: number;
+  readonly startsAt?: string;
+  readonly endsAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPromotionIssuanceInput {
+  readonly customerIds: ReadonlyArray<string>;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPromotionIssuance {
+  readonly promotionId: string;
+  readonly issuedCount: number;
+  readonly failedCount: number;
+  readonly [field: string]: unknown;
+}
+
+// -- Admin notification campaigns -----------------------------------------------
+
+export interface AdminNotificationCampaign {
+  readonly id: string;
+  readonly name: string;
+  readonly channel: string;
+  readonly status: string;
+  readonly scheduledAt?: string;
+  readonly completedAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNotificationCampaignDraft {
+  readonly name: string;
+  readonly channel: string;
+  readonly template: string;
+  readonly audience: Readonly<Record<string, unknown>>;
+  readonly scheduledAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNotificationCampaignMetrics {
+  readonly campaignId: string;
+  readonly delivered: number;
+  readonly opened?: number;
+  readonly clicked?: number;
+  readonly failed?: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAudiencePreviewInput {
+  readonly definition: Readonly<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAudiencePreview {
+  readonly matchedCount: number;
+  readonly sample?: ReadonlyArray<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+// -- Admin nail designs ----------------------------------------------------------
+
+export interface AdminNailDesign {
+  readonly id: string;
+  readonly name: string;
+  readonly imageUrl?: string;
+  readonly categoryIds?: ReadonlyArray<string>;
+  readonly status: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNailDesignDraft {
+  readonly name: string;
+  readonly imageUrl?: string;
+  readonly categoryIds?: ReadonlyArray<string>;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNailDesignPatch {
+  readonly name?: string;
+  readonly imageUrl?: string;
+  readonly categoryIds?: ReadonlyArray<string>;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNailDesignProposalDecisionInput {
+  readonly decision: "approve" | "reject";
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminNailDesignProposal {
+  readonly id: string;
+  readonly designId: string;
+  readonly status: string;
+  readonly decidedAt?: string;
+  readonly note?: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}

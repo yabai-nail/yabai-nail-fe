@@ -23,7 +23,10 @@ import type {
   AdminBranchSettings,
   AdminConversation,
   AdminMessage,
+  AdminNailDesign,
+  AdminNotificationCampaignMetrics,
   AdminPaymentRefund,
+  AdminPromotion,
   AdminReview,
   AdminReport,
   AdminReportExport,
@@ -322,4 +325,23 @@ export function useAdminBranchSettings(branchId: string | null) {
     branchId ? "GET /api/v1/admin/branches/{branchId}/settings" : null,
     { path: branchId ? { branchId } : undefined },
   );
+}
+
+export function useAdminPromotions(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminPromotion>>("GET /api/v1/admin/promotions", { query });
+}
+
+export function useAdminNotificationCampaignMetrics(campaignId: string | null) {
+  return useApiOperation<AdminNotificationCampaignMetrics>(
+    campaignId ? "GET /api/v1/admin/notification-campaigns/{campaignId}/metrics" : null,
+    { path: campaignId ? { campaignId } : undefined },
+  );
+}
+
+export function useAdminNailDesigns(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminNailDesign>>("GET /api/v1/admin/nail-designs", { query });
 }

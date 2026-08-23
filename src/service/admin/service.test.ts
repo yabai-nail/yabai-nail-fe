@@ -27,6 +27,22 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const MARKETING_OPERATION_IDS = [
+  "GET /api/v1/admin/promotions",
+  "POST /api/v1/admin/promotions",
+  "PATCH /api/v1/admin/promotions/{promotionId}",
+  "POST /api/v1/admin/promotions/{promotionId}/issuances",
+  "POST /api/v1/admin/notification-campaigns",
+  "POST /api/v1/admin/notification-campaigns/{campaignId}/cancellation",
+  "GET /api/v1/admin/notification-campaigns/{campaignId}/metrics",
+  "POST /api/v1/admin/notification-campaigns/audience-previews",
+  "POST /api/v1/admin/audiences/previews",
+  "GET /api/v1/admin/nail-designs",
+  "POST /api/v1/admin/nail-designs",
+  "PATCH /api/v1/admin/nail-designs/{designId}",
+  "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
+] as const;
+
 const MESSAGING_OPERATION_IDS = [
   "GET /api/v1/admin/branches/{branchId}/conversations",
   "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
@@ -123,6 +139,34 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService marketing surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of MARKETING_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each marketing operation", () => {
+    for (const fn of [
+      adminService.promotions,
+      adminService.createPromotion,
+      adminService.updatePromotion,
+      adminService.issuePromotion,
+      adminService.createNotificationCampaign,
+      adminService.cancelNotificationCampaign,
+      adminService.notificationCampaignMetrics,
+      adminService.notificationCampaignAudiencePreview,
+      adminService.previewAudience,
+      adminService.nailDesigns,
+      adminService.createNailDesign,
+      adminService.updateNailDesign,
+      adminService.decideNailDesignProposal,
     ]) {
       expect(typeof fn).toBe("function");
     }

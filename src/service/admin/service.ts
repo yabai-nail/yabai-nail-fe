@@ -49,6 +49,8 @@ import type {
   AdminStaffShiftDraft,
   AdminStaffSkill,
   AdminStaffSkillsInput,
+  AdminAudiencePreview,
+  AdminAudiencePreviewInput,
   AdminAuditLog,
   AdminBranchSettings,
   AdminBranchSettingsPatch,
@@ -56,11 +58,24 @@ import type {
   AdminConversationPatch,
   AdminMessage,
   AdminMessageDraft,
+  AdminNailDesign,
+  AdminNailDesignDraft,
+  AdminNailDesignPatch,
+  AdminNailDesignProposal,
+  AdminNailDesignProposalDecisionInput,
+  AdminNotificationCampaign,
+  AdminNotificationCampaignDraft,
+  AdminNotificationCampaignMetrics,
   AdminPaymentRefund,
   AdminReview,
   AdminReviewHandlingPatch,
   AdminReviewReplyInput,
   AdminPaymentRefundInput,
+  AdminPromotion,
+  AdminPromotionDraft,
+  AdminPromotionIssuance,
+  AdminPromotionIssuanceInput,
+  AdminPromotionPatch,
   AdminReport,
   AdminReportExport,
   AdminReportExportDownloadInput,
@@ -568,5 +583,92 @@ export const adminService = {
     executeApiOperation<AdminBranchSettings>(
       "PATCH /api/v1/admin/branches/{branchId}/settings",
       { path: { branchId }, body: patch, version },
+    ),
+  promotions: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminPromotion>>("GET /api/v1/admin/promotions", { query }),
+  createPromotion: (draft: AdminPromotionDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminPromotion>("POST /api/v1/admin/promotions", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updatePromotion: (
+    promotionId: string,
+    patch: AdminPromotionPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminPromotion>("PATCH /api/v1/admin/promotions/{promotionId}", {
+      path: { promotionId },
+      body: patch,
+      version,
+    }),
+  issuePromotion: (
+    promotionId: string,
+    input: AdminPromotionIssuanceInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminPromotionIssuance>(
+      "POST /api/v1/admin/promotions/{promotionId}/issuances",
+      { path: { promotionId }, body: input, idempotencyKey },
+    ),
+  createNotificationCampaign: (
+    draft: AdminNotificationCampaignDraft,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminNotificationCampaign>("POST /api/v1/admin/notification-campaigns", {
+      body: draft,
+      idempotencyKey,
+    }),
+  cancelNotificationCampaign: (
+    campaignId: string,
+    input?: Readonly<Record<string, unknown>>,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminNotificationCampaign>(
+      "POST /api/v1/admin/notification-campaigns/{campaignId}/cancellation",
+      { path: { campaignId }, body: input ?? {}, idempotencyKey },
+    ),
+  notificationCampaignMetrics: (campaignId: string) =>
+    executeApiOperation<AdminNotificationCampaignMetrics>(
+      "GET /api/v1/admin/notification-campaigns/{campaignId}/metrics",
+      { path: { campaignId } },
+    ),
+  notificationCampaignAudiencePreview: (
+    input: AdminAudiencePreviewInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminAudiencePreview>(
+      "POST /api/v1/admin/notification-campaigns/audience-previews",
+      { body: input, idempotencyKey },
+    ),
+  previewAudience: (input: AdminAudiencePreviewInput, idempotencyKey?: string) =>
+    executeApiOperation<AdminAudiencePreview>("POST /api/v1/admin/audiences/previews", {
+      body: input,
+      idempotencyKey,
+    }),
+  nailDesigns: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminNailDesign>>("GET /api/v1/admin/nail-designs", { query }),
+  createNailDesign: (draft: AdminNailDesignDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminNailDesign>("POST /api/v1/admin/nail-designs", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateNailDesign: (
+    designId: string,
+    patch: AdminNailDesignPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminNailDesign>("PATCH /api/v1/admin/nail-designs/{designId}", {
+      path: { designId },
+      body: patch,
+      version,
+    }),
+  decideNailDesignProposal: (
+    proposalId: string,
+    input: AdminNailDesignProposalDecisionInput,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminNailDesignProposal>(
+      "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
+      { path: { proposalId }, body: input, version },
     ),
 };
