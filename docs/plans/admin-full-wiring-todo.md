@@ -91,7 +91,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: category mới xuất hiện trong filter bar page và trong modal edit service.
   - Files: `AdminServices/ServiceSidebar.tsx`, `CategoryEditor.tsx` (new).
 
-- [ ] **T3.3** Wire surcharges CRUD
+- [x] **T3.3** Wire surcharges CRUD
   - Acceptance: tab hoặc panel mới liệt kê surcharges + create/edit.
   - Verify: BE `surcharges` collection có row.
   - Files: `AdminServices/component.tsx`, `SurchargePanel.tsx` (new).

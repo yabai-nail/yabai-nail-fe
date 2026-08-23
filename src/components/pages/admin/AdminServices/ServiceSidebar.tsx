@@ -5,6 +5,7 @@ import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { CategoryEditor } from "./CategoryEditor";
+import { SurchargePanel } from "./SurchargePanel";
 import { categoryLabels, type SalonService, type ServiceCategory } from "./data";
 
 export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
@@ -93,6 +94,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
           </ol>
         </Card.Content>
       </Card>
+      <SurchargePanel />
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Content className="p-4"><h2 className="font-bold">Ghi chú</h2><p className="mt-2 text-xs leading-5 text-admin-muted">Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng.</p></Card.Content>
       </Card>
