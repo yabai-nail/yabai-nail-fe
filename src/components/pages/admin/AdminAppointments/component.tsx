@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
-import { useAdminAppointments, useAdminBranch, type AdminAppointment as ServerAppointment } from "@/service";
+import {
+  adminService,
+  useAdminAppointments,
+  useAdminBranch,
+  useAdminCustomers,
+  useAdminServices,
+  useAdminStaff,
+  type AdminAppointment as ServerAppointment,
+  type AdminCustomer,
+  type AdminServiceItem,
+  type AdminStaffMember,
+} from "@/service";
 import {
   filterAppointments,
   getAppointmentsInRange,
@@ -60,55 +71,81 @@ function normalizeStatus(status: string): AppointmentStatus {
   return "pending";
 }
 
-function placeholderCustomer(customerId: string): AppointmentCustomer {
+function deriveInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>): AppointmentCustomer {
+  const server = byId.get(customerId);
   const short = customerId.slice(0, 6);
+  const name = server?.displayName ?? server?.name ?? `Khách #${short}`;
+  const record = server as unknown as Record<string, unknown> | undefined;
   return {
     id: customerId,
-    name: `Khách #${short}`,
-    initials: short.slice(0, 2).toUpperCase(),
-    phone: "",
-    birthday: "",
+    name,
+    initials: deriveInitials(name),
+    phone: server?.phone ?? "",
+    birthday: (record?.birthday as string) ?? "",
     segment: "regular",
-    preference: "",
-    visits: 0,
-    totalSpend: 0,
+    preference: (record?.preference as string) ?? "",
+    visits: (record?.visits as number) ?? 0,
+    totalSpend: (record?.totalSpend as number) ?? 0,
   };
 }
 
-function placeholderService(serviceIds: ReadonlyArray<string>): AppointmentService {
+function resolveService(
+  serviceIds: ReadonlyArray<string>,
+  byId: Map<string, AdminServiceItem>,
+): AppointmentService {
   const first = serviceIds[0] ?? "unknown";
+  const server = byId.get(first);
+  if (serviceIds.length > 1) {
+    return {
+      id: first,
+      name: `${serviceIds.length} dịch vụ`,
+      durationMinutes: server?.durationMinutes ?? 60,
+    };
+  }
   return {
     id: first,
-    name: serviceIds.length > 1 ? `${serviceIds.length} dịch vụ` : `Dịch vụ #${first.slice(0, 6)}`,
-    durationMinutes: 60,
+    name: server?.name ?? `Dịch vụ #${first.slice(0, 6)}`,
+    durationMinutes: server?.durationMinutes ?? 60,
   };
 }
 
-function placeholderStaff(staffId: string): AppointmentStaff {
+function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>): AppointmentStaff {
+  const server = byId.get(staffId);
   const short = staffId.slice(0, 6);
-  return {
-    id: staffId,
-    name: `Nhân viên #${short}`,
-    initials: short.slice(0, 2).toUpperCase(),
-  };
+  const name = server?.displayName ?? `Nhân viên #${short}`;
+  return { id: staffId, name, initials: deriveInitials(name) };
 }
 
 /**
  * Server AdminAppointment carries ids + timestamps; the fixture Appointment
  * expects joined display shapes (customer / service / staff records) and
- * date / time split fields. Missing joins fall back to placeholders so the
- * calendar and list still render — the detail panel then shows the ids
- * until a follow-up wires customer / service / staff queries in parallel.
+ * date / time split fields. Names come from parallel `useAdminCustomers` /
+ * `useAdminStaff` / `useAdminServices` queries; unresolved ids fall back to
+ * short-id placeholders so a partial load never blanks the calendar.
  */
-function toFixtureAppointment(server: ServerAppointment): Appointment {
+function toFixtureAppointment(
+  server: ServerAppointment,
+  lookups: {
+    readonly customers: Map<string, AdminCustomer>;
+    readonly staff: Map<string, AdminStaffMember>;
+    readonly services: Map<string, AdminServiceItem>;
+  },
+): Appointment {
   return {
     id: server.id,
     date: toDatePart(server.startsAt),
     startTime: toTimePart(server.startsAt),
     endTime: toTimePart(server.endsAt),
-    customer: placeholderCustomer(server.customerId),
-    service: placeholderService(server.serviceIds),
-    staff: placeholderStaff(server.staffId),
+    customer: resolveCustomer(server.customerId, lookups.customers),
+    service: resolveService(server.serviceIds, lookups.services),
+    staff: resolveStaff(server.staffId, lookups.staff),
     status: normalizeStatus(server.status),
     note: server.note ?? "",
   };
@@ -117,12 +154,31 @@ function toFixtureAppointment(server: ServerAppointment): Appointment {
 export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{ initialCreate?: boolean }>) {
   const router = useRouter();
   const { branchId } = useAdminBranch();
-  const { data, isLoading, error } = useAdminAppointments(branchId);
+  const { data, isLoading, error, mutate: mutateAppointments } = useAdminAppointments(branchId);
+  // Parallel joins: appointment rows arrive with ids; the name-resolvers
+  // hand back their own lookup, and the adapter fills the joined record so
+  // the detail panel reads real names instead of "Khách #xxxxx".
+  const { data: customersData } = useAdminCustomers(branchId);
+  const { data: staffData } = useAdminStaff();
+  const { data: servicesData } = useAdminServices();
+  const lookups = useMemo(() => ({
+    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
+    staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
+    services: new Map((servicesData?.items ?? []).map((s) => [s.id, s] as const)),
+  }), [customersData, staffData, servicesData]);
+  // Version and status stay off the fixture Appointment; keep a side lookup so
+  // `If-Match` headers can attach to reschedule / cancel mutations.
+  const versionsById = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const item of data?.items ?? []) map[item.id] = item.version;
+    return map;
+  }, [data]);
+  const isServerBacked = (id: string) => id in versionsById;
   // Server is the source of truth once it responds; fixture stays as the
   // fallback while there is no branch, the request is in flight, or errored.
   const source = useMemo<ReadonlyArray<Appointment>>(
-    () => (data?.items ? data.items.map(toFixtureAppointment) : initialAppointments),
-    [data],
+    () => (data?.items ? data.items.map((row) => toFixtureAppointment(row, lookups)) : initialAppointments),
+    [data, lookups],
   );
   // Session overlay: create/edit/cancel intents that this session made but
   // haven't yet been sent to the backend. A follow-up PR wires the
@@ -166,33 +222,104 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
     setSelectedDate((date) => shiftAppointmentDate(date, view, direction));
   }
 
+  // Salon operates in Asia/Tokyo per the platform contract. The form gives
+  // us local date + time strings; append the salon offset so the backend
+  // stores the exact wall-clock moment the admin selected.
+  const toIso = (date: string, time: string): string => `${date}T${time}:00+09:00`;
+
   function saveAppointment(draft: AppointmentDraft) {
-    // Session-only. adminService.createAppointment / rescheduleAppointment
-    // wiring lands in a follow-up PR once the form modal can produce real
-    // customerId / staffId / serviceIds (currently it collects display
-    // names, not ids).
+    // Optimistic overlay first so the calendar reflects the intent
+    // immediately; the server round-trip (below) will reconcile via
+    // `mutateAppointments` on success.
     if (formMode === "edit" && selectedAppointment) {
       setLocalEdits((current) => ({ ...current, [selectedAppointment.id]: draft }));
     } else {
       const id = `appointment-local-${localId.current++}`;
-      const appointment: Appointment = { ...draft, id };
-      setLocalCreates((current) => [...current, appointment]);
+      setLocalCreates((current) => [...current, { ...draft, id }]);
       setSelectedId(id);
       setSelectedDate(draft.date);
     }
     setFormMode(null);
+
+    if (!branchId) return; // Nothing to persist to when signed out.
+
+    if (formMode === "edit" && selectedAppointment && isServerBacked(selectedAppointment.id)) {
+      const appointmentId = selectedAppointment.id;
+      void (async () => {
+        try {
+          await adminService.rescheduleAppointment(
+            branchId,
+            appointmentId,
+            {
+              startsAt: toIso(draft.date, draft.startTime),
+              endsAt: toIso(draft.date, draft.endTime),
+              staffId: draft.staff.id,
+            },
+            versionsById[appointmentId],
+          );
+          setLocalEdits((current) => {
+            if (!(appointmentId in current)) return current;
+            const next = { ...current };
+            delete next[appointmentId];
+            return next;
+          });
+          void mutateAppointments();
+        } catch {
+          // Overlay stays; a follow-up wires a toast for real feedback.
+        }
+      })();
+    } else if (formMode !== "edit") {
+      void (async () => {
+        try {
+          await adminService.createAppointment(branchId, {
+            customerId: draft.customer.id,
+            staffId: draft.staff.id,
+            serviceIds: [draft.service.id],
+            startsAt: toIso(draft.date, draft.startTime),
+            endsAt: toIso(draft.date, draft.endTime),
+            note: draft.note,
+          });
+          // Drop the placeholder local create; the server's canonical row
+          // will land through the revalidate below.
+          setLocalCreates((current) => current.slice(0, -1));
+          void mutateAppointments();
+        } catch {
+          // Overlay stays.
+        }
+      })();
+    }
   }
 
   function confirmCancel() {
     if (!selectedAppointment) return;
-    // Session-only. adminService.cancelAppointment wiring follows once the
-    // cancel dialog can carry a reason to the server.
+    const appointmentId = selectedAppointment.id;
     setLocalCancels((current) => {
       const next = new Set(current);
-      next.add(selectedAppointment.id);
+      next.add(appointmentId);
       return next;
     });
     setIsCancelOpen(false);
+
+    if (!branchId || !isServerBacked(appointmentId)) return;
+    void (async () => {
+      try {
+        await adminService.cancelAppointment(
+          branchId,
+          appointmentId,
+          { reason: "Cancelled by admin from the calendar." },
+          versionsById[appointmentId],
+        );
+        setLocalCancels((current) => {
+          if (!current.has(appointmentId)) return current;
+          const next = new Set(current);
+          next.delete(appointmentId);
+          return next;
+        });
+        void mutateAppointments();
+      } catch {
+        // Overlay stays.
+      }
+    })();
   }
 
   return (
