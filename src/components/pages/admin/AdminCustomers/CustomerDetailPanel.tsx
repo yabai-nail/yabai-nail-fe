@@ -2,12 +2,19 @@ import { CalendarDaysIcon, ChatBubbleLeftRightIcon, PencilSquareIcon, PhoneIcon 
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { CustomerNotesPanel } from "./CustomerNotesPanel";
 import { getCustomerHistory, type Customer } from "./data";
 
 export function CustomerDetailPanel({
   customer,
+  branchId,
   onEdit,
-}: Readonly<{ customer: Customer; onEdit?: () => void }>) {
+}: Readonly<{
+  customer: Customer;
+  /** Branch scope; when null the panel hides server-backed features. */
+  branchId?: string | null;
+  onEdit?: () => void;
+}>) {
   const customerHistory = getCustomerHistory(customer.id);
 
   return (
@@ -47,6 +54,9 @@ export function CustomerDetailPanel({
           <ul className="mt-2 space-y-2 text-xs">{customerHistory.map((item) => <li key={item.id} className="grid grid-cols-[5rem_1fr_auto] gap-2"><span className="text-admin-muted">{item.date}</span><span>{item.service}</span><strong>{formatVnd(item.amount)}</strong></li>)}</ul>
         </section>
         <section aria-labelledby="customer-note-heading" className="border-t border-admin-border pt-3"><h3 id="customer-note-heading" className="text-sm font-bold">Ghi chú của khách hàng</h3><p className="mt-2 text-xs leading-5 text-admin-muted">{customer.note}</p></section>
+        {branchId && customer.version !== undefined ? (
+          <CustomerNotesPanel branchId={branchId} customerId={customer.id} />
+        ) : null}
         <div className="grid gap-2">
           <Button variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
             <PencilSquareIcon className="size-4" />Chỉnh sửa thông tin

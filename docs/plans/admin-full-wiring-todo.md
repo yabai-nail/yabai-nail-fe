@@ -63,7 +63,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: sửa displayName → BE lưu, list refresh.
   - Files: `AdminCustomers/CustomerDetailPanel.tsx`, `component.tsx`.
 
-- [ ] **T2.2** Wire notes CRUD
+- [x] **T2.2** Wire notes CRUD
   - Acceptance: list notes từ API; create/update note có form + button; error inline.
   - Verify: BE ghi `customer_notes` (domain_records với kind phù hợp).
   - Files: `CustomerDetailPanel.tsx` (tab Notes), `CustomerNoteEditor.tsx` (new).

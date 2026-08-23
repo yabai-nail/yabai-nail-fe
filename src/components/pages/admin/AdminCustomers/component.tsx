@@ -138,6 +138,7 @@ export function AdminCustomersComponent() {
           selectedCustomer ? (
             <CustomerDetailPanel
               customer={selectedCustomer}
+              branchId={branchId}
               onEdit={
                 branchId && selectedCustomer.version !== undefined
                   ? () => {
