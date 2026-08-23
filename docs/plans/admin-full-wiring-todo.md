@@ -81,7 +81,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 3 — Services + catalog
 
-- [ ] **T3.1** Wire service update
+- [x] **T3.1** Wire service update
   - Acceptance: nút edit trong `ServiceTable` mở modal; PATCH với version; success revalidate + đóng modal.
   - Verify: sửa giá → list hiển thị giá mới.
   - Files: `AdminServices/ServiceTable.tsx`, `ServiceEditModal.tsx` (new hoặc reuse `ServiceCreateModal`).

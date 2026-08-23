@@ -9,6 +9,7 @@ import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { useAdminServices, type AdminServiceItem as ServerService } from "@/service";
 import { ServiceCreateModal } from "./ServiceCreateModal";
+import { ServiceEditModal } from "./ServiceEditModal";
 import { ServiceSidebar } from "./ServiceSidebar";
 import { ServiceTable } from "./ServiceTable";
 import {
@@ -40,12 +41,14 @@ function toFixtureService(server: ServerService): SalonService {
     durationMinutes: server.durationMinutes,
     isVisible: server.active,
     soldCount: typeof soldRaw === "number" ? soldRaw : 0,
+    version: server.version,
   };
 }
 
 export function AdminServicesComponent() {
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<SalonService | null>(null);
   const source = useMemo<ReadonlyArray<SalonService>>(() => {
     if (!data?.items) return fixtureServices;
     if (data.items.length === 0) return [];
@@ -112,7 +115,9 @@ export function AdminServicesComponent() {
       ) : null}
       <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
         <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-          <Card.Content className="min-w-0 p-0"><ServiceTable services={visible} /></Card.Content>
+          <Card.Content className="min-w-0 p-0">
+            <ServiceTable services={visible} onEdit={setEditing} />
+          </Card.Content>
           <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
             <span>Hiển thị {visible.length} trong tổng số {filtered.length} dịch vụ</span>
             <div className="flex gap-1">
@@ -127,6 +132,13 @@ export function AdminServicesComponent() {
         <ServiceCreateModal
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateServices()}
+        />
+      ) : null}
+      {editing ? (
+        <ServiceEditModal
+          service={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => void mutateServices()}
         />
       ) : null}
     </AdminPageLayout>

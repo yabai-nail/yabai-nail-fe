@@ -9,6 +9,9 @@ export type SalonService = {
   readonly durationMinutes: number;
   readonly isVisible: boolean;
   readonly soldCount: number;
+  // Present only when adapted from useAdminServices; absent for fixture
+  // rows so the edit affordance stays hidden in design-time preview.
+  readonly version?: number;
 };
 
 export const salonServices: ReadonlyArray<SalonService> = [
