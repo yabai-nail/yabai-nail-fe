@@ -147,6 +147,8 @@ export function AdminPaymentsComponent() {
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
 
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [confirmPending, setConfirmPending] = useState(false);
   const handleConfirm = () => {
     // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
@@ -154,16 +156,43 @@ export function AdminPaymentsComponent() {
     setIsConfirmOpen(false);
 
     if (!isServerBacked || !invoice.paymentMethod) return;
+    setConfirmPending(true);
+    setConfirmError(null);
+    // Two-step: quote first so BE reconciles line items + discount + surcharges;
+    // record uses the BE-authoritative totalVnd, not the local calculation.
     void (async () => {
       try {
+        // Quote inputs mirror what BE needs to reconcile totals against its
+        // own catalog snapshot: primary service, ad-hoc additional items
+        // (name + price + source), and the manual discount.
+        const quote = await adminService.requestAppointmentPaymentQuote(
+          branchId!,
+          appointmentId!,
+          {
+            serviceIds: [
+              invoice.currentService.id,
+              ...invoice.additionalItems
+                .filter((item) => item.source === "catalog")
+                .map((item) => item.id),
+            ],
+            customItems: invoice.additionalItems
+              .filter((item) => item.source === "custom")
+              .map((item) => ({ name: item.name, priceVnd: item.price, note: item.note })),
+            discountVnd: invoice.discount,
+          },
+        );
         await adminService.recordAppointmentPayment(branchId!, appointmentId!, {
           method: invoice.paymentMethod!,
-          amountVnd: totals.grandTotal,
-          discountVnd: invoice.discount,
+          amountVnd: quote.totalVnd,
+          discountVnd: quote.discountVnd,
         });
         void mutateAppointment();
-      } catch {
-        // Local paid state stays; a toast wire lands in a follow-up.
+      } catch (thrown) {
+        setConfirmError(
+          thrown instanceof Error ? thrown.message : "Không ghi được giao dịch.",
+        );
+      } finally {
+        setConfirmPending(false);
       }
     })();
   };
@@ -172,11 +201,21 @@ export function AdminPaymentsComponent() {
     <AdminPageLayout>
       <p className="mb-4 rounded-lg border border-admin-border bg-admin-soft px-4 py-3 text-xs leading-5 text-admin-muted">
         {isServerBacked
-          ? "Kết nối với lịch hẹn thật — thao tác xác nhận sẽ ghi giao dịch vào backend."
+          ? "Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán."
           : appointmentError
             ? "Không tải được lịch hẹn — hiển thị mô phỏng nội bộ, không tạo giao dịch thật."
             : "Bản mô phỏng nội bộ: mở từ Chi tiết lịch hẹn để thanh toán một lịch thật."}
       </p>
+      {confirmPending ? (
+        <p className="mb-4 rounded-lg border border-admin-border bg-admin-surface px-4 py-2 text-xs text-admin-muted">
+          Đang gọi quote và ghi giao dịch…
+        </p>
+      ) : null}
+      {confirmError ? (
+        <p role="alert" className="mb-4 rounded-lg border border-admin-danger/40 bg-admin-surface px-4 py-2 text-xs text-admin-danger">
+          {confirmError}
+        </p>
+      ) : null}
       <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(28rem,1fr)_18rem]">
         <CustomerAppointmentPanel
           invoice={invoice}

@@ -65,6 +65,7 @@ function toFixtureConversation(server: ServerConversation): Conversation {
     unreadCount: server.unreadCount,
     status: normalizedStatus,
     messages: [],
+    version: server.version,
   };
 }
 
@@ -86,7 +87,9 @@ export function AdminMessagesComponent() {
   const [draft, setDraft] = useState("");
   const [localMessages, setLocalMessages] = useState<ConversationMessages>({});
 
-  const { data: conversationsData, error: conversationsError } = useAdminConversations(branchId);
+  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations(branchId);
+  const [statusPending, setStatusPending] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
     if (!conversationsData?.items) return fixtureConversations;
     if (conversationsData.items.length === 0) return [];
@@ -158,6 +161,27 @@ export function AdminMessagesComponent() {
     })();
   };
 
+  async function changeStatus(next: "READ" | "UNREAD" | "ARCHIVED") {
+    if (!branchId || !selected || selected.version === undefined) return;
+    setStatusPending(true);
+    setStatusError(null);
+    try {
+      await adminService.updateConversation(
+        branchId,
+        selected.id,
+        { status: next },
+        selected.version,
+      );
+      void mutateConversations();
+    } catch (thrown) {
+      setStatusError(
+        thrown instanceof Error ? thrown.message : "Không cập nhật được trạng thái hội thoại.",
+      );
+    } finally {
+      setStatusPending(false);
+    }
+  }
+
   return (
     <AdminPageLayout>
       {conversationsError ? (
@@ -174,7 +198,25 @@ export function AdminMessagesComponent() {
           onSelect={setSelectedId}
         />
         {selected ? (
-          <MessageThread customer={selected.customer} messages={messages} draft={draft} onDraftChange={setDraft} onSend={sendMessage} />
+          <MessageThread
+            customer={selected.customer}
+            messages={messages}
+            draft={draft}
+            onDraftChange={setDraft}
+            onSend={sendMessage}
+            statusPending={statusPending}
+            statusError={statusError}
+            onMarkRead={
+              branchId && selected.version !== undefined
+                ? () => void changeStatus("READ")
+                : undefined
+            }
+            onArchive={
+              branchId && selected.version !== undefined
+                ? () => void changeStatus("ARCHIVED")
+                : undefined
+            }
+          />
         ) : (
           <AdminEmptySelection title="Không có hội thoại" description="Thay đổi từ khóa hoặc bộ lọc để tiếp tục nhắn tin." />
         )}

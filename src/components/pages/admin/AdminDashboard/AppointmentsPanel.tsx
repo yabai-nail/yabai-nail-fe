@@ -64,25 +64,30 @@ export function AppointmentsPanel() {
             {rows.map((appointment) => {
               const isConfirmed = appointment.status === "Đã xác nhận";
               return (
-                <li
-                  key={appointment.id}
-                  className="grid grid-cols-[3.5rem_1fr] gap-x-3 gap-y-2 py-3 sm:grid-cols-[3.5rem_1fr_auto] sm:items-center"
-                >
-                  <time className="text-sm font-bold text-admin-accent" dateTime={appointment.time}>
-                    {appointment.time}
-                  </time>
-                  <div className="min-w-0 border-l border-admin-border pl-3">
-                    <p className="truncate text-sm font-semibold text-admin-ink">{appointment.customer}</p>
-                    <p className="mt-1 truncate text-xs text-admin-muted">{appointment.service}</p>
-                  </div>
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color={isConfirmed ? "accent" : "warning"}
-                    className="col-start-2 w-fit sm:col-start-auto"
+                <li key={appointment.id}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(`/admin/appointments?id=${encodeURIComponent(appointment.id)}`)
+                    }
+                    className="grid w-full grid-cols-[3.5rem_1fr] gap-x-3 gap-y-2 py-3 text-left transition-colors hover:bg-admin-soft sm:grid-cols-[3.5rem_1fr_auto] sm:items-center"
                   >
-                    <Chip.Label>{appointment.status}</Chip.Label>
-                  </Chip>
+                    <time className="text-sm font-bold text-admin-accent" dateTime={appointment.time}>
+                      {appointment.time}
+                    </time>
+                    <div className="min-w-0 border-l border-admin-border pl-3">
+                      <p className="truncate text-sm font-semibold text-admin-ink">{appointment.customer}</p>
+                      <p className="mt-1 truncate text-xs text-admin-muted">{appointment.service}</p>
+                    </div>
+                    <Chip
+                      size="sm"
+                      variant="soft"
+                      color={isConfirmed ? "accent" : "warning"}
+                      className="col-start-2 w-fit sm:col-start-auto"
+                    >
+                      <Chip.Label>{appointment.status}</Chip.Label>
+                    </Chip>
+                  </button>
                 </li>
               );
             })}

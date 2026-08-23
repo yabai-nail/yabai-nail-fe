@@ -30,6 +30,9 @@ export type Conversation = {
   readonly unreadCount: number;
   readonly status: ConversationStatus;
   readonly messages: ReadonlyArray<ChatMessage>;
+  // Present when adapted from useAdminConversations; drives the mark-read /
+  // archive header actions in MessageThread.
+  readonly version?: number;
 };
 
 const baseMessages: ReadonlyArray<ChatMessage> = [

@@ -9,9 +9,10 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
-import { useAdminBranch, useAdminCustomers, type AdminCustomer } from "@/service";
+import { adminService, useAdminBranch, useAdminCustomers, type AdminCustomer } from "@/service";
 import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
+import { CustomerEditModal } from "./CustomerEditModal";
 import { CustomerTable } from "./CustomerTable";
 import { customers as fixtureCustomers, type Customer, type CustomerRank, type CustomerSegment } from "./data";
 
@@ -57,6 +58,9 @@ function toFixtureCustomer(server: AdminCustomer): Customer {
     segment: (readString("segment") as CustomerSegment) || "regular",
     rank: (readString("rank") as CustomerRank) || "none",
     note: readString("note"),
+    version: server.version,
+    locale: server.locale,
+    status: server.status,
   };
 }
 
@@ -64,6 +68,9 @@ export function AdminCustomersComponent() {
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   // Fixture is the fallback while there is no branch (unauthenticated), the
   // request is in flight, or the endpoint errored. This keeps the layout
   // useful for design review; a real branch replaces the sample rows.
@@ -129,7 +136,18 @@ export function AdminCustomersComponent() {
       <AdminSplitLayout
         aside={
           selectedCustomer ? (
-            <CustomerDetailPanel customer={selectedCustomer} />
+            <CustomerDetailPanel
+              customer={selectedCustomer}
+              branchId={branchId}
+              onEdit={
+                branchId && selectedCustomer.version !== undefined
+                  ? () => {
+                      setEditError(null);
+                      setIsEditOpen(true);
+                    }
+                  : undefined
+              }
+            />
           ) : (
             <AdminEmptySelection
               title="Không có khách hàng"
@@ -148,6 +166,34 @@ export function AdminCustomersComponent() {
           branchId={branchId}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateCustomers()}
+        />
+      ) : null}
+      {isEditOpen && branchId && selectedCustomer ? (
+        <CustomerEditModal
+          customer={selectedCustomer}
+          submitting={editSubmitting}
+          error={editError}
+          onClose={() => setIsEditOpen(false)}
+          onConfirm={async (patch) => {
+            setEditSubmitting(true);
+            setEditError(null);
+            try {
+              await adminService.updateCustomer(
+                branchId,
+                selectedCustomer.id,
+                patch,
+                selectedCustomer.version,
+              );
+              setIsEditOpen(false);
+              void mutateCustomers();
+            } catch (thrown) {
+              setEditError(
+                thrown instanceof Error ? thrown.message : "Không lưu được thông tin khách hàng.",
+              );
+            } finally {
+              setEditSubmitting(false);
+            }
+          }}
         />
       ) : null}
     </AdminPageLayout>

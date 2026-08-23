@@ -24,6 +24,9 @@ import {
 } from "./appointment-state";
 import { AppointmentCalendar } from "./AppointmentCalendar";
 import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
+import { AssignStaffModal } from "./AssignStaffModal";
+import { ActualServicesModal } from "./ActualServicesModal";
+import { AttachPhotoModal } from "./AttachPhotoModal";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
@@ -35,6 +38,7 @@ import {
   type Appointment,
   type AppointmentCustomer,
   type AppointmentDraft,
+  type AppointmentLifecycleAction,
   type AppointmentService,
   type AppointmentStaff,
   type AppointmentStatus,
@@ -148,10 +152,27 @@ function toFixtureAppointment(
     staff: resolveStaff(server.staffId, lookups.staff),
     status: normalizeStatus(server.status),
     note: server.note ?? "",
+    serverStatus: server.status,
+    version: server.version,
   };
 }
 
-export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{ initialCreate?: boolean }>) {
+// Which BE status → which set of lifecycle transitions are enabled. Anything
+// not listed = terminal (no action bar).
+const LIFECYCLE_BY_STATUS: Record<string, ReadonlyArray<AppointmentLifecycleAction>> = {
+  CONFIRMED: ["check-in", "no-show"],
+  CHECKED_IN: ["service-start", "no-show"],
+  IN_SERVICE: ["service-complete"],
+};
+
+export function AdminAppointmentsComponent({
+  initialCreate = false,
+  initialSelectedId,
+}: Readonly<{
+  initialCreate?: boolean;
+  /** Deep-link target from dashboard drill-down; overrides the first-row default. */
+  initialSelectedId?: string;
+}>) {
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateAppointments } = useAdminAppointments(branchId);
@@ -196,7 +217,18 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
   const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
   const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
-  const [selectedId, setSelectedId] = useState(initialAppointments[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState(initialSelectedId ?? initialAppointments[0]?.id ?? "");
+  // Deep-link: when the drill-down targets an appointment, jump the calendar
+  // to its day so the detail panel resolves once the row loads. React 19
+  // adjust-state-on-input pattern instead of useEffect + setState.
+  const [drilldownConsumed, setDrilldownConsumed] = useState(false);
+  if (initialSelectedId && !drilldownConsumed) {
+    const target = (data?.items ?? []).find((row) => row.id === initialSelectedId);
+    if (target) {
+      setDrilldownConsumed(true);
+      setSelectedDate(toDatePart(target.startsAt));
+    }
+  }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const localId = useRef(initialAppointments.length + 1);
@@ -290,6 +322,117 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
     }
   }
 
+  // Server-side lifecycle transitions the detail panel exposes. Each call
+  // maps directly onto one canonical admin operation; success revalidates
+  // the appointment list so the row's `serverStatus` (and any BE-computed
+  // fields) refreshes.
+  const [lifecyclePending, setLifecyclePending] = useState<AppointmentLifecycleAction | null>(null);
+  const [lifecycleError, setLifecycleError] = useState<string | null>(null);
+  async function runLifecycle(
+    action: AppointmentLifecycleAction,
+    appointmentId: string,
+    version: number | undefined,
+  ) {
+    if (!branchId) return;
+    setLifecyclePending(action);
+    setLifecycleError(null);
+    try {
+      if (action === "check-in") {
+        await adminService.checkInAppointment(branchId, appointmentId, version);
+      } else if (action === "service-start") {
+        await adminService.startAppointmentService(branchId, appointmentId, version);
+      } else if (action === "service-complete") {
+        await adminService.completeAppointmentService(branchId, appointmentId, {}, version);
+      } else {
+        await adminService.markAppointmentNoShow(branchId, appointmentId, version);
+      }
+      void mutateAppointments();
+    } catch (thrown) {
+      setLifecycleError(
+        thrown instanceof Error ? thrown.message : "Không thực hiện được thao tác.",
+      );
+    } finally {
+      setLifecyclePending(null);
+    }
+  }
+
+  // Assignment modal state. Only opens for server-backed rows because the
+  // allocation-candidates endpoint is keyed on a persisted appointment id.
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [assignSubmitting, setAssignSubmitting] = useState(false);
+  const [assignError, setAssignError] = useState<string | null>(null);
+  async function confirmAssign(staffId: string, note: string) {
+    if (!branchId || !selectedAppointment) return;
+    setAssignSubmitting(true);
+    setAssignError(null);
+    try {
+      await adminService.assignAppointment(
+        branchId,
+        selectedAppointment.id,
+        note ? { staffId, note } : { staffId },
+        selectedAppointment.version,
+      );
+      setIsAssignOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setAssignError(
+        thrown instanceof Error ? thrown.message : "Không đổi được nhân viên.",
+      );
+    } finally {
+      setAssignSubmitting(false);
+    }
+  }
+
+  // Actual-services modal state. Uses the appointment.version for If-Match
+  // so a concurrent lifecycle transition doesn't silently overwrite the
+  // planner's edit.
+  const [isActualOpen, setIsActualOpen] = useState(false);
+  const [actualSubmitting, setActualSubmitting] = useState(false);
+  const [actualError, setActualError] = useState<string | null>(null);
+  async function confirmActualServices(serviceIds: ReadonlyArray<string>) {
+    if (!branchId || !selectedAppointment) return;
+    setActualSubmitting(true);
+    setActualError(null);
+    try {
+      await adminService.setAppointmentActualServices(
+        branchId,
+        selectedAppointment.id,
+        { serviceIds: [...serviceIds] },
+        selectedAppointment.version,
+      );
+      setIsActualOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setActualError(
+        thrown instanceof Error ? thrown.message : "Không lưu được dịch vụ thực tế.",
+      );
+    } finally {
+      setActualSubmitting(false);
+    }
+  }
+
+  // Attach-photo modal state. Version is not sent on POST photos; the
+  // endpoint appends, not updates.
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+  const [photoSubmitting, setPhotoSubmitting] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  async function confirmAttachPhoto(input: { mediaId: string; kind?: string; note?: string }) {
+    if (!branchId || !selectedAppointment) return;
+    setPhotoSubmitting(true);
+    setPhotoError(null);
+    try {
+      await adminService.attachAppointmentPhoto(branchId, selectedAppointment.id, input);
+      setIsPhotoOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setPhotoError(
+        thrown instanceof Error ? thrown.message : "Không đính kèm được ảnh.",
+      );
+    } finally {
+      setPhotoSubmitting(false);
+    }
+  }
+
   function confirmCancel() {
     if (!selectedAppointment) return;
     const appointmentId = selectedAppointment.id;
@@ -359,9 +502,43 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
           {selectedAppointment ? (
             <AppointmentDetailPanel
               appointment={selectedAppointment}
+              lifecycleActions={
+                selectedAppointment.serverStatus
+                  ? LIFECYCLE_BY_STATUS[selectedAppointment.serverStatus] ?? []
+                  : []
+              }
+              lifecyclePending={lifecyclePending}
+              lifecycleError={lifecycleError}
+              onLifecycle={(action) =>
+                runLifecycle(action, selectedAppointment.id, selectedAppointment.version)
+              }
               onEdit={() => setFormMode("edit")}
               onCancel={() => setIsCancelOpen(true)}
               onMessage={() => router.push("/admin/messages")}
+              onAssignStaff={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setAssignError(null);
+                      setIsAssignOpen(true);
+                    }
+                  : undefined
+              }
+              onEditActualServices={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setActualError(null);
+                      setIsActualOpen(true);
+                    }
+                  : undefined
+              }
+              onAttachPhoto={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setPhotoError(null);
+                      setIsPhotoOpen(true);
+                    }
+                  : undefined
+              }
             />
           ) : (
             <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
@@ -381,6 +558,34 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
       ) : null}
       {isCancelOpen && selectedAppointment ? (
         <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} />
+      ) : null}
+      {isAssignOpen && selectedAppointment ? (
+        <AssignStaffModal
+          branchId={branchId}
+          appointment={selectedAppointment}
+          onClose={() => setIsAssignOpen(false)}
+          onConfirm={confirmAssign}
+          submitting={assignSubmitting}
+          error={assignError}
+        />
+      ) : null}
+      {isActualOpen && selectedAppointment ? (
+        <ActualServicesModal
+          appointment={selectedAppointment}
+          onClose={() => setIsActualOpen(false)}
+          onConfirm={confirmActualServices}
+          submitting={actualSubmitting}
+          error={actualError}
+        />
+      ) : null}
+      {isPhotoOpen && selectedAppointment ? (
+        <AttachPhotoModal
+          appointment={selectedAppointment}
+          onClose={() => setIsPhotoOpen(false)}
+          onConfirm={confirmAttachPhoto}
+          submitting={photoSubmitting}
+          error={photoError}
+        />
       ) : null}
     </AdminPageLayout>
   );

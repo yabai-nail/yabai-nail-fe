@@ -3,7 +3,14 @@ import { Button, Chip } from "@heroui/react";
 import { formatVnd } from "@/lib/admin-format";
 import { categoryLabels, type SalonService } from "./data";
 
-export function ServiceTable({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
+export function ServiceTable({
+  services,
+  onEdit,
+}: Readonly<{
+  services: ReadonlyArray<SalonService>;
+  /** Optional edit callback. When omitted the pencil button is hidden. */
+  onEdit?: (service: SalonService) => void;
+}>) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[700px] text-left text-sm">
@@ -41,7 +48,16 @@ export function ServiceTable({ services }: Readonly<{ services: ReadonlyArray<Sa
               </td>
               <td className="px-3 py-2">
                 <div className="flex gap-1">
-                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Sửa ${service.name}`}><PencilSquareIcon className="size-4" /></Button>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Sửa ${service.name}`}
+                    isDisabled={!onEdit || service.version === undefined}
+                    onPress={onEdit ? () => onEdit(service) : undefined}
+                  >
+                    <PencilSquareIcon className="size-4" />
+                  </Button>
                   <Button isIconOnly size="sm" variant="ghost" aria-label={`Xóa ${service.name}`}><TrashIcon className="size-4" /></Button>
                 </div>
               </td>

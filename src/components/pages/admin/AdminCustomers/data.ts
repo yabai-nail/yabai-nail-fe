@@ -25,6 +25,12 @@ export type Customer = {
   readonly segment: CustomerSegment;
   readonly rank: CustomerRank;
   readonly note: string;
+  // Server row identity. Present only when adapted from useAdminCustomers;
+  // absent for fixture rows so mutation buttons hide themselves for the
+  // design-time sample.
+  readonly version?: number;
+  readonly locale?: string;
+  readonly status?: string;
 };
 
 export const customers: ReadonlyArray<Customer> = [
