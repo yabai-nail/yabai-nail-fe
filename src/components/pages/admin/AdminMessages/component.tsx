@@ -5,38 +5,128 @@ import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import {
+  adminService,
+  useAdminBranch,
+  useAdminConversations,
+  useAdminConversationMessages,
+  type AdminConversation as ServerConversation,
+  type AdminMessage as ServerMessage,
+} from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
 import { CustomerSummary } from "./CustomerSummary";
 import { MessageThread } from "./MessageThread";
-import { conversations } from "./data";
+import { conversations as fixtureConversations, type ChatMessage, type Conversation, type MessageCustomer } from "./data";
 import {
   appendConversationMessage,
   type ConversationMessages,
 } from "./state";
 
+function deriveInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+function formatTimeLabel(iso: string): string {
+  try {
+    return new Date(iso).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
+  } catch {
+    return "";
+  }
+}
+
+function toFixtureCustomer(server: ServerConversation): MessageCustomer {
+  const name = server.customer.displayName ?? `Khách #${server.customer.customerId.slice(0, 6)}`;
+  return {
+    id: server.customer.customerId,
+    name,
+    initials: deriveInitials(name),
+    phone: server.customer.phone ?? "",
+    birthday: "",
+    preference: "",
+    totalSpend: 0,
+    visits: 0,
+    points: 0,
+    segment: "regular",
+  };
+}
+
+function toFixtureConversation(server: ServerConversation): Conversation {
+  const status = server.status.toLowerCase();
+  const normalizedStatus =
+    status === "unread" || status === "read" || status === "archived" ? status : "read";
+  return {
+    id: server.id,
+    customer: toFixtureCustomer(server),
+    preview: server.lastMessage?.content ?? "",
+    timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt) : "",
+    unreadCount: server.unreadCount,
+    status: normalizedStatus,
+    messages: [],
+  };
+}
+
+function toChatMessage(server: ServerMessage): ChatMessage {
+  const sender = server.senderType.toLowerCase().includes("customer") ? "customer" : "salon";
+  return {
+    id: server.id,
+    sender,
+    content: server.content,
+    time: formatTimeLabel(server.createdAt),
+  };
+}
+
 export function AdminMessagesComponent() {
+  const { branchId } = useAdminBranch();
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(conversations[0].id);
+  const [selectedId, setSelectedId] = useState<string>("");
   const [draft, setDraft] = useState("");
   const [localMessages, setLocalMessages] = useState<ConversationMessages>({});
+
+  const { data: conversationsData, error: conversationsError } = useAdminConversations(branchId);
+  const source = useMemo<ReadonlyArray<Conversation>>(() => {
+    if (!conversationsData?.items) return fixtureConversations;
+    if (conversationsData.items.length === 0) return [];
+    return conversationsData.items.map(toFixtureConversation);
+  }, [conversationsData]);
+
   const visibleConversations = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("vi");
-    return conversations.filter(
+    return source.filter(
       (item) =>
         (filter === "all" || item.status === filter) &&
         (!normalized || `${item.customer.name} ${item.preview}`.toLocaleLowerCase("vi").includes(normalized)),
     );
-  }, [filter, query]);
-  const selected = resolveVisibleSelection(visibleConversations, selectedId);
-  const messages = selected
-    ? [...selected.messages, ...(localMessages[selected.id] ?? [])]
-    : [];
+  }, [source, filter, query]);
+  const selected = resolveVisibleSelection(visibleConversations, selectedId || visibleConversations[0]?.id || "");
+
+  // The message thread comes from a separate paginated endpoint; only fetch
+  // when a real (server-loaded) conversation is selected. Fixture conversations
+  // carry their own baseline messages.
+  const shouldFetchThread = Boolean(selected && conversationsData?.items);
+  const { data: threadData, mutate: mutateThread } = useAdminConversationMessages(
+    shouldFetchThread ? branchId : null,
+    shouldFetchThread ? selected?.id ?? null : null,
+  );
+
+  const messages = useMemo(() => {
+    if (!selected) return [];
+    const serverThread = threadData?.items ? threadData.items.map(toChatMessage) : selected.messages;
+    return [...serverThread, ...(localMessages[selected.id] ?? [])];
+  }, [selected, threadData, localMessages]);
 
   const sendMessage = () => {
     const content = draft.trim();
     if (!selected) return;
     if (!content) return;
+    setDraft("");
+
+    // Optimistic: drop the salon-side bubble into the thread immediately so the
+    // composer feels responsive; if the request errors, the local bubble stays
+    // so the salon can retry — the message they typed is never silently lost.
     setLocalMessages((messagesByConversation) =>
       appendConversationMessage(messagesByConversation, selected.id, {
         id: `local-${selected.id}-${(messagesByConversation[selected.id]?.length ?? 0) + 1}`,
@@ -45,11 +135,34 @@ export function AdminMessagesComponent() {
         time: "Bây giờ",
       }),
     );
-    setDraft("");
+
+    // Only round-trip if this is a real server conversation. Fixture rows have
+    // no matching backend record — those stay local like they were before.
+    if (!branchId || !shouldFetchThread) return;
+    void (async () => {
+      try {
+        await adminService.sendConversationMessage(branchId, selected.id, { content });
+        // Server accepted; drop the local bubble and let the refetch bring
+        // the canonical message (with real id + timestamp + delivery status).
+        setLocalMessages((current) => {
+          if (!(selected.id in current)) return current;
+          const next = { ...current };
+          delete next[selected.id];
+          return next;
+        });
+        void mutateThread();
+      } catch {
+        // Silent: the local bubble already reflects the salon's intent. A
+        // toast belongs here once the shell has a notification surface.
+      }
+    })();
   };
 
   return (
     <AdminPageLayout>
+      {conversationsError ? (
+        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+      ) : null}
       <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none xl:grid-cols-[17rem_minmax(0,1fr)_19rem]">
         <ConversationList
           conversations={visibleConversations}
