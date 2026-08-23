@@ -143,7 +143,7 @@ type CalendarViewProps = Readonly<{
 export function AppointmentCalendar({ view, ...props }: CalendarViewProps & Readonly<{ view: AppointmentView }>) {
   return (
     <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-      <Card.Header className="flex items-center justify-between border-b border-admin-border px-4 py-3">
+      <Card.Header className="flex flex-row items-center justify-between border-b border-admin-border px-4 py-3">
         <div className="flex items-center gap-2">
           <CalendarDaysIcon className="size-5 text-admin-accent" />
           <h2 className="text-sm font-bold text-admin-ink">Lịch {view === "day" ? "ngày" : view === "week" ? "tuần" : "tháng"}</h2>

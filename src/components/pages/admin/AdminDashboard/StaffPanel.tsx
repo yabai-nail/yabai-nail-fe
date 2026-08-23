@@ -4,7 +4,7 @@ import { staffMembers } from "./data";
 export function StaffPanel() {
   return (
     <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
-      <Card.Header className="flex items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
+      <Card.Header className="flex flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">Nhân viên</h2>
         <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent">
           Xem tất cả

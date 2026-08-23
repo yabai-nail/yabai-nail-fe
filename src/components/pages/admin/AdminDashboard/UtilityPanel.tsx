@@ -52,7 +52,7 @@ export function UtilityPanel() {
       </Card>
 
       <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="flex items-center justify-between gap-2 px-4 pt-4">
+        <Card.Header className="flex flex-row items-center justify-between gap-2 px-4 pt-4">
           <h2 className="text-sm font-bold text-admin-ink">Thông báo</h2>
           <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent">
             Xem tất cả
