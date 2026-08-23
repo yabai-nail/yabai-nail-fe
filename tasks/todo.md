@@ -145,7 +145,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 6 — Messages polish
 
-- [ ] **T6.1** Wire conversation update
+- [x] **T6.1** Wire conversation update — Phase 6 done
   - Acceptance: dropdown nhỏ trên mỗi conversation với "Đánh dấu đã đọc" / "Lưu trữ"; PATCH kèm `If-Match`; optimistic decrement unread.
   - Verify: badge unread biến mất, list revalidate.
   - Files: `AdminMessages/ConversationList.tsx`, `component.tsx`.
