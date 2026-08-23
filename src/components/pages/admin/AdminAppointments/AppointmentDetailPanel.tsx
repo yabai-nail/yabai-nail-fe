@@ -1,4 +1,5 @@
 import {
+  ArrowsRightLeftIcon,
   BanknotesIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
@@ -50,6 +51,7 @@ export function AppointmentDetailPanel({
   onEdit,
   onCancel,
   onMessage,
+  onAssignStaff,
 }: Readonly<{
   appointment: Appointment;
   /** BE lifecycle transitions enabled for the current serverStatus. */
@@ -63,6 +65,8 @@ export function AppointmentDetailPanel({
   onEdit: () => void;
   onCancel: () => void;
   onMessage: () => void;
+  /** Opens the assign-staff modal; hidden when omitted (local overlays). */
+  onAssignStaff?: () => void;
 }>) {
   const router = useRouter();
   const details = [
@@ -154,6 +158,11 @@ export function AppointmentDetailPanel({
           </Button>
         ) : null}
         <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEdit}><PencilSquareIcon className="size-4" />Chỉnh sửa lịch hẹn</Button>
+        {onAssignStaff && appointment.status !== "cancelled" ? (
+          <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onAssignStaff}>
+            <ArrowsRightLeftIcon className="size-4" />Đổi nhân viên
+          </Button>
+        ) : null}
         {appointment.status !== "cancelled" ? <Button fullWidth variant="outline" className="rounded-lg border-admin-accent text-admin-accent" onPress={onCancel}><XMarkIcon className="size-4" />Hủy lịch hẹn</Button> : null}
         <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onMessage}>
           <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách

@@ -39,7 +39,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: BE local → click qua đủ vòng đời `CONFIRMED → CHECKED_IN → IN_SERVICE → AWAITING_PAYMENT`.
   - Files: `src/components/pages/admin/AdminAppointments/AppointmentDetailPanel.tsx`, `component.tsx`, test.
 
-- [ ] **T1.2** Wire assignment change
+- [x] **T1.2** Wire assignment change
   - Acceptance: modal chọn nhân viên dùng `useAdminAppointmentAllocationCandidates`; save gọi `assignAppointment` với `version`; revalidate list.
   - Verify: BE 200 → detail panel hiển thị nhân viên mới.
   - Files: `AppointmentDetailPanel.tsx`, new `AssignStaffModal.tsx`, `component.tsx`.

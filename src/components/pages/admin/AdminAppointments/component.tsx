@@ -24,6 +24,7 @@ import {
 } from "./appointment-state";
 import { AppointmentCalendar } from "./AppointmentCalendar";
 import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
+import { AssignStaffModal } from "./AssignStaffModal";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
@@ -335,6 +336,33 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
     }
   }
 
+  // Assignment modal state. Only opens for server-backed rows because the
+  // allocation-candidates endpoint is keyed on a persisted appointment id.
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [assignSubmitting, setAssignSubmitting] = useState(false);
+  const [assignError, setAssignError] = useState<string | null>(null);
+  async function confirmAssign(staffId: string, note: string) {
+    if (!branchId || !selectedAppointment) return;
+    setAssignSubmitting(true);
+    setAssignError(null);
+    try {
+      await adminService.assignAppointment(
+        branchId,
+        selectedAppointment.id,
+        note ? { staffId, note } : { staffId },
+        selectedAppointment.version,
+      );
+      setIsAssignOpen(false);
+      void mutateAppointments();
+    } catch (thrown) {
+      setAssignError(
+        thrown instanceof Error ? thrown.message : "Không đổi được nhân viên.",
+      );
+    } finally {
+      setAssignSubmitting(false);
+    }
+  }
+
   function confirmCancel() {
     if (!selectedAppointment) return;
     const appointmentId = selectedAppointment.id;
@@ -417,6 +445,14 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
               onEdit={() => setFormMode("edit")}
               onCancel={() => setIsCancelOpen(true)}
               onMessage={() => router.push("/admin/messages")}
+              onAssignStaff={
+                selectedAppointment.version !== undefined
+                  ? () => {
+                      setAssignError(null);
+                      setIsAssignOpen(true);
+                    }
+                  : undefined
+              }
             />
           ) : (
             <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
@@ -436,6 +472,16 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
       ) : null}
       {isCancelOpen && selectedAppointment ? (
         <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} />
+      ) : null}
+      {isAssignOpen && selectedAppointment ? (
+        <AssignStaffModal
+          branchId={branchId}
+          appointment={selectedAppointment}
+          onClose={() => setIsAssignOpen(false)}
+          onConfirm={confirmAssign}
+          submitting={assignSubmitting}
+          error={assignError}
+        />
       ) : null}
     </AdminPageLayout>
   );
