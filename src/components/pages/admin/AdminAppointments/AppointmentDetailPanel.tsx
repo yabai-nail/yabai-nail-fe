@@ -1,4 +1,5 @@
 import {
+  BanknotesIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   ClockIcon,
@@ -9,6 +10,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
 import type { Appointment } from "./data";
 import {
@@ -28,6 +30,7 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
   onCancel: () => void;
   onMessage: () => void;
 }>) {
+  const router = useRouter();
   const details = [
     { icon: ClockIcon, label: "Thời gian", value: `${appointment.startTime} - ${appointment.endTime} (${appointment.service.durationMinutes} phút)` },
     { icon: CalendarDaysIcon, label: "Ngày", value: appointment.date.split("-").reverse().join("/") },
@@ -76,7 +79,18 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
         {appointment.note ? <div className="rounded-lg border border-admin-border p-3 text-xs leading-5 text-admin-muted"><strong className="block text-admin-ink">Ghi chú</strong>{appointment.note}</div> : null}
       </Card.Content>
       <Card.Footer className="flex flex-col gap-2 border-t border-admin-border p-4">
-        <Button fullWidth variant="primary" className="rounded-lg" onPress={onEdit}><PencilSquareIcon className="size-4" />Chỉnh sửa lịch hẹn</Button>
+        {appointment.status !== "cancelled" ? (
+          <Button
+            fullWidth
+            variant="primary"
+            className="rounded-lg"
+            onPress={() => router.push(`/admin/payments?appointmentId=${encodeURIComponent(appointment.id)}`)}
+          >
+            <BanknotesIcon className="size-4" />
+            Thanh toán
+          </Button>
+        ) : null}
+        <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEdit}><PencilSquareIcon className="size-4" />Chỉnh sửa lịch hẹn</Button>
         {appointment.status !== "cancelled" ? <Button fullWidth variant="outline" className="rounded-lg border-admin-accent text-admin-accent" onPress={onCancel}><XMarkIcon className="size-4" />Hủy lịch hẹn</Button> : null}
         <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onMessage}>
           <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
