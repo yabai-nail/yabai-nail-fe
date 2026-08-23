@@ -27,6 +27,23 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const FOUNDATION_OPERATION_IDS = [
+  "GET /api/v1/admin/branches",
+  "POST /api/v1/admin/branches",
+  "GET /api/v1/admin/branches/{branchId}",
+  "PATCH /api/v1/admin/branches/{branchId}",
+  "GET /api/v1/admin/accounts",
+  "POST /api/v1/admin/accounts",
+  "PATCH /api/v1/admin/accounts/{accountId}",
+  "POST /api/v1/admin/accounts/{accountId}/password-resets",
+  "GET /api/v1/admin/loyalty-config",
+  "PUT /api/v1/admin/loyalty-config",
+  "GET /api/v1/admin/system-config",
+  "PATCH /api/v1/admin/system-config",
+  "POST /api/v1/admin/branches/{branchId}/check-in-resolutions",
+  "POST /api/v1/admin/branches/{branchId}/membership-card-resolutions",
+] as const;
+
 const MARKETING_OPERATION_IDS = [
   "GET /api/v1/admin/promotions",
   "POST /api/v1/admin/promotions",
@@ -139,6 +156,35 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService foundation surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of FOUNDATION_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each foundation operation", () => {
+    for (const fn of [
+      adminService.branches,
+      adminService.createBranch,
+      adminService.branch,
+      adminService.updateBranch,
+      adminService.accounts,
+      adminService.createAccount,
+      adminService.updateAccount,
+      adminService.resetAccountPassword,
+      adminService.loyaltyConfig,
+      adminService.updateLoyaltyConfig,
+      adminService.systemConfig,
+      adminService.updateSystemConfig,
+      adminService.resolveCheckIn,
+      adminService.resolveMembershipCard,
     ]) {
       expect(typeof fn).toBe("function");
     }

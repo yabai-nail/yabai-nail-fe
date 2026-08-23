@@ -790,3 +790,115 @@ export interface AdminNailDesignProposal {
   readonly version: number;
   readonly [field: string]: unknown;
 }
+
+// -- Admin foundation: branches CRUD + accounts + configs + resolutions --------
+
+export interface AdminBranch {
+  readonly id: string;
+  readonly name: string;
+  readonly slug?: string;
+  readonly address?: string;
+  readonly phone?: string;
+  readonly status?: string;
+  readonly timezone?: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminBranchDraft {
+  readonly name: string;
+  readonly slug?: string;
+  readonly address?: string;
+  readonly phone?: string;
+  readonly timezone?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminBranchPatch {
+  readonly name?: string;
+  readonly address?: string;
+  readonly phone?: string;
+  readonly status?: string;
+  readonly timezone?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAccount {
+  readonly id: string;
+  readonly phone: string;
+  readonly displayName: string;
+  readonly role: string;
+  readonly branchIds?: ReadonlyArray<string>;
+  readonly status: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAccountDraft {
+  readonly phone: string;
+  readonly displayName: string;
+  readonly role: string;
+  readonly branchIds?: ReadonlyArray<string>;
+  readonly password?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAccountPatch {
+  readonly displayName?: string;
+  readonly role?: string;
+  readonly branchIds?: ReadonlyArray<string>;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAccountPasswordResetInput {
+  readonly reason?: string;
+  readonly notifyChannel?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAccountPasswordReset {
+  readonly resetToken?: string;
+  readonly expiresAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminLoyaltyConfig {
+  readonly version: number;
+  readonly tiers?: ReadonlyArray<Record<string, unknown>>;
+  readonly rules?: Readonly<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminSystemConfig {
+  readonly version: number;
+  readonly features?: Readonly<Record<string, boolean>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCheckInResolutionInput {
+  readonly customerId?: string;
+  readonly phone?: string;
+  readonly code?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCheckInResolution {
+  readonly customerId?: string;
+  readonly appointmentId?: string;
+  readonly status: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminMembershipCardResolutionInput {
+  readonly code?: string;
+  readonly qrToken?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminMembershipCardResolution {
+  readonly customerId?: string;
+  readonly tier?: string;
+  readonly status: string;
+  readonly [field: string]: unknown;
+}

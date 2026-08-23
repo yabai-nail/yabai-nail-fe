@@ -19,8 +19,12 @@ import type {
   AdminStaffPerformance,
   AdminStaffShift,
   AdminStaffSkill,
+  AdminAccount,
   AdminAuditLog,
+  AdminBranch,
   AdminBranchSettings,
+  AdminLoyaltyConfig,
+  AdminSystemConfig,
   AdminConversation,
   AdminMessage,
   AdminNailDesign,
@@ -344,4 +348,31 @@ export function useAdminNailDesigns(
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
   return useApiOperation<BackendList<AdminNailDesign>>("GET /api/v1/admin/nail-designs", { query });
+}
+
+export function useAdminBranchList(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminBranch>>("GET /api/v1/admin/branches", { query });
+}
+
+export function useAdminBranchDetail(branchId: string | null) {
+  return useApiOperation<AdminBranch>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}" : null,
+    { path: branchId ? { branchId } : undefined },
+  );
+}
+
+export function useAdminAccounts(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminAccount>>("GET /api/v1/admin/accounts", { query });
+}
+
+export function useAdminLoyaltyConfig() {
+  return useApiOperation<AdminLoyaltyConfig>("GET /api/v1/admin/loyalty-config");
+}
+
+export function useAdminSystemConfig() {
+  return useApiOperation<AdminSystemConfig>("GET /api/v1/admin/system-config");
 }

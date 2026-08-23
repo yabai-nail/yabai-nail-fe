@@ -49,10 +49,24 @@ import type {
   AdminStaffShiftDraft,
   AdminStaffSkill,
   AdminStaffSkillsInput,
+  AdminAccount,
+  AdminAccountDraft,
+  AdminAccountPasswordReset,
+  AdminAccountPasswordResetInput,
+  AdminAccountPatch,
   AdminAudiencePreview,
   AdminAudiencePreviewInput,
   AdminAuditLog,
+  AdminBranch,
+  AdminBranchDraft,
+  AdminBranchPatch,
   AdminBranchSettings,
+  AdminCheckInResolution,
+  AdminCheckInResolutionInput,
+  AdminLoyaltyConfig,
+  AdminMembershipCardResolution,
+  AdminMembershipCardResolutionInput,
+  AdminSystemConfig,
   AdminBranchSettingsPatch,
   AdminConversation,
   AdminConversationPatch,
@@ -670,5 +684,76 @@ export const adminService = {
     executeApiOperation<AdminNailDesignProposal>(
       "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
       { path: { proposalId }, body: input, version },
+    ),
+  branches: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminBranch>>("GET /api/v1/admin/branches", { query }),
+  createBranch: (draft: AdminBranchDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminBranch>("POST /api/v1/admin/branches", {
+      body: draft,
+      idempotencyKey,
+    }),
+  branch: (branchId: string) =>
+    executeApiOperation<AdminBranch>("GET /api/v1/admin/branches/{branchId}", {
+      path: { branchId },
+    }),
+  updateBranch: (branchId: string, patch: AdminBranchPatch, version?: string | number) =>
+    executeApiOperation<AdminBranch>("PATCH /api/v1/admin/branches/{branchId}", {
+      path: { branchId },
+      body: patch,
+      version,
+    }),
+  accounts: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminAccount>>("GET /api/v1/admin/accounts", { query }),
+  createAccount: (draft: AdminAccountDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminAccount>("POST /api/v1/admin/accounts", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateAccount: (accountId: string, patch: AdminAccountPatch, version?: string | number) =>
+    executeApiOperation<AdminAccount>("PATCH /api/v1/admin/accounts/{accountId}", {
+      path: { accountId },
+      body: patch,
+      version,
+    }),
+  resetAccountPassword: (
+    accountId: string,
+    input: AdminAccountPasswordResetInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminAccountPasswordReset>(
+      "POST /api/v1/admin/accounts/{accountId}/password-resets",
+      { path: { accountId }, body: input, idempotencyKey },
+    ),
+  loyaltyConfig: () =>
+    executeApiOperation<AdminLoyaltyConfig>("GET /api/v1/admin/loyalty-config"),
+  updateLoyaltyConfig: (patch: Readonly<Record<string, unknown>>, version?: string | number) =>
+    executeApiOperation<AdminLoyaltyConfig>("PUT /api/v1/admin/loyalty-config", {
+      body: patch,
+      version,
+    }),
+  systemConfig: () =>
+    executeApiOperation<AdminSystemConfig>("GET /api/v1/admin/system-config"),
+  updateSystemConfig: (patch: Readonly<Record<string, unknown>>, version?: string | number) =>
+    executeApiOperation<AdminSystemConfig>("PATCH /api/v1/admin/system-config", {
+      body: patch,
+      version,
+    }),
+  resolveCheckIn: (
+    branchId: string,
+    input: AdminCheckInResolutionInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminCheckInResolution>(
+      "POST /api/v1/admin/branches/{branchId}/check-in-resolutions",
+      { path: { branchId }, body: input, idempotencyKey },
+    ),
+  resolveMembershipCard: (
+    branchId: string,
+    input: AdminMembershipCardResolutionInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminMembershipCardResolution>(
+      "POST /api/v1/admin/branches/{branchId}/membership-card-resolutions",
+      { path: { branchId }, body: input, idempotencyKey },
     ),
 };
