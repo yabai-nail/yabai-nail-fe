@@ -3,6 +3,7 @@ export * from "./admin";
 export * from "./auth";
 export * from "./booking";
 export * from "./branches";
+export * from "./catalog";
 export * from "./me";
 
 // Temporary compatibility alias for existing imports.
