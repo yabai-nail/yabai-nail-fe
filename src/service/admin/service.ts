@@ -31,7 +31,15 @@ import type {
   AdminLeaveRequestDecisionInput,
   AdminLeaveRequestDraft,
   AdminServiceCategory,
+  AdminServiceCategoryDraft,
+  AdminServiceCategoryPatch,
+  AdminServiceCategoryReorderInput,
   AdminServiceItem,
+  AdminServiceItemDraft,
+  AdminServiceItemPatch,
+  AdminSurcharge,
+  AdminSurchargeDraft,
+  AdminSurchargePatch,
   AdminStaffCompensationInput,
   AdminStaffDraft,
   AdminStaffMember,
@@ -278,6 +286,56 @@ export const adminService = {
     executeApiOperation<BackendList<AdminServiceCategory>>(
       "GET /api/v1/admin/service-categories",
     ),
+  createService: (draft: AdminServiceItemDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminServiceItem>("POST /api/v1/admin/services", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateService: (serviceId: string, patch: AdminServiceItemPatch, version?: string | number) =>
+    executeApiOperation<AdminServiceItem>("PATCH /api/v1/admin/services/{serviceId}", {
+      path: { serviceId },
+      body: patch,
+      version,
+    }),
+  createServiceCategory: (draft: AdminServiceCategoryDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminServiceCategory>("POST /api/v1/admin/service-categories", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateServiceCategory: (
+    categoryId: string,
+    patch: AdminServiceCategoryPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminServiceCategory>(
+      "PATCH /api/v1/admin/service-categories/{categoryId}",
+      { path: { categoryId }, body: patch, version },
+    ),
+  reorderServiceCategories: (
+    input: AdminServiceCategoryReorderInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<BackendList<AdminServiceCategory>>(
+      "POST /api/v1/admin/service-categories/reorder",
+      { body: input, idempotencyKey },
+    ),
+  surcharges: () =>
+    executeApiOperation<BackendList<AdminSurcharge>>("GET /api/v1/admin/surcharges"),
+  createSurcharge: (draft: AdminSurchargeDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminSurcharge>("POST /api/v1/admin/surcharges", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateSurcharge: (
+    surchargeId: string,
+    patch: AdminSurchargePatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminSurcharge>("PATCH /api/v1/admin/surcharges/{surchargeId}", {
+      path: { surchargeId },
+      body: patch,
+      version,
+    }),
   staff: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminStaffMember>>(
       "GET /api/v1/admin/staff",

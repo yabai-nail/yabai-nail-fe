@@ -14,6 +14,7 @@ import type {
   AdminDashboardData,
   AdminServiceCategory,
   AdminServiceItem,
+  AdminSurcharge,
   AdminStaffMember,
   AdminStaffPerformance,
   AdminStaffShift,
@@ -156,6 +157,10 @@ export function useAdminServiceCategories() {
   return useApiOperation<BackendList<AdminServiceCategory>>(
     "GET /api/v1/admin/service-categories",
   );
+}
+
+export function useAdminSurcharges() {
+  return useApiOperation<BackendList<AdminSurcharge>>("GET /api/v1/admin/surcharges");
 }
 
 export function useAdminStaff(query?: Readonly<Record<string, string | number | undefined>>) {

@@ -397,3 +397,79 @@ export interface AdminStaffPerformance {
   readonly totals?: Readonly<Record<string, number>>;
   readonly [field: string]: unknown;
 }
+
+// -- Admin service catalog & surcharges ------------------------------------------
+
+export interface AdminServiceItemDraft {
+  readonly name: string;
+  readonly categoryId?: string;
+  readonly priceVnd: number;
+  readonly durationMinutes: number;
+  readonly description?: string;
+  readonly nameJa?: string;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminServiceItemPatch {
+  readonly name?: string;
+  readonly categoryId?: string;
+  readonly priceVnd?: number;
+  readonly durationMinutes?: number;
+  readonly description?: string;
+  readonly nameJa?: string;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminServiceCategoryDraft {
+  readonly code: string;
+  readonly name: string;
+  readonly nameVi?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminServiceCategoryPatch {
+  readonly code?: string;
+  readonly name?: string;
+  readonly nameVi?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminServiceCategoryReorderInput {
+  readonly orderedCategoryIds: ReadonlyArray<string>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminSurcharge {
+  readonly id: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly amountVnd?: number;
+  readonly percentage?: number;
+  readonly active: boolean;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminSurchargeDraft {
+  readonly name: string;
+  readonly kind: string;
+  readonly amountVnd?: number;
+  readonly percentage?: number;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminSurchargePatch {
+  readonly name?: string;
+  readonly kind?: string;
+  readonly amountVnd?: number;
+  readonly percentage?: number;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
