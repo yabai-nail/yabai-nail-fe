@@ -27,6 +27,22 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const STAFF_OPERATION_IDS = [
+  "GET /api/v1/admin/staff",
+  "POST /api/v1/admin/staff",
+  "GET /api/v1/admin/staff/{staffId}",
+  "PATCH /api/v1/admin/staff/{staffId}",
+  "GET /api/v1/admin/staff/{staffId}/compensation",
+  "PUT /api/v1/admin/staff/{staffId}/compensation",
+  "GET /api/v1/admin/staff/{staffId}/skills",
+  "PUT /api/v1/admin/staff/{staffId}/skills",
+  "GET /api/v1/admin/branches/{branchId}/shifts",
+  "POST /api/v1/admin/branches/{branchId}/shifts",
+  "POST /api/v1/admin/branches/{branchId}/leave-requests",
+  "POST /api/v1/admin/branches/{branchId}/leave-requests/{requestId}/decision",
+  "GET /api/v1/admin/branches/{branchId}/staff-performance",
+] as const;
+
 const CUSTOMER_OPERATION_IDS = [
   "GET /api/v1/admin/branches/{branchId}/customers",
   "POST /api/v1/admin/branches/{branchId}/customers",
@@ -67,6 +83,34 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService staff surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of STAFF_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each staff operation", () => {
+    for (const fn of [
+      adminService.staff,
+      adminService.createStaff,
+      adminService.staffMember,
+      adminService.updateStaff,
+      adminService.staffCompensation,
+      adminService.setStaffCompensation,
+      adminService.staffSkills,
+      adminService.setStaffSkills,
+      adminService.staffShifts,
+      adminService.createStaffShift,
+      adminService.createLeaveRequest,
+      adminService.decideLeaveRequest,
+      adminService.staffPerformance,
     ]) {
       expect(typeof fn).toBe("function");
     }

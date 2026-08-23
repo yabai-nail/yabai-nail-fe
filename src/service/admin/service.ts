@@ -27,9 +27,20 @@ import type {
   AdminCustomerPointAdjustment,
   AdminCustomerPointAdjustmentInput,
   AdminDashboardData,
+  AdminLeaveRequest,
+  AdminLeaveRequestDecisionInput,
+  AdminLeaveRequestDraft,
   AdminServiceCategory,
   AdminServiceItem,
+  AdminStaffCompensationInput,
+  AdminStaffDraft,
   AdminStaffMember,
+  AdminStaffPatch,
+  AdminStaffPerformance,
+  AdminStaffShift,
+  AdminStaffShiftDraft,
+  AdminStaffSkill,
+  AdminStaffSkillsInput,
   BackendList,
   RevenueReport,
   StaffCompensation,
@@ -280,6 +291,77 @@ export const adminService = {
     executeApiOperation<StaffCompensation>(
       "GET /api/v1/admin/staff/{staffId}/compensation",
       { path: { staffId }, query: { period } },
+    ),
+  createStaff: (draft: AdminStaffDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminStaffMember>("POST /api/v1/admin/staff", {
+      body: draft,
+      idempotencyKey,
+    }),
+  updateStaff: (staffId: string, patch: AdminStaffPatch, version?: string | number) =>
+    executeApiOperation<AdminStaffMember>("PATCH /api/v1/admin/staff/{staffId}", {
+      path: { staffId },
+      body: patch,
+      version,
+    }),
+  setStaffCompensation: (
+    staffId: string,
+    input: AdminStaffCompensationInput,
+    version?: string | number,
+  ) =>
+    executeApiOperation<StaffCompensation>("PUT /api/v1/admin/staff/{staffId}/compensation", {
+      path: { staffId },
+      body: input,
+      version,
+    }),
+  staffSkills: (staffId: string) =>
+    executeApiOperation<BackendList<AdminStaffSkill>>(
+      "GET /api/v1/admin/staff/{staffId}/skills",
+      { path: { staffId } },
+    ),
+  setStaffSkills: (staffId: string, input: AdminStaffSkillsInput, version?: string | number) =>
+    executeApiOperation<BackendList<AdminStaffSkill>>(
+      "PUT /api/v1/admin/staff/{staffId}/skills",
+      { path: { staffId }, body: input, version },
+    ),
+  staffShifts: (
+    branchId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminStaffShift>>(
+      "GET /api/v1/admin/branches/{branchId}/shifts",
+      { path: { branchId }, query },
+    ),
+  createStaffShift: (branchId: string, draft: AdminStaffShiftDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminStaffShift>(
+      "POST /api/v1/admin/branches/{branchId}/shifts",
+      { path: { branchId }, body: draft, idempotencyKey },
+    ),
+  createLeaveRequest: (
+    branchId: string,
+    draft: AdminLeaveRequestDraft,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminLeaveRequest>(
+      "POST /api/v1/admin/branches/{branchId}/leave-requests",
+      { path: { branchId }, body: draft, idempotencyKey },
+    ),
+  decideLeaveRequest: (
+    branchId: string,
+    requestId: string,
+    input: AdminLeaveRequestDecisionInput,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminLeaveRequest>(
+      "POST /api/v1/admin/branches/{branchId}/leave-requests/{requestId}/decision",
+      { path: { branchId, requestId }, body: input, version },
+    ),
+  staffPerformance: (
+    branchId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<AdminStaffPerformance>(
+      "GET /api/v1/admin/branches/{branchId}/staff-performance",
+      { path: { branchId }, query },
     ),
   revenueReport: (from?: string, to?: string) =>
     executeApiOperation<RevenueReport>(

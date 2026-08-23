@@ -15,6 +15,9 @@ import type {
   AdminServiceCategory,
   AdminServiceItem,
   AdminStaffMember,
+  AdminStaffPerformance,
+  AdminStaffShift,
+  AdminStaffSkill,
   BackendList,
   RevenueReport,
   StaffCompensation,
@@ -166,6 +169,33 @@ export function useStaffCompensation(staffId: string | null, period?: string) {
   return useApiOperation<StaffCompensation>(
     staffId ? "GET /api/v1/admin/staff/{staffId}/compensation" : null,
     { path: staffId ? { staffId } : undefined, query: { period } },
+  );
+}
+
+export function useStaffSkills(staffId: string | null) {
+  return useApiOperation<BackendList<AdminStaffSkill>>(
+    staffId ? "GET /api/v1/admin/staff/{staffId}/skills" : null,
+    { path: staffId ? { staffId } : undefined },
+  );
+}
+
+export function useAdminStaffShifts(
+  branchId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminStaffShift>>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/shifts" : null,
+    { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminStaffPerformance(
+  branchId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<AdminStaffPerformance>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/staff-performance" : null,
+    { path: branchId ? { branchId } : undefined, query },
   );
 }
 

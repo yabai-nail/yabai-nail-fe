@@ -304,3 +304,96 @@ export interface AdminCustomerLookupResult {
   readonly items: ReadonlyArray<AdminCustomer>;
   readonly matchedBy?: string;
 }
+
+// -- Admin staff mutations -------------------------------------------------------
+
+export interface AdminStaffDraft {
+  readonly displayName: string;
+  readonly branchId: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly phone?: string;
+  readonly role?: string;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffPatch {
+  readonly displayName?: string;
+  readonly branchId?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly active?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffCompensationInput {
+  readonly baseSalaryVnd: number;
+  readonly commissionRate: number;
+  readonly effectiveFrom?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffSkill {
+  readonly serviceId: string;
+  readonly level?: string;
+  readonly certifiedAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffSkillsInput {
+  readonly skills: ReadonlyArray<AdminStaffSkill>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffShift {
+  readonly id: string;
+  readonly staffId: string;
+  readonly branchId: string;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly status?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffShiftDraft {
+  readonly staffId: string;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminLeaveRequest {
+  readonly id: string;
+  readonly staffId: string;
+  readonly branchId: string;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly reason?: string;
+  readonly status: string;
+  readonly decidedAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminLeaveRequestDraft {
+  readonly staffId: string;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly reason?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminLeaveRequestDecisionInput {
+  readonly decision: "approve" | "reject";
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminStaffPerformance {
+  readonly branchId: string;
+  readonly period: string;
+  readonly rows: ReadonlyArray<Record<string, unknown>>;
+  readonly totals?: Readonly<Record<string, number>>;
+  readonly [field: string]: unknown;
+}
