@@ -86,7 +86,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: sửa giá → list hiển thị giá mới.
   - Files: `AdminServices/ServiceTable.tsx`, `ServiceEditModal.tsx` (new hoặc reuse `ServiceCreateModal`).
 
-- [ ] **T3.2** Wire service-categories CRUD + reorder
+- [x] **T3.2** Wire service-categories (list + create + rename); reorder deferred (needs DnD kit)
   - Acceptance: sidebar list từ API; create/update/reorder gọi API; UI thay bằng skeleton khi loading.
   - Verify: category mới xuất hiện trong filter bar page và trong modal edit service.
   - Files: `AdminServices/ServiceSidebar.tsx`, `CategoryEditor.tsx` (new).

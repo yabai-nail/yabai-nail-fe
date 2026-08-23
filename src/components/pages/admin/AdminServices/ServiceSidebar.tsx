@@ -1,5 +1,10 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
+"use client";
+
+import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
+import { useState } from "react";
+import { useAdminServiceCategories, type AdminServiceCategory } from "@/service";
+import { CategoryEditor } from "./CategoryEditor";
 import { categoryLabels, type SalonService, type ServiceCategory } from "./data";
 
 export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
@@ -8,6 +13,14 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
     ...Object.entries(categoryLabels).map(([id, label]) => ({ id: id as ServiceCategory, label })),
   ];
   const topServices = [...services].sort((left, right) => right.soldCount - left.soldCount).slice(0, 5);
+
+  // BE-backed categories live alongside the fixture filter tabs — those
+  // remain the local UI filter (primary/addon/combo), while this section
+  // is the source of truth for what the salon actually manages.
+  const beCategories = useAdminServiceCategories();
+  const beItems = beCategories.data?.items ?? [];
+  const [editing, setEditing] = useState<AdminServiceCategory | null>(null);
+  const [creating, setCreating] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -22,7 +35,48 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
               </li>
             ))}
           </ul>
-          <Button fullWidth variant="outline" className="mt-3 rounded-lg border-admin-accent/30 text-admin-accent"><PlusIcon className="size-4" />Thêm danh mục</Button>
+
+          <div className="mt-4 border-t border-admin-border pt-3">
+            <p className="mb-2 text-[0.65rem] uppercase tracking-wide text-admin-muted">
+              Danh mục lưu trên hệ thống
+            </p>
+            {beCategories.isLoading ? (
+              <p className="text-xs text-admin-muted">Đang tải…</p>
+            ) : beCategories.error ? (
+              <p role="alert" className="text-xs text-admin-danger">Không tải được danh mục.</p>
+            ) : beItems.length === 0 ? (
+              <p className="text-xs text-admin-muted">Chưa có danh mục nào trên hệ thống.</p>
+            ) : (
+              <ul className="space-y-1">
+                {beItems.map((category) => (
+                  <li key={category.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
+                    <span className="min-w-0 flex-1 truncate">
+                      <strong className="text-admin-ink">{category.nameVi ?? category.name}</strong>
+                      <span className="ml-2 text-admin-muted">({category.code})</span>
+                    </span>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Đổi tên ${category.name}`}
+                      onPress={() => setEditing(category)}
+                    >
+                      <PencilSquareIcon className="size-3.5" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <Button
+            fullWidth
+            variant="outline"
+            className="mt-3 rounded-lg border-admin-accent/30 text-admin-accent"
+            onPress={() => setCreating(true)}
+          >
+            <PlusIcon className="size-4" />Thêm danh mục
+          </Button>
         </Card.Content>
       </Card>
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -42,6 +96,17 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Content className="p-4"><h2 className="font-bold">Ghi chú</h2><p className="mt-2 text-xs leading-5 text-admin-muted">Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng.</p></Card.Content>
       </Card>
+
+      {(creating || editing) ? (
+        <CategoryEditor
+          category={editing}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
+          onSaved={() => void beCategories.mutate()}
+        />
+      ) : null}
     </div>
   );
 }
