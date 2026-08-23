@@ -10,23 +10,56 @@ import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { useAdminStaff, type AdminStaffMember as ServerStaff } from "@/service";
 import { RecentOrdersTable } from "./RecentOrdersTable";
 import { StaffDetailPanel } from "./StaffDetailPanel";
 import { StaffTable } from "./StaffTable";
-import { staffMembers, type StaffStatus } from "./data";
+import { staffMembers as fixtureStaff, type StaffMember, type StaffStatus } from "./data";
 
 type StaffFilter = "all" | StaffStatus;
 
+function deriveInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+// Server → fixture. Revenue / orders / commission live in a separate
+// `useStaffCompensation` endpoint that a follow-up wires; for now zeros
+// keep the totals card additive-safe.
+function toFixtureStaff(server: ServerStaff): StaffMember {
+  const name = server.displayName || `Nhân viên #${server.id.slice(0, 6)}`;
+  return {
+    id: server.id,
+    name,
+    initials: deriveInitials(name),
+    phone: server.account?.phone ?? "",
+    birthday: "",
+    status: server.active ? "working" : "leave",
+    revenue: 0,
+    commissionRate: 60,
+    orders: 0,
+  };
+}
+
 export function AdminStaffComponent() {
+  const { data, isLoading, error } = useAdminStaff();
+  const source = useMemo<ReadonlyArray<StaffMember>>(() => {
+    if (!data?.items) return fixtureStaff;
+    if (data.items.length === 0) return [];
+    return data.items.map(toFixtureStaff);
+  }, [data]);
+
   const [filter, setFilter] = useState<StaffFilter>("all");
-  const [selectedId, setSelectedId] = useState(staffMembers[0].id);
+  const [selectedId, setSelectedId] = useState<string>("");
   const visibleStaff = useMemo(
-    () => staffMembers.filter((member) => filter === "all" || member.status === filter),
-    [filter],
+    () => source.filter((member) => filter === "all" || member.status === filter),
+    [source, filter],
   );
-  const selected = resolveVisibleSelection(visibleStaff, selectedId);
-  const totalRevenue = staffMembers.reduce((sum, member) => sum + member.revenue, 0);
-  const totalCommission = staffMembers.reduce(
+  const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
+  const totalRevenue = source.reduce((sum, member) => sum + member.revenue, 0);
+  const totalCommission = source.reduce(
     (sum, member) => sum + calculateCommission(member.revenue, member.commissionRate),
     0,
   );
@@ -73,6 +106,11 @@ export function AdminStaffComponent() {
           <Button variant="primary" className="rounded-lg"><PlusIcon className="size-4" />Thêm nhân viên</Button>
         </div>
       </div>
+      {isLoading ? (
+        <p className="mt-3 text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+      ) : error ? (
+        <p className="mt-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+      ) : null}
       <div className="mt-4 min-w-0">
         <AdminSplitLayout
           aside={

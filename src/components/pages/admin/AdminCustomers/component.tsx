@@ -9,21 +9,77 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { useAdminBranch, useAdminCustomers, type AdminCustomer } from "@/service";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerTable } from "./CustomerTable";
-import { customers, type CustomerSegment } from "./data";
+import { customers as fixtureCustomers, type Customer, type CustomerRank, type CustomerSegment } from "./data";
 
 type CustomerFilter = "all" | CustomerSegment;
 
+function deriveInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+/**
+ * Server → fixture adapter. The API only exposes a small typed head
+ * (`id`, `displayName`, `phone`, `status`, …); the fixture display carries
+ * spend, points, birthdays and other rich fields the backend has not yet
+ * standardised. We fill best-effort defaults and pass through anything the
+ * backend happens to have sent via the `[field: string]: unknown` escape.
+ */
+function toFixtureCustomer(server: AdminCustomer): Customer {
+  const name = server.displayName ?? server.name ?? `Khách #${server.id.slice(0, 6)}`;
+  const record = server as unknown as Record<string, unknown>;
+  const readNumber = (key: string): number => {
+    const value = record[key];
+    return typeof value === "number" ? value : 0;
+  };
+  const readString = (key: string): string => {
+    const value = record[key];
+    return typeof value === "string" ? value : "";
+  };
+  return {
+    id: server.id,
+    name,
+    initials: deriveInitials(name),
+    phone: server.phone ?? "",
+    birthday: readString("birthday"),
+    handle: readString("handle"),
+    preference: readString("preference"),
+    lastVisit: readString("lastVisit"),
+    totalSpend: readNumber("totalSpend"),
+    points: readNumber("points"),
+    visits: readNumber("visits"),
+    segment: (readString("segment") as CustomerSegment) || "regular",
+    rank: (readString("rank") as CustomerRank) || "none",
+    note: readString("note"),
+  };
+}
+
 export function AdminCustomersComponent() {
+  const { branchId } = useAdminBranch();
+  const { data, isLoading, error } = useAdminCustomers(branchId);
+  // Fixture is the fallback while there is no branch (unauthenticated), the
+  // request is in flight, or the endpoint errored. This keeps the layout
+  // useful for design review; a real branch replaces the sample rows.
+  const source = useMemo<ReadonlyArray<Customer>>(() => {
+    if (!data?.items) return fixtureCustomers;
+    if (data.items.length === 0) return [];
+    return data.items.map(toFixtureCustomer);
+  }, [data]);
+
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(customers[0].id);
+  const [selectedId, setSelectedId] = useState<string>("");
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("vi");
-    return customers.filter((customer) => (filter === "all" || customer.segment === filter) && (!normalizedQuery || `${customer.name} ${customer.phone}`.toLocaleLowerCase("vi").includes(normalizedQuery)));
-  }, [filter, query]);
-  const selectedCustomer = resolveVisibleSelection(filteredCustomers, selectedId);
+    return source.filter((customer) => (filter === "all" || customer.segment === filter) && (!normalizedQuery || `${customer.name} ${customer.phone}`.toLocaleLowerCase("vi").includes(normalizedQuery)));
+  }, [source, filter, query]);
+  const selectedCustomer = resolveVisibleSelection(filteredCustomers, selectedId || filteredCustomers[0]?.id || "");
+  const totalLabel = data?.pageInfo?.limit ?? source.length;
 
   return (
     <AdminPageLayout>
@@ -32,15 +88,15 @@ export function AdminCustomersComponent() {
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
             <Tabs.List aria-label="Phân nhóm khách hàng">
               <Tabs.Tab id="all">
-                <AdminTabLabel count={128}>Tất cả khách hàng</AdminTabLabel>
+                <AdminTabLabel count={source.length}>Tất cả khách hàng</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="loyal">
-                <AdminTabLabel count={28}>Khách thân thiết</AdminTabLabel>
+                <AdminTabLabel count={source.filter((c) => c.segment === "loyal").length}>Khách thân thiết</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="new">
-                <AdminTabLabel count={42}>Khách mới</AdminTabLabel>
+                <AdminTabLabel count={source.filter((c) => c.segment === "new").length}>Khách mới</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="regular">
@@ -56,6 +112,11 @@ export function AdminCustomersComponent() {
           <Button variant="primary" className="rounded-lg"><PlusIcon className="size-4" />Thêm khách hàng</Button>
         </div>
       </div>
+      {isLoading ? (
+        <p className="mb-3 text-xs text-admin-muted">Đang tải danh sách khách hàng…</p>
+      ) : error ? (
+        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+      ) : null}
       <AdminSplitLayout
         aside={
           selectedCustomer ? (
@@ -70,7 +131,7 @@ export function AdminCustomersComponent() {
       >
         <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
           <Card.Content className="min-w-0 p-0"><CustomerTable customers={filteredCustomers} selectedId={selectedCustomer?.id ?? null} onSelect={setSelectedId} /></Card.Content>
-          <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số 128 khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
+          <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
         </Card>
       </AdminSplitLayout>
     </AdminPageLayout>
