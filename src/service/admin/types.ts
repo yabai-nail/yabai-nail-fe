@@ -207,3 +207,100 @@ export interface AdminAppointmentAllocationCandidate {
   readonly reasons?: ReadonlyArray<string>;
   readonly [field: string]: unknown;
 }
+
+// -- Admin customer mutations ----------------------------------------------------
+
+export interface AdminCustomerDraft {
+  readonly displayName?: string;
+  readonly phone: string;
+  readonly locale?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerPatch {
+  readonly displayName?: string;
+  readonly locale?: string;
+  readonly status?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerBenefits {
+  readonly customerId: string;
+  readonly membershipTier?: string;
+  readonly membershipProgress?: number;
+  readonly points?: number;
+  readonly activeCoupons?: ReadonlyArray<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerCouponIssuanceInput {
+  readonly couponId: string;
+  readonly reason?: string;
+  readonly expiresAt?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerCouponIssuance {
+  readonly id: string;
+  readonly customerId: string;
+  readonly couponId: string;
+  readonly issuedAt: string;
+  readonly expiresAt?: string;
+  readonly status: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerNailHistoryEntry {
+  readonly appointmentId: string;
+  readonly startedAt: string;
+  readonly serviceNames: ReadonlyArray<string>;
+  readonly staffName?: string;
+  readonly totalVnd?: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerNote {
+  readonly id: string;
+  readonly customerId: string;
+  readonly authorId?: string;
+  readonly content: string;
+  readonly createdAt: string;
+  readonly updatedAt?: string;
+  readonly pinned?: boolean;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerNoteDraft {
+  readonly content: string;
+  readonly pinned?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerNotePatch {
+  readonly content?: string;
+  readonly pinned?: boolean;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerPointAdjustmentInput {
+  readonly deltaPoints: number;
+  readonly reason: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerPointAdjustment {
+  readonly id: string;
+  readonly customerId: string;
+  readonly deltaPoints: number;
+  readonly balanceAfter?: number;
+  readonly createdAt: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminCustomerLookupResult {
+  readonly items: ReadonlyArray<AdminCustomer>;
+  readonly matchedBy?: string;
+}

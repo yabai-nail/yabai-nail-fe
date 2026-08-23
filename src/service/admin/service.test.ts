@@ -27,6 +27,21 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const CUSTOMER_OPERATION_IDS = [
+  "GET /api/v1/admin/branches/{branchId}/customers",
+  "POST /api/v1/admin/branches/{branchId}/customers",
+  "GET /api/v1/admin/branches/{branchId}/customers/{customerId}",
+  "PATCH /api/v1/admin/branches/{branchId}/customers/{customerId}",
+  "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/benefits",
+  "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/coupon-issuances",
+  "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/nail-history",
+  "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/notes",
+  "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/notes",
+  "PATCH /api/v1/admin/branches/{branchId}/customers/{customerId}/notes/{noteId}",
+  "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/point-adjustments",
+  "GET /api/v1/admin/branches/{branchId}/customers/lookup",
+] as const;
+
 describe("adminService appointment surface", () => {
   it("names an operation the runtime catalog knows about", () => {
     for (const id of APPOINTMENT_OPERATION_IDS) {
@@ -52,6 +67,33 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService customer surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of CUSTOMER_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each customer operation", () => {
+    for (const fn of [
+      adminService.customers,
+      adminService.customer,
+      adminService.createCustomer,
+      adminService.updateCustomer,
+      adminService.customerBenefits,
+      adminService.issueCustomerCoupon,
+      adminService.customerNailHistory,
+      adminService.customerNotes,
+      adminService.createCustomerNote,
+      adminService.updateCustomerNote,
+      adminService.adjustCustomerPoints,
+      adminService.lookupCustomer,
     ]) {
       expect(typeof fn).toBe("function");
     }

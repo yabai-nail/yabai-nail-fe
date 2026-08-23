@@ -14,6 +14,18 @@ import type {
   AdminAppointmentServiceCompletionInput,
   AdminCalendarData,
   AdminCustomer,
+  AdminCustomerBenefits,
+  AdminCustomerCouponIssuance,
+  AdminCustomerCouponIssuanceInput,
+  AdminCustomerDraft,
+  AdminCustomerLookupResult,
+  AdminCustomerNailHistoryEntry,
+  AdminCustomerNote,
+  AdminCustomerNoteDraft,
+  AdminCustomerNotePatch,
+  AdminCustomerPatch,
+  AdminCustomerPointAdjustment,
+  AdminCustomerPointAdjustmentInput,
   AdminDashboardData,
   AdminServiceCategory,
   AdminServiceItem,
@@ -155,6 +167,95 @@ export const adminService = {
   customers: (branchId: string, query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminCustomer>>(
       "GET /api/v1/admin/branches/{branchId}/customers",
+      { path: { branchId }, query },
+    ),
+  customer: (branchId: string, customerId: string) =>
+    executeApiOperation<AdminCustomer>(
+      "GET /api/v1/admin/branches/{branchId}/customers/{customerId}",
+      { path: { branchId, customerId } },
+    ),
+  createCustomer: (branchId: string, draft: AdminCustomerDraft, idempotencyKey?: string) =>
+    executeApiOperation<AdminCustomer>(
+      "POST /api/v1/admin/branches/{branchId}/customers",
+      { path: { branchId }, body: draft, idempotencyKey },
+    ),
+  updateCustomer: (
+    branchId: string,
+    customerId: string,
+    patch: AdminCustomerPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminCustomer>(
+      "PATCH /api/v1/admin/branches/{branchId}/customers/{customerId}",
+      { path: { branchId, customerId }, body: patch, version },
+    ),
+  customerBenefits: (branchId: string, customerId: string) =>
+    executeApiOperation<AdminCustomerBenefits>(
+      "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/benefits",
+      { path: { branchId, customerId } },
+    ),
+  issueCustomerCoupon: (
+    branchId: string,
+    customerId: string,
+    input: AdminCustomerCouponIssuanceInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminCustomerCouponIssuance>(
+      "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/coupon-issuances",
+      { path: { branchId, customerId }, body: input, idempotencyKey },
+    ),
+  customerNailHistory: (
+    branchId: string,
+    customerId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminCustomerNailHistoryEntry>>(
+      "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/nail-history",
+      { path: { branchId, customerId }, query },
+    ),
+  customerNotes: (
+    branchId: string,
+    customerId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminCustomerNote>>(
+      "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/notes",
+      { path: { branchId, customerId }, query },
+    ),
+  createCustomerNote: (
+    branchId: string,
+    customerId: string,
+    draft: AdminCustomerNoteDraft,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminCustomerNote>(
+      "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/notes",
+      { path: { branchId, customerId }, body: draft, idempotencyKey },
+    ),
+  updateCustomerNote: (
+    branchId: string,
+    customerId: string,
+    noteId: string,
+    patch: AdminCustomerNotePatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminCustomerNote>(
+      "PATCH /api/v1/admin/branches/{branchId}/customers/{customerId}/notes/{noteId}",
+      { path: { branchId, customerId, noteId }, body: patch, version },
+    ),
+  adjustCustomerPoints: (
+    branchId: string,
+    customerId: string,
+    input: AdminCustomerPointAdjustmentInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminCustomerPointAdjustment>(
+      "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/point-adjustments",
+      { path: { branchId, customerId }, body: input, idempotencyKey },
+    ),
+  lookupCustomer: (branchId: string, query: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<AdminCustomerLookupResult>(
+      "GET /api/v1/admin/branches/{branchId}/customers/lookup",
       { path: { branchId }, query },
     ),
   services: (query?: Readonly<Record<string, string | number | undefined>>) =>

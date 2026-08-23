@@ -7,6 +7,10 @@ import type {
   AdminAppointmentPayment,
   AdminCalendarData,
   AdminCustomer,
+  AdminCustomerBenefits,
+  AdminCustomerLookupResult,
+  AdminCustomerNailHistoryEntry,
+  AdminCustomerNote,
   AdminDashboardData,
   AdminServiceCategory,
   AdminServiceItem,
@@ -74,6 +78,67 @@ export function useAdminCustomers(branchId: string | null, query?: Readonly<Reco
   return useApiOperation<BackendList<AdminCustomer>>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/customers" : null,
     { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminCustomer(branchId: string | null, customerId: string | null) {
+  return useApiOperation<AdminCustomer>(
+    branchId && customerId
+      ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}"
+      : null,
+    { path: branchId && customerId ? { branchId, customerId } : undefined },
+  );
+}
+
+export function useAdminCustomerBenefits(branchId: string | null, customerId: string | null) {
+  return useApiOperation<AdminCustomerBenefits>(
+    branchId && customerId
+      ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/benefits"
+      : null,
+    { path: branchId && customerId ? { branchId, customerId } : undefined },
+  );
+}
+
+export function useAdminCustomerNailHistory(
+  branchId: string | null,
+  customerId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminCustomerNailHistoryEntry>>(
+    branchId && customerId
+      ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/nail-history"
+      : null,
+    { path: branchId && customerId ? { branchId, customerId } : undefined, query },
+  );
+}
+
+export function useAdminCustomerNotes(
+  branchId: string | null,
+  customerId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminCustomerNote>>(
+    branchId && customerId
+      ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/notes"
+      : null,
+    { path: branchId && customerId ? { branchId, customerId } : undefined, query },
+  );
+}
+
+export function useAdminCustomerLookup(
+  branchId: string | null,
+  query: Readonly<Record<string, string | number | undefined>> | null,
+) {
+  // Lookup is a targeted search; a null query means "no active search", so the hook
+  // stays idle rather than sending an empty request that would either 400 or return
+  // the full list.
+  const hasQuery = query !== null && Object.values(query).some((value) => value !== undefined && value !== "");
+  return useApiOperation<AdminCustomerLookupResult>(
+    branchId && hasQuery ? "GET /api/v1/admin/branches/{branchId}/customers/lookup" : null,
+    {
+      path: branchId ? { branchId } : undefined,
+      query: hasQuery ? query ?? undefined : undefined,
+    },
   );
 }
 
