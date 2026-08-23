@@ -41,7 +41,22 @@ export type AppointmentDraft = {
 
 export type Appointment = AppointmentDraft & {
   readonly id: string;
+  // Raw BE state machine label (CONFIRMED, CHECKED_IN, IN_SERVICE, …). Present
+  // only for server-backed rows; absent for local overlays so the lifecycle
+  // action bar can hide itself for pre-persistence intents.
+  readonly serverStatus?: string;
+  // Row version used for `If-Match` on lifecycle transitions.
+  readonly version?: number;
 };
+
+// BE lifecycle transitions the detail panel exposes as action buttons. The
+// enum stays here (not in status.ts) so the mock data file is the single
+// source of truth for what the fixture Appointment shape can carry.
+export type AppointmentLifecycleAction =
+  | "check-in"
+  | "service-start"
+  | "service-complete"
+  | "no-show";
 
 export const DEFAULT_APPOINTMENT_DATE = "2026-08-16";
 

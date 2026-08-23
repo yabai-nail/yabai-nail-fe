@@ -2,9 +2,12 @@ import {
   BanknotesIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
   ClockIcon,
+  NoSymbolIcon,
   PencilSquareIcon,
   PhoneIcon,
+  PlayCircleIcon,
   ScissorsIcon,
   UserIcon,
   XMarkIcon,
@@ -12,11 +15,25 @@ import {
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
-import type { Appointment } from "./data";
+import type { Appointment, AppointmentLifecycleAction } from "./data";
 import {
   appointmentStatusColor,
   appointmentStatusLabel,
 } from "./status";
+
+const LIFECYCLE_LABEL: Record<AppointmentLifecycleAction, string> = {
+  "check-in": "Check-in",
+  "service-start": "Bắt đầu dịch vụ",
+  "service-complete": "Hoàn tất dịch vụ",
+  "no-show": "Không đến",
+};
+
+const LIFECYCLE_ICON: Record<AppointmentLifecycleAction, typeof CheckCircleIcon> = {
+  "check-in": CheckCircleIcon,
+  "service-start": PlayCircleIcon,
+  "service-complete": CheckCircleIcon,
+  "no-show": NoSymbolIcon,
+};
 
 const segmentLabel = {
   loyal: "Khách thân thiết",
@@ -24,8 +41,25 @@ const segmentLabel = {
   regular: "Khách lâu năm",
 } as const;
 
-export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessage }: Readonly<{
+export function AppointmentDetailPanel({
+  appointment,
+  lifecycleActions = [],
+  lifecyclePending = null,
+  lifecycleError = null,
+  onLifecycle,
+  onEdit,
+  onCancel,
+  onMessage,
+}: Readonly<{
   appointment: Appointment;
+  /** BE lifecycle transitions enabled for the current serverStatus. */
+  lifecycleActions?: ReadonlyArray<AppointmentLifecycleAction>;
+  /** Which transition is currently mid-request (disables the whole bar). */
+  lifecyclePending?: AppointmentLifecycleAction | null;
+  /** User-facing error from the most recent transition, or null. */
+  lifecycleError?: string | null;
+  /** Fires when the admin picks a transition; parent runs the API call. */
+  onLifecycle?: (action: AppointmentLifecycleAction) => void;
   onEdit: () => void;
   onCancel: () => void;
   onMessage: () => void;
@@ -79,6 +113,35 @@ export function AppointmentDetailPanel({ appointment, onEdit, onCancel, onMessag
         {appointment.note ? <div className="rounded-lg border border-admin-border p-3 text-xs leading-5 text-admin-muted"><strong className="block text-admin-ink">Ghi chú</strong>{appointment.note}</div> : null}
       </Card.Content>
       <Card.Footer className="flex flex-col gap-2 border-t border-admin-border p-4">
+        {lifecycleActions.length > 0 && onLifecycle ? (
+          <div className="flex flex-col gap-2 border-b border-admin-border pb-3">
+            <span className="text-[0.65rem] uppercase tracking-wide text-admin-muted">Vòng đời</span>
+            <div className="grid grid-cols-2 gap-2">
+              {lifecycleActions.map((action) => {
+                const Icon = LIFECYCLE_ICON[action];
+                const isPending = lifecyclePending === action;
+                return (
+                  <Button
+                    key={action}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-lg border-admin-border"
+                    isDisabled={lifecyclePending !== null}
+                    onPress={() => onLifecycle(action)}
+                  >
+                    <Icon className="size-4" />
+                    {isPending ? "Đang xử lý…" : LIFECYCLE_LABEL[action]}
+                  </Button>
+                );
+              })}
+            </div>
+            {lifecycleError ? (
+              <p role="alert" className="text-xs text-admin-danger">
+                {lifecycleError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {appointment.status !== "cancelled" ? (
           <Button
             fullWidth

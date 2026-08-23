@@ -35,6 +35,7 @@ import {
   type Appointment,
   type AppointmentCustomer,
   type AppointmentDraft,
+  type AppointmentLifecycleAction,
   type AppointmentService,
   type AppointmentStaff,
   type AppointmentStatus,
@@ -148,8 +149,18 @@ function toFixtureAppointment(
     staff: resolveStaff(server.staffId, lookups.staff),
     status: normalizeStatus(server.status),
     note: server.note ?? "",
+    serverStatus: server.status,
+    version: server.version,
   };
 }
+
+// Which BE status → which set of lifecycle transitions are enabled. Anything
+// not listed = terminal (no action bar).
+const LIFECYCLE_BY_STATUS: Record<string, ReadonlyArray<AppointmentLifecycleAction>> = {
+  CONFIRMED: ["check-in", "no-show"],
+  CHECKED_IN: ["service-start", "no-show"],
+  IN_SERVICE: ["service-complete"],
+};
 
 export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{ initialCreate?: boolean }>) {
   const router = useRouter();
@@ -290,6 +301,40 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
     }
   }
 
+  // Server-side lifecycle transitions the detail panel exposes. Each call
+  // maps directly onto one canonical admin operation; success revalidates
+  // the appointment list so the row's `serverStatus` (and any BE-computed
+  // fields) refreshes.
+  const [lifecyclePending, setLifecyclePending] = useState<AppointmentLifecycleAction | null>(null);
+  const [lifecycleError, setLifecycleError] = useState<string | null>(null);
+  async function runLifecycle(
+    action: AppointmentLifecycleAction,
+    appointmentId: string,
+    version: number | undefined,
+  ) {
+    if (!branchId) return;
+    setLifecyclePending(action);
+    setLifecycleError(null);
+    try {
+      if (action === "check-in") {
+        await adminService.checkInAppointment(branchId, appointmentId, version);
+      } else if (action === "service-start") {
+        await adminService.startAppointmentService(branchId, appointmentId, version);
+      } else if (action === "service-complete") {
+        await adminService.completeAppointmentService(branchId, appointmentId, {}, version);
+      } else {
+        await adminService.markAppointmentNoShow(branchId, appointmentId, version);
+      }
+      void mutateAppointments();
+    } catch (thrown) {
+      setLifecycleError(
+        thrown instanceof Error ? thrown.message : "Không thực hiện được thao tác.",
+      );
+    } finally {
+      setLifecyclePending(null);
+    }
+  }
+
   function confirmCancel() {
     if (!selectedAppointment) return;
     const appointmentId = selectedAppointment.id;
@@ -359,6 +404,16 @@ export function AdminAppointmentsComponent({ initialCreate = false }: Readonly<{
           {selectedAppointment ? (
             <AppointmentDetailPanel
               appointment={selectedAppointment}
+              lifecycleActions={
+                selectedAppointment.serverStatus
+                  ? LIFECYCLE_BY_STATUS[selectedAppointment.serverStatus] ?? []
+                  : []
+              }
+              lifecyclePending={lifecyclePending}
+              lifecycleError={lifecycleError}
+              onLifecycle={(action) =>
+                runLifecycle(action, selectedAppointment.id, selectedAppointment.version)
+              }
               onEdit={() => setFormMode("edit")}
               onCancel={() => setIsCancelOpen(true)}
               onMessage={() => router.push("/admin/messages")}
