@@ -549,3 +549,109 @@ export interface AdminAuditLog {
   readonly diff?: Readonly<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
+
+// -- Admin messaging (conversations + messages) ---------------------------------
+
+export interface AdminConversationCustomerSummary {
+  readonly customerId: string;
+  readonly displayName?: string;
+  readonly phone?: string;
+  readonly avatarUrl?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminConversation {
+  readonly id: string;
+  readonly branchId: string;
+  readonly status: string;
+  readonly unreadCount: number;
+  readonly customer: AdminConversationCustomerSummary;
+  readonly lastMessage?: {
+    readonly id: string;
+    readonly senderType: string;
+    readonly content: string;
+    readonly createdAt: string;
+  };
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminConversationPatch {
+  readonly status: "READ" | "UNREAD" | "ARCHIVED";
+  readonly [field: string]: unknown;
+}
+
+export interface AdminMessage {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly senderType: string;
+  readonly content: string;
+  readonly createdAt: string;
+  readonly deliveryStatus?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminMessageDraft {
+  readonly content: string;
+  readonly attachments?: ReadonlyArray<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+// -- Admin reviews ---------------------------------------------------------------
+
+export interface AdminReview {
+  readonly id: string;
+  readonly appointmentId: string;
+  readonly customerId: string;
+  readonly branchId: string;
+  readonly rating: number;
+  readonly content?: string;
+  readonly status: string;
+  readonly createdAt: string;
+  readonly handling?: {
+    readonly status: string;
+    readonly assignedTo?: string;
+    readonly note?: string;
+  };
+  readonly reply?: {
+    readonly id: string;
+    readonly content: string;
+    readonly createdAt: string;
+  };
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReviewHandlingPatch {
+  readonly status: string;
+  readonly assignedTo?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminReviewReplyInput {
+  readonly content: string;
+  readonly [field: string]: unknown;
+}
+
+// -- Admin branch settings -------------------------------------------------------
+
+export interface AdminBranchSettings {
+  readonly branchId: string;
+  readonly booking?: Readonly<Record<string, unknown>>;
+  readonly payment?: Readonly<Record<string, unknown>>;
+  readonly automation?: Readonly<Record<string, unknown>>;
+  readonly notification?: Readonly<Record<string, unknown>>;
+  readonly backup?: Readonly<Record<string, unknown>>;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminBranchSettingsPatch {
+  readonly booking?: Readonly<Record<string, unknown>>;
+  readonly payment?: Readonly<Record<string, unknown>>;
+  readonly automation?: Readonly<Record<string, unknown>>;
+  readonly notification?: Readonly<Record<string, unknown>>;
+  readonly backup?: Readonly<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}

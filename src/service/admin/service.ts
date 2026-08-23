@@ -50,7 +50,16 @@ import type {
   AdminStaffSkill,
   AdminStaffSkillsInput,
   AdminAuditLog,
+  AdminBranchSettings,
+  AdminBranchSettingsPatch,
+  AdminConversation,
+  AdminConversationPatch,
+  AdminMessage,
+  AdminMessageDraft,
   AdminPaymentRefund,
+  AdminReview,
+  AdminReviewHandlingPatch,
+  AdminReviewReplyInput,
   AdminPaymentRefundInput,
   AdminReport,
   AdminReportExport,
@@ -479,4 +488,85 @@ export const adminService = {
     executeApiOperation<AdminAuditLog>("GET /api/v1/admin/audit-logs/{logId}", {
       path: { logId },
     }),
+  conversations: (
+    branchId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminConversation>>(
+      "GET /api/v1/admin/branches/{branchId}/conversations",
+      { path: { branchId }, query },
+    ),
+  conversationMessages: (
+    branchId: string,
+    conversationId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminMessage>>(
+      "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
+      { path: { branchId, conversationId }, query },
+    ),
+  sendConversationMessage: (
+    branchId: string,
+    conversationId: string,
+    draft: AdminMessageDraft,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminMessage>(
+      "POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
+      { path: { branchId, conversationId }, body: draft, idempotencyKey },
+    ),
+  updateConversation: (
+    branchId: string,
+    conversationId: string,
+    patch: AdminConversationPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminConversation>(
+      "PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}",
+      { path: { branchId, conversationId }, body: patch, version },
+    ),
+  branchReviews: (
+    branchId: string,
+    query?: Readonly<Record<string, string | number | undefined>>,
+  ) =>
+    executeApiOperation<BackendList<AdminReview>>(
+      "GET /api/v1/admin/branches/{branchId}/reviews",
+      { path: { branchId }, query },
+    ),
+  updateBranchReviewHandling: (
+    branchId: string,
+    reviewId: string,
+    patch: AdminReviewHandlingPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminReview>(
+      "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling",
+      { path: { branchId, reviewId }, body: patch, version },
+    ),
+  replyToBranchReview: (
+    branchId: string,
+    reviewId: string,
+    input: AdminReviewReplyInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminReview>(
+      "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
+      { path: { branchId, reviewId }, body: input, idempotencyKey },
+    ),
+  reviews: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query }),
+  branchSettings: (branchId: string) =>
+    executeApiOperation<AdminBranchSettings>(
+      "GET /api/v1/admin/branches/{branchId}/settings",
+      { path: { branchId } },
+    ),
+  updateBranchSettings: (
+    branchId: string,
+    patch: AdminBranchSettingsPatch,
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminBranchSettings>(
+      "PATCH /api/v1/admin/branches/{branchId}/settings",
+      { path: { branchId }, body: patch, version },
+    ),
 };

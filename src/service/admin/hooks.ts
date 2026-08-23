@@ -20,7 +20,11 @@ import type {
   AdminStaffShift,
   AdminStaffSkill,
   AdminAuditLog,
+  AdminBranchSettings,
+  AdminConversation,
+  AdminMessage,
   AdminPaymentRefund,
+  AdminReview,
   AdminReport,
   AdminReportExport,
   BackendList,
@@ -268,5 +272,54 @@ export function useAdminAuditLog(logId: string | null) {
   return useApiOperation<AdminAuditLog>(
     logId ? "GET /api/v1/admin/audit-logs/{logId}" : null,
     { path: logId ? { logId } : undefined },
+  );
+}
+
+export function useAdminConversations(
+  branchId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminConversation>>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/conversations" : null,
+    { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminConversationMessages(
+  branchId: string | null,
+  conversationId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminMessage>>(
+    branchId && conversationId
+      ? "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages"
+      : null,
+    {
+      path: branchId && conversationId ? { branchId, conversationId } : undefined,
+      query,
+    },
+  );
+}
+
+export function useAdminBranchReviews(
+  branchId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminReview>>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/reviews" : null,
+    { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminReviews(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return useApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query });
+}
+
+export function useAdminBranchSettings(branchId: string | null) {
+  return useApiOperation<AdminBranchSettings>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/settings" : null,
+    { path: branchId ? { branchId } : undefined },
   );
 }

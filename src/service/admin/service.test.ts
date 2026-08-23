@@ -27,6 +27,19 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
 
+const MESSAGING_OPERATION_IDS = [
+  "GET /api/v1/admin/branches/{branchId}/conversations",
+  "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
+  "POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
+  "PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}",
+  "GET /api/v1/admin/branches/{branchId}/reviews",
+  "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling",
+  "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
+  "GET /api/v1/admin/reviews",
+  "GET /api/v1/admin/branches/{branchId}/settings",
+  "PATCH /api/v1/admin/branches/{branchId}/settings",
+] as const;
+
 const FINANCE_OPERATION_IDS = [
   "GET /api/v1/admin/reports/revenue-summary",
   "GET /api/v1/admin/reports/branches",
@@ -110,6 +123,31 @@ describe("adminService appointment surface", () => {
       adminService.recordAppointmentPayment,
       adminService.requestAppointmentPaymentQuote,
       adminService.attachAppointmentPhoto,
+    ]) {
+      expect(typeof fn).toBe("function");
+    }
+  });
+});
+
+describe("adminService messaging and reviews surface", () => {
+  it("names an operation the runtime catalog knows about", () => {
+    for (const id of MESSAGING_OPERATION_IDS) {
+      expect(() => getApiOperation(id)).not.toThrow();
+    }
+  });
+
+  it("exposes a function for each messaging and review operation", () => {
+    for (const fn of [
+      adminService.conversations,
+      adminService.conversationMessages,
+      adminService.sendConversationMessage,
+      adminService.updateConversation,
+      adminService.branchReviews,
+      adminService.updateBranchReviewHandling,
+      adminService.replyToBranchReview,
+      adminService.reviews,
+      adminService.branchSettings,
+      adminService.updateBranchSettings,
     ]) {
       expect(typeof fn).toBe("function");
     }
