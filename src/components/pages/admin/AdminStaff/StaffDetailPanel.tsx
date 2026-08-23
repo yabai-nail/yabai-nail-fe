@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { StaffCompensationForm } from "./StaffCompensationForm";
+import { StaffPerformancePanel } from "./StaffPerformancePanel";
 import { StaffShiftsPanel } from "./StaffShiftsPanel";
 import { StaffSkillsPanel } from "./StaffSkillsPanel";
 import type { StaffMember } from "./data";
@@ -56,7 +57,12 @@ export function StaffDetailPanel({
           <>
             <StaffCompensationForm staffId={member.id} />
             <StaffSkillsPanel staffId={member.id} staffVersion={member.version} />
-            {branchId ? <StaffShiftsPanel branchId={branchId} staffId={member.id} /> : null}
+            {branchId ? (
+              <>
+                <StaffShiftsPanel branchId={branchId} staffId={member.id} />
+                <StaffPerformancePanel branchId={branchId} staffId={member.id} />
+              </>
+            ) : null}
           </>
         ) : null}
         <div className="grid gap-2">

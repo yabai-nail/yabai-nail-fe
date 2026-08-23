@@ -119,7 +119,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: shift entry trong `staff_shifts`.
   - Files: `StaffDetailPanel.tsx`, `ShiftsPanel.tsx`, `LeaveDialog.tsx` (new).
 
-- [ ] **T4.4** Wire staff-performance
+- [x] **T4.4** Wire staff-performance
   - Acceptance: tab "Hiệu suất" dùng `useAdminStaffPerformance` (period=YYYY-MM); loading/error/empty state đủ.
   - Verify: manual — chọn period, số liệu render.
   - Files: `StaffDetailPanel.tsx`, `PerformancePanel.tsx` (new).
