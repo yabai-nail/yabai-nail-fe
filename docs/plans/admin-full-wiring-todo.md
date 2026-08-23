@@ -68,7 +68,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
   - Verify: BE ghi `customer_notes` (domain_records với kind phù hợp).
   - Files: `CustomerDetailPanel.tsx` (tab Notes), `CustomerNoteEditor.tsx` (new).
 
-- [ ] **T2.3** Wire loyalty ops + lookup + nail-history
+- [x] **T2.3** Wire loyalty ops (benefits + points + coupon + nail-history); lookup deferred to when a picker consumer exists
   - Acceptance: tab "Ưu đãi" hiển thị benefits + coupon; button "Cộng điểm/Trừ điểm" gọi `adjustCustomerPoints`; "Phát coupon" gọi `issueCustomerCoupon`; lookup dùng cho search input.
   - Verify: point_transactions có row mới; customer_coupons có row.
   - Files: `CustomerDetailPanel.tsx`, `LoyaltyActions.tsx` (new), `CustomerLookupField.tsx` (dùng chung nếu đủ thời gian).

@@ -2,6 +2,7 @@ import { CalendarDaysIcon, ChatBubbleLeftRightIcon, PencilSquareIcon, PhoneIcon 
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { CustomerLoyaltyPanel } from "./CustomerLoyaltyPanel";
 import { CustomerNotesPanel } from "./CustomerNotesPanel";
 import { getCustomerHistory, type Customer } from "./data";
 
@@ -55,7 +56,10 @@ export function CustomerDetailPanel({
         </section>
         <section aria-labelledby="customer-note-heading" className="border-t border-admin-border pt-3"><h3 id="customer-note-heading" className="text-sm font-bold">Ghi chú của khách hàng</h3><p className="mt-2 text-xs leading-5 text-admin-muted">{customer.note}</p></section>
         {branchId && customer.version !== undefined ? (
-          <CustomerNotesPanel branchId={branchId} customerId={customer.id} />
+          <>
+            <CustomerNotesPanel branchId={branchId} customerId={customer.id} />
+            <CustomerLoyaltyPanel branchId={branchId} customerId={customer.id} />
+          </>
         ) : null}
         <div className="grid gap-2">
           <Button variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
