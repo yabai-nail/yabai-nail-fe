@@ -3,6 +3,8 @@
 import { useApiOperation } from "../api";
 import type {
   AdminAppointment,
+  AdminAppointmentAllocationCandidate,
+  AdminAppointmentPayment,
   AdminCalendarData,
   AdminCustomer,
   AdminDashboardData,
@@ -32,6 +34,39 @@ export function useAdminAppointments(branchId: string | null, query?: Readonly<R
   return useApiOperation<BackendList<AdminAppointment>>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/appointments" : null,
     { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminAppointment(branchId: string | null, appointmentId: string | null) {
+  return useApiOperation<AdminAppointment>(
+    branchId && appointmentId
+      ? "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}"
+      : null,
+    { path: branchId && appointmentId ? { branchId, appointmentId } : undefined },
+  );
+}
+
+export function useAdminAppointmentAllocationCandidates(
+  branchId: string | null,
+  appointmentId: string | null,
+) {
+  return useApiOperation<BackendList<AdminAppointmentAllocationCandidate>>(
+    branchId && appointmentId
+      ? "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/allocation-candidates"
+      : null,
+    { path: branchId && appointmentId ? { branchId, appointmentId } : undefined },
+  );
+}
+
+export function useAdminAppointmentPayments(
+  branchId: string | null,
+  appointmentId: string | null,
+) {
+  return useApiOperation<BackendList<AdminAppointmentPayment>>(
+    branchId && appointmentId
+      ? "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments"
+      : null,
+    { path: branchId && appointmentId ? { branchId, appointmentId } : undefined },
   );
 }
 

@@ -117,3 +117,93 @@ export interface RevenueReport {
   readonly metrics: Readonly<Record<string, { readonly value: number | null }>>;
   readonly rows: ReadonlyArray<Record<string, unknown>>;
 }
+
+// -- Admin appointment mutations -------------------------------------------------
+// Inputs stay minimally typed on top of the known fields; the `[field: string]: unknown`
+// escape hatch lets a page pass through additional properties the backend expects
+// without waiting on an exhaustive type export from the platform.
+
+export interface AdminAppointmentDraft {
+  readonly customerId: string;
+  readonly staffId?: string | null;
+  readonly serviceIds: ReadonlyArray<string>;
+  readonly startsAt: string;
+  readonly endsAt?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentRescheduleInput {
+  readonly startsAt: string;
+  readonly endsAt?: string;
+  readonly staffId?: string | null;
+  readonly reason?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentCancellationInput {
+  readonly reason: string;
+  readonly refundVnd?: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentAssignmentInput {
+  readonly staffId: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentServiceCompletionInput {
+  readonly completedAt?: string;
+  readonly actualServiceIds?: ReadonlyArray<string>;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentPaymentInput {
+  readonly method: string;
+  readonly amountVnd: number;
+  readonly discountVnd?: number;
+  readonly reference?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentActualServicesInput {
+  readonly serviceIds: ReadonlyArray<string>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentPhotoInput {
+  readonly mediaId: string;
+  readonly kind?: string;
+  readonly note?: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentPayment {
+  readonly id: string;
+  readonly appointmentId: string;
+  readonly method: string;
+  readonly amountVnd: number;
+  readonly status: string;
+  readonly paidAt?: string;
+  readonly version: number;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentPaymentQuote {
+  readonly appointmentId: string;
+  readonly subtotalVnd: number;
+  readonly discountVnd: number;
+  readonly totalVnd: number;
+  readonly lines: ReadonlyArray<Record<string, unknown>>;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentAllocationCandidate {
+  readonly staffId: string;
+  readonly displayName: string;
+  readonly score?: number;
+  readonly reasons?: ReadonlyArray<string>;
+  readonly [field: string]: unknown;
+}
