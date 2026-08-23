@@ -88,3 +88,36 @@ export interface AccountMergeResult {
   readonly mergedAccountId: string;
   readonly [field: string]: unknown;
 }
+
+// -- Admin auth mutations + bootstrap ------------------------------------------
+
+export interface AdminSessionSummary {
+  readonly sessionId: string;
+  readonly user: AuthenticatedAdmin;
+  readonly issuedAt?: string;
+  readonly expiresAt?: string;
+  readonly branchId?: string | null;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminSessionBranchInput {
+  readonly branchId: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPasswordChangeInput {
+  readonly currentPassword: string;
+  readonly newPassword: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPasswordResetRequestInput {
+  readonly phone: string;
+  readonly [field: string]: unknown;
+}
+
+export interface AdminPasswordResetInput {
+  readonly resetToken: string;
+  readonly newPassword: string;
+  readonly [field: string]: unknown;
+}

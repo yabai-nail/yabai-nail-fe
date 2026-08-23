@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { apiRequest, setAccessToken } = vi.hoisted(() => ({
-  apiRequest: vi.fn(),
+const { executeApiOperation, setAccessToken } = vi.hoisted(() => ({
+  executeApiOperation: vi.fn(),
   setAccessToken: vi.fn(),
 }));
 
 vi.mock("../api", () => ({
-  apiRequest,
-  apiRoutes: { auth: { adminSession: "/admin/auth/sessions" } },
+  executeApiOperation,
   setAccessToken,
 }));
 
@@ -15,7 +14,7 @@ import { authService } from "./service";
 
 describe("authService.loginAdmin", () => {
   beforeEach(() => {
-    apiRequest.mockReset();
+    executeApiOperation.mockReset();
     setAccessToken.mockReset();
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
       "1cbaa0aa-0325-4b2e-8cd1-43ce8328afcd",
@@ -37,25 +36,27 @@ describe("authService.loginAdmin", () => {
         branchIds: ["branch-1"],
       },
     };
-    apiRequest.mockResolvedValue(session);
+    executeApiOperation.mockResolvedValue(session);
 
     await expect(
       authService.loginAdmin({ phone: "0900 000 003", password: "123456" }),
     ).resolves.toEqual(session);
 
-    expect(apiRequest).toHaveBeenCalledWith({
-      method: "POST",
-      url: "/admin/auth/sessions",
-      headers: {
-        "Idempotency-Key": "1cbaa0aa-0325-4b2e-8cd1-43ce8328afcd",
+    // The service must reach the canonical operation string — the string that
+    // the runtime catalog will resolve — so a route rename fails a test rather
+    // than the login button.
+    expect(executeApiOperation).toHaveBeenCalledWith(
+      "POST /api/v1/admin/auth/sessions",
+      {
+        body: { phone: "0900000003", password: "123456" },
+        idempotencyKey: undefined,
       },
-      data: { phone: "0900000003", password: "123456" },
-    });
+    );
     expect(setAccessToken).toHaveBeenCalledWith("access-token");
   });
 
   it("does not change the current token when login fails", async () => {
-    apiRequest.mockRejectedValue(new Error("Invalid credentials"));
+    executeApiOperation.mockRejectedValue(new Error("Invalid credentials"));
 
     await expect(
       authService.loginAdmin({ phone: "0900000003", password: "wrong" }),

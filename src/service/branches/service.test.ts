@@ -1,26 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { apiRequest } = vi.hoisted(() => ({ apiRequest: vi.fn() }));
+const { executeApiOperation } = vi.hoisted(() => ({ executeApiOperation: vi.fn() }));
 
-vi.mock("../api", () => ({
-  apiRequest,
-  apiRoutes: { catalog: { branches: "/branches" } },
-}));
+vi.mock("../api", () => ({ executeApiOperation }));
 
 import { branchesService } from "./service";
 
 describe("branchesService", () => {
-  beforeEach(() => apiRequest.mockReset());
+  beforeEach(() => executeApiOperation.mockReset());
 
-  it("loads the public branch catalog through the shared API client", async () => {
-    apiRequest.mockResolvedValue([{ id: "branch-1", name: "YABAI" }]);
+  it("lists the public branch catalog through the canonical operation", async () => {
+    executeApiOperation.mockResolvedValue({
+      items: [{ id: "branch-1", name: "YABAI" }],
+    });
 
-    await expect(branchesService.list()).resolves.toEqual([
-      { id: "branch-1", name: "YABAI" },
-    ]);
-    expect(apiRequest).toHaveBeenCalledWith({
-      method: "GET",
-      url: "/branches",
+    await expect(branchesService.list()).resolves.toEqual({
+      items: [{ id: "branch-1", name: "YABAI" }],
+    });
+    expect(executeApiOperation).toHaveBeenCalledWith("GET /api/v1/branches", {
+      query: undefined,
+    });
+  });
+
+  it("forwards a query when the caller wants to narrow the list", async () => {
+    executeApiOperation.mockResolvedValue({ items: [] });
+
+    await branchesService.list({ city: "Fukuoka" });
+
+    expect(executeApiOperation).toHaveBeenCalledWith("GET /api/v1/branches", {
+      query: { city: "Fukuoka" },
     });
   });
 });

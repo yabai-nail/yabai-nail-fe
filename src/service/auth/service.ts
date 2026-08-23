@@ -1,9 +1,14 @@
-import { apiRequest, apiRoutes, executeApiOperation, setAccessToken } from "../api";
+import { executeApiOperation, setAccessToken } from "../api";
 import type {
   AccountMergeInput,
   AccountMergeResult,
   AdminLoginInput,
+  AdminPasswordChangeInput,
+  AdminPasswordResetInput,
+  AdminPasswordResetRequestInput,
   AdminSession,
+  AdminSessionBranchInput,
+  AdminSessionSummary,
   CustomerSession,
   PhoneChallenge,
   PhoneChallengeInput,
@@ -15,20 +20,55 @@ import type {
 } from "./types";
 
 export const authService = {
-  async loginAdmin(input: AdminLoginInput): Promise<AdminSession> {
-    const session = await apiRequest<AdminSession>({
-      method: "POST",
-      url: apiRoutes.auth.adminSession,
-      headers: { "Idempotency-Key": crypto.randomUUID() },
-      data: {
-        phone: input.phone.replace(/\s/g, ""),
-        password: input.password,
+  async loginAdmin(input: AdminLoginInput, idempotencyKey?: string): Promise<AdminSession> {
+    // Uses the canonical operation catalog so admin login shares the same
+    // `executeApiOperation` code path (auto `Idempotency-Key`, typed response,
+    // catalog drift caught by tests) as every other admin mutation.
+    const session = await executeApiOperation<AdminSession>(
+      "POST /api/v1/admin/auth/sessions",
+      {
+        body: {
+          phone: input.phone.replace(/\s/g, ""),
+          password: input.password,
+        },
+        idempotencyKey,
       },
-    });
+    );
 
     setAccessToken(session.accessToken);
     return session;
   },
+  adminSession: () =>
+    // Bootstrap the current admin session (permissions, active branch) after
+    // reload. Feature-stability endpoint per the platform catalog.
+    executeApiOperation<AdminSessionSummary>("GET /api/v1/admin/auth/session"),
+  switchAdminBranch: (
+    sessionId: string,
+    input: AdminSessionBranchInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminSession>(
+      "POST /api/v1/admin/auth/sessions/{sessionId}/branch",
+      { path: { sessionId }, body: input, idempotencyKey },
+    ),
+  changeAdminPassword: (input: AdminPasswordChangeInput, idempotencyKey?: string) =>
+    executeApiOperation<void>("POST /api/v1/admin/auth/password-changes", {
+      body: input,
+      idempotencyKey,
+    }),
+  requestAdminPasswordReset: (
+    input: AdminPasswordResetRequestInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<void>("POST /api/v1/admin/auth/password-reset-requests", {
+      body: input,
+      idempotencyKey,
+    }),
+  resetAdminPassword: (input: AdminPasswordResetInput, idempotencyKey?: string) =>
+    executeApiOperation<AdminSession>("POST /api/v1/admin/auth/password-resets", {
+      body: input,
+      idempotencyKey,
+    }),
   startPhoneChallenge: (input: PhoneChallengeInput, idempotencyKey?: string) =>
     executeApiOperation<PhoneChallenge>("POST /api/v1/auth/phone/challenges", {
       body: input,

@@ -1,18 +1,20 @@
 "use client";
 
-import useSWR from "swr";
-
-import { apiRoutes, useApiOperation } from "../api";
-import type { ApiClientError } from "../api";
+import { useApiOperation } from "../api";
 import type { BackendList } from "../admin/types";
 import type { Branch, BranchService, BranchServiceCategory, BranchStaff } from "./types";
 
-export function useBranches() {
-  const result = useSWR<Branch[], ApiClientError>(apiRoutes.catalog.branches);
+export function useBranches(
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  const result = useApiOperation<BackendList<Branch>>(
+    "GET /api/v1/branches",
+    { query },
+  );
 
   return {
     ...result,
-    branches: result.data ?? [],
+    branches: result.data?.items ?? [],
   };
 }
 

@@ -1,13 +1,13 @@
-import { apiRequest, apiRoutes, executeApiOperation } from "../api";
+import { executeApiOperation } from "../api";
 import type { BackendList } from "../admin/types";
 import type { Branch, BranchService, BranchServiceCategory, BranchStaff } from "./types";
 
 export const branchesService = {
-  list: () =>
-    apiRequest<Branch[]>({
-      method: "GET",
-      url: apiRoutes.catalog.branches,
-    }),
+  // Public browse. Uses the canonical catalog operation so tests catch a route
+  // rename and the generic client applies the same defaults every other
+  // read shares (typed response, cancellable signal via config).
+  list: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<Branch>>("GET /api/v1/branches", { query }),
   detail: (branchId: string) =>
     executeApiOperation<Branch>("GET /api/v1/branches/{branchId}", { path: { branchId } }),
   serviceCategories: (branchId: string) =>
