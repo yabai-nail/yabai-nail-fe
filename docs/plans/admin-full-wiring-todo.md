@@ -132,7 +132,7 @@ grep -roh -E "adminService\.[a-zA-Z]+" src/components src/app | sort -u | wc -l
 
 ## Phase 5 — Payments extras
 
-- [ ] **T5.1** Wire payment-quote
+- [x] **T5.1** Wire payment-quote — Phase 5 done
   - Acceptance: trước "Xác nhận thanh toán", gọi `requestAppointmentPaymentQuote` với line items → hiển thị breakdown BE; nút confirm gửi `recordAppointmentPayment` với quote id/version.
   - Verify: hai bước, PaymentQuote ghi + Payment ghi trong DB.
   - Files: `AdminPayments/component.tsx`, `PaymentConfirmationDialog.tsx`, `payment-state.ts`.
