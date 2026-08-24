@@ -6,6 +6,7 @@ import {
   Cog6ToothIcon,
   HomeIcon,
   PaintBrushIcon,
+  StarIcon,
   UserGroupIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -22,6 +23,7 @@ export type AdminRoute = {
     | "payments"
     | "staff"
     | "services"
+    | "reviews"
     | "reports"
     | "settings";
   readonly href: string;
@@ -96,6 +98,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Quản lý dịch vụ",
     description: "Thêm, chỉnh sửa và quản lý các dịch vụ của tiệm.",
     icon: PaintBrushIcon,
+    isAvailable: true,
+  },
+  {
+    id: "reviews",
+    href: "/admin/reviews",
+    label: "Đánh giá",
+    title: "Đánh giá của khách",
+    description: "Trả lời đánh giá và theo dõi trạng thái xử lý của từng phản hồi.",
+    icon: StarIcon,
     isAvailable: true,
   },
   {
