@@ -7,6 +7,7 @@ import {
   HomeIcon,
   PaintBrushIcon,
   StarIcon,
+  SwatchIcon,
   UserGroupIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -23,6 +24,7 @@ export type AdminRoute = {
     | "payments"
     | "staff"
     | "services"
+    | "nail-designs"
     | "reviews"
     | "reports"
     | "settings";
@@ -98,6 +100,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Quản lý dịch vụ",
     description: "Thêm, chỉnh sửa và quản lý các dịch vụ của tiệm.",
     icon: PaintBrushIcon,
+    isAvailable: true,
+  },
+  {
+    id: "nail-designs",
+    href: "/admin/nail-designs",
+    label: "Mẫu nail",
+    title: "Mẫu nail",
+    description: "Quản lý bộ sưu tập mẫu nail và duyệt đề xuất từ khách.",
+    icon: SwatchIcon,
     isAvailable: true,
   },
   {
