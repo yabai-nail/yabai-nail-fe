@@ -1,13 +1,20 @@
 import {
   BanknotesIcon,
+  BuildingStorefrontIcon,
   CalendarDaysIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
+  ClipboardDocumentListIcon,
   Cog6ToothIcon,
   HomeIcon,
+  MegaphoneIcon,
   PaintBrushIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  SwatchIcon,
   UserGroupIcon,
   UsersIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
 
@@ -22,7 +29,14 @@ export type AdminRoute = {
     | "payments"
     | "staff"
     | "services"
+    | "nail-designs"
+    | "reviews"
+    | "marketing"
     | "reports"
+    | "branches"
+    | "accounts"
+    | "operations"
+    | "audit-logs"
     | "settings";
   readonly href: string;
   readonly label: string;
@@ -99,13 +113,76 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     isAvailable: true,
   },
   {
+    id: "nail-designs",
+    href: "/admin/nail-designs",
+    label: "Mẫu nail",
+    title: "Thư viện mẫu nail",
+    description: "Quản lý mẫu nail và duyệt đề xuất từ khách/nhân viên.",
+    icon: SwatchIcon,
+    isAvailable: true,
+  },
+  {
+    id: "reviews",
+    href: "/admin/reviews",
+    label: "Đánh giá",
+    title: "Đánh giá khách hàng",
+    description: "Xem, phản hồi và xử lý đánh giá của khách.",
+    icon: StarIcon,
+    isAvailable: true,
+  },
+  {
+    id: "marketing",
+    href: "/admin/marketing",
+    label: "Marketing",
+    title: "Marketing",
+    description: "Quản lý khuyến mãi và chiến dịch thông báo.",
+    icon: MegaphoneIcon,
+    isAvailable: true,
+  },
+  {
     id: "reports",
     href: "/admin/reports",
     label: "Báo cáo",
     title: "Báo cáo",
     description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
-    isAvailable: false,
+    isAvailable: true,
+  },
+  {
+    id: "branches",
+    href: "/admin/branches",
+    label: "Chi nhánh",
+    title: "Quản lý chi nhánh",
+    description: "Thêm, chỉnh sửa và quản lý các chi nhánh của tiệm.",
+    icon: BuildingStorefrontIcon,
+    isAvailable: true,
+  },
+  {
+    id: "accounts",
+    href: "/admin/accounts",
+    label: "Tài khoản",
+    title: "Tài khoản & Cấu hình",
+    description: "Quản lý tài khoản quản trị và cấu hình hệ thống.",
+    icon: ShieldCheckIcon,
+    isAvailable: true,
+  },
+  {
+    id: "operations",
+    href: "/admin/operations",
+    label: "Vận hành",
+    title: "Vận hành",
+    description: "Hoàn tiền, duyệt nghỉ phép, check-in, thẻ thành viên, tra cứu khách.",
+    icon: WrenchScrewdriverIcon,
+    isAvailable: true,
+  },
+  {
+    id: "audit-logs",
+    href: "/admin/audit-logs",
+    label: "Nhật ký",
+    title: "Nhật ký hệ thống",
+    description: "Theo dõi nhật ký thao tác quản trị của tiệm.",
+    icon: ClipboardDocumentListIcon,
+    isAvailable: true,
   },
   {
     id: "settings",
