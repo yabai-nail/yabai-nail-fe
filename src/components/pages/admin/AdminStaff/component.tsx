@@ -7,12 +7,18 @@ import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelecti
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
-import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
+  averageCommissionRate,
+  currentMonthPeriod,
+  indexStaffPerformance,
+  type StaffPerformanceRow,
+} from "@/lib/admin-staff-performance";
+import {
   useAdminBranch,
   useAdminStaff,
+  useAdminStaffPerformance,
   type AdminStaffMember as ServerStaff,
 } from "@/service";
 import { RecentOrdersTable } from "./RecentOrdersTable";
@@ -20,9 +26,11 @@ import { StaffCreateModal } from "./StaffCreateModal";
 import { StaffDetailPanel } from "./StaffDetailPanel";
 import { StaffEditModal } from "./StaffEditModal";
 import { StaffTable } from "./StaffTable";
-import { staffMembers as fixtureStaff, type StaffMember, type StaffStatus } from "./data";
+import type { StaffMember, StaffStatus } from "./data";
 
 type StaffFilter = "all" | StaffStatus;
+
+const MISSING = "—";
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -31,37 +39,48 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-// Server → fixture. Revenue / orders / commission live in a separate
-// `useStaffCompensation` endpoint that a follow-up wires; for now zeros
-// keep the totals card additive-safe.
-function toFixtureStaff(server: ServerStaff): StaffMember {
+function formatOptionalVnd(value: number | null): string {
+  return typeof value === "number" ? formatVnd(value) : MISSING;
+}
+
+/**
+ * Roster record + that member's period row. Revenue, order count and
+ * commission live only on the staff-performance read model; the roster call
+ * carries identity and the active flag. A member with no row for the period
+ * keeps `null` money fields so the table can say so.
+ */
+function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined): StaffMember {
   const name = server.displayName || `Nhân viên #${server.id.slice(0, 6)}`;
   return {
     id: server.id,
     name,
     initials: deriveInitials(name),
     phone: server.account?.phone ?? "",
-    birthday: "",
     status: server.active ? "working" : "leave",
-    revenue: 0,
-    commissionRate: 60,
-    orders: 0,
+    revenue: performance?.revenueVnd ?? null,
+    commissionRate: performance?.commissionRate ?? null,
+    commissionAmount: performance?.commissionAmountVnd ?? null,
+    orders: performance?.orderCount ?? null,
     version: server.version,
-    branchId: server.branchId,
-    serviceIds: server.serviceIds,
   };
 }
 
 export function AdminStaffComponent() {
   const { branchId } = useAdminBranch();
+  const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
+  const performance = useAdminStaffPerformance(branchId, { period });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
-  const source = useMemo<ReadonlyArray<StaffMember>>(() => {
-    if (!data?.items) return fixtureStaff;
-    if (data.items.length === 0) return [];
-    return data.items.map(toFixtureStaff);
-  }, [data]);
+
+  const performanceById = useMemo(
+    () => indexStaffPerformance(performance.data?.rows),
+    [performance.data],
+  );
+  const source = useMemo<ReadonlyArray<StaffMember>>(
+    () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id))),
+    [data, performanceById],
+  );
 
   const [filter, setFilter] = useState<StaffFilter>("all");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -70,16 +89,47 @@ export function AdminStaffComponent() {
     [source, filter],
   );
   const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
-  const totalRevenue = source.reduce((sum, member) => sum + member.revenue, 0);
-  const totalCommission = source.reduce(
-    (sum, member) => sum + calculateCommission(member.revenue, member.commissionRate),
-    0,
-  );
+
+  const kpi = performance.data?.kpi;
+  const revenue = kpi?.revenueVnd ?? null;
+  const commission = kpi?.commissionAmountVnd ?? null;
+  const salonShare =
+    typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
+  const averageRate = averageCommissionRate(source.map((member) => member.commissionRate));
+  const workingCount = source.filter((member) => member.status === "working").length;
   const metrics = [
-    { id: "revenue", label: "Tổng doanh thu hôm nay", value: formatVnd(totalRevenue), detail: "10 đơn hàng", icon: BanknotesIcon, tone: "text-admin-accent bg-admin-soft" },
-    { id: "commission", label: "Tổng hoa hồng phải trả", value: formatVnd(totalCommission), detail: "60% / Trung bình", icon: WalletIcon, tone: "text-admin-success bg-green-50" },
-    { id: "shop", label: "Quán thực nhận hôm nay", value: formatVnd(totalRevenue - totalCommission), detail: "40% / Trung bình", icon: BuildingStorefrontIcon, tone: "text-admin-info bg-sky-50" },
-    { id: "working", label: "Nhân viên đang làm", value: "3 / 4", detail: "1 nghỉ phép", icon: UserGroupIcon, tone: "text-admin-violet bg-purple-50" },
+    {
+      id: "revenue",
+      label: `Doanh thu kỳ ${period}`,
+      value: formatOptionalVnd(revenue),
+      detail: typeof kpi?.orderCount === "number" ? `${kpi.orderCount} đơn hàng` : "Chưa có số đơn",
+      icon: BanknotesIcon,
+      tone: "text-admin-accent bg-admin-soft",
+    },
+    {
+      id: "commission",
+      label: "Tổng hoa hồng phải trả",
+      value: formatOptionalVnd(commission),
+      detail: averageRate === null ? "Chưa có tỷ lệ" : `${averageRate}% / Trung bình`,
+      icon: WalletIcon,
+      tone: "text-admin-success bg-green-50",
+    },
+    {
+      id: "shop",
+      label: "Quán thực nhận",
+      value: formatOptionalVnd(salonShare),
+      detail: `Kỳ ${period}`,
+      icon: BuildingStorefrontIcon,
+      tone: "text-admin-info bg-sky-50",
+    },
+    {
+      id: "working",
+      label: "Nhân viên đang làm",
+      value: source.length === 0 ? MISSING : `${workingCount} / ${source.length}`,
+      detail: `${source.length - workingCount} nghỉ phép`,
+      icon: UserGroupIcon,
+      tone: "text-admin-violet bg-purple-50",
+    },
   ] as const;
 
   return (
@@ -113,45 +163,62 @@ export function AdminStaffComponent() {
             </Tabs.List>
           </Tabs.ListContainer>
         </Tabs>
-        <div className="flex gap-2">
-          <Button variant="outline" className="rounded-lg border-admin-border">Hôm nay</Button>
-          <Button
-            variant="primary"
-            className="rounded-lg"
-            isDisabled={!branchId}
-            onPress={() => setIsCreateOpen(true)}
-          >
-            <PlusIcon className="size-4" />Thêm nhân viên
-          </Button>
-        </div>
+        <Button
+          variant="primary"
+          className="rounded-lg"
+          isDisabled={!branchId}
+          onPress={() => setIsCreateOpen(true)}
+        >
+          <PlusIcon className="size-4" />Thêm nhân viên
+        </Button>
       </div>
-      {isLoading ? (
-        <p className="mt-3 text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
-      ) : error ? (
-        <p className="mt-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+      {error ? (
+        <p role="alert" className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+          Không tải được danh sách nhân viên.
+        </p>
+      ) : performance.error ? (
+        <p role="alert" className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+          Không tải được doanh thu kỳ {period} — cột doanh thu và hoa hồng hiển thị “{MISSING}”.
+        </p>
       ) : null}
       <div className="mt-4 min-w-0">
-        <AdminSplitLayout
-          aside={
-            selected ? (
-              <StaffDetailPanel
-                member={selected}
-                branchId={branchId}
-                onEdit={selected.version !== undefined ? () => setEditing(selected) : undefined}
-              />
-            ) : (
-              <AdminEmptySelection
-                title="Không có nhân viên"
-                description="Thay đổi bộ lọc để xem thông tin nhân viên."
-              />
-            )
-          }
-        >
-          <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Content className="min-w-0 p-0"><StaffTable staff={visibleStaff} selectedId={selected?.id ?? null} onSelect={setSelectedId} /></Card.Content>
+        {isLoading ? (
+          <p className="py-6 text-center text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+        ) : source.length === 0 ? (
+          <Card className="rounded-lg border-admin-border bg-admin-surface shadow-none">
+            <Card.Content className="p-12 text-center">
+              <h2 className="font-bold">Chưa có nhân viên</h2>
+              <p className="mt-2 text-sm text-admin-muted">
+                {error ? "Thử tải lại trang." : "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng."}
+              </p>
+            </Card.Content>
           </Card>
-          <RecentOrdersTable />
-        </AdminSplitLayout>
+        ) : (
+          <AdminSplitLayout
+            aside={
+              selected ? (
+                <StaffDetailPanel
+                  member={selected}
+                  branchId={branchId}
+                  period={period}
+                  onEdit={() => setEditing(selected)}
+                />
+              ) : (
+                <AdminEmptySelection
+                  title="Không có nhân viên"
+                  description="Thay đổi bộ lọc để xem thông tin nhân viên."
+                />
+              )
+            }
+          >
+            <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+              <Card.Content className="min-w-0 p-0"><StaffTable staff={visibleStaff} selectedId={selected?.id ?? null} onSelect={setSelectedId} /></Card.Content>
+            </Card>
+            {selected && branchId ? (
+              <RecentOrdersTable branchId={branchId} staffId={selected.id} staffName={selected.name} />
+            ) : null}
+          </AdminSplitLayout>
+        )}
       </div>
       {isCreateOpen && branchId ? (
         <StaffCreateModal
