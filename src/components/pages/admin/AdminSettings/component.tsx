@@ -6,13 +6,17 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
-import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
-import { useAdminBranch, useAdminStaff } from "@/service";
+import {
+  averageCommissionRate,
+  currentMonthPeriod,
+  indexStaffPerformance,
+} from "@/lib/admin-staff-performance";
+import { useAdminBranch, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
-import { commissionPolicies as fixturePolicies, type CommissionPolicy } from "./data";
+import type { CommissionPolicy } from "./data";
 
 const settingsTabs = [
   { id: "overview", label: "Tổng quan" },
@@ -25,6 +29,16 @@ const settingsTabs = [
   { id: "backup", label: "Sao lưu dữ liệu" },
 ] as const;
 
+const MISSING = "—";
+
+// `account.role` uses the same vocabulary as the admin session. Only a role
+// above plain staff earns a chip; an unknown value is dropped rather than
+// guessed at.
+const ROLE_LABELS: Record<string, string> = {
+  OWNER: "Chủ chuỗi",
+  MANAGER: "Quản lý",
+};
+
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -32,56 +46,82 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
+function formatOptionalVnd(value: number | null): string {
+  return typeof value === "number" ? formatVnd(value) : MISSING;
+}
+
 export function AdminSettingsComponent() {
   const { branchId } = useAdminBranch();
   const [activeTab, setActiveTab] = useState("commission");
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [showRate, setShowRate] = useState(true);
+  const period = useMemo(() => currentMonthPeriod(new Date()), []);
 
-  // Wire the commission tab against the real staff roster. Rate + revenue
-  // are not exposed on the staff endpoint — those live on the per-staff
-  // `useStaffCompensation` reads and would need N parallel calls to fill
-  // the table. Fixture values remain until a batched compensation endpoint
-  // (or a client-side fan-out) lands. Names / status / count are real.
-  const { data: staffData, error: staffError } = useAdminStaff();
+  // The commission table is the staff roster joined with the branch
+  // staff-performance read model: the roster carries identity, role and the
+  // active flag, the read model carries rate, revenue and commission for the
+  // period. Two requests, no per-staff fan-out.
+  const staff = useAdminStaff();
+  const performance = useAdminStaffPerformance(branchId, { period });
   const commissionPolicies = useMemo<ReadonlyArray<CommissionPolicy>>(() => {
-    const staffItems = staffData?.items;
-    if (!staffItems) return fixturePolicies;
-    if (staffItems.length === 0) return [];
-    return staffItems.map((staff) => {
-      // Preserve any existing fixture rate for a matching staff id so the
-      // commission table's numbers stay coherent for design review; new
-      // staff default to 40%.
-      const existing = fixturePolicies.find((p) => p.staffId === staff.id);
-      const name = staff.displayName || `Nhân viên #${staff.id.slice(0, 6)}`;
+    const byStaffId = indexStaffPerformance(performance.data?.rows);
+    return (staff.data?.items ?? []).map((member) => {
+      const row = byStaffId.get(member.id);
+      const name = member.displayName || `Nhân viên #${member.id.slice(0, 6)}`;
       return {
-        id: existing?.id ?? `policy-${staff.id}`,
-        staffId: staff.id,
+        id: `policy-${member.id}`,
+        staffId: member.id,
         name,
         initials: deriveInitials(name),
-        role: existing?.role,
-        status: staff.active ? "working" : "leave",
-        rate: existing?.rate ?? 40,
-        previousRate: existing?.previousRate,
-        effectiveFrom: existing?.effectiveFrom ?? "01/01/2026",
-        personalRevenue: existing?.personalRevenue ?? 0,
+        roleLabel: ROLE_LABELS[member.account?.role?.toUpperCase() ?? ""] ?? null,
+        status: member.active ? "working" : "leave",
+        rate: row?.commissionRate ?? null,
+        personalRevenue: row?.revenueVnd ?? null,
+        payout: row?.commissionAmountVnd ?? null,
       } satisfies CommissionPolicy;
     });
-  }, [staffData]);
+  }, [staff.data, performance.data]);
 
-  const totalRevenue = commissionPolicies.reduce((sum, policy) => sum + policy.personalRevenue, 0);
-  const totalCommission = commissionPolicies.reduce(
-    (sum, policy) => sum + calculateCommission(policy.personalRevenue, policy.rate),
-    0,
-  );
-  const averageRate = commissionPolicies.length === 0
-    ? 0
-    : commissionPolicies.reduce((sum, policy) => sum + policy.rate, 0) / commissionPolicies.length;
+  const kpi = performance.data?.kpi;
+  const revenue = kpi?.revenueVnd ?? null;
+  const commission = kpi?.commissionAmountVnd ?? null;
+  const salonShare =
+    typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
+  const averageRate = averageCommissionRate(commissionPolicies.map((policy) => policy.rate));
+  const workingCount = commissionPolicies.filter((policy) => policy.status === "working").length;
   const metrics = [
-    { id: "staff", label: "Tổng nhân viên", value: String(commissionPolicies.length), detail: "Đang làm việc: 3", icon: UserGroupIcon, tone: "bg-admin-soft text-admin-accent" },
-    { id: "rate", label: "Tỷ lệ hoa hồng TB", value: `${averageRate}%`, detail: "Trung bình", icon: BanknotesIcon, tone: "bg-amber-50 text-admin-warning" },
-    { id: "commission", label: "Tổng tiền hoa hồng tháng này", value: formatVnd(totalCommission), detail: "05/2025", icon: WalletIcon, tone: "bg-green-50 text-admin-success" },
-    { id: "shop", label: "Phần doanh thu thuộc tiệm", value: formatVnd(totalRevenue - totalCommission), detail: "05/2025", icon: BuildingStorefrontIcon, tone: "bg-purple-50 text-admin-violet" },
+    {
+      id: "staff",
+      label: "Tổng nhân viên",
+      value: commissionPolicies.length === 0 ? MISSING : String(commissionPolicies.length),
+      detail: `Đang làm việc: ${workingCount}`,
+      icon: UserGroupIcon,
+      tone: "bg-admin-soft text-admin-accent",
+    },
+    {
+      id: "rate",
+      label: "Tỷ lệ hoa hồng TB",
+      value: averageRate === null ? MISSING : `${averageRate}%`,
+      detail: "Trung bình",
+      icon: BanknotesIcon,
+      tone: "bg-amber-50 text-admin-warning",
+    },
+    {
+      id: "commission",
+      label: "Tổng tiền hoa hồng kỳ này",
+      value: formatOptionalVnd(commission),
+      detail: period,
+      icon: WalletIcon,
+      tone: "bg-green-50 text-admin-success",
+    },
+    {
+      id: "shop",
+      label: "Phần doanh thu thuộc tiệm",
+      value: formatOptionalVnd(salonShare),
+      detail: period,
+      icon: BuildingStorefrontIcon,
+      tone: "bg-purple-50 text-admin-violet",
+    },
   ] as const;
 
   return (
@@ -110,8 +150,11 @@ export function AdminSettingsComponent() {
       ) : (
         <CommissionSettings
           metrics={metrics}
+          period={period}
           policies={commissionPolicies}
-          hasStaffError={Boolean(staffError)}
+          isLoading={staff.isLoading}
+          staffError={Boolean(staff.error)}
+          performanceError={Boolean(performance.error)}
           autoCalculate={autoCalculate}
           showRate={showRate}
           onAutoCalculateChange={setAutoCalculate}
@@ -131,10 +174,24 @@ type CommissionMetric = {
   readonly tone: string;
 };
 
-function CommissionSettings({ metrics, policies, hasStaffError, autoCalculate, showRate, onAutoCalculateChange, onShowRateChange }: Readonly<{
+function CommissionSettings({
+  metrics,
+  period,
+  policies,
+  isLoading,
+  staffError,
+  performanceError,
+  autoCalculate,
+  showRate,
+  onAutoCalculateChange,
+  onShowRateChange,
+}: Readonly<{
   metrics: ReadonlyArray<CommissionMetric>;
+  period: string;
   policies: ReadonlyArray<CommissionPolicy>;
-  hasStaffError: boolean;
+  isLoading: boolean;
+  staffError: boolean;
+  performanceError: boolean;
   autoCalculate: boolean;
   showRate: boolean;
   onAutoCalculateChange: (value: boolean) => void;
@@ -144,7 +201,10 @@ function CommissionSettings({ metrics, policies, hasStaffError, autoCalculate, s
     <>
       <section className="mt-4" aria-labelledby="commission-settings-heading">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div><h2 id="commission-settings-heading" className="text-lg font-bold">Nhân viên & Cài đặt hoa hồng</h2><p className="mt-1 text-sm text-admin-muted">Cài đặt tỷ lệ hoa hồng riêng cho từng nhân viên theo năng lực.</p></div>
+          <div>
+            <h2 id="commission-settings-heading" className="text-lg font-bold">Nhân viên &amp; Cài đặt hoa hồng</h2>
+            <p className="mt-1 text-sm text-admin-muted">Tỷ lệ, doanh thu và hoa hồng của kỳ {period}.</p>
+          </div>
           <Button variant="outline" className="rounded-lg border-admin-border">Hướng dẫn tính hoa hồng</Button>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -158,21 +218,33 @@ function CommissionSettings({ metrics, policies, hasStaffError, autoCalculate, s
       <div className="mt-4">
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên & tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
+            <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
             <Card.Content className="min-w-0 p-0 pt-2">
-              {hasStaffError ? (
-                <p className="mx-4 mb-2 text-xs text-admin-danger">
-                  Không tải được danh sách nhân viên — hiển thị dữ liệu mẫu.
+              {staffError ? (
+                <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+                  Không tải được danh sách nhân viên.
+                </p>
+              ) : performanceError ? (
+                <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+                  Không tải được số liệu kỳ {period} — cột tỷ lệ, doanh thu và hoa hồng hiển thị “{MISSING}”.
                 </p>
               ) : null}
-              <CommissionTable policies={policies} />
+              {isLoading ? (
+                <p className="px-4 pb-4 text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+              ) : policies.length === 0 ? (
+                <p className="px-4 pb-4 text-xs text-admin-muted">
+                  {staffError ? "Thử tải lại trang." : "Chi nhánh này chưa có nhân viên nào."}
+                </p>
+              ) : (
+                <CommissionTable policies={policies} />
+              )}
               <CommissionGuide />
             </Card.Content>
           </Card>
         </AdminSplitLayout>
       </div>
       <Card className="mt-4 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center"><div className="mr-auto"><h2 className="font-bold">Cài đặt chung</h2><p className="mt-1 text-xs text-admin-muted">Quy tắc làm tròn tiền hoa hồng: Làm tròn đến đơn vị 100đ</p></div><LabeledSwitch label="Tự động tính hoa hồng khi thanh toán đơn" value={autoCalculate} onChange={onAutoCalculateChange} /><LabeledSwitch label="Hiển thị % hoa hồng với nhân viên" value={showRate} onChange={onShowRateChange} /></Card.Content>
+        <Card.Content className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center"><div className="mr-auto"><h2 className="font-bold">Cài đặt chung</h2><p className="mt-1 text-xs text-admin-muted">Hai công tắc dưới đây chỉ áp dụng trên trình duyệt này — chưa có API cấu hình hoa hồng theo chi nhánh.</p></div><LabeledSwitch label="Tự động tính hoa hồng khi thanh toán đơn" value={autoCalculate} onChange={onAutoCalculateChange} /><LabeledSwitch label="Hiển thị % hoa hồng với nhân viên" value={showRate} onChange={onShowRateChange} /></Card.Content>
       </Card>
     </>
   );
