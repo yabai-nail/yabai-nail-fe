@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AdminPayments } from "@/components/pages/admin/AdminPayments";
 
 export const metadata: Metadata = {
@@ -7,6 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPaymentsPage() {
-  return <AdminPayments />;
+  // useSearchParams() inside AdminPayments needs a boundary or the static
+  // prerender bails out at build time.
+  return (
+    <Suspense>
+      <AdminPayments />
+    </Suspense>
+  );
 }
-
