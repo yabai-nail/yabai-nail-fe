@@ -6,6 +6,7 @@ import {
   ClipboardDocumentListIcon,
   Cog6ToothIcon,
   HomeIcon,
+  MegaphoneIcon,
   PaintBrushIcon,
   StarIcon,
   UserGroupIcon,
@@ -25,6 +26,7 @@ export type AdminRoute = {
     | "staff"
     | "services"
     | "reviews"
+    | "marketing"
     | "reports"
     | "audit-logs"
     | "settings";
@@ -109,6 +111,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Đánh giá khách hàng",
     description: "Xem, phản hồi và xử lý đánh giá của khách.",
     icon: StarIcon,
+    isAvailable: true,
+  },
+  {
+    id: "marketing",
+    href: "/admin/marketing",
+    label: "Marketing",
+    title: "Marketing",
+    description: "Quản lý khuyến mãi và chiến dịch thông báo.",
+    icon: MegaphoneIcon,
     isAvailable: true,
   },
   {
