@@ -14,6 +14,7 @@ import {
   SwatchIcon,
   UserGroupIcon,
   UsersIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
 
@@ -34,6 +35,7 @@ export type AdminRoute = {
     | "reports"
     | "branches"
     | "accounts"
+    | "operations"
     | "audit-logs"
     | "settings";
   readonly href: string;
@@ -162,6 +164,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Tài khoản & Cấu hình",
     description: "Quản lý tài khoản quản trị và cấu hình hệ thống.",
     icon: ShieldCheckIcon,
+    isAvailable: true,
+  },
+  {
+    id: "operations",
+    href: "/admin/operations",
+    label: "Vận hành",
+    title: "Vận hành",
+    description: "Hoàn tiền, duyệt nghỉ phép, check-in, thẻ thành viên, tra cứu khách.",
+    icon: WrenchScrewdriverIcon,
     isAvailable: true,
   },
   {
