@@ -42,7 +42,13 @@ export function MetricCard({ metric }: Readonly<{ metric: DashboardMetric }>) {
         </div>
         <div className="mt-4 flex items-center justify-between gap-3 text-xs text-admin-muted">
           <span>{metric.detail}</span>
-          {metric.trend ? <span className="font-bold text-admin-success">↑ {metric.trend}</span> : null}
+          {metric.trend ? (
+            <span
+              className={`font-bold ${metric.trendDirection === "down" ? "text-danger" : "text-admin-success"}`}
+            >
+              {metric.trendDirection === "down" ? "↓" : "↑"} {metric.trend}
+            </span>
+          ) : null}
         </div>
       </Card.Content>
     </Card>
