@@ -7,6 +7,7 @@ import {
   HomeIcon,
   MegaphoneIcon,
   PaintBrushIcon,
+  ShieldCheckIcon,
   StarIcon,
   SwatchIcon,
   UserGroupIcon,
@@ -29,7 +30,8 @@ export type AdminRoute = {
     | "campaigns"
     | "reviews"
     | "reports"
-    | "settings";
+    | "settings"
+    | "system";
   readonly href: string;
   readonly label: string;
   readonly title: string;
@@ -147,6 +149,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Cài đặt",
     description: "Quản lý và thiết lập cho tiệm nail của bạn.",
     icon: Cog6ToothIcon,
+    isAvailable: true,
+  },
+  {
+    id: "system",
+    href: "/admin/system",
+    label: "Hệ thống",
+    title: "Quản trị hệ thống",
+    description: "Cấu hình hệ thống, tích điểm, tài khoản quản trị và nhật ký.",
+    icon: ShieldCheckIcon,
     isAvailable: true,
   },
 ] as const;
