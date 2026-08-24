@@ -1,5 +1,6 @@
 import {
   BanknotesIcon,
+  BuildingStorefrontIcon,
   CalendarDaysIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
@@ -31,6 +32,7 @@ export type AdminRoute = {
     | "reviews"
     | "marketing"
     | "reports"
+    | "branches"
     | "accounts"
     | "audit-logs"
     | "settings";
@@ -142,6 +144,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Báo cáo",
     description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
+    isAvailable: true,
+  },
+  {
+    id: "branches",
+    href: "/admin/branches",
+    label: "Chi nhánh",
+    title: "Quản lý chi nhánh",
+    description: "Thêm, chỉnh sửa và quản lý các chi nhánh của tiệm.",
+    icon: BuildingStorefrontIcon,
     isAvailable: true,
   },
   {
