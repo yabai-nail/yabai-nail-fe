@@ -5,6 +5,7 @@ import {
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
   HomeIcon,
+  MegaphoneIcon,
   PaintBrushIcon,
   StarIcon,
   SwatchIcon,
@@ -25,6 +26,7 @@ export type AdminRoute = {
     | "staff"
     | "services"
     | "nail-designs"
+    | "campaigns"
     | "reviews"
     | "reports"
     | "settings";
@@ -109,6 +111,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Mẫu nail",
     description: "Quản lý bộ sưu tập mẫu nail và duyệt đề xuất từ khách.",
     icon: SwatchIcon,
+    isAvailable: true,
+  },
+  {
+    id: "campaigns",
+    href: "/admin/campaigns",
+    label: "Chiến dịch",
+    title: "Chiến dịch thông báo",
+    description: "Tạo chiến dịch gửi thông báo, xem trước tập khách và theo dõi chỉ số.",
+    icon: MegaphoneIcon,
     isAvailable: true,
   },
   {
