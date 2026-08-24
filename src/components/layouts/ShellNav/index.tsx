@@ -3,7 +3,13 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { _ShellNav, type ShellNavRoute } from "./component";
+import { CustomerLoginDialog } from "@/components/overlays/auth/CustomerLoginDialog";
+import { useCustomerAuth } from "@/service";
+import {
+  _ShellNav,
+  type ShellNavAccount,
+  type ShellNavRoute,
+} from "./component";
 
 const ROUTES = [
   { id: "home", href: "/", label: "Trang chủ" },
@@ -28,7 +34,10 @@ const isCurrentPath = (pathname: string, href: string) =>
 export const ShellNav = () => {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
+  const { customer, status, logout } = useCustomerAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const isThemeReady = useSyncExternalStore(
     subscribeToHydration,
     getClientHydrationSnapshot,
@@ -53,23 +62,53 @@ export const ShellNav = () => {
     setIsMenuOpen(false);
   }, []);
 
+  const openLogin = useCallback(() => {
+    setIsLoginOpen(true);
+  }, []);
+
+  const signOut = useCallback(() => {
+    setIsSigningOut(true);
+    // `logout` revokes server-side then clears the local store; it resolves
+    // even when the revoke fails, so the flag always comes back down.
+    void logout().finally(() => setIsSigningOut(false));
+  }, [logout]);
+
+  // The nav renders on the server too, where `status` is always `restoring`;
+  // keeping that its own case means no sign-in button is painted before the
+  // stored refresh token has had its chance.
+  const account: ShellNavAccount =
+    status === "authenticated"
+      ? {
+          status: "authenticated",
+          label: customer?.displayName?.trim() || customer?.phone || "Tài khoản",
+          phone: customer?.phone ?? "",
+          isSigningOut,
+        }
+      : { status: status === "anonymous" ? "anonymous" : "restoring" };
+
   return (
-    <_ShellNav
-      props={{
-        brand: "YABAI",
-        tagline: "Nail atelier · Sài Gòn",
-        routes,
-        bookingHref: BOOKING_HREF,
-        bookingLabel: "Đặt lịch",
-        isBookingCurrent: isCurrentPath(pathname, "/booking"),
-        isDark,
-        isThemeReady,
-        themeLabel: isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối",
-        isMenuOpen,
-        menuLabel: isMenuOpen ? "Đóng menu" : "Mở menu",
-      }}
-      on={{ toggleTheme, toggleMenu, closeMenu }}
-    />
+    <>
+      <_ShellNav
+        props={{
+          brand: "YABAI",
+          tagline: "Nail atelier · Sài Gòn",
+          routes,
+          bookingHref: BOOKING_HREF,
+          bookingLabel: "Đặt lịch",
+          isBookingCurrent: isCurrentPath(pathname, "/booking"),
+          isDark,
+          isThemeReady,
+          themeLabel: isDark
+            ? "Chuyển sang giao diện sáng"
+            : "Chuyển sang giao diện tối",
+          isMenuOpen,
+          menuLabel: isMenuOpen ? "Đóng menu" : "Mở menu",
+          account,
+        }}
+        on={{ toggleTheme, toggleMenu, closeMenu, openLogin, signOut }}
+      />
+      <CustomerLoginDialog isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+    </>
   );
 };
 
