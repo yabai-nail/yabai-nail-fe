@@ -118,7 +118,7 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Báo cáo",
     description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     id: "audit-logs",
