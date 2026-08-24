@@ -3,6 +3,7 @@ import {
   CalendarDaysIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
+  ClipboardDocumentListIcon,
   Cog6ToothIcon,
   HomeIcon,
   PaintBrushIcon,
@@ -23,6 +24,7 @@ export type AdminRoute = {
     | "staff"
     | "services"
     | "reports"
+    | "audit-logs"
     | "settings";
   readonly href: string;
   readonly label: string;
@@ -106,6 +108,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
     isAvailable: false,
+  },
+  {
+    id: "audit-logs",
+    href: "/admin/audit-logs",
+    label: "Nhật ký",
+    title: "Nhật ký hệ thống",
+    description: "Theo dõi nhật ký thao tác quản trị của tiệm.",
+    icon: ClipboardDocumentListIcon,
+    isAvailable: true,
   },
   {
     id: "settings",
