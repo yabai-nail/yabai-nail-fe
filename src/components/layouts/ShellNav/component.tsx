@@ -4,7 +4,6 @@ import {
   SunIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { LoginModal } from "@/components/overlays/auth/LoginModal";
 import Link from "next/link";
 
 /** One destination shown in the primary navigation. */
@@ -108,8 +107,6 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
           )}
         </button>
 
-        <LoginModal triggerClassName="hidden min-h-11 items-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex" />
-
         <Link
           href={props.bookingHref}
           aria-current={props.isBookingCurrent ? "page" : undefined}
@@ -153,10 +150,6 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
               {route.label}
             </Link>
           ))}
-          <LoginModal
-            triggerClassName="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
-            onDismiss={on.closeMenu}
-          />
           <Link
             href={props.bookingHref}
             aria-current={props.isBookingCurrent ? "page" : undefined}
