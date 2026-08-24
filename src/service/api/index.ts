@@ -7,7 +7,12 @@ export {
   setCustomerAccessToken,
   getAccessTokenForUrl,
 } from "./auth-token";
-export { API_BASE_URL, apiClient, createApiClient } from "./client";
+export {
+  API_BASE_URL,
+  apiClient,
+  createApiClient,
+  setAdminTokenRefresher,
+} from "./client";
 export {
   ApiClientError,
   normalizeApiError,

@@ -10,6 +10,7 @@ import { Avatar, Badge, Button, Drawer, Dropdown } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BranchSelector } from "@/components/blocks/admin/BranchSelector";
+import { useAuth, type AdminRole } from "@/service";
 import { getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
 
@@ -31,26 +32,50 @@ function NotificationButton() {
   );
 }
 
+const ROLE_LABELS: Record<AdminRole, string> = {
+  OWNER: "Chủ chuỗi",
+  MANAGER: "Quản lý cửa hàng",
+  STAFF: "Nhân viên",
+};
+
+function initialsOf(displayName: string): string {
+  const parts = displayName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  const last = parts[parts.length - 1];
+  return `${parts[0][0] ?? ""}${parts.length > 1 ? (last[0] ?? "") : ""}`.toUpperCase();
+}
+
 function OwnerMenu() {
+  const { user, logout } = useAuth();
+  // The gate guarantees a user here, but the shell must not crash if a render
+  // slips through during sign-out.
+  const displayName = user?.displayName ?? "Quản trị";
+  const roleLabel = user ? ROLE_LABELS[user.role] : "";
+
   return (
     <Dropdown>
       <Dropdown.Trigger className="flex min-h-11 items-center gap-3 rounded-lg px-2 text-left outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
         <Avatar size="sm" color="accent">
-          <Avatar.Fallback>CT</Avatar.Fallback>
+          <Avatar.Fallback>{initialsOf(displayName)}</Avatar.Fallback>
         </Avatar>
         <span className="hidden leading-tight sm:block">
-          <span className="block text-sm font-semibold text-admin-ink">Chủ tiệm</span>
-          <span className="mt-0.5 block text-xs text-admin-muted">Quản lý cửa hàng</span>
+          <span className="block text-sm font-semibold text-admin-ink">{displayName}</span>
+          <span className="mt-0.5 block text-xs text-admin-muted">{roleLabel}</span>
         </span>
         <ChevronDownIcon aria-hidden="true" className="hidden size-4 text-admin-muted sm:block" />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="admin-shell">
-        <Dropdown.Menu aria-label="Tài khoản chủ tiệm">
-          <Dropdown.Item id="profile" textValue="Hồ sơ cửa hàng">
-            Hồ sơ cửa hàng
-          </Dropdown.Item>
+        <Dropdown.Menu
+          aria-label="Tài khoản quản trị"
+          onAction={(key) => {
+            if (key === "logout") logout();
+          }}
+        >
           <Dropdown.Item id="settings" textValue="Cài đặt tài khoản">
             Cài đặt tài khoản
+          </Dropdown.Item>
+          <Dropdown.Item id="logout" textValue="Đăng xuất">
+            Đăng xuất
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>

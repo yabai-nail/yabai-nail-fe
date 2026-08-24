@@ -91,18 +91,41 @@ export interface AccountMergeResult {
 
 // -- Admin auth mutations + bootstrap ------------------------------------------
 
+/**
+ * `GET /admin/auth/session` returns the phone masked and never returns tokens —
+ * it is the reload bootstrap, not a login response. Kept separate from
+ * `AuthenticatedAdmin` so the two shapes cannot be confused at a call site.
+ */
+export interface AdminSessionUser {
+  readonly id: string;
+  readonly displayName: string;
+  readonly phoneMasked: string;
+  readonly role: AdminRole;
+  readonly locale: string;
+  readonly branchIds: string[];
+  readonly permissions: string[];
+  readonly capabilities: string[];
+}
+
 export interface AdminSessionSummary {
-  readonly sessionId: string;
-  readonly user: AuthenticatedAdmin;
-  readonly issuedAt?: string;
-  readonly expiresAt?: string;
-  readonly branchId?: string | null;
-  readonly [field: string]: unknown;
+  readonly user: AdminSessionUser;
+  readonly session: {
+    readonly id: string | null;
+    readonly expiresAt: string | null;
+    readonly activeBranchId: string | null;
+  };
 }
 
 export interface AdminSessionBranchInput {
   readonly branchId: string;
   readonly [field: string]: unknown;
+}
+
+/** Branch switch mints a new access token carrying the selected branch. */
+export interface AdminBranchSwitchResult {
+  readonly accessToken: string;
+  readonly expiresIn: number;
+  readonly selectedBranchId: string;
 }
 
 export interface AdminPasswordChangeInput {
