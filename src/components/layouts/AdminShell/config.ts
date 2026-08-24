@@ -8,6 +8,7 @@ import {
   HomeIcon,
   MegaphoneIcon,
   PaintBrushIcon,
+  ShieldCheckIcon,
   StarIcon,
   SwatchIcon,
   UserGroupIcon,
@@ -30,6 +31,7 @@ export type AdminRoute = {
     | "reviews"
     | "marketing"
     | "reports"
+    | "accounts"
     | "audit-logs"
     | "settings";
   readonly href: string;
@@ -140,6 +142,15 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Báo cáo",
     description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
+    isAvailable: true,
+  },
+  {
+    id: "accounts",
+    href: "/admin/accounts",
+    label: "Tài khoản",
+    title: "Tài khoản & Cấu hình",
+    description: "Quản lý tài khoản quản trị và cấu hình hệ thống.",
+    icon: ShieldCheckIcon,
     isAvailable: true,
   },
   {
