@@ -14,7 +14,7 @@ import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerEditModal } from "./CustomerEditModal";
 import { CustomerTable } from "./CustomerTable";
-import { customers as fixtureCustomers, type Customer, type CustomerRank, type CustomerSegment } from "./data";
+import type { Customer, CustomerRank, CustomerSegment } from "./data";
 
 type CustomerFilter = "all" | CustomerSegment;
 
@@ -26,13 +26,13 @@ function deriveInitials(name: string): string {
 }
 
 /**
- * Server → fixture adapter. The API only exposes a small typed head
- * (`id`, `displayName`, `phone`, `status`, …); the fixture display carries
- * spend, points, birthdays and other rich fields the backend has not yet
- * standardised. We fill best-effort defaults and pass through anything the
- * backend happens to have sent via the `[field: string]: unknown` escape.
+ * Server row → the shape this screen renders. The API only exposes a small
+ * typed head (`id`, `displayName`, `phone`, `status`, …); the richer display
+ * fields (spend, points, birthday) are read best-effort through the
+ * `[field: string]: unknown` escape and fall back to blank rather than to an
+ * invented value.
  */
-function toFixtureCustomer(server: AdminCustomer): Customer {
+function toCustomerRow(server: AdminCustomer): Customer {
   const name = server.displayName ?? server.name ?? `Khách #${server.id.slice(0, 6)}`;
   const record = server as unknown as Record<string, unknown>;
   const readNumber = (key: string): number => {
@@ -71,14 +71,13 @@ export function AdminCustomersComponent() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
-  // Fixture is the fallback while there is no branch (unauthenticated), the
-  // request is in flight, or the endpoint errored. This keeps the layout
-  // useful for design review; a real branch replaces the sample rows.
-  const source = useMemo<ReadonlyArray<Customer>>(() => {
-    if (!data?.items) return fixtureCustomers;
-    if (data.items.length === 0) return [];
-    return data.items.map(toFixtureCustomer);
-  }, [data]);
+  // No fixture fallback: with no branch, an in-flight request or a failed one
+  // the list stays empty and the screen says so. A sample roster that looks
+  // exactly like a real one is worse than an error message.
+  const source = useMemo<ReadonlyArray<Customer>>(
+    () => (data?.items ?? []).map(toCustomerRow),
+    [data],
+  );
 
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [query, setQuery] = useState("");
@@ -128,39 +127,56 @@ export function AdminCustomersComponent() {
           </Button>
         </div>
       </div>
-      {isLoading ? (
-        <p className="mb-3 text-xs text-admin-muted">Đang tải danh sách khách hàng…</p>
-      ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+      {error ? (
+        <p role="alert" className="mb-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+          Không tải được danh sách khách hàng.
+        </p>
       ) : null}
-      <AdminSplitLayout
-        aside={
-          selectedCustomer ? (
-            <CustomerDetailPanel
-              customer={selectedCustomer}
-              branchId={branchId}
-              onEdit={
-                branchId && selectedCustomer.version !== undefined
-                  ? () => {
-                      setEditError(null);
-                      setIsEditOpen(true);
-                    }
-                  : undefined
-              }
-            />
-          ) : (
-            <AdminEmptySelection
-              title="Không có khách hàng"
-              description="Thay đổi từ khóa hoặc nhóm khách hàng để xem chi tiết."
-            />
-          )
-        }
-      >
-        <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-          <Card.Content className="min-w-0 p-0"><CustomerTable customers={filteredCustomers} selectedId={selectedCustomer?.id ?? null} onSelect={setSelectedId} /></Card.Content>
-          <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
+      {isLoading ? (
+        <p className="py-6 text-center text-xs text-admin-muted">Đang tải danh sách khách hàng…</p>
+      ) : source.length === 0 ? (
+        <Card className="rounded-lg border-admin-border bg-admin-surface shadow-none">
+          <Card.Content className="p-12 text-center">
+            <h2 className="font-bold">Chưa có khách hàng</h2>
+            <p className="mt-2 text-sm text-admin-muted">
+              {error
+                ? "Thử tải lại trang."
+                : branchId
+                  ? "Thêm khách hàng đầu tiên để bắt đầu theo dõi lịch sử và điểm tích luỹ."
+                  : "Chọn chi nhánh để xem danh sách khách hàng."}
+            </p>
+          </Card.Content>
         </Card>
-      </AdminSplitLayout>
+      ) : (
+        <AdminSplitLayout
+          aside={
+            selectedCustomer ? (
+              <CustomerDetailPanel
+                customer={selectedCustomer}
+                branchId={branchId}
+                onEdit={
+                  branchId && selectedCustomer.version !== undefined
+                    ? () => {
+                        setEditError(null);
+                        setIsEditOpen(true);
+                      }
+                    : undefined
+                }
+              />
+            ) : (
+              <AdminEmptySelection
+                title="Không có khách hàng"
+                description="Thay đổi từ khóa hoặc nhóm khách hàng để xem chi tiết."
+              />
+            )
+          }
+        >
+          <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+            <Card.Content className="min-w-0 p-0"><CustomerTable customers={filteredCustomers} selectedId={selectedCustomer?.id ?? null} onSelect={setSelectedId} /></Card.Content>
+            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
+          </Card>
+        </AdminSplitLayout>
+      )}
       {isCreateOpen && branchId ? (
         <CustomerCreateModal
           branchId={branchId}
