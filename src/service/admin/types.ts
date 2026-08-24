@@ -9,17 +9,48 @@ export interface BackendList<T> {
   readonly pageInfo?: PageInfo;
 }
 
+export interface AdminDashboardDataFreshness {
+  readonly projectionThrough?: string;
+  readonly lagSeconds?: number;
+  readonly isProvisional?: boolean;
+  readonly reconciledThroughBusinessDate?: string;
+  readonly qualityFlags?: ReadonlyArray<string>;
+}
+
+// Shape observed on https://apiyabai.tedo.vn/api/v1/admin/branches/{branchId}/dashboard.
+// Everything past the four appointment counters landed with BE-GAP-003; they stay
+// optional so a branch served by an older deploy still type-checks and the UI can
+// fall back to an explicit "chưa có dữ liệu" instead of a fabricated number.
+export interface AdminDashboardKpi {
+  readonly total: number;
+  readonly confirmed: number;
+  readonly inService: number;
+  readonly completed: number;
+  readonly revenueVnd?: number;
+  readonly previousRevenueVnd?: number;
+  readonly revenueChangePercent?: number | null;
+  readonly customerCount?: number;
+  readonly newCustomerCount?: number;
+  readonly workingStaffCount?: number;
+  readonly offStaffCount?: number;
+  readonly expensesVnd?: number;
+  readonly commissionVnd?: number;
+  readonly salonShareVnd?: number;
+}
+
 export interface AdminDashboardData {
   readonly localDate: string;
-  readonly kpi: {
-    readonly total: number;
-    readonly confirmed: number;
-    readonly inService: number;
-    readonly completed: number;
-  };
+  readonly currency?: string;
+  readonly branchTimeZone?: string;
+  readonly scope?: string;
+  readonly kpi: AdminDashboardKpi;
+  // The live branch has no captured payment yet, so the element contract is
+  // still unconfirmed — kept as loose records and narrowed at the render site.
+  readonly paymentMethods?: ReadonlyArray<Record<string, unknown>>;
   readonly upcoming: ReadonlyArray<AdminAppointment>;
   readonly alerts: ReadonlyArray<AdminAppointment>;
   readonly generatedAt: string;
+  readonly dataFreshness?: AdminDashboardDataFreshness;
 }
 
 export interface AdminAppointment {
@@ -390,10 +421,23 @@ export interface AdminLeaveRequestDecisionInput {
   readonly [field: string]: unknown;
 }
 
+export interface AdminStaffPerformanceKpi {
+  readonly revenueVnd?: number;
+  readonly orderCount?: number;
+  readonly commissionAmountVnd?: number;
+  readonly activeStaffCount?: number;
+}
+
 export interface AdminStaffPerformance {
   readonly branchId: string;
   readonly period: string;
+  readonly currency?: string;
+  readonly branchTimeZone?: string;
+  // Verified live: { staff: { id, displayName }, workingStatus, revenueVnd,
+  // orderCount, commissionRate, commissionAmountVnd, version }. Kept loose here
+  // because existing callers already narrow the rows themselves.
   readonly rows: ReadonlyArray<Record<string, unknown>>;
+  readonly kpi?: AdminStaffPerformanceKpi;
   readonly totals?: Readonly<Record<string, number>>;
   readonly [field: string]: unknown;
 }

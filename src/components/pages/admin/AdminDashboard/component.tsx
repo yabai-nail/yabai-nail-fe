@@ -10,47 +10,17 @@ import { MonthlySummaryPanel } from "./MonthlySummaryPanel";
 import { RevenuePanel } from "./RevenuePanel";
 import { StaffPanel } from "./StaffPanel";
 import { UtilityPanel } from "./UtilityPanel";
-import { dashboardMetrics, type DashboardMetric } from "./data";
-
-function buildAppointmentMetric(
-  base: DashboardMetric,
-  data: { total: number; confirmed: number; inService: number; completed: number } | undefined,
-  isLoading: boolean,
-  hasError: boolean,
-): DashboardMetric {
-  if (hasError) return { ...base, value: "—", detail: "Không tải được dữ liệu hôm nay" };
-  if (isLoading || !data) return { ...base, value: "…", detail: "Đang tải…" };
-
-  const pending = Math.max(0, data.total - data.confirmed - data.inService - data.completed);
-  return {
-    ...base,
-    value: String(data.total),
-    detail: `Đã xác nhận: ${data.confirmed} · Đang phục vụ: ${data.inService} · Hoàn tất: ${data.completed}${pending > 0 ? ` · Chờ: ${pending}` : ""}`,
-  };
-}
+import { buildDashboardMetrics } from "./adapters";
+import type { DashboardMetric } from "./data";
 
 export function AdminDashboardComponent() {
   const { branchId } = useAdminBranch();
   const { data, isLoading, error } = useAdminDashboard(branchId);
 
-  const metrics = useMemo<ReadonlyArray<DashboardMetric>>(() => {
-    const appointmentBase = dashboardMetrics.find((metric) => metric.id === "appointments");
-    if (!appointmentBase) return dashboardMetrics;
-
-    const liveAppointment = buildAppointmentMetric(
-      appointmentBase,
-      data?.kpi,
-      isLoading,
-      error !== undefined,
-    );
-
-    // Only the first card is wired today; revenue / customers / staff stay on
-    // fixture data until the platform exposes matching KPI endpoints. Keeping
-    // the layout intact avoids a half-empty dashboard.
-    return dashboardMetrics.map((metric) =>
-      metric.id === "appointments" ? liveAppointment : metric,
-    );
-  }, [data, isLoading, error]);
+  const metrics = useMemo<ReadonlyArray<DashboardMetric>>(
+    () => buildDashboardMetrics(data?.kpi, isLoading || !branchId, error !== undefined),
+    [data, isLoading, error, branchId],
+  );
 
   return (
     <AdminPageLayout>
