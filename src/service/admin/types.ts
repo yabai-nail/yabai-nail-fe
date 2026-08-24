@@ -543,39 +543,82 @@ export interface AdminReportRow {
   readonly [field: string]: unknown;
 }
 
+// Shapes below were read off the running backend at https://apiyabai.tedo.vn
+// (`GET /docs-json` confirms the seven operations) and pinned against the
+// handlers that serve them, so the field names here are the ones the wire
+// actually carries rather than a plausible guess.
+
 export interface AdminReport {
   readonly metricVersion: string;
+  readonly currency?: string;
+  readonly timeBasis?: string;
   readonly from?: string;
   readonly toExclusive?: string;
+  readonly asOf?: string;
   readonly generatedAt: string;
-  readonly rows: ReadonlyArray<AdminReportRow>;
-  readonly totals?: Readonly<Record<string, number | null>>;
+  readonly dataFreshness?: {
+    readonly projectionThrough?: string;
+    readonly lagSeconds?: number;
+    readonly isProvisional?: boolean;
+    readonly reconciledThroughBusinessDate?: string;
+    readonly qualityFlags?: ReadonlyArray<string>;
+  };
+  // Every metric arrives boxed as `{ value }`, and `value` is genuinely null
+  // when the window has nothing to average — a missing number, not a zero.
+  readonly metrics?: Readonly<Record<string, { readonly value: number | null }>>;
+  // The customers report answers with `segments` and no `rows` at all, so this
+  // stays optional instead of forcing callers to fake an empty table.
+  readonly rows?: ReadonlyArray<AdminReportRow>;
+  readonly segments?: Readonly<Record<string, number | null>>;
   readonly [field: string]: unknown;
 }
 
+/** Terminal once the backend reaches `READY` or `FAILED`; `QUEUED` is still in flight. */
+export type AdminReportExportStatus = "QUEUED" | "READY" | "FAILED" | (string & {});
+
 export interface AdminReportExport {
-  readonly id: string;
-  readonly reportKind: string;
-  readonly status: string;
-  readonly requestedAt: string;
-  readonly completedAt?: string;
-  readonly downloadUrl?: string;
+  readonly exportId: string;
+  readonly status: AdminReportExportStatus;
+  readonly reportType?: string;
+  readonly expiresAt?: string;
+  readonly completedAt?: string | null;
+  // Set only on FAILED: REPORT_NO_DATA, REPORT_SCOPE_FORBIDDEN,
+  // REPORT_FILTER_INVALID or DISPATCH_FAILED.
+  readonly errorCode?: string | null;
+  readonly [field: string]: unknown;
+}
+
+export type AdminReportExportType =
+  | "REVENUE_SUMMARY"
+  | "BRANCHES"
+  | "CUSTOMERS"
+  | "STAFF_PERFORMANCE";
+
+export type AdminReportExportFormat = "CSV" | "XLSX";
+
+export interface AdminReportExportFilters {
+  readonly from?: string;
+  readonly to?: string;
+  readonly branchIds?: ReadonlyArray<string>;
   readonly [field: string]: unknown;
 }
 
 export interface AdminReportExportInput {
-  readonly reportKind: string;
-  readonly params?: Readonly<Record<string, unknown>>;
+  readonly reportType: AdminReportExportType;
+  readonly format: AdminReportExportFormat;
+  // The backend only accepts "vi" or "ja" and rejects anything else with 422.
+  readonly locale?: "vi" | "ja";
+  readonly filters?: AdminReportExportFilters;
   readonly [field: string]: unknown;
 }
 
 export interface AdminReportExportDownloadInput {
-  readonly ttlSeconds?: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminReportExportDownloadUrl {
-  readonly url: string;
+  readonly exportId: string;
+  readonly signedUrl: string;
   readonly expiresAt: string;
 }
 

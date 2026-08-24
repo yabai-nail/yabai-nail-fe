@@ -1,6 +1,9 @@
 "use client";
 
+import type { SWRConfiguration } from "swr";
+
 import { useApiOperation } from "../api";
+import type { ApiClientError } from "../api";
 import type {
   AdminAppointment,
   AdminAppointmentAllocationCandidate,
@@ -253,11 +256,24 @@ export function useAdminStaffPerformanceReport(
   return useApiOperation<AdminReport>("GET /api/v1/admin/reports/staff-performance", { query });
 }
 
-export function useAdminReportExport(exportId: string | null) {
+// Export builds run on a background worker, so the caller has to poll. Pass a
+// function refreshInterval — SWR re-evaluates it after every response, so
+// answering 0 once the backend reaches READY or FAILED stops the poll instead
+// of leaving it hammering the endpoint forever.
+export function useAdminReportExport(
+  exportId: string | null,
+  config?: SWRConfiguration<AdminReportExport, ApiClientError>,
+) {
   return useApiOperation<AdminReportExport>(
     exportId ? "GET /api/v1/admin/report-exports/{exportId}" : null,
     { path: exportId ? { exportId } : undefined },
+    config,
   );
+}
+
+/** True once the backend will never move this export again. */
+export function isReportExportSettled(status: string | undefined): boolean {
+  return status === "READY" || status === "FAILED";
 }
 
 export function useAdminPaymentRefund(
