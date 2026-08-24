@@ -44,12 +44,26 @@ export interface PhoneChallengeVerifyInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * The customer the backend echoes back on OTP verify and on session refresh.
+ * Optional on `CustomerSession` because the field is not part of the frozen
+ * contract — the nav falls back to the masked phone when it is absent.
+ */
+export interface AuthenticatedCustomer {
+  readonly id: string;
+  readonly displayName: string;
+  readonly phone: string;
+  readonly locale?: string;
+  readonly [field: string]: unknown;
+}
+
 export interface CustomerSession {
   readonly sessionId: string;
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly expiresIn: number;
   readonly profileCompletionRequired?: boolean;
+  readonly user?: AuthenticatedCustomer;
   readonly [field: string]: unknown;
 }
 

@@ -1,7 +1,9 @@
 import {
+  ArrowRightStartOnRectangleIcon,
   Bars3Icon,
   MoonIcon,
   SunIcon,
+  UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -13,6 +15,22 @@ export type ShellNavRoute = {
   readonly label: string;
   readonly isCurrent: boolean;
 };
+
+/**
+ * Customer session state as the nav needs it. `restoring` is its own case so
+ * the bar shows nothing rather than flashing "Đăng nhập" at somebody whose
+ * stored refresh token is still in flight.
+ */
+export type ShellNavAccount =
+  | { readonly status: "restoring" }
+  | { readonly status: "anonymous" }
+  | {
+      readonly status: "authenticated";
+      /** Display name when the backend gave one, else the phone. */
+      readonly label: string;
+      readonly phone: string;
+      readonly isSigningOut: boolean;
+    };
 
 /** Resolved copy and state drawn by the navigation shell. */
 export type ShellNavData = {
@@ -27,6 +45,7 @@ export type ShellNavData = {
   readonly themeLabel: string;
   readonly isMenuOpen: boolean;
   readonly menuLabel: string;
+  readonly account: ShellNavAccount;
 };
 
 /** Events reported by interactive navigation controls. */
@@ -34,6 +53,8 @@ export type ShellNavActions = {
   readonly toggleTheme: () => void;
   readonly toggleMenu: () => void;
   readonly closeMenu: () => void;
+  readonly openLogin: () => void;
+  readonly signOut: () => void;
 };
 
 export type ShellNavProps = {
@@ -50,6 +71,9 @@ const navLinkClassName = (isCurrent: boolean) =>
       ? "bg-accent-soft text-accent-soft-foreground"
       : "text-muted hover:bg-default hover:text-foreground",
   ].join(" ");
+
+const outlineButtonClassName =
+  "min-h-11 items-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-wait disabled:opacity-60";
 
 /** Draw the responsive site navigation without owning route or theme state. */
 export const _ShellNav = ({ props, on }: ShellNavProps) => (
@@ -107,6 +131,39 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
           )}
         </button>
 
+        {props.account.status === "anonymous" ? (
+          <button
+            type="button"
+            onClick={on.openLogin}
+            className={`hidden ${outlineButtonClassName} sm:flex`}
+          >
+            <UserIcon aria-hidden="true" className="size-4" />
+            Đăng nhập
+          </button>
+        ) : null}
+
+        {props.account.status === "authenticated" ? (
+          <div className="hidden items-center gap-2 sm:flex">
+            <span
+              title={props.account.phone}
+              className="flex min-h-11 max-w-40 items-center gap-2 rounded-lg bg-default px-3 text-sm font-semibold text-default-foreground"
+            >
+              <UserIcon aria-hidden="true" className="size-4 shrink-0" />
+              <span className="truncate">{props.account.label}</span>
+            </span>
+            <button
+              type="button"
+              onClick={on.signOut}
+              disabled={props.account.isSigningOut}
+              aria-label="Đăng xuất"
+              title="Đăng xuất"
+              className="grid size-11 place-items-center rounded-lg text-muted transition-colors hover:bg-default hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-wait disabled:opacity-60"
+            >
+              <ArrowRightStartOnRectangleIcon aria-hidden="true" className="size-5" />
+            </button>
+          </div>
+        ) : null}
+
         <Link
           href={props.bookingHref}
           aria-current={props.isBookingCurrent ? "page" : undefined}
@@ -150,6 +207,44 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
               {route.label}
             </Link>
           ))}
+          {props.account.status === "anonymous" ? (
+            <button
+              type="button"
+              onClick={() => {
+                on.closeMenu();
+                on.openLogin();
+              }}
+              className={`mt-2 flex justify-center ${outlineButtonClassName} sm:hidden`}
+            >
+              <UserIcon aria-hidden="true" className="size-4" />
+              Đăng nhập
+            </button>
+          ) : null}
+
+          {props.account.status === "authenticated" ? (
+            <div className="mt-2 flex flex-col gap-1 sm:hidden">
+              <span className="flex min-h-11 items-center gap-2 rounded-lg bg-default px-3 text-sm font-semibold text-default-foreground">
+                <UserIcon aria-hidden="true" className="size-4 shrink-0" />
+                <span className="truncate">{props.account.label}</span>
+                <span className="ml-auto truncate text-xs font-normal text-muted">
+                  {props.account.phone}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  on.closeMenu();
+                  on.signOut();
+                }}
+                disabled={props.account.isSigningOut}
+                className={`flex justify-center ${outlineButtonClassName}`}
+              >
+                <ArrowRightStartOnRectangleIcon aria-hidden="true" className="size-4" />
+                Đăng xuất
+              </button>
+            </div>
+          ) : null}
+
           <Link
             href={props.bookingHref}
             aria-current={props.isBookingCurrent ? "page" : undefined}
