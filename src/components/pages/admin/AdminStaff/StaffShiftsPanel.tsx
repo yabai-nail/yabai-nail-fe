@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import {
   adminService,
   useAdminStaffShifts,
+  type AdminLeaveRequest,
   type AdminStaffShift,
 } from "@/service";
 
@@ -39,6 +40,10 @@ export function StaffShiftsPanel({
   );
 
   const [openMode, setOpenMode] = useState<"shift" | "leave" | null>(null);
+  // The backend exposes no list endpoint for leave requests (only create +
+  // decision), so the approval queue is seeded from requests raised in this
+  // session. Each one carries the real id the decision endpoint needs.
+  const [pendingLeaves, setPendingLeaves] = useState<ReadonlyArray<AdminLeaveRequest>>([]);
 
   return (
     <section aria-labelledby="staff-shifts-heading" className="space-y-2 border-t border-admin-border pt-4">
@@ -71,6 +76,20 @@ export function StaffShiftsPanel({
         </ul>
       )}
 
+      {pendingLeaves.length > 0 ? (
+        <LeaveDecisionList
+          branchId={branchId}
+          requests={pendingLeaves}
+          onDecided={(requestId, status) =>
+            setPendingLeaves((current) =>
+              current.map((request) =>
+                request.id === requestId ? { ...request, status } : request,
+              ),
+            )
+          }
+        />
+      ) : null}
+
       {openMode ? (
         <ShiftOrLeaveDialog
           branchId={branchId}
@@ -78,9 +97,84 @@ export function StaffShiftsPanel({
           mode={openMode}
           onClose={() => setOpenMode(null)}
           onSaved={() => void shifts.mutate()}
+          onLeaveCreated={(request) =>
+            setPendingLeaves((current) => [request, ...current])
+          }
         />
       ) : null}
     </section>
+  );
+}
+
+// Approve / reject freshly-raised leave requests. Decision revalidates the
+// shifts feed because an approval frees the staff member's slot.
+function LeaveDecisionList({
+  branchId,
+  requests,
+  onDecided,
+}: Readonly<{
+  branchId: string;
+  requests: ReadonlyArray<AdminLeaveRequest>;
+  onDecided: (requestId: string, status: string) => void;
+}>) {
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function decide(requestId: string, decision: "approve" | "reject") {
+    setBusyId(requestId);
+    setError(null);
+    try {
+      const updated = await adminService.decideLeaveRequest(branchId, requestId, { decision });
+      onDecided(requestId, updated.status);
+    } catch (thrown) {
+      setError(thrown instanceof Error ? thrown.message : "Không xử lý được yêu cầu nghỉ.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <div className="space-y-2 rounded-lg border border-admin-border p-2">
+      <p className="text-[0.65rem] uppercase tracking-wide text-admin-muted">Yêu cầu nghỉ (phiên này)</p>
+      <ul className="space-y-1 text-xs">
+        {requests.map((request) => {
+          const decided = request.status.toUpperCase() !== "PENDING";
+          return (
+            <li key={request.id} className="flex flex-wrap items-center justify-between gap-2">
+              <span className="min-w-0 text-admin-ink">
+                {fmt(request.startsAt)} → {fmt(request.endsAt)}
+                {request.reason ? <span className="ml-1 text-admin-muted">· {request.reason}</span> : null}
+              </span>
+              {decided ? (
+                <span className="text-[0.65rem] uppercase tracking-wide text-admin-muted">{request.status}</span>
+              ) : (
+                <span className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-admin-success"
+                    isDisabled={busyId === request.id}
+                    onPress={() => void decide(request.id, "approve")}
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-admin-danger"
+                    isDisabled={busyId === request.id}
+                    onPress={() => void decide(request.id, "reject")}
+                  >
+                    Từ chối
+                  </Button>
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
+    </div>
   );
 }
 
@@ -90,12 +184,14 @@ function ShiftOrLeaveDialog({
   mode,
   onClose,
   onSaved,
+  onLeaveCreated,
 }: Readonly<{
   branchId: string;
   staffId: string;
   mode: "shift" | "leave";
   onClose: () => void;
   onSaved: () => void;
+  onLeaveCreated: (request: AdminLeaveRequest) => void;
 }>) {
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
@@ -119,12 +215,13 @@ function ShiftOrLeaveDialog({
           endsAt: toIso(date, end),
         });
       } else {
-        await adminService.createLeaveRequest(branchId, {
+        const request = await adminService.createLeaveRequest(branchId, {
           staffId,
           startsAt: toIso(date, start),
           endsAt: toIso(date, end),
           reason: reason.trim(),
         });
+        onLeaveCreated(request);
       }
       onSaved();
       onClose();

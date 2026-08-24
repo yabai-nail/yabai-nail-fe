@@ -22,6 +22,7 @@ import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
 import { PaymentSummaryPanel } from "./PaymentSummaryPanel";
+import { RefundPanel } from "./RefundPanel";
 import { ServiceCheckoutPanel } from "./ServiceCheckoutPanel";
 
 function deriveInitials(name: string): string {
@@ -231,6 +232,7 @@ export function AdminPaymentsComponent() {
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
       </div>
+      {isServerBacked ? <RefundPanel branchId={branchId!} appointmentId={appointmentId!} /> : null}
       {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
     </AdminPageLayout>

@@ -1,10 +1,11 @@
 "use client";
 
-import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
-import { useState } from "react";
-import { useAdminServiceCategories, type AdminServiceCategory } from "@/service";
+import { useMemo, useState } from "react";
+import { adminService, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { CategoryEditor } from "./CategoryEditor";
+import { PromotionsPanel } from "./PromotionsPanel";
 import { SurchargePanel } from "./SurchargePanel";
 import { categoryLabels, type SalonService, type ServiceCategory } from "./data";
 
@@ -19,9 +20,37 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
   // remain the local UI filter (primary/addon/combo), while this section
   // is the source of truth for what the salon actually manages.
   const beCategories = useAdminServiceCategories();
-  const beItems = beCategories.data?.items ?? [];
+  // Sorted by the backend sortOrder so the up/down controls act on the same
+  // order the customer-facing catalog renders.
+  const beItems = useMemo(
+    () => [...(beCategories.data?.items ?? [])].sort((left, right) => left.sortOrder - right.sortOrder),
+    [beCategories.data],
+  );
   const [editing, setEditing] = useState<AdminServiceCategory | null>(null);
   const [creating, setCreating] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  const [reorderError, setReorderError] = useState<string | null>(null);
+
+  // Nudge one category up/down and persist the whole order. Simpler and more
+  // accessible than drag-and-drop, and it needs no extra dependency.
+  async function move(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= beItems.length || reordering) return;
+    const next = [...beItems];
+    [next[index], next[target]] = [next[target], next[index]];
+    setReordering(true);
+    setReorderError(null);
+    try {
+      await adminService.reorderServiceCategories({
+        orderedCategoryIds: next.map((category) => category.id),
+      });
+      await beCategories.mutate();
+    } catch (thrown) {
+      setReorderError(thrown instanceof Error ? thrown.message : "Không lưu được thứ tự danh mục.");
+    } finally {
+      setReordering(false);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -49,12 +78,32 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
               <p className="text-xs text-admin-muted">Chưa có danh mục nào trên hệ thống.</p>
             ) : (
               <ul className="space-y-1">
-                {beItems.map((category) => (
-                  <li key={category.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
+                {beItems.map((category, index) => (
+                  <li key={category.id} className="flex items-center justify-between gap-1 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
                     <span className="min-w-0 flex-1 truncate">
                       <strong className="text-admin-ink">{category.nameVi ?? category.name}</strong>
                       <span className="ml-2 text-admin-muted">({category.code})</span>
                     </span>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Đưa ${category.name} lên trên`}
+                      isDisabled={index === 0 || reordering}
+                      onPress={() => void move(index, -1)}
+                    >
+                      <ChevronUpIcon className="size-3.5" />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Đưa ${category.name} xuống dưới`}
+                      isDisabled={index === beItems.length - 1 || reordering}
+                      onPress={() => void move(index, 1)}
+                    >
+                      <ChevronDownIcon className="size-3.5" />
+                    </Button>
                     <Button
                       isIconOnly
                       size="sm"
@@ -68,6 +117,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
                 ))}
               </ul>
             )}
+            {reorderError ? <p role="alert" className="mt-2 text-xs text-admin-danger">{reorderError}</p> : null}
           </div>
 
           <Button
@@ -95,6 +145,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
         </Card.Content>
       </Card>
       <SurchargePanel />
+      <PromotionsPanel />
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Content className="p-4"><h2 className="font-bold">Ghi chú</h2><p className="mt-2 text-xs leading-5 text-admin-muted">Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng.</p></Card.Content>
       </Card>

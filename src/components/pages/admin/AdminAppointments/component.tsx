@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@heroui/react";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -32,6 +34,7 @@ import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
 import { AppointmentToolbar } from "./AppointmentToolbar";
 import { CancelAppointmentDialog } from "./CancelAppointmentDialog";
+import { ResolutionsModal } from "./ResolutionsModal";
 import {
   DEFAULT_APPOINTMENT_DATE,
   initialAppointments,
@@ -231,6 +234,7 @@ export function AdminAppointmentsComponent({
   }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [isResolutionsOpen, setIsResolutionsOpen] = useState(false);
   const localId = useRef(initialAppointments.length + 1);
   const visibleDayAppointments = useMemo(
     () => filterAppointments(appointments, { date: selectedDate, status }),
@@ -484,6 +488,18 @@ export function AdminAppointmentsComponent({
         onCreate={() => setFormMode("create")}
       />
 
+      {branchId ? (
+        <div className="mb-4 flex justify-end">
+          <Button
+            variant="outline"
+            className="rounded-lg border-admin-border"
+            onPress={() => setIsResolutionsOpen(true)}
+          >
+            <UserPlusIcon className="size-4" />Xử lý tại quầy
+          </Button>
+        </div>
+      ) : null}
+
       <div className="grid min-w-0 gap-4 lg:grid-cols-[19rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)_19rem]">
         <section className="min-w-0" aria-label="Danh sách và tổng quan lịch hẹn">
           <AppointmentList appointments={visibleDayAppointments} selectedId={selectedAppointment?.id ?? null} onSelect={setSelectedId} />
@@ -558,6 +574,13 @@ export function AdminAppointmentsComponent({
       ) : null}
       {isCancelOpen && selectedAppointment ? (
         <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} />
+      ) : null}
+      {isResolutionsOpen && branchId ? (
+        <ResolutionsModal
+          branchId={branchId}
+          onClose={() => setIsResolutionsOpen(false)}
+          onCheckInResolved={() => void mutateAppointments()}
+        />
       ) : null}
       {isAssignOpen && selectedAppointment ? (
         <AssignStaffModal
