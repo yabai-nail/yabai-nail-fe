@@ -9,8 +9,6 @@ export type PaymentTotals = {
   readonly subtotal: number;
   readonly discount: number;
   readonly grandTotal: number;
-  readonly staffShare: number;
-  readonly salonShare: number;
 };
 
 export type PaymentTransitionResult =
@@ -49,19 +47,24 @@ function nextCustomId(items: ReadonlyArray<PaymentLineItem>) {
 function validateInvoice(invoice: CheckoutInvoice) {
   const serviceError = validateItem(invoice.currentService) ?? invoice.additionalItems.map(validateItem).find(Boolean);
   if (serviceError) return serviceError;
-  if (!Number.isInteger(invoice.staffPercent) || invoice.staffPercent < 0 || invoice.staffPercent > 100) return "Tỷ lệ chia doanh thu không hợp lệ.";
   const subtotal = invoice.currentService.price + invoice.additionalItems.reduce((sum, item) => sum + item.price, 0);
   if (!isValidMoney(invoice.discount) || invoice.discount > subtotal) return "Giảm giá không hợp lệ.";
   return null;
 }
 
+/**
+ * Money the customer owes. Deliberately no staff/salon split: the commission
+ * rate is a property of the STAFF MEMBER over time (backend STAFF_COMPENSATION
+ * records with effectiveFrom + history), never of a single invoice, and the
+ * capture endpoint accepts neither a rate nor an amount from this screen — it
+ * recomputes the commission from that record. Any split rendered here would be
+ * a made-up wage figure.
+ */
 export function calculatePaymentTotals(invoice: CheckoutInvoice): PaymentTotals {
   const subtotal = invoice.currentService.price + invoice.additionalItems.reduce((sum, item) => sum + item.price, 0);
   const discount = Math.min(Math.max(invoice.discount, 0), subtotal);
-  const grandTotal = subtotal - discount;
-  const staffShare = Math.round(grandTotal * invoice.staffPercent / 100);
 
-  return { subtotal, discount, grandTotal, staffShare, salonShare: grandTotal - staffShare };
+  return { subtotal, discount, grandTotal: subtotal - discount };
 }
 
 export function replaceCurrentService(invoice: CheckoutInvoice, service: PaymentServiceSnapshot): PaymentTransitionResult {
@@ -111,13 +114,6 @@ export function updateDiscount(invoice: CheckoutInvoice, discount: number): Paym
   const { subtotal } = calculatePaymentTotals(invoice);
   if (!isValidMoney(discount) || discount > subtotal) return failure("Giảm giá phải từ 0 đến tổng tiền dịch vụ.");
   return success({ ...invoice, discount });
-}
-
-export function updateStaffPercent(invoice: CheckoutInvoice, staffPercent: number): PaymentTransitionResult {
-  const locked = requireDraft(invoice);
-  if (locked) return failure(locked);
-  if (!Number.isInteger(staffPercent) || staffPercent < 0 || staffPercent > 100) return failure("Tỷ lệ nhân viên phải từ 0% đến 100%.");
-  return success({ ...invoice, staffPercent });
 }
 
 export function setPaymentMethod(invoice: CheckoutInvoice, paymentMethod: PaymentMethod): PaymentTransitionResult {
