@@ -42,16 +42,63 @@ describe("audit log derivation", () => {
       id: "x1",
       action: "CUSTOMER_UPDATED",
       actorId: "user-9",
-      actorType: "MANAGER",
-      targetType: "Customer",
-      targetId: "CU-1",
+      resourceType: "Customer",
+      resourceId: "CU-1",
       createdAt: "2026-08-24T00:00:00.000Z",
     });
     expect(row).toMatchObject({
       id: "x1",
       action: "CUSTOMER_UPDATED",
-      actor: "MANAGER · user-9",
+      actor: "user-9",
       target: "Customer · CU-1",
+      branch: undefined,
+    });
+  });
+
+  it("resolves actor and branch ids through the lookups", () => {
+    const actorId = "a11ceafc-9c7d-4d6e-b712-58ad27b9eb64";
+    const branchId = "7f8aed1f-c4aa-4b53-97ef-8615b455db87";
+    const row = adaptAuditLog(
+      {
+        id: "x2",
+        action: "APPOINTMENT_CHECKED_IN",
+        actorId,
+        resourceType: "Appointment",
+        resourceId: "3339ad7c-22b7-4540-8916-4dc5c8271935",
+        metadata: { branchId },
+        createdAt: "2026-08-25T16:23:18.974Z",
+      },
+      {
+        accounts: new Map([[actorId, { displayName: "Chu chuoi YABAI", role: "OWNER" }]]),
+        branches: new Map([[branchId, { name: "Thảo Điền" }]]),
+      },
+    );
+    expect(row).toMatchObject({
+      actor: "OWNER · Chu chuoi YABAI",
+      actorTitle: actorId,
+      target: "Appointment · 3339ad7c",
+      targetTitle: "3339ad7c-22b7-4540-8916-4dc5c8271935",
+      branch: "Thảo Điền",
+      branchTitle: branchId,
+    });
+  });
+
+  it("shortens unresolved uuids and keeps the full value for the tooltip", () => {
+    const actorId = "a11ceafc-9c7d-4d6e-b712-58ad27b9eb64";
+    const row = adaptAuditLog({
+      id: "x3",
+      action: "REFRESH_TOKEN_REUSE_DETECTED",
+      actorId,
+      resourceType: "AuthSession",
+      resourceId: "fc16bbb8-a5f4-48cc-a0cf-bce574c24b8b",
+      metadata: { tokenFamilyId: "d451e5e9-3a69-4303-bfe3-7c6fde99fea2" },
+      createdAt: "2026-08-25T17:14:33.853Z",
+    });
+    expect(row).toMatchObject({
+      actor: "a11ceafc",
+      actorTitle: actorId,
+      target: "AuthSession · fc16bbb8",
+      branch: undefined,
     });
   });
 

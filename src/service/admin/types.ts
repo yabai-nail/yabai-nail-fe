@@ -584,13 +584,14 @@ export interface AdminReportExportDownloadUrl {
 export interface AdminAuditLog {
   readonly id: string;
   readonly actorId?: string;
-  readonly actorType?: string;
   readonly action: string;
-  readonly targetType?: string;
-  readonly targetId?: string;
+  /** Backend trả `resourceType`/`resourceId`, không phải `targetType`/`targetId`. */
+  readonly resourceType?: string;
+  readonly resourceId?: string;
+  readonly outcome?: string;
   readonly createdAt: string;
-  readonly branchId?: string;
-  readonly diff?: Readonly<Record<string, unknown>>;
+  /** `branchId` nằm trong `metadata`, không có ở cấp cao nhất của bản ghi. */
+  readonly metadata?: Readonly<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
 
