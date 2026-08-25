@@ -16,19 +16,6 @@ export function isQuarterHour(time: string): boolean {
   return match !== null && Number(match[2]) % 15 === 0;
 }
 
-function fmt(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
-
 export function StaffShiftsPanel({
   branchId,
   staffId,
@@ -65,8 +52,8 @@ export function StaffShiftsPanel({
         <ul className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
           {staffShifts.slice(0, 20).map((shift) => (
             <li key={shift.id} className="flex items-center justify-between gap-2">
-              <span className="text-admin-ink">{fmt(shift.startsAt)} → {fmt(shift.endsAt)}</span>
-              <span className="text-[0.65rem] text-admin-muted">{shift.status ?? ""}</span>
+              <span className="text-admin-ink">{shift.localDate.split("-").reverse().join("/")} · {shift.startLocalTime.slice(0, 5)} → {shift.endLocalTime.slice(0, 5)}</span>
+              <span className="text-[0.65rem] text-admin-muted">{shift.approvalStatus ?? ""}</span>
             </li>
           ))}
         </ul>

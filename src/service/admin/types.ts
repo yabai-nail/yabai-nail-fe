@@ -428,14 +428,21 @@ export interface AdminStaffSkillsInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API: a shift is a branch-local date plus
+ * wall-clock times, and its state is `approvalStatus`. Reading startsAt/endsAt
+ * produced "Invalid Date → Invalid Date" for every row.
+ */
 export interface AdminStaffShift {
   readonly id: string;
   readonly staffId: string;
   readonly branchId: string;
-  readonly startsAt: string;
-  readonly endsAt: string;
-  readonly status?: string;
-  readonly note?: string;
+  readonly localDate: string;
+  readonly startLocalTime: string;
+  readonly endLocalTime: string;
+  readonly type?: "WORK" | "LEAVE";
+  readonly approvalStatus?: string;
+  readonly reason?: string;
   readonly [field: string]: unknown;
 }
 
