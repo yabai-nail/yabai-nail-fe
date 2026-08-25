@@ -4,12 +4,12 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { useAdminBranchList } from "@/service";
+import { useAdminBranchDetail, useAdminBranchList } from "@/service";
 import { BranchModal } from "./BranchModal";
 import {
   adaptBranch,
-  branchFixtures,
   branchStatusLabels,
   filterBranches,
   paginate,
@@ -21,16 +21,17 @@ const pageSize = 8;
 export function AdminBranchesComponent() {
   const { data, isLoading, error, mutate } = useAdminBranchList();
 
-  const source = useMemo<ReadonlyArray<BranchRow>>(() => {
-    if (!data?.items) return branchFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptBranch);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<BranchRow>>(
+    () => (data?.items ? data.items.map(adaptBranch) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<BranchRow | null>(null);
   const [creating, setCreating] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const detail = useAdminBranchDetail(detailId);
 
   const filtered = useMemo(() => filterBranches(source, query), [source, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
@@ -47,7 +48,7 @@ export function AdminBranchesComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải chi nhánh…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách chi nhánh.</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -76,8 +77,11 @@ export function AdminBranchesComponent() {
                         {row.status ? branchStatusLabels[row.status] ?? row.status : "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setDetailId(row.id)}>Chi tiết</Button>
+                        <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -97,6 +101,15 @@ export function AdminBranchesComponent() {
 
       {creating ? <BranchModal branch={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
       {editing ? <BranchModal branch={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {detailId ? (
+        <AdminRecordDetail
+          title="Chi tiết chi nhánh"
+          isLoading={detail.isLoading}
+          error={detail.error}
+          data={detail.data as Record<string, unknown> | undefined}
+          onClose={() => setDetailId(null)}
+        />
+      ) : null}
     </AdminPageLayout>
   );
 }

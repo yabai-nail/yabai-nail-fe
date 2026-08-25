@@ -7,6 +7,7 @@ import {
   adminService,
   useAdminBranchesReport,
   useAdminCustomersReport,
+  useAdminReportExport,
   useAdminStaffPerformanceReport,
   useRevenueReport,
   type AdminReportExport,
@@ -17,8 +18,6 @@ import {
   labelForKey,
   metricCards,
   reportKindLabels,
-  reportRowsFixture,
-  revenueFixture,
   tableColumns,
   type ReportKind,
 } from "./data";
@@ -36,23 +35,21 @@ export function AdminReportsComponent() {
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  // Live status of the created export, by id — a build can still be running when
+  // the create call returns, so the row reflects the freshest read.
+  const exportStatus = useAdminReportExport(exportInfo?.id ?? null);
 
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
 
-  const cards = useMemo(
-    () => metricCards(revenue.data ?? (revenue.isLoading ? undefined : revenueFixture)),
-    [revenue.data, revenue.isLoading],
-  );
+  const cards = useMemo(() => metricCards(revenue.data), [revenue.data]);
 
   const rows = useMemo<ReadonlyArray<Record<string, unknown>>>(() => {
     if (kind === "revenue") {
-      return (revenue.data?.rows ?? (revenue.data ? [] : revenueFixture.rows)) as ReadonlyArray<Record<string, unknown>>;
+      return (revenue.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
     }
-    const report = active.data;
-    if (!report) return active.isLoading ? [] : reportRowsFixture;
-    return report.rows as ReadonlyArray<Record<string, unknown>>;
-  }, [kind, revenue.data, active.data, active.isLoading]);
+    return (active.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
+  }, [kind, revenue.data, active.data]);
 
   const columns = useMemo(() => tableColumns(rows), [rows]);
 
@@ -107,8 +104,9 @@ export function AdminReportsComponent() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {exportInfo ? (
-            <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-              Xuất: {exportInfo.status}
+            <span className="inline-flex items-center gap-2 rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
+              Xuất: {(exportStatus.data?.status as string | undefined) ?? exportInfo.status}
+              <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>làm mới</button>
             </span>
           ) : null}
           {downloadUrl ? (
@@ -139,7 +137,7 @@ export function AdminReportsComponent() {
 
       {exportError ? <p className="mb-3 text-xs text-admin-danger" role="alert">{exportError}</p> : null}
       {active.error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được báo cáo — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được báo cáo.</p>
       ) : active.isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải báo cáo…</p>
       ) : null}

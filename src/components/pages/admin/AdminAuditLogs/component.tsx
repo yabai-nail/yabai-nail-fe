@@ -3,12 +3,12 @@
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { useAdminAuditLogs } from "@/service";
+import { useAdminAuditLog, useAdminAuditLogs } from "@/service";
 import {
   adaptAuditLog,
   auditActions,
-  auditEntries as fixtureEntries,
   filterAuditEntries,
   formatAuditTime,
   paginate,
@@ -20,15 +20,16 @@ const pageSize = 10;
 export function AdminAuditLogsComponent() {
   const { data, isLoading, error } = useAdminAuditLogs();
 
-  const source = useMemo<ReadonlyArray<AuditEntry>>(() => {
-    if (!data?.items) return fixtureEntries;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptAuditLog);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<AuditEntry>>(
+    () => (data?.items ? data.items.map(adaptAuditLog) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [action, setAction] = useState("all");
   const [page, setPage] = useState(1);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const detail = useAdminAuditLog(detailId);
 
   const actions = useMemo(() => auditActions(source), [source]);
   const filtered = useMemo(
@@ -72,7 +73,7 @@ export function AdminAuditLogsComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải nhật ký hệ thống…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được nhật ký hệ thống.</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -96,7 +97,11 @@ export function AdminAuditLogsComponent() {
                 </tr>
               ) : (
                 visible.map((entry) => (
-                  <tr key={entry.id} className="border-b border-admin-border last:border-0">
+                  <tr
+                    key={entry.id}
+                    className="cursor-pointer border-b border-admin-border last:border-0 hover:bg-admin-soft/50"
+                    onClick={() => setDetailId(entry.id)}
+                  >
                     <td className="whitespace-nowrap px-4 py-3 text-admin-muted">
                       {formatAuditTime(entry.createdAt)}
                     </td>
@@ -137,6 +142,16 @@ export function AdminAuditLogsComponent() {
           </div>
         </Card.Footer>
       </Card>
+
+      {detailId ? (
+        <AdminRecordDetail
+          title="Chi tiết nhật ký"
+          isLoading={detail.isLoading}
+          error={detail.error}
+          data={detail.data as Record<string, unknown> | undefined}
+          onClose={() => setDetailId(null)}
+        />
+      ) : null}
     </AdminPageLayout>
   );
 }

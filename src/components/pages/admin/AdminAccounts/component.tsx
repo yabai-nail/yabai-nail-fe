@@ -16,7 +16,6 @@ import {
 import { AccountModal } from "./AccountModal";
 import { ResetPasswordModal } from "./ResetPasswordModal";
 import {
-  accountFixtures,
   accountRoles,
   accountStatusLabels,
   adaptAccount,
@@ -33,11 +32,10 @@ export function AdminAccountsComponent() {
   const [tab, setTab] = useState<Tab>("accounts");
   const { data, isLoading, error, mutate } = useAdminAccounts();
 
-  const source = useMemo<ReadonlyArray<AccountRow>>(() => {
-    if (!data?.items) return accountFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptAccount);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<AccountRow>>(
+    () => (data?.items ? data.items.map(adaptAccount) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("all");
@@ -88,7 +86,7 @@ export function AdminAccountsComponent() {
           {isLoading ? (
             <p className="mb-3 text-xs text-admin-muted">Đang tải tài khoản…</p>
           ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+            <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách tài khoản.</p>
           ) : null}
 
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
