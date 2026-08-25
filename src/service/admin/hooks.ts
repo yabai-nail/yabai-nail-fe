@@ -185,6 +185,13 @@ export function useAdminStaff(query?: Readonly<Record<string, string | number | 
   );
 }
 
+export function useAdminStaffMember(staffId: string | null) {
+  return useApiOperation<AdminStaffMember>(
+    staffId ? "GET /api/v1/admin/staff/{staffId}" : null,
+    { path: staffId ? { staffId } : undefined },
+  );
+}
+
 export function useStaffCompensation(staffId: string | null, period?: string) {
   return useApiOperation<StaffCompensation>(
     staffId ? "GET /api/v1/admin/staff/{staffId}/compensation" : null,
