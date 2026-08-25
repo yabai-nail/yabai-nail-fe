@@ -2,35 +2,16 @@
 
 import {
   Bars3Icon,
-  BellIcon,
   ChevronDownIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Avatar, Badge, Button, Drawer, Dropdown } from "@heroui/react";
+import { Avatar, Drawer, Dropdown } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BranchSelector } from "@/components/blocks/admin/BranchSelector";
 import { useAuth, type AdminRole } from "@/service";
 import { getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
-
-function NotificationButton() {
-  return (
-    <Badge.Anchor>
-      <Button
-        isIconOnly
-        variant="ghost"
-        aria-label="Thông báo, 12 thông báo chưa đọc"
-        className="rounded-lg text-admin-muted"
-      >
-        <BellIcon aria-hidden="true" className="size-5" />
-      </Button>
-      <Badge color="danger" placement="top-right" size="sm" variant="primary">
-        <Badge.Label>12</Badge.Label>
-      </Badge>
-    </Badge.Anchor>
-  );
-}
 
 const ROLE_LABELS: Record<AdminRole, string> = {
   OWNER: "Chủ chuỗi",
@@ -142,7 +123,6 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
             </div>
 
             <BranchSelector />
-            <NotificationButton />
             <OwnerMenu />
           </div>
         </header>
