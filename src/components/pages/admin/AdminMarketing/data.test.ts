@@ -19,16 +19,16 @@ describe("marketing promotion derivation", () => {
   });
 
   it("formats percentage and fixed discounts, dash otherwise", () => {
-    expect(formatDiscount({ percentage: 20 })).toBe("20%");
-    expect(formatDiscount({ discountVnd: 50000 })).toBe("50.000 ₫");
-    expect(formatDiscount({})).toBe("—");
+    expect(formatDiscount({ type: "PERCENT", value: 20 })).toBe("20%");
+    expect(formatDiscount({ type: "FIXED", value: 50000 })).toBe("50.000 ₫");
+    expect(formatDiscount({ type: "FIXED", value: undefined as unknown as number })).toBe("—");
   });
 
   it("adapts a backend promotion", () => {
     const row = adaptPromotion({
-      id: "p1", code: "X", name: "Test", kind: "FIXED", status: "ACTIVE", discountVnd: 10000, version: 4,
+      id: "p1", code: "X", title: "Test", type: "FIXED", status: "ACTIVE", value: 10000, version: 4,
     });
-    expect(row).toMatchObject({ id: "p1", code: "X", discountVnd: 10000, version: 4 });
+    expect(row).toMatchObject({ id: "p1", code: "X", title: "Test", type: "FIXED", value: 10000, version: 4 });
   });
 
   it("paginates and rejects invalid page size", () => {

@@ -753,38 +753,46 @@ export interface AdminBranchSettingsPatch {
 
 // -- Admin promotions ------------------------------------------------------------
 
+/**
+ * Shape confirmed against the live API: the name is `title` (mirrored to
+ * `nameVi`), the discount is one `value` alongside `type`, and the window is
+ * `startAt`/`endAt`. The previous declaration used name/kind/percentage/
+ * startsAt/endsAt, none of which the endpoint reads or returns.
+ */
 export interface AdminPromotion {
   readonly id: string;
   readonly code: string;
-  readonly name: string;
-  readonly kind: string;
+  readonly title: string;
+  readonly nameVi?: string;
+  readonly type: string;
+  readonly value: number;
   readonly status: string;
-  readonly discountVnd?: number;
-  readonly percentage?: number;
-  readonly startsAt?: string;
-  readonly endsAt?: string;
+  readonly startAt?: string;
+  readonly endAt?: string;
   readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminPromotionDraft {
+  /** A-Z, 0-9, underscore and hyphen only, 3-60 characters. */
   readonly code: string;
-  readonly name: string;
-  readonly kind: string;
-  readonly discountVnd?: number;
-  readonly percentage?: number;
-  readonly startsAt?: string;
-  readonly endsAt?: string;
+  readonly title: string;
+  readonly type: string;
+  readonly value: number;
+  /** Both dates are required on create. */
+  readonly startAt: string;
+  readonly endAt: string;
+  readonly issuanceLimit?: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminPromotionPatch {
-  readonly name?: string;
+  readonly title?: string;
   readonly status?: string;
-  readonly discountVnd?: number;
-  readonly percentage?: number;
-  readonly startsAt?: string;
-  readonly endsAt?: string;
+  readonly type?: string;
+  readonly value?: number;
+  readonly startAt?: string;
+  readonly endAt?: string;
   readonly [field: string]: unknown;
 }
 
@@ -844,29 +852,36 @@ export interface AdminAudiencePreview {
 
 // -- Admin nail designs ----------------------------------------------------------
 
+/**
+ * Shape confirmed against the live API. The name field is `title` (mirrored to
+ * `nameVi`), not `name`, and there is no `imageUrl` — media is referenced by
+ * `mediaIds`. Publishing requires `consentToPublish`.
+ */
 export interface AdminNailDesign {
   readonly id: string;
-  readonly name: string;
-  readonly imageUrl?: string;
-  readonly categoryIds?: ReadonlyArray<string>;
+  readonly title: string;
+  readonly nameVi?: string;
+  readonly mediaIds?: ReadonlyArray<string>;
+  readonly tags?: ReadonlyArray<string>;
+  readonly visibility?: string;
+  readonly consentToPublish?: boolean;
   readonly status: string;
   readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminNailDesignDraft {
-  readonly name: string;
-  readonly imageUrl?: string;
-  readonly categoryIds?: ReadonlyArray<string>;
+  readonly title: string;
   readonly status?: string;
+  /** Required by the backend before a design may be PUBLISHED. */
+  readonly consentToPublish?: boolean;
   readonly [field: string]: unknown;
 }
 
 export interface AdminNailDesignPatch {
-  readonly name?: string;
-  readonly imageUrl?: string;
-  readonly categoryIds?: ReadonlyArray<string>;
+  readonly title?: string;
   readonly status?: string;
+  readonly consentToPublish?: boolean;
   readonly [field: string]: unknown;
 }
 

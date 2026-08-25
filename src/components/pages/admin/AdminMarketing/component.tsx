@@ -109,8 +109,8 @@ export function AdminMarketingComponent() {
                     visible.map((row) => (
                       <tr key={row.id} className="border-b border-admin-border last:border-0">
                         <td className="px-4 py-3 font-mono text-admin-ink">{row.code}</td>
-                        <td className="px-4 py-3 text-admin-ink">{row.name}</td>
-                        <td className="px-4 py-3 text-admin-muted">{promotionKindLabels[row.kind] ?? row.kind}</td>
+                        <td className="px-4 py-3 text-admin-ink">{row.title}</td>
+                        <td className="px-4 py-3 text-admin-muted">{promotionKindLabels[row.type] ?? row.type}</td>
                         <td className="px-4 py-3 font-semibold text-admin-ink">{formatDiscount(row)}</td>
                         <td className="px-4 py-3">
                           <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
@@ -148,7 +148,7 @@ export function AdminMarketingComponent() {
 
       {creating ? <PromotionModal promotion={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
       {editing ? <PromotionModal promotion={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
-      {issuing ? <IssueModal promotionId={issuing.id} promotionName={issuing.name} onClose={() => setIssuing(null)} onIssued={() => void mutate()} /> : null}
+      {issuing ? <IssueModal promotionId={issuing.id} promotionName={issuing.title} onClose={() => setIssuing(null)} onIssued={() => void mutate()} /> : null}
     </AdminPageLayout>
   );
 }
