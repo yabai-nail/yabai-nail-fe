@@ -843,7 +843,8 @@ export interface AdminBranch {
   readonly slug?: string;
   readonly address?: string;
   readonly phone?: string;
-  readonly status?: string;
+  /** Backend trả về cờ boolean `active`, không phải chuỗi `status`. */
+  readonly active?: boolean;
   readonly timezone?: string;
   readonly version: number;
   readonly [field: string]: unknown;
@@ -873,7 +874,8 @@ export interface AdminAccount {
   readonly displayName: string;
   readonly role: string;
   readonly branchIds?: ReadonlyArray<string>;
-  readonly status: string;
+  /** Backend trả về `accountStatus` (ACTIVE/INACTIVE/DISABLED/...), không phải `status`. */
+  readonly accountStatus: string;
   readonly version: number;
   readonly [field: string]: unknown;
 }

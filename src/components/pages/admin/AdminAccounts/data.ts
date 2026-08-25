@@ -19,8 +19,12 @@ export const roleLabels: Record<string, string> = {
 
 export const accountStatusLabels: Record<string, string> = {
   ACTIVE: "Hoạt động",
+  INACTIVE: "Ngưng hoạt động",
   SUSPENDED: "Tạm khoá",
   DISABLED: "Vô hiệu",
+  MERGED: "Đã gộp",
+  PENDING_DELETION: "Chờ xoá",
+  DELETED: "Đã xoá",
 };
 
 export function adaptAccount(account: AdminAccount): AccountRow {
@@ -29,7 +33,7 @@ export function adaptAccount(account: AdminAccount): AccountRow {
     phone: account.phone,
     displayName: account.displayName,
     role: account.role,
-    status: account.status,
+    status: account.accountStatus,
     branchIds: account.branchIds,
     version: account.version,
   };
