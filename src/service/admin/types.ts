@@ -359,7 +359,12 @@ export interface AdminStaffPatch {
 export interface AdminStaffCompensationInput {
   readonly baseSalaryVnd: number;
   readonly commissionRate: number;
-  readonly effectiveFrom?: string;
+  /**
+   * Required, `YYYY-MM-DD`. The backend parses it unconditionally and rejects
+   * the whole request when it is absent, so an optional field here meant the
+   * form compiled fine and failed every single time at runtime.
+   */
+  readonly effectiveFrom: string;
   readonly note?: string;
   readonly [field: string]: unknown;
 }
@@ -584,13 +589,14 @@ export interface AdminReportExportDownloadUrl {
 export interface AdminAuditLog {
   readonly id: string;
   readonly actorId?: string;
-  readonly actorType?: string;
   readonly action: string;
-  readonly targetType?: string;
-  readonly targetId?: string;
+  /** Backend trả `resourceType`/`resourceId`, không phải `targetType`/`targetId`. */
+  readonly resourceType?: string;
+  readonly resourceId?: string;
+  readonly outcome?: string;
   readonly createdAt: string;
-  readonly branchId?: string;
-  readonly diff?: Readonly<Record<string, unknown>>;
+  /** `branchId` nằm trong `metadata`, không có ở cấp cao nhất của bản ghi. */
+  readonly metadata?: Readonly<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
 
@@ -843,7 +849,8 @@ export interface AdminBranch {
   readonly slug?: string;
   readonly address?: string;
   readonly phone?: string;
-  readonly status?: string;
+  /** Backend trả về cờ boolean `active`, không phải chuỗi `status`. */
+  readonly active?: boolean;
   readonly timezone?: string;
   readonly version: number;
   readonly [field: string]: unknown;
@@ -873,7 +880,8 @@ export interface AdminAccount {
   readonly displayName: string;
   readonly role: string;
   readonly branchIds?: ReadonlyArray<string>;
-  readonly status: string;
+  /** Backend trả về `accountStatus` (ACTIVE/INACTIVE/DISABLED/...), không phải `status`. */
+  readonly accountStatus: string;
   readonly version: number;
   readonly [field: string]: unknown;
 }
@@ -920,29 +928,44 @@ export interface AdminSystemConfig {
   readonly [field: string]: unknown;
 }
 
+/**
+ * The resolution endpoints identify a customer from a scanned membership QR
+ * (`qrPayload`) or a typed phone number. They accept no other lookup key --
+ * a plain `code` resolves to nobody and comes back 404.
+ */
 export interface AdminCheckInResolutionInput {
-  readonly customerId?: string;
   readonly phone?: string;
-  readonly code?: string;
+  readonly qrPayload?: string;
+  readonly localDate?: string;
   readonly [field: string]: unknown;
 }
 
+/** Customer card returned by both resolution endpoints. */
+export interface AdminResolvedCustomer {
+  readonly id: string;
+  readonly displayName?: string;
+  readonly phone?: string;
+  readonly tier?: string;
+  readonly pointBalance?: number;
+  readonly [field: string]: unknown;
+}
+
+/** Read-only lookup: it reports the day's appointments, it does not check anyone in. */
 export interface AdminCheckInResolution {
-  readonly customerId?: string;
-  readonly appointmentId?: string;
-  readonly status: string;
+  readonly customer: AdminResolvedCustomer;
+  readonly localDate: string;
+  readonly todaysAppointments: ReadonlyArray<AdminAppointment>;
   readonly [field: string]: unknown;
 }
 
 export interface AdminMembershipCardResolutionInput {
-  readonly code?: string;
-  readonly qrToken?: string;
+  readonly phone?: string;
+  readonly qrPayload?: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminMembershipCardResolution {
-  readonly customerId?: string;
-  readonly tier?: string;
-  readonly status: string;
+  readonly customer: AdminResolvedCustomer;
+  readonly resolvedAt: string;
   readonly [field: string]: unknown;
 }

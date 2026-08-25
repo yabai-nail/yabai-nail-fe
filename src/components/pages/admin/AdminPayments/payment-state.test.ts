@@ -8,31 +8,32 @@ import {
   replaceCurrentService,
   updateDiscount,
   updateLineItem,
-  updateStaffPercent,
 } from "./payment-state";
 
 describe("payment totals", () => {
-  it("calculates the reference invoice and preserves the full amount in the revenue split", () => {
+  it("calculates the reference invoice as customer-owed money only", () => {
     expect(calculatePaymentTotals(initialCheckoutInvoice)).toEqual({
       subtotal: 12_100,
       discount: 0,
       grandTotal: 12_100,
-      staffShare: 7_260,
-      salonShare: 4_840,
     });
   });
 
-  it("keeps the split exact for boundary percentages and odd totals", () => {
-    expect(calculatePaymentTotals({ ...initialCheckoutInvoice, staffPercent: 0 }).staffShare).toBe(0);
-    expect(calculatePaymentTotals({ ...initialCheckoutInvoice, staffPercent: 100 }).salonShare).toBe(0);
+  it("exposes no staff/salon revenue split — the backend owns the commission rate", () => {
+    const totals = calculatePaymentTotals(initialCheckoutInvoice);
 
-    const result = calculatePaymentTotals({
-      ...initialCheckoutInvoice,
-      currentService: { ...initialCheckoutInvoice.currentService, price: 101 },
-      additionalItems: [],
-      staffPercent: 50,
-    });
-    expect(result.staffShare + result.salonShare).toBe(result.grandTotal);
+    expect(Object.keys(totals).sort()).toEqual(["discount", "grandTotal", "subtotal"]);
+    expect(totals).not.toHaveProperty("staffShare");
+    expect(totals).not.toHaveProperty("salonShare");
+    expect(initialCheckoutInvoice).not.toHaveProperty("staffPercent");
+  });
+
+  it("clamps the discount into the subtotal before deriving the grand total", () => {
+    const overDiscounted = { ...initialCheckoutInvoice, discount: 99_999 };
+    expect(calculatePaymentTotals(overDiscounted)).toEqual({ subtotal: 12_100, discount: 12_100, grandTotal: 0 });
+
+    const negative = { ...initialCheckoutInvoice, discount: -500 };
+    expect(calculatePaymentTotals(negative)).toEqual({ subtotal: 12_100, discount: 0, grandTotal: 12_100 });
   });
 });
 
@@ -105,9 +106,7 @@ describe("payment transitions", () => {
     expect(new Set(result.value.additionalItems.map((item) => item.id)).size).toBe(result.value.additionalItems.length);
   });
 
-  it("rejects invalid percentages and all money mutations after payment", () => {
-    expect(updateStaffPercent(initialCheckoutInvoice, 101)).toMatchObject({ ok: false });
-
+  it("rejects all money mutations after payment", () => {
     const paid = { ...initialCheckoutInvoice, status: "paid" as const, paidAt: "2026-08-16T14:30:00.000Z" };
     expect(updateDiscount(paid, 100)).toMatchObject({ ok: false });
     expect(replaceCurrentService(paid, paymentServiceCatalog[2])).toMatchObject({ ok: false });

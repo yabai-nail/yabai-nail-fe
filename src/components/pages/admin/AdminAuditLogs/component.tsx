@@ -5,7 +5,12 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { useAdminAuditLog, useAdminAuditLogs } from "@/service";
+import {
+  useAdminAccounts,
+  useAdminAuditLog,
+  useAdminAuditLogs,
+  useAdminBranchList,
+} from "@/service";
 import {
   adaptAuditLog,
   auditActions,
@@ -19,10 +24,22 @@ const pageSize = 10;
 
 export function AdminAuditLogsComponent() {
   const { data, isLoading, error } = useAdminAuditLogs();
+  // Parallel joins: the log rows only carry ids, so the account and branch
+  // lists resolve `actorId` / `metadata.branchId` into names the same way
+  // AdminAppointments resolves its customer and staff ids.
+  const { data: accountsData } = useAdminAccounts();
+  const { data: branchesData } = useAdminBranchList();
+  const lookups = useMemo(
+    () => ({
+      accounts: new Map((accountsData?.items ?? []).map((a) => [a.id, a] as const)),
+      branches: new Map((branchesData?.items ?? []).map((b) => [b.id, b] as const)),
+    }),
+    [accountsData, branchesData],
+  );
 
   const source = useMemo<ReadonlyArray<AuditEntry>>(
-    () => (data?.items ? data.items.map(adaptAuditLog) : []),
-    [data],
+    () => (data?.items ? data.items.map((log) => adaptAuditLog(log, lookups)) : []),
+    [data, lookups],
   );
 
   const [query, setQuery] = useState("");
@@ -110,9 +127,15 @@ export function AdminAuditLogsComponent() {
                         {entry.action}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-admin-ink">{entry.actor}</td>
-                    <td className="px-4 py-3 text-admin-ink">{entry.target}</td>
-                    <td className="px-4 py-3 text-admin-muted">{entry.branchId ?? "—"}</td>
+                    <td className="px-4 py-3 text-admin-ink" title={entry.actorTitle}>
+                      {entry.actor}
+                    </td>
+                    <td className="px-4 py-3 text-admin-ink" title={entry.targetTitle}>
+                      {entry.target}
+                    </td>
+                    <td className="px-4 py-3 text-admin-muted" title={entry.branchTitle}>
+                      {entry.branch ?? "—"}
+                    </td>
                   </tr>
                 ))
               )}

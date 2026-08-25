@@ -34,9 +34,10 @@ function deriveInitials(name: string): string {
 /**
  * Adapt a real appointment + its joined lookups into the fixture-shaped
  * CheckoutInvoice the checkout components already consume. Values the API
- * doesn't yet provide (birthday, preference, spend, staff commission %)
- * fall back to zeros / empty strings — the page stays functional and the
- * salon can still tick a payment method and confirm.
+ * doesn't yet provide (birthday, preference, spend) fall back to zeros /
+ * empty strings — the page stays functional and the salon can still tick a
+ * payment method and confirm. Staff commission is intentionally absent: the
+ * backend owns the rate per staff member and recomputes it on capture.
  */
 function buildInvoiceFromServer(
   appointment: ServerAppointment,
@@ -99,7 +100,6 @@ function buildInvoiceFromServer(
       source: "catalog" as const,
     })),
     discount: appointment.discountVnd,
-    staffPercent: 60,
     paymentMethod: null,
     orderNote: "",
     status: appointment.status.toUpperCase().includes("PAID") ? "paid" : "draft",

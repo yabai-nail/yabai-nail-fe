@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   accountFixtures,
   accountRoles,
+  accountStatusLabels,
   adaptAccount,
   filterAccounts,
   paginate,
@@ -17,9 +18,19 @@ describe("account list derivation", () => {
     expect(accountRoles(accountFixtures)).toEqual(["MANAGER", "OWNER", "STAFF"]);
   });
 
-  it("adapts a backend account", () => {
-    const row = adaptAccount({ id: "a1", phone: "09", displayName: "N", role: "STAFF", status: "ACTIVE", version: 5 });
-    expect(row).toMatchObject({ id: "a1", role: "STAFF", version: 5 });
+  it("adapts a backend account, reading accountStatus (not status)", () => {
+    const row = adaptAccount({ id: "a1", phone: "09", displayName: "N", role: "STAFF", accountStatus: "ACTIVE", version: 5 });
+    expect(row).toMatchObject({ id: "a1", role: "STAFF", status: "ACTIVE", version: 5 });
+
+    expect(
+      adaptAccount({ id: "a2", phone: "08", displayName: "M", role: "STAFF", accountStatus: "DISABLED", version: 1 }).status,
+    ).toBe("DISABLED");
+  });
+
+  it("labels every status the backend can emit", () => {
+    for (const code of ["ACTIVE", "INACTIVE", "DISABLED", "MERGED", "PENDING_DELETION", "DELETED"]) {
+      expect(accountStatusLabels[code]).toBeTruthy();
+    }
   });
 
   it("paginates and rejects invalid page size", () => {

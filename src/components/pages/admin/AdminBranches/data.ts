@@ -17,6 +17,15 @@ export const branchStatusLabels: Record<string, string> = {
   CLOSED: "Đã đóng",
 };
 
+/**
+ * Backend trả cờ boolean `active`; bảng hiển thị dùng mã trạng thái dạng chuỗi.
+ * Thiếu cờ (undefined) thì trả undefined để ô hiển thị "—" thay vì đoán bừa.
+ */
+export function branchStatusFromActive(active: boolean | undefined): string | undefined {
+  if (active === undefined) return undefined;
+  return active ? "ACTIVE" : "INACTIVE";
+}
+
 export function adaptBranch(branch: AdminBranch): BranchRow {
   return {
     id: branch.id,
@@ -24,7 +33,7 @@ export function adaptBranch(branch: AdminBranch): BranchRow {
     slug: branch.slug,
     address: branch.address,
     phone: branch.phone,
-    status: branch.status,
+    status: branchStatusFromActive(branch.active),
     timezone: branch.timezone,
     version: branch.version,
   };

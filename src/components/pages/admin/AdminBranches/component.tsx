@@ -71,6 +71,7 @@ export function AdminBranchesComponent() {
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.name}</td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.address ?? "—"}</td>
+                    {/* Backend chưa có cột phone cho chi nhánh; ô này luôn "—" cho tới khi API trả về. */}
                     <td className="px-4 py-3 font-mono text-admin-muted">{row.phone ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
