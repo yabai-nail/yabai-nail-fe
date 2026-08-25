@@ -303,12 +303,24 @@ export interface AdminCustomerCouponIssuance {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. The date field is `startsAt` and the
+ * services are objects under `services`, not a `serviceNames` string array —
+ * reading the old names threw on `.join` and took the whole customers page down
+ * as soon as a customer had any history.
+ */
+export interface AdminCustomerNailHistoryService {
+  readonly serviceId: string;
+  readonly serviceName: string;
+  readonly unitPriceVnd: number;
+  readonly durationMinutes?: number;
+}
+
 export interface AdminCustomerNailHistoryEntry {
   readonly appointmentId: string;
-  readonly startedAt: string;
-  readonly serviceNames: ReadonlyArray<string>;
-  readonly staffName?: string;
-  readonly totalVnd?: number;
+  readonly startsAt: string;
+  readonly status?: string;
+  readonly services: ReadonlyArray<AdminCustomerNailHistoryService>;
   readonly [field: string]: unknown;
 }
 
