@@ -38,11 +38,18 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
     setBusy(true);
     setError(null);
     try {
-      await adminService.setStaffCompensation(staffId, {
-        baseSalaryVnd: effectiveBase,
-        commissionRate: effectiveRate,
-        effectiveFrom,
-      });
+      await adminService.setStaffCompensation(
+        staffId,
+        {
+          baseSalaryVnd: effectiveBase,
+          commissionRate: effectiveRate,
+          effectiveFrom,
+        },
+        // The endpoint is version-checked; without If-Match it answers
+        // "If-Match bat buoc." An unconfigured staff member reads back as
+        // version 0, which is the correct first-write value.
+        compensation?.version ?? 0,
+      );
       setBaseSalary("");
       setRate("");
       void query.mutate();

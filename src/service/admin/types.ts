@@ -373,11 +373,25 @@ export interface AdminStaffCompensationInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * One service a staff member is cleared to perform. The identifier the backend
+ * reads is `skillId`, not `serviceId` — the form used to send `serviceId`, so
+ * every entry resolved to an empty id, the ids collided, and the save came back
+ * "Ky nang bi trung hoac cap do khong hop le."
+ */
 export interface AdminStaffSkill {
-  readonly serviceId: string;
-  readonly level?: string;
+  readonly skillId: string;
+  /** TRAINEE | BEGINNER | JUNIOR | MID | QUALIFIED | SENIOR | EXPERT. Defaults to QUALIFIED. */
+  readonly proficiencyLevel?: string;
   readonly certifiedAt?: string;
   readonly [field: string]: unknown;
+}
+
+/** `GET/PUT /admin/staff/{id}/skills` answers this shape, not the `{ items }` list envelope. */
+export interface AdminStaffSkillSet {
+  readonly staffId: string;
+  readonly skills: ReadonlyArray<AdminStaffSkill>;
+  readonly version: number;
 }
 
 export interface AdminStaffSkillsInput {
@@ -396,10 +410,18 @@ export interface AdminStaffShift {
   readonly [field: string]: unknown;
 }
 
+/**
+ * A shift is stated in the branch's own local date and wall-clock times; the
+ * backend resolves them against the branch timezone. It never read startsAt or
+ * endsAt, which is what this used to declare, so every save was rejected.
+ * Minutes must land on a quarter hour.
+ */
 export interface AdminStaffShiftDraft {
   readonly staffId: string;
-  readonly startsAt: string;
-  readonly endsAt: string;
+  readonly localDate: string;
+  readonly startLocalTime: string;
+  readonly endLocalTime: string;
+  readonly type?: "WORK" | "LEAVE";
   readonly note?: string;
   readonly [field: string]: unknown;
 }
@@ -416,11 +438,12 @@ export interface AdminLeaveRequest {
   readonly [field: string]: unknown;
 }
 
+/** Leave is whole days in branch-local dates, and the reason is required. */
 export interface AdminLeaveRequestDraft {
   readonly staffId: string;
-  readonly startsAt: string;
-  readonly endsAt: string;
-  readonly reason?: string;
+  readonly from: string;
+  readonly to: string;
+  readonly reason: string;
   readonly [field: string]: unknown;
 }
 
@@ -498,32 +521,40 @@ export interface AdminServiceCategoryReorderInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. The previous declaration used `kind`,
+ * `percentage` and `active`; the backend speaks `type`, `percent` and `status`,
+ * so both reading and writing a surcharge were broken.
+ */
 export interface AdminSurcharge {
   readonly id: string;
+  readonly code: string;
   readonly name: string;
-  readonly kind: string;
+  readonly type: "FIXED" | "PERCENT";
+  readonly status: "ACTIVE" | "INACTIVE";
   readonly amountVnd?: number;
-  readonly percentage?: number;
-  readonly active: boolean;
+  readonly percent?: number;
   readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminSurchargeDraft {
+  /** Required by the backend; uppercase identifier such as WEEKEND. */
+  readonly code: string;
   readonly name: string;
-  readonly kind: string;
+  readonly type: "FIXED" | "PERCENT";
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly amountVnd?: number;
-  readonly percentage?: number;
-  readonly active?: boolean;
+  readonly percent?: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminSurchargePatch {
   readonly name?: string;
-  readonly kind?: string;
+  readonly type?: "FIXED" | "PERCENT";
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly amountVnd?: number;
-  readonly percentage?: number;
-  readonly active?: boolean;
+  readonly percent?: number;
   readonly [field: string]: unknown;
 }
 

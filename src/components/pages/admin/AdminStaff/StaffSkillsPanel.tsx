@@ -6,7 +6,6 @@ import {
   adminService,
   useAdminServices,
   useStaffSkills,
-  type AdminStaffSkill,
 } from "@/service";
 
 // Reads the org service catalog and the staff's current skill grants,
@@ -18,7 +17,12 @@ export function StaffSkillsPanel({
   const services = useAdminServices();
   const skills = useStaffSkills(staffId);
   const grantedIds = useMemo<Set<string>>(
-    () => new Set(((skills.data?.items ?? []) as AdminStaffSkill[]).map((skill) => skill.serviceId)),
+    // The endpoint answers { staffId, skills, version } — not the { items }
+    // envelope the rest of the admin lists use — and each entry is keyed by
+    // skillId. Reading `.items` and `.serviceId` meant the granted set was
+    // always empty, so a staff member's existing skills never showed as ticked
+    // and saving silently dropped every one of them.
+    () => new Set((skills.data?.skills ?? []).map((skill) => skill.skillId)),
     [skills.data],
   );
 
@@ -41,8 +45,10 @@ export function StaffSkillsPanel({
     try {
       await adminService.setStaffSkills(
         staffId,
-        { skills: [...currentSet].map((serviceId) => ({ serviceId })) },
-        staffVersion,
+        { skills: [...currentSet].map((skillId) => ({ skillId })) },
+        // The skill set carries its own version; the staff member's is a
+        // different resource and would fail the optimistic check.
+        skills.data?.version ?? staffVersion,
       );
       setSelected(null);
       void skills.mutate();

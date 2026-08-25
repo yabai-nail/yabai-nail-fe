@@ -47,7 +47,7 @@ import type {
   AdminStaffPerformance,
   AdminStaffShift,
   AdminStaffShiftDraft,
-  AdminStaffSkill,
+  AdminStaffSkillSet,
   AdminStaffSkillsInput,
   AdminAccount,
   AdminAccountDraft,
@@ -422,12 +422,12 @@ export const adminService = {
       version,
     }),
   staffSkills: (staffId: string) =>
-    executeApiOperation<BackendList<AdminStaffSkill>>(
+    executeApiOperation<AdminStaffSkillSet>(
       "GET /api/v1/admin/staff/{staffId}/skills",
       { path: { staffId } },
     ),
   setStaffSkills: (staffId: string, input: AdminStaffSkillsInput, version?: string | number) =>
-    executeApiOperation<BackendList<AdminStaffSkill>>(
+    executeApiOperation<AdminStaffSkillSet>(
       "PUT /api/v1/admin/staff/{staffId}/skills",
       { path: { staffId }, body: input, version },
     ),

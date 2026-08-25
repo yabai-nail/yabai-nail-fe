@@ -10,10 +10,10 @@ import {
   type AdminStaffShift,
 } from "@/service";
 
-const TZ_OFFSET_TOKYO = "+09:00";
-
-function toIso(date: string, time: string): string {
-  return `${date}T${time}:00${TZ_OFFSET_TOKYO}`;
+/** The shift endpoint only accepts quarter-hour boundaries. */
+export function isQuarterHour(time: string): boolean {
+  const match = /^(\d{2}):(\d{2})$/.exec(time);
+  return match !== null && Number(match[2]) % 15 === 0;
 }
 
 function fmt(iso: string): string {
@@ -106,7 +106,15 @@ function ShiftOrLeaveDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = !busy && date && start && end && (mode === "shift" || reason.trim().length > 0);
+  // Quarter-hour and ordering are backend rules; check them here so the admin
+  // is told before submitting rather than after a 422.
+  const timesValid =
+    mode === "leave" || (isQuarterHour(start) && isQuarterHour(end) && end > start);
+  const canSubmit =
+    !busy &&
+    Boolean(date && start && end) &&
+    timesValid &&
+    (mode === "shift" || reason.trim().length > 0);
 
   async function submit() {
     if (!canSubmit) return;
@@ -114,16 +122,24 @@ function ShiftOrLeaveDialog({
     setError(null);
     try {
       if (mode === "shift") {
+        // The endpoint takes the branch's local date and wall-clock times, not
+        // absolute instants — it resolves them against the branch timezone
+        // itself. Sending startsAt/endsAt left localDate and the two times
+        // empty, so every save came back "Ngay, khoang ca hoac nhan vien
+        // khong hop le."
         await adminService.createStaffShift(branchId, {
           staffId,
-          startsAt: toIso(date, start),
-          endsAt: toIso(date, end),
+          localDate: date,
+          startLocalTime: start,
+          endLocalTime: end,
+          type: "WORK",
         });
       } else {
+        // Leave is whole days: from/to, plus a reason the backend requires.
         await adminService.createLeaveRequest(branchId, {
           staffId,
-          startsAt: toIso(date, start),
-          endsAt: toIso(date, end),
+          from: date,
+          to: date,
           reason: reason.trim(),
         });
       }
@@ -176,6 +192,11 @@ function ShiftOrLeaveDialog({
                   />
                 </label>
               </div>
+              {mode === "shift" && !timesValid ? (
+                <p className="text-xs text-admin-muted">
+                  Giờ bắt đầu và kết thúc phải rơi vào mốc 15 phút (00, 15, 30, 45), và giờ kết thúc phải sau giờ bắt đầu.
+                </p>
+              ) : null}
               {mode === "leave" ? (
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-admin-ink">Lý do</span>
