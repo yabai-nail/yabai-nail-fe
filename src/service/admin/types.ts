@@ -1001,10 +1001,18 @@ export interface AdminAccountPasswordReset {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. There is no `rules` key; the earn rate,
+ * redemption cap and increment are top-level and the backend rejects a save
+ * that omits any of them, because a PUT replaces the record rather than merging
+ * into it.
+ */
 export interface AdminLoyaltyConfig {
   readonly version: number;
+  readonly pointRate?: { readonly spendVnd: number; readonly points: number };
   readonly tiers?: ReadonlyArray<Record<string, unknown>>;
-  readonly rules?: Readonly<Record<string, unknown>>;
+  readonly redemptionCapPercent?: number;
+  readonly redemptionIncrement?: number;
   readonly [field: string]: unknown;
 }
 
