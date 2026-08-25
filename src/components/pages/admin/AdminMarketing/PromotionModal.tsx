@@ -20,25 +20,26 @@ export function PromotionModal({
 }>) {
   const isEdit = promotion !== null;
   const [code, setCode] = useState(promotion?.code ?? "");
-  const [name, setName] = useState(promotion?.name ?? "");
-  const [kind, setKind] = useState(promotion?.kind ?? "PERCENTAGE");
-  const [value, setValue] = useState(
-    String(promotion?.percentage ?? promotion?.discountVnd ?? ""),
-  );
-  const [startsAt, setStartsAt] = useState(promotion?.startsAt?.slice(0, 10) ?? "");
-  const [endsAt, setEndsAt] = useState(promotion?.endsAt?.slice(0, 10) ?? "");
+  const [name, setName] = useState(promotion?.title ?? "");
+  const [kind, setKind] = useState(promotion?.type ?? "PERCENT");
+  const [value, setValue] = useState(String(promotion?.value ?? ""));
+  const [startsAt, setStartsAt] = useState(promotion?.startAt?.slice(0, 10) ?? "");
+  const [endsAt, setEndsAt] = useState(promotion?.endAt?.slice(0, 10) ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const numericValue = Number(value.replace(/[^\d]/g, ""));
+  // Creating a promotion requires both dates; the backend rejects the request
+  // outright without them, and the code must be A-Z 0-9 _ - only.
   const canSubmit =
     name.trim().length >= 2 &&
     numericValue > 0 &&
-    (isEdit || code.trim().length >= 2) &&
+    (isEdit || (/^[A-Z0-9_-]{3,60}$/.test(code.trim().toUpperCase()) && startsAt !== "" && endsAt !== "")) &&
     !busy;
 
-  const amountFields =
-    kind === "PERCENTAGE" ? { percentage: numericValue } : { discountVnd: numericValue };
+  // The backend takes one `value` alongside `type`; it has no `percentage`
+  // field and reads neither `kind` nor `discountType`.
+  const amountFields = { type: kind, value: numericValue };
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -48,17 +49,16 @@ export function PromotionModal({
       if (isEdit && promotion) {
         await adminService.updatePromotion(
           promotion.id,
-          { name: name.trim(), ...amountFields, startsAt: startsAt || undefined, endsAt: endsAt || undefined },
+          { title: name.trim(), ...amountFields, startAt: startsAt || undefined, endAt: endsAt || undefined },
           promotion.version,
         );
       } else {
         await adminService.createPromotion({
           code: code.trim().toUpperCase(),
-          name: name.trim(),
-          kind,
+          title: name.trim(),
           ...amountFields,
-          startsAt: startsAt || undefined,
-          endsAt: endsAt || undefined,
+          startAt: startsAt,
+          endAt: endsAt,
         });
       }
       onSaved();
@@ -100,15 +100,15 @@ export function PromotionModal({
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Loại</span>
                   <select className={inputClass} value={kind} onChange={(event) => setKind(event.target.value)}>
-                    <option value="PERCENTAGE">Phần trăm (%)</option>
+                    <option value="PERCENT">Phần trăm (%)</option>
                     <option value="FIXED">Số tiền (₫)</option>
                   </select>
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">
-                    {kind === "PERCENTAGE" ? "Phần trăm" : "Số tiền (₫)"}
+                    {kind === "PERCENT" ? "Phần trăm" : "Số tiền (₫)"}
                   </span>
-                  <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENTAGE" ? "20" : "50000"} />
+                  <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} />
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-3">

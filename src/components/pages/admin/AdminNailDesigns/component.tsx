@@ -78,13 +78,14 @@ export function AdminNailDesignsComponent() {
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {row.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={row.imageUrl} alt="" className="size-10 rounded-lg object-cover" />
-                        ) : (
-                          <span className="grid size-10 place-items-center rounded-lg bg-admin-soft text-admin-accent">✦</span>
-                        )}
-                        <span className="font-medium text-admin-ink">{row.name}</span>
+                        {/*
+                          The endpoint returns mediaIds, not a URL, so a
+                          thumbnail needs the media access-url flow. Until that
+                          is wired, show the placeholder rather than an <img>
+                          bound to a field that never arrives.
+                        */}
+                        <span className="grid size-10 place-items-center rounded-lg bg-admin-soft text-admin-accent">✦</span>
+                        <span className="font-medium text-admin-ink">{row.title}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">

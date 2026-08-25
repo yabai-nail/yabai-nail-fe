@@ -18,8 +18,8 @@ describe("nail design derivation", () => {
   });
 
   it("adapts a backend design", () => {
-    const row = adaptDesign({ id: "d1", name: "X", imageUrl: "u", status: "DRAFT", version: 2 });
-    expect(row).toMatchObject({ id: "d1", imageUrl: "u", status: "DRAFT", version: 2 });
+    const row = adaptDesign({ id: "d1", title: "X", status: "DRAFT", version: 2 });
+    expect(row).toMatchObject({ id: "d1", title: "X", status: "DRAFT", version: 2 });
   });
 
   it("paginates and rejects invalid page size", () => {

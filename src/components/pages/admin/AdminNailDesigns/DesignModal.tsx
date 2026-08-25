@@ -19,8 +19,7 @@ export function DesignModal({
   onSaved: () => void;
 }>) {
   const isEdit = design !== null;
-  const [name, setName] = useState(design?.name ?? "");
-  const [imageUrl, setImageUrl] = useState(design?.imageUrl ?? "");
+  const [name, setName] = useState(design?.title ?? "");
   const [status, setStatus] = useState(design?.status ?? "DRAFT");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,14 +34,21 @@ export function DesignModal({
       if (isEdit && design) {
         await adminService.updateNailDesign(
           design.id,
-          { name: name.trim(), imageUrl: imageUrl.trim() || undefined, status },
+          // The backend names this `title`; `name` was never read, so the
+          // request failed validation with an empty title every time.
+          // Publishing additionally needs explicit consent.
+          {
+            title: name.trim(),
+            status,
+            ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
+          },
           design.version,
         );
       } else {
         await adminService.createNailDesign({
-          name: name.trim(),
-          imageUrl: imageUrl.trim() || undefined,
+          title: name.trim(),
           status,
+          ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
         });
       }
       onSaved();
@@ -69,10 +75,11 @@ export function DesignModal({
                 <span className="font-semibold text-admin-ink">Tên mẫu</span>
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="Gradient hồng pastel" autoFocus />
               </label>
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">URL ảnh (tuỳ chọn)</span>
-                <input className={inputClass} value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="https://..." />
-              </label>
+              {/*
+                No image URL field: the endpoint stores media as mediaIds from
+                the upload flow and never reads a URL, so anything typed here
+                was discarded on save.
+              */}
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Trạng thái</span>
                 <select className={inputClass} value={status} onChange={(event) => setStatus(event.target.value)}>
