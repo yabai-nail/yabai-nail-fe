@@ -922,29 +922,44 @@ export interface AdminSystemConfig {
   readonly [field: string]: unknown;
 }
 
+/**
+ * The resolution endpoints identify a customer from a scanned membership QR
+ * (`qrPayload`) or a typed phone number. They accept no other lookup key --
+ * a plain `code` resolves to nobody and comes back 404.
+ */
 export interface AdminCheckInResolutionInput {
-  readonly customerId?: string;
   readonly phone?: string;
-  readonly code?: string;
+  readonly qrPayload?: string;
+  readonly localDate?: string;
   readonly [field: string]: unknown;
 }
 
+/** Customer card returned by both resolution endpoints. */
+export interface AdminResolvedCustomer {
+  readonly id: string;
+  readonly displayName?: string;
+  readonly phone?: string;
+  readonly tier?: string;
+  readonly pointBalance?: number;
+  readonly [field: string]: unknown;
+}
+
+/** Read-only lookup: it reports the day's appointments, it does not check anyone in. */
 export interface AdminCheckInResolution {
-  readonly customerId?: string;
-  readonly appointmentId?: string;
-  readonly status: string;
+  readonly customer: AdminResolvedCustomer;
+  readonly localDate: string;
+  readonly todaysAppointments: ReadonlyArray<AdminAppointment>;
   readonly [field: string]: unknown;
 }
 
 export interface AdminMembershipCardResolutionInput {
-  readonly code?: string;
-  readonly qrToken?: string;
+  readonly phone?: string;
+  readonly qrPayload?: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminMembershipCardResolution {
-  readonly customerId?: string;
-  readonly tier?: string;
-  readonly status: string;
+  readonly customer: AdminResolvedCustomer;
+  readonly resolvedAt: string;
   readonly [field: string]: unknown;
 }
