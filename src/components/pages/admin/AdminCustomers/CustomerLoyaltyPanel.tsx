@@ -178,12 +178,16 @@ export function CustomerLoyaltyPanel({
                 className="grid grid-cols-[6rem_1fr_auto] gap-2"
               >
                 <span className="text-admin-muted">
-                  {new Date(entry.startedAt).toLocaleDateString("vi-VN")}
+                  {new Date(entry.startsAt).toLocaleDateString("vi-VN")}
                 </span>
                 <span className="truncate text-admin-ink">
-                  {entry.serviceNames.join(", ") || "—"}
+                  {(entry.services ?? []).map((service) => service.serviceName).join(", ") || "—"}
                 </span>
-                <strong>{typeof entry.totalVnd === "number" ? formatVnd(entry.totalVnd) : ""}</strong>
+                <strong>
+                  {formatVnd(
+                    (entry.services ?? []).reduce((sum, service) => sum + (service.unitPriceVnd ?? 0), 0),
+                  )}
+                </strong>
               </li>
             ))}
           </ul>

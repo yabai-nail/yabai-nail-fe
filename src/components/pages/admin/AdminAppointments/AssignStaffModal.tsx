@@ -56,28 +56,25 @@ export function AssignStaffModal({
                   <legend className="text-xs font-semibold text-admin-ink">Nhân viên khả dụng</legend>
                   {candidates.map((candidate) => (
                     <label
-                      key={candidate.staffId}
+                      key={candidate.id}
                       className="flex cursor-pointer items-start gap-3 rounded-lg border border-admin-border p-3 hover:border-admin-accent"
                     >
                       <input
                         type="radio"
                         name="assign-staff"
-                        value={candidate.staffId}
-                        checked={staffId === candidate.staffId}
-                        onChange={() => setStaffId(candidate.staffId)}
+                        value={candidate.id}
+                        checked={staffId === candidate.id}
+                        onChange={() => setStaffId(candidate.id)}
                         className="mt-1"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-admin-ink">{candidate.displayName}</p>
-                        {candidate.reasons && candidate.reasons.length > 0 ? (
-                          <p className="mt-1 text-[0.65rem] leading-4 text-admin-muted">
-                            {candidate.reasons.join(" • ")}
-                          </p>
-                        ) : null}
+                        {/*
+                          The endpoint returns staff rows and nothing else — no
+                          score and no reasons — so the ranking hints that used
+                          to render here were bound to fields that never arrive.
+                        */}
                       </div>
-                      {typeof candidate.score === "number" ? (
-                        <span className="text-[0.65rem] text-admin-muted">Điểm phù hợp: {candidate.score.toFixed(2)}</span>
-                      ) : null}
                     </label>
                   ))}
                 </fieldset>

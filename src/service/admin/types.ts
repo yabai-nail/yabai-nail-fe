@@ -245,11 +245,18 @@ export interface AdminAppointmentPaymentQuote {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API: allocation candidates are staff rows,
+ * keyed by `id`. The previous declaration said `staffId`, so every candidate
+ * read as undefined - no radio could be selected and the assign dialog could
+ * never submit. There is no score or reasons field either.
+ */
 export interface AdminAppointmentAllocationCandidate {
-  readonly staffId: string;
+  readonly id: string;
   readonly displayName: string;
-  readonly score?: number;
-  readonly reasons?: ReadonlyArray<string>;
+  readonly branchId?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly active?: boolean;
   readonly [field: string]: unknown;
 }
 
@@ -296,12 +303,24 @@ export interface AdminCustomerCouponIssuance {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. The date field is `startsAt` and the
+ * services are objects under `services`, not a `serviceNames` string array —
+ * reading the old names threw on `.join` and took the whole customers page down
+ * as soon as a customer had any history.
+ */
+export interface AdminCustomerNailHistoryService {
+  readonly serviceId: string;
+  readonly serviceName: string;
+  readonly unitPriceVnd: number;
+  readonly durationMinutes?: number;
+}
+
 export interface AdminCustomerNailHistoryEntry {
   readonly appointmentId: string;
-  readonly startedAt: string;
-  readonly serviceNames: ReadonlyArray<string>;
-  readonly staffName?: string;
-  readonly totalVnd?: number;
+  readonly startsAt: string;
+  readonly status?: string;
+  readonly services: ReadonlyArray<AdminCustomerNailHistoryService>;
   readonly [field: string]: unknown;
 }
 
@@ -409,14 +428,21 @@ export interface AdminStaffSkillsInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API: a shift is a branch-local date plus
+ * wall-clock times, and its state is `approvalStatus`. Reading startsAt/endsAt
+ * produced "Invalid Date → Invalid Date" for every row.
+ */
 export interface AdminStaffShift {
   readonly id: string;
   readonly staffId: string;
   readonly branchId: string;
-  readonly startsAt: string;
-  readonly endsAt: string;
-  readonly status?: string;
-  readonly note?: string;
+  readonly localDate: string;
+  readonly startLocalTime: string;
+  readonly endLocalTime: string;
+  readonly type?: "WORK" | "LEAVE";
+  readonly approvalStatus?: string;
+  readonly reason?: string;
   readonly [field: string]: unknown;
 }
 
@@ -975,10 +1001,18 @@ export interface AdminAccountPasswordReset {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. There is no `rules` key; the earn rate,
+ * redemption cap and increment are top-level and the backend rejects a save
+ * that omits any of them, because a PUT replaces the record rather than merging
+ * into it.
+ */
 export interface AdminLoyaltyConfig {
   readonly version: number;
+  readonly pointRate?: { readonly spendVnd: number; readonly points: number };
   readonly tiers?: ReadonlyArray<Record<string, unknown>>;
-  readonly rules?: Readonly<Record<string, unknown>>;
+  readonly redemptionCapPercent?: number;
+  readonly redemptionIncrement?: number;
   readonly [field: string]: unknown;
 }
 

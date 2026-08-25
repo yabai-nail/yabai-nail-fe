@@ -220,7 +220,17 @@ function LoyaltyConfigForm({
   config,
   onSaved,
 }: Readonly<{ config: AdminLoyaltyConfig; onSaved: () => void }>) {
-  const [text, setText] = useState(() => JSON.stringify({ tiers: config.tiers, rules: config.rules }, null, 2));
+  // Seed the editor with the whole config, minus the fields the server owns.
+  // It used to seed { tiers, rules } only — `rules` is not part of the response
+  // at all, and dropping pointRate, redemptionCapPercent and redemptionIncrement
+  // meant every save replaced the record with one missing required fields and
+  // came back "Cau hinh diem khong hop le."
+  const [text, setText] = useState(() => {
+    const editable: Record<string, unknown> = { ...config };
+    delete editable.version;
+    delete editable.effectiveVersion;
+    return JSON.stringify(editable, null, 2);
+  });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

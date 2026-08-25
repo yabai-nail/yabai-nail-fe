@@ -29,8 +29,10 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
   const query = useAdminBranchSettings(branchId);
   const settings = query.data;
   const remote: BookingConfig = {
-    windowDays: readNumber(settings?.booking, "windowDays", DEFAULTS.windowDays),
-    cancellationCutoffHours: readNumber(settings?.booking, "cancellationCutoffHours", DEFAULTS.cancellationCutoffHours),
+    windowDays: readNumber(settings?.booking, "bookingWindowDays", DEFAULTS.windowDays),
+    cancellationCutoffHours: Math.round(
+      readNumber(settings?.booking, "cancellationCutoffMinutes", DEFAULTS.cancellationCutoffHours * 60) / 60,
+    ),
     slotIntervalMinutes: readNumber(settings?.booking, "slotIntervalMinutes", DEFAULTS.slotIntervalMinutes),
   };
 
@@ -58,9 +60,14 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
       await adminService.updateBranchSettings(
         branchId,
         {
+          // Field names the backend consumes. It reads booking.bookingWindowDays
+          // and booking.cancellationCutoffMinutes; the form used to write
+          // windowDays and cancellationCutoffHours, which were stored verbatim
+          // and never read, so the saved value showed on screen while the salon
+          // kept running on the old one.
           booking: {
-            windowDays: draft.windowDays,
-            cancellationCutoffHours: draft.cancellationCutoffHours,
+            bookingWindowDays: draft.windowDays,
+            cancellationCutoffMinutes: draft.cancellationCutoffHours * 60,
             slotIntervalMinutes: draft.slotIntervalMinutes,
           },
         },
