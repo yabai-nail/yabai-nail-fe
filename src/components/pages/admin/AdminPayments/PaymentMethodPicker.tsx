@@ -15,8 +15,16 @@ export function PaymentMethodPicker({ value, isDisabled, onChange }: Readonly<{
   isDisabled: boolean;
   onChange: (method: PaymentMethod) => void;
 }>) {
+  // `value` is passed straight through, including null — never `undefined`.
+  // Undefined switches react-aria to uncontrolled mode, where it keeps its own
+  // selection that can drift from the invoice. It drifted on the very first
+  // option: "Tiền mặt" rendered as checked while `invoice.paymentMethod` was
+  // still null, so clicking it produced no change event, no onChange, and a
+  // confirm that silently did nothing. Cash being the most common method made
+  // it the worst one to break. Controlled means the radio can only ever show
+  // what the invoice actually holds.
   return (
-    <RadioGroup aria-label="Phương thức thanh toán" value={value ?? undefined} onChange={(next) => onChange(next as PaymentMethod)} isDisabled={isDisabled} className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+    <RadioGroup aria-label="Phương thức thanh toán" value={value} onChange={(next) => onChange(next as PaymentMethod)} isDisabled={isDisabled} className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       {methods.map(({ id, icon: Icon }) => <Radio key={id} value={id} className="rounded-lg border border-admin-border px-2 py-3 text-admin-muted data-[selected=true]:border-admin-accent data-[selected=true]:bg-admin-soft data-[selected=true]:text-admin-accent"><Radio.Control className="sr-only"><Radio.Indicator /></Radio.Control><Radio.Content className="flex flex-col items-center gap-1 text-center text-xs"><Icon aria-hidden="true" className="size-5" />{paymentMethodLabels[id]}</Radio.Content></Radio>)}
     </RadioGroup>
   );

@@ -40,6 +40,26 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/**
+ * The in-flight boot refresh, shared across every mount of the provider.
+ *
+ * Refresh tokens rotate, and the backend treats a second use of a spent token
+ * as theft: it revokes the whole token family. React StrictMode mounts effects
+ * twice in development, and a remount can happen in production too, so two
+ * mounts reading the same stored token would each POST it — the second call
+ * killing the session the first had just established. A module-level promise
+ * makes the exchange happen once and lets every caller await the same result;
+ * a mount-scoped ref cannot, because each mount gets its own ref.
+ */
+let bootRefresh: Promise<AdminSession> | null = null;
+
+function refreshOnce(refreshToken: string): Promise<AdminSession> {
+  bootRefresh ??= authService.refreshAdminSession(refreshToken).finally(() => {
+    bootRefresh = null;
+  });
+  return bootRefresh;
+}
+
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [user, setUser] = useState<AuthenticatedAdmin | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -96,7 +116,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       try {
         const stored = readAdminSession();
         if (!stored) throw new Error("NO_STORED_SESSION");
-        const session = await authService.refreshAdminSession(stored.refreshToken);
+        const session = await refreshOnce(stored.refreshToken);
         if (cancelled) return;
         adoptSession(session);
         const summary = await authService.adminSession();
@@ -116,7 +136,10 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       const token = refreshTokenRef.current;
       if (!token) return null;
       try {
-        const session = await authService.refreshAdminSession(token);
+        // Same single-flight guard as boot: a page with several panels can
+        // have three requests 401 at once, and three refreshes of one token
+        // is exactly the reuse pattern the backend punishes by revoking.
+        const session = await refreshOnce(token);
         adoptSession(session);
         return session.accessToken;
       } catch {

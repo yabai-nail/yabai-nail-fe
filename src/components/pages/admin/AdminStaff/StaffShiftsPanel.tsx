@@ -3,6 +3,7 @@
 import { CalendarDaysIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
   useAdminStaffShifts,
@@ -97,7 +98,7 @@ function ShiftOrLeaveDialog({
   onClose: () => void;
   onSaved: () => void;
 }>) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayAtSalon();
   const [date, setDate] = useState(today);
   const [start, setStart] = useState("09:00");
   const [end, setEnd] = useState("17:00");
