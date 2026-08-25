@@ -191,10 +191,14 @@ export interface AdminAppointmentServiceCompletionInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * What the backend actually reads when capturing a payment: `method`, and
+ * `reference` for card/transfer receipts. The amount is recomputed server-side
+ * from the appointment so a client can never set a price — `amountVnd` and
+ * `discountVnd` used to be declared here and sent, and were silently dropped.
+ */
 export interface AdminAppointmentPaymentInput {
   readonly method: string;
-  readonly amountVnd: number;
-  readonly discountVnd?: number;
   readonly reference?: string;
   readonly [field: string]: unknown;
 }
