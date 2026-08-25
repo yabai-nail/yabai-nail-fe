@@ -20,7 +20,6 @@ export function ServiceEditModal({
   const [name, setName] = useState(service.name);
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
-  const [isVisible, setIsVisible] = useState(service.isVisible);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +39,6 @@ export function ServiceEditModal({
           name: name.trim(),
           priceVnd: priceNum,
           durationMinutes: durationNum,
-          active: isVisible,
         },
         service.version,
       );
@@ -93,14 +91,13 @@ export function ServiceEditModal({
                   />
                 </label>
               </div>
-              <label className="flex items-center gap-3 text-sm text-admin-ink">
-                <input
-                  type="checkbox"
-                  checked={isVisible}
-                  onChange={(event) => setIsVisible(event.target.checked)}
-                />
-                Hiển thị công khai cho khách
-              </label>
+              {/*
+                No visibility toggle: the service endpoint never reads an
+                `active` field — grepping the whole controller for `body.active`
+                returns nothing — so the checkbox that used to sit here looked
+                like it hid a service from customers and did nothing at all.
+                Restore it when the backend accepts the flag.
+              */}
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">

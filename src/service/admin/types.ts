@@ -226,12 +226,22 @@ export interface AdminAppointmentPayment {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API. The amount to collect is `amountDueVnd`;
+ * there is no `totalVnd` and no `lines`, which is what this used to declare — so
+ * a reader checking `quote.totalVnd` was checking a field that never arrives.
+ *
+ * The endpoint also ignores its request body entirely: it echoes the totals
+ * already stored on the appointment. Sending serviceIds, customItems or a
+ * discount changes nothing.
+ */
 export interface AdminAppointmentPaymentQuote {
   readonly appointmentId: string;
   readonly subtotalVnd: number;
   readonly discountVnd: number;
-  readonly totalVnd: number;
-  readonly lines: ReadonlyArray<Record<string, unknown>>;
+  readonly amountDueVnd: number;
+  readonly currency: string;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 

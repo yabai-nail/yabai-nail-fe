@@ -171,36 +171,26 @@ export function AdminPaymentsComponent() {
     }
     setConfirmPending(true);
     setConfirmError(null);
-    // Two-step: quote first so BE reconciles line items + discount + surcharges;
-    // record uses the BE-authoritative totalVnd, not the local calculation.
+    // Quote first, then record. The quote is what the backend will actually
+    // charge; it ignores its request body entirely and echoes the totals already
+    // stored on the appointment, so nothing is sent with it.
     void (async () => {
       try {
-        // Quote inputs mirror what BE needs to reconcile totals against its
-        // own catalog snapshot: primary service, ad-hoc additional items
-        // (name + price + source), and the manual discount.
         const quote = await adminService.requestAppointmentPaymentQuote(
           branchId!,
           appointmentId!,
-          {
-            serviceIds: [
-              invoice.currentService.id,
-              ...invoice.additionalItems
-                .filter((item) => item.source === "catalog")
-                .map((item) => item.id),
-            ],
-            customItems: invoice.additionalItems
-              .filter((item) => item.source === "custom")
-              .map((item) => ({ name: item.name, priceVnd: item.price, note: item.note })),
-            discountVnd: invoice.discount,
-          },
+          undefined,
           appointment?.version,
         );
         // The screen's own total is only ever a preview. If it disagrees with the
-        // quote the backend just issued, stop and say so rather than confirming a
-        // number the salon read off the screen and the till will never see.
-        if (typeof quote.totalVnd === "number" && quote.totalVnd !== totals.grandTotal) {
+        // amount the backend is about to charge, stop and say so rather than
+        // confirming a number the salon read off the screen and the till will
+        // never see. The field is amountDueVnd — an earlier version of this
+        // check read quote.totalVnd, which the endpoint does not return, so the
+        // comparison silently never ran.
+        if (typeof quote.amountDueVnd === "number" && quote.amountDueVnd !== totals.grandTotal) {
           setConfirmError(
-            `Số tiền trên màn hình (${formatVnd(totals.grandTotal)}) khác số máy chủ tính (${formatVnd(quote.totalVnd)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
+            `Số tiền trên màn hình (${formatVnd(totals.grandTotal)}) khác số máy chủ sẽ thu (${formatVnd(quote.amountDueVnd)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
           );
           return;
         }
