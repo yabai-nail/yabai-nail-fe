@@ -51,8 +51,8 @@ export function SurchargePanel() {
                   <span className="ml-2 text-admin-muted">
                     {typeof surcharge.amountVnd === "number"
                       ? formatVnd(surcharge.amountVnd)
-                      : typeof surcharge.percentage === "number"
-                        ? `${surcharge.percentage}%`
+                      : typeof surcharge.percent === "number"
+                        ? `${surcharge.percent}%`
                         : "—"}
                   </span>
                 </span>
@@ -95,23 +95,27 @@ function SurchargeEditor({
   onSaved: () => void;
 }>) {
   const isEdit = surcharge !== null;
+  const [code, setCode] = useState(
+    typeof surcharge?.code === "string" ? surcharge.code : "",
+  );
   const [name, setName] = useState(surcharge?.name ?? "");
   const [kind, setKind] = useState<"FIXED" | "PERCENT">(
-    surcharge && typeof surcharge.percentage === "number" ? "PERCENT" : "FIXED",
+    surcharge?.type === "PERCENT" ? "PERCENT" : "FIXED",
   );
   const [amount, setAmount] = useState(
     typeof surcharge?.amountVnd === "number" ? String(surcharge.amountVnd) : "",
   );
   const [percent, setPercent] = useState(
-    typeof surcharge?.percentage === "number" ? String(surcharge.percentage) : "",
+    typeof surcharge?.percent === "number" ? String(surcharge.percent) : "",
   );
-  const [active, setActive] = useState(surcharge?.active ?? true);
+  const [active, setActive] = useState(surcharge ? surcharge.status === "ACTIVE" : true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const numericAmount = Number(amount.replace(/\D/g, ""));
   const numericPercent = Number(percent);
   const canSubmit =
+    code.trim().length > 0 &&
     name.trim().length > 0 &&
     !busy &&
     (kind === "FIXED" ? numericAmount > 0 : numericPercent > 0);
@@ -120,11 +124,16 @@ function SurchargeEditor({
     if (!canSubmit) return;
     setBusy(true);
     setError(null);
+    // Field names the backend actually reads. The form used to send
+    // { name, kind, active, percentage } and omit code entirely, so every save
+    // failed with "Thong tin phu thu khong hop le." — code is required, and
+    // kind/active/percentage are read as type/status/percent.
     const payload = {
+      code: code.trim().toUpperCase(),
       name: name.trim(),
-      kind,
-      active,
-      ...(kind === "FIXED" ? { amountVnd: numericAmount } : { percentage: numericPercent }),
+      type: kind,
+      status: (active ? "ACTIVE" : "INACTIVE") as "ACTIVE" | "INACTIVE",
+      ...(kind === "FIXED" ? { amountVnd: numericAmount } : { percent: numericPercent }),
     };
     try {
       if (isEdit) {
@@ -152,6 +161,19 @@ function SurchargeEditor({
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-3 px-5 py-4 text-sm">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold text-admin-ink">Mã phụ thu</span>
+                <input
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
+                  placeholder="WEEKEND"
+                  disabled={isEdit}
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink disabled:opacity-60"
+                />
+                <span className="text-admin-muted">
+                  {isEdit ? "Mã không đổi được sau khi tạo." : "Chữ in hoa, dùng để nhận diện phụ thu."}
+                </span>
+              </label>
               <label className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-admin-ink">Tên phụ thu</span>
                 <input

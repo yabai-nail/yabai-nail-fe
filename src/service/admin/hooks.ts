@@ -17,8 +17,8 @@ import type {
   AdminSurcharge,
   AdminStaffMember,
   AdminStaffPerformance,
+  AdminStaffSkillSet,
   AdminStaffShift,
-  AdminStaffSkill,
   AdminAccount,
   AdminAuditLog,
   AdminBranch,
@@ -200,7 +200,7 @@ export function useStaffCompensation(staffId: string | null, period?: string) {
 }
 
 export function useStaffSkills(staffId: string | null) {
-  return useApiOperation<BackendList<AdminStaffSkill>>(
+  return useApiOperation<AdminStaffSkillSet>(
     staffId ? "GET /api/v1/admin/staff/{staffId}/skills" : null,
     { path: staffId ? { staffId } : undefined },
   );
