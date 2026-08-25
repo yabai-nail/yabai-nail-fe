@@ -1,6 +1,7 @@
 import { PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { formatVnd } from "@/lib/admin-format";
+import { useAdminStaffMember } from "@/service";
 import { StaffCompensationForm } from "./StaffCompensationForm";
 import { StaffPerformancePanel } from "./StaffPerformancePanel";
 import { StaffShiftsPanel } from "./StaffShiftsPanel";
@@ -29,6 +30,14 @@ export function StaffDetailPanel({
       ? member.revenue - member.commissionAmount
       : null;
 
+  // GET /admin/staff/{id} is the authoritative record; prefer it for profile fields the
+  // performance-oriented list row may not carry, falling back to the row while it loads.
+  const detail = useAdminStaffMember(member.id);
+  const info = detail.data as Record<string, unknown> | undefined;
+  const phone = (typeof info?.phone === "string" && info.phone) || member.phone;
+  const commissionRate =
+    typeof info?.commissionRate === "number" ? info.commissionRate : member.commissionRate;
+
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="px-4 pt-4"><h2 className="font-bold">Chi tiết nhân viên</h2></Card.Header>
@@ -46,12 +55,12 @@ export function StaffDetailPanel({
           <div className="flex gap-2">
             <PhoneIcon className="size-4 text-admin-muted" />
             <dt className="sr-only">Số điện thoại</dt>
-            <dd>{member.phone || MISSING}</dd>
+            <dd>{phone || MISSING}</dd>
           </div>
           <div className="flex items-center justify-between">
             <dt>Tỷ lệ hoa hồng</dt>
             <dd className="font-bold">
-              {typeof member.commissionRate === "number" ? `${member.commissionRate}%` : MISSING}
+              {typeof commissionRate === "number" ? `${commissionRate}%` : MISSING}
             </dd>
           </div>
         </dl>

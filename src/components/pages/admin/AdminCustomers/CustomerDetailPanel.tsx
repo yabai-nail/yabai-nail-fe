@@ -2,6 +2,7 @@ import { CalendarDaysIcon, ChatBubbleLeftRightIcon, PencilSquareIcon, PhoneIcon 
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { useAdminCustomer } from "@/service";
 import { CustomerLoyaltyPanel } from "./CustomerLoyaltyPanel";
 import { CustomerNotesPanel } from "./CustomerNotesPanel";
 import type { Customer } from "./data";
@@ -16,6 +17,14 @@ export function CustomerDetailPanel({
   branchId?: string | null;
   onEdit?: () => void;
 }>) {
+  // Authoritative by-id read; prefer its masked phone over the list row while present.
+  const detail = useAdminCustomer(branchId ?? null, customer.id);
+  const info = detail.data as Record<string, unknown> | undefined;
+  const phone =
+    (typeof info?.phoneMasked === "string" && info.phoneMasked) ||
+    (typeof info?.phone === "string" && info.phone) ||
+    customer.phone;
+
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between px-4 pt-4">
@@ -37,7 +46,7 @@ export function CustomerDetailPanel({
           <div><p className="font-bold">{customer.name}</p><Chip size="sm" color="accent" variant="soft"><Chip.Label>{getCustomerSegmentLabel(customer.segment)}</Chip.Label></Chip></div>
         </div>
         <dl className="space-y-2 text-sm">
-          <div className="flex gap-2"><PhoneIcon className="size-4 shrink-0 text-admin-muted" /><dd>{customer.phone}</dd></div>
+          <div className="flex gap-2"><PhoneIcon className="size-4 shrink-0 text-admin-muted" /><dd>{phone}</dd></div>
           <div className="flex gap-2"><CalendarDaysIcon className="size-4 shrink-0 text-admin-muted" /><dd>{customer.birthday}</dd></div>
           <div><dt className="sr-only">Mạng xã hội</dt><dd className="text-admin-muted">{customer.handle}</dd></div>
           <div><dt className="sr-only">Sở thích</dt><dd>{customer.preference}</dd></div>

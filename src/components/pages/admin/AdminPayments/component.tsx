@@ -6,6 +6,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import {
   adminService,
   useAdminAppointment,
+  useAdminAppointmentPayments,
   useAdminBranch,
   useAdminCustomers,
   useAdminServices,
@@ -120,6 +121,10 @@ export function AdminPaymentsComponent() {
   const { data: customersData } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
+  // Payments already recorded against this appointment, shown so the cashier can
+  // see prior/partial captures before taking another.
+  const { data: priorPaymentsData } = useAdminAppointmentPayments(branchId, appointmentId);
+  const priorPayments = priorPaymentsData?.items ?? [];
   const lookups = useMemo(() => ({
     customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
@@ -230,6 +235,25 @@ export function AdminPaymentsComponent() {
           <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">Xác nhận & thanh toán</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">Tổng tiền khách thanh toán</span><strong className="text-xl text-admin-accent">{totals.grandTotal.toLocaleString("vi-VN")} ₫</strong></div></div>
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
+        {priorPayments.length > 0 ? (
+          <div className="rounded-lg border border-admin-border bg-admin-surface p-4">
+            <h2 className="mb-2 text-sm font-bold text-admin-ink">Thanh toán trước đó</h2>
+            <ul className="divide-y divide-admin-border">
+              {priorPayments.map((payment) => {
+                const record = payment as unknown as Record<string, unknown>;
+                const amount = typeof record.amountVnd === "number" ? record.amountVnd : null;
+                const method = typeof record.method === "string" ? record.method : "—";
+                const status = typeof record.status === "string" ? record.status : "";
+                return (
+                  <li key={String(record.id)} className="flex items-center justify-between py-2 text-sm">
+                    <span className="text-admin-muted">{method}{status ? ` · ${status}` : ""}</span>
+                    <span className="font-semibold text-admin-ink">{amount !== null ? `${amount.toLocaleString("vi-VN")} ₫` : "—"}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
       </div>
       {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
