@@ -1,6 +1,5 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
-import { calculateCommission } from "@/lib/admin-commission";
 import { formatVnd } from "@/lib/admin-format";
 import type { StaffMember } from "./data";
 
@@ -9,6 +8,12 @@ type StaffTableProps = {
   readonly selectedId: string | null;
   readonly onSelect: (id: string) => void;
 };
+
+const MISSING = "—";
+
+function formatOptionalVnd(value: number | null): string {
+  return typeof value === "number" ? formatVnd(value) : MISSING;
+}
 
 export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
   return (
@@ -27,34 +32,32 @@ export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
-          {staff.map((member) => {
-            const payout = calculateCommission(member.revenue, member.commissionRate);
-
-            return (
-              <tr key={member.id} className={selectedId === member.id ? "bg-admin-soft" : ""}>
-                <td className="px-3 py-2">
-                  <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
-                    <Avatar size="sm" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
-                    <strong>{member.name}</strong>
-                  </Button>
-                </td>
-                <td className="px-3 py-2">
-                  <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>
-                    <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
-                  </Chip>
-                </td>
-                <td className="px-3 py-2 font-medium">{formatVnd(member.revenue)}</td>
-                <td className="px-3 py-2">{member.commissionRate}%</td>
-                <td className="px-3 py-2 font-bold text-admin-accent">{formatVnd(payout)}</td>
-                <td className="px-3 py-2">{member.orders}</td>
-                <td className="px-3 py-2">
-                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Thao tác cho ${member.name}`}>
-                    <EllipsisHorizontalIcon className="size-4" />
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
+          {staff.map((member) => (
+            <tr key={member.id} className={selectedId === member.id ? "bg-admin-soft" : ""}>
+              <td className="px-3 py-2">
+                <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
+                  <Avatar size="sm" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
+                  <strong>{member.name}</strong>
+                </Button>
+              </td>
+              <td className="px-3 py-2">
+                <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>
+                  <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
+                </Chip>
+              </td>
+              <td className="px-3 py-2 font-medium">{formatOptionalVnd(member.revenue)}</td>
+              <td className="px-3 py-2">
+                {typeof member.commissionRate === "number" ? `${member.commissionRate}%` : MISSING}
+              </td>
+              <td className="px-3 py-2 font-bold text-admin-accent">{formatOptionalVnd(member.commissionAmount)}</td>
+              <td className="px-3 py-2">{member.orders ?? MISSING}</td>
+              <td className="px-3 py-2">
+                <Button isIconOnly size="sm" variant="ghost" aria-label={`Thao tác cho ${member.name}`}>
+                  <EllipsisHorizontalIcon className="size-4" />
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

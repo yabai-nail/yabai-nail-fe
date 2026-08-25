@@ -1,0 +1,171 @@
+"use client";
+
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  LockClosedIcon,
+  PhoneIcon,
+} from "@heroicons/react/24/outline";
+import { Button } from "@heroui/react";
+import { useState, type FormEvent } from "react";
+
+import { ApiClientError, useAuth } from "@/service";
+
+const PHONE_ID = "admin-login-phone";
+const PASSWORD_ID = "admin-login-password";
+const ERROR_ID = "admin-login-error";
+
+const FIELD_CLASS =
+  "min-h-11 w-full rounded-lg border border-admin-border bg-admin-surface px-10 text-sm text-admin-ink outline-none transition-colors placeholder:text-admin-muted focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20 disabled:cursor-wait disabled:opacity-60";
+
+function messageFor(error: unknown): string {
+  if (error instanceof ApiClientError) {
+    if (error.code === "INVALID_CREDENTIALS") {
+      return "Số điện thoại hoặc mật khẩu không đúng.";
+    }
+    if (error.code === "NETWORK_ERROR") {
+      return "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.";
+    }
+    return error.message;
+  }
+  return "Không thể đăng nhập. Vui lòng thử lại.";
+}
+
+/**
+ * Full-page sign-in for the admin console. Rendered by `AdminAuthGate` in
+ * place of the shell, so signing in returns the admin to the page they were
+ * trying to reach instead of dumping them on the dashboard.
+ */
+export function AdminLogin() {
+  const { login } = useAuth();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await login({
+        phone: String(form.get("phone") ?? ""),
+        password: String(form.get("password") ?? ""),
+      });
+    } catch (caught) {
+      setError(messageFor(caught));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="admin-shell grid min-h-screen place-items-center bg-admin-canvas px-4 py-10 text-admin-ink">
+      <main className="w-full max-w-sm rounded-xl border border-admin-border bg-admin-surface p-6 shadow-sm">
+        <span
+          aria-hidden="true"
+          className="font-display grid size-11 place-items-center rounded-lg bg-admin-accent text-lg font-semibold text-white"
+        >
+          Y
+        </span>
+        <h1 className="mt-4 text-xl font-bold text-admin-ink">Đăng nhập quản trị</h1>
+        <p className="mt-1 text-sm leading-6 text-admin-muted">
+          Dành cho quản lý và chủ chuỗi YABAI.
+        </p>
+
+        <form className="mt-6 space-y-4" onSubmit={submit} aria-busy={isSubmitting}>
+          <div>
+            <label
+              htmlFor={PHONE_ID}
+              className="mb-2 block text-sm font-semibold text-admin-ink"
+            >
+              Số điện thoại
+            </label>
+            <div className="relative">
+              <PhoneIcon
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-admin-muted"
+              />
+              <input
+                id={PHONE_ID}
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="username"
+                required
+                placeholder="0900000000"
+                disabled={isSubmitting}
+                aria-describedby={error ? ERROR_ID : undefined}
+                className={FIELD_CLASS}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor={PASSWORD_ID}
+              className="mb-2 block text-sm font-semibold text-admin-ink"
+            >
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <LockClosedIcon
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-admin-muted"
+              />
+              <input
+                id={PASSWORD_ID}
+                name="password"
+                type={isPasswordVisible ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                placeholder="Nhập mật khẩu"
+                disabled={isSubmitting}
+                aria-describedby={error ? ERROR_ID : undefined}
+                className={`${FIELD_CLASS} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setIsPasswordVisible((visible) => !visible)}
+                aria-label={isPasswordVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                className="absolute right-0 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-lg text-admin-muted transition-colors hover:text-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
+              >
+                {isPasswordVisible ? (
+                  <EyeSlashIcon aria-hidden="true" className="size-5" />
+                ) : (
+                  <EyeIcon aria-hidden="true" className="size-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {error ? (
+            <p
+              id={ERROR_ID}
+              role="alert"
+              className="rounded-lg bg-danger/10 px-3 py-2 text-xs leading-5 text-danger"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            isDisabled={isSubmitting}
+            className="rounded-lg"
+          >
+            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
+          </Button>
+        </form>
+
+        <p className="mt-4 text-center text-xs leading-5 text-admin-muted">
+          Tài khoản quản trị do chủ hệ thống cấp.
+        </p>
+      </main>
+    </div>
+  );
+}
+
+export const adminLoginMeta = { world: "connected", domain: "auth" } as const;

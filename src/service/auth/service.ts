@@ -1,7 +1,12 @@
-import { executeApiOperation, setAdminAccessToken } from "../api";
+import {
+  executeApiOperation,
+  setAdminAccessToken,
+  setCustomerAccessToken,
+} from "../api";
 import type {
   AccountMergeInput,
   AccountMergeResult,
+  AdminBranchSwitchResult,
   AdminLoginInput,
   AdminPasswordChangeInput,
   AdminPasswordResetInput,
@@ -42,15 +47,37 @@ export const authService = {
     // Bootstrap the current admin session (permissions, active branch) after
     // reload. Feature-stability endpoint per the platform catalog.
     executeApiOperation<AdminSessionSummary>("GET /api/v1/admin/auth/session"),
-  switchAdminBranch: (
+  /**
+   * Restores an admin session after reload. The refresh token rotates on every
+   * call — the caller MUST persist the one that comes back or the next reload
+   * replays a revoked token and the backend kills the whole family.
+   */
+  async refreshAdminSession(
+    refreshToken: string,
+    idempotencyKey?: string,
+  ): Promise<AdminSession> {
+    const session = await executeApiOperation<AdminSession>(
+      "POST /api/v1/auth/sessions/refresh",
+      { body: { refreshToken }, idempotencyKey },
+    );
+    setAdminAccessToken(session.accessToken);
+    return session;
+  },
+  async switchAdminBranch(
     sessionId: string,
     input: AdminSessionBranchInput,
     idempotencyKey?: string,
-  ) =>
-    executeApiOperation<AdminSession>(
+  ): Promise<AdminBranchSwitchResult> {
+    // The response is a fresh access token carrying `selectedBranchId`, not a
+    // whole session. Install it or every later request still reads the old
+    // branch.
+    const result = await executeApiOperation<AdminBranchSwitchResult>(
       "POST /api/v1/admin/auth/sessions/{sessionId}/branch",
       { path: { sessionId }, body: input, idempotencyKey },
-    ),
+    );
+    setAdminAccessToken(result.accessToken);
+    return result;
+  },
   changeAdminPassword: (input: AdminPasswordChangeInput, idempotencyKey?: string) =>
     executeApiOperation<void>("POST /api/v1/admin/auth/password-changes", {
       body: input,
@@ -71,18 +98,27 @@ export const authService = {
     }),
   startPhoneChallenge: (input: PhoneChallengeInput, idempotencyKey?: string) =>
     executeApiOperation<PhoneChallenge>("POST /api/v1/auth/phone/challenges", {
-      body: input,
+      body: { ...input, phone: input.phone.replace(/\s/g, "") },
       idempotencyKey,
     }),
-  verifyPhoneChallenge: (
+  /**
+   * Verifying the OTP is the customer's login. The access token lands in the
+   * customer bearer slot, never the admin one — the axios interceptor picks a
+   * slot by URL, so a customer token in the admin slot would be sent on
+   * `/admin/*` requests.
+   */
+  async verifyPhoneChallenge(
     challengeId: string,
     input: PhoneChallengeVerifyInput,
     idempotencyKey?: string,
-  ) =>
-    executeApiOperation<CustomerSession>(
+  ): Promise<CustomerSession> {
+    const session = await executeApiOperation<CustomerSession>(
       "POST /api/v1/auth/phone/challenges/{challengeId}/verify",
       { path: { challengeId }, body: input, idempotencyKey },
-    ),
+    );
+    setCustomerAccessToken(session.accessToken);
+    return session;
+  },
   startRecoveryChallenge: (input: PhoneChallengeInput, idempotencyKey?: string) =>
     executeApiOperation<PhoneChallenge>("POST /api/v1/auth/recovery/phone/challenges", {
       body: input,
@@ -97,11 +133,23 @@ export const authService = {
       "POST /api/v1/auth/recovery/phone/challenges/{challengeId}/verify",
       { path: { challengeId }, body: input, idempotencyKey },
     ),
-  refreshSession: (input: SessionRefreshInput, idempotencyKey?: string) =>
-    executeApiOperation<CustomerSession>("POST /api/v1/auth/sessions/refresh", {
-      body: input,
-      idempotencyKey,
-    }),
+  /**
+   * Restores a customer session after reload. Like the admin twin, the refresh
+   * token ROTATES on every call — the caller MUST persist the one that comes
+   * back or the next reload replays a spent token and the backend kills the
+   * whole family.
+   */
+  async refreshSession(
+    input: SessionRefreshInput,
+    idempotencyKey?: string,
+  ): Promise<CustomerSession> {
+    const session = await executeApiOperation<CustomerSession>(
+      "POST /api/v1/auth/sessions/refresh",
+      { body: input, idempotencyKey },
+    );
+    setCustomerAccessToken(session.accessToken);
+    return session;
+  },
   revokeAllSessions: () => executeApiOperation<void>("DELETE /api/v1/auth/sessions"),
   revokeCurrentSession: () => executeApiOperation<void>("DELETE /api/v1/auth/sessions/current"),
   startSocialAuthorization: (

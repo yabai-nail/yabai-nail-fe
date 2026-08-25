@@ -10,7 +10,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { notifications } from "./data";
+import { useMemo } from "react";
+
+import { useAdminBranch, useAdminDashboard } from "@/service";
+import { buildActivityItems } from "./adapters";
 
 const quickActions = [
   { id: "appointment", label: "Tạo lịch hẹn", icon: CalendarDaysIcon, href: "/admin/appointments?create=1" },
@@ -27,6 +30,10 @@ const notificationIcons = {
 
 export function UtilityPanel() {
   const router = useRouter();
+  const { branchId } = useAdminBranch();
+  const { data, error, isLoading } = useAdminDashboard(branchId);
+
+  const notifications = useMemo(() => buildActivityItems(data), [data]);
 
   return (
     <div className="space-y-4 xl:col-span-3">
@@ -59,6 +66,15 @@ export function UtilityPanel() {
           </Button>
         </Card.Header>
         <Card.Content className="px-4 pb-4 pt-2">
+          {error ? (
+            <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
+              Không tải được thông báo.
+            </p>
+          ) : !branchId || isLoading ? (
+            <p className="py-3 text-center text-xs text-admin-muted">Đang tải thông báo…</p>
+          ) : notifications.length === 0 ? (
+            <p className="py-3 text-center text-xs text-admin-muted">Chưa có thông báo mới.</p>
+          ) : (
           <ul aria-label="Thông báo mới" className="divide-y divide-admin-border">
             {notifications.map((notification) => {
               const Icon = notificationIcons[notification.kind];
@@ -79,10 +95,11 @@ export function UtilityPanel() {
               );
             })}
           </ul>
+          )}
         </Card.Content>
       </Card>
     </div>
   );
 }
 
-export const utilityPanelMeta = { world: "pure", domain: "admin-dashboard" } as const;
+export const utilityPanelMeta = { world: "connected", domain: "admin-dashboard" } as const;

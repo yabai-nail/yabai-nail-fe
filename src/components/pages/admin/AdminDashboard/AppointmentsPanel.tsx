@@ -6,19 +6,16 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import { useAdminBranch, useAdminDashboard, type AdminAppointment } from "@/service";
-import { appointments as fixtureAppointments, type Appointment as FixtureAppointment } from "./data";
+import { formatClock } from "./adapters";
+import type { Appointment as AppointmentRow } from "./data";
 
 // Server appointments do not carry rendered names — the admin dashboard
 // payload gives ids + timestamps. The panel fills the gaps as best it can
 // so a live list still reads, and callers who want richer information can
 // click through to the appointments page (which will resolve customers /
 // services separately).
-function toFixtureAppointment(server: AdminAppointment): FixtureAppointment {
-  const time = new Date(server.startsAt).toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+function toAppointmentRow(server: AdminAppointment, timeZone?: string): AppointmentRow {
+  const time = formatClock(server.startsAt, timeZone);
   const isConfirmed =
     server.status === "CONFIRMED" || server.status.toLowerCase().includes("confirm");
   return {
@@ -38,13 +35,12 @@ function toFixtureAppointment(server: AdminAppointment): FixtureAppointment {
 export function AppointmentsPanel() {
   const router = useRouter();
   const { branchId } = useAdminBranch();
-  const { data, error } = useAdminDashboard(branchId);
+  const { data, error, isLoading } = useAdminDashboard(branchId);
 
-  const rows = useMemo(() => {
-    if (!data?.upcoming) return fixtureAppointments;
-    if (data.upcoming.length === 0) return [];
-    return data.upcoming.map(toFixtureAppointment);
-  }, [data]);
+  const rows = useMemo(
+    () => (data?.upcoming ?? []).map((item) => toAppointmentRow(item, data?.branchTimeZone)),
+    [data],
+  );
 
   return (
     <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-5">
@@ -56,7 +52,11 @@ export function AppointmentsPanel() {
       </Card.Header>
       <Card.Content className="px-4 pb-4 pt-2 sm:px-5 sm:pb-5">
         {error ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Không tải được lịch hẹn hôm nay.</p>
+          <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
+            Không tải được lịch hẹn hôm nay.
+          </p>
+        ) : !branchId || isLoading ? (
+          <p className="py-3 text-center text-xs text-admin-muted">Đang tải lịch hẹn…</p>
         ) : rows.length === 0 ? (
           <p className="py-3 text-center text-xs text-admin-muted">Hôm nay chưa có lịch hẹn nào.</p>
         ) : (

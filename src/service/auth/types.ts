@@ -44,12 +44,26 @@ export interface PhoneChallengeVerifyInput {
   readonly [field: string]: unknown;
 }
 
+/**
+ * The customer the backend echoes back on OTP verify and on session refresh.
+ * Optional on `CustomerSession` because the field is not part of the frozen
+ * contract — the nav falls back to the masked phone when it is absent.
+ */
+export interface AuthenticatedCustomer {
+  readonly id: string;
+  readonly displayName: string;
+  readonly phone: string;
+  readonly locale?: string;
+  readonly [field: string]: unknown;
+}
+
 export interface CustomerSession {
   readonly sessionId: string;
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly expiresIn: number;
   readonly profileCompletionRequired?: boolean;
+  readonly user?: AuthenticatedCustomer;
   readonly [field: string]: unknown;
 }
 
@@ -91,18 +105,41 @@ export interface AccountMergeResult {
 
 // -- Admin auth mutations + bootstrap ------------------------------------------
 
+/**
+ * `GET /admin/auth/session` returns the phone masked and never returns tokens —
+ * it is the reload bootstrap, not a login response. Kept separate from
+ * `AuthenticatedAdmin` so the two shapes cannot be confused at a call site.
+ */
+export interface AdminSessionUser {
+  readonly id: string;
+  readonly displayName: string;
+  readonly phoneMasked: string;
+  readonly role: AdminRole;
+  readonly locale: string;
+  readonly branchIds: string[];
+  readonly permissions: string[];
+  readonly capabilities: string[];
+}
+
 export interface AdminSessionSummary {
-  readonly sessionId: string;
-  readonly user: AuthenticatedAdmin;
-  readonly issuedAt?: string;
-  readonly expiresAt?: string;
-  readonly branchId?: string | null;
-  readonly [field: string]: unknown;
+  readonly user: AdminSessionUser;
+  readonly session: {
+    readonly id: string | null;
+    readonly expiresAt: string | null;
+    readonly activeBranchId: string | null;
+  };
 }
 
 export interface AdminSessionBranchInput {
   readonly branchId: string;
   readonly [field: string]: unknown;
+}
+
+/** Branch switch mints a new access token carrying the selected branch. */
+export interface AdminBranchSwitchResult {
+  readonly accessToken: string;
+  readonly expiresIn: number;
+  readonly selectedBranchId: string;
 }
 
 export interface AdminPasswordChangeInput {

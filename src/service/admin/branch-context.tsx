@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { useAuth } from "../auth";
+import { authService, useAuth } from "../auth";
 
 interface AdminBranchContextValue {
   /** Currently selected branch id, or null if no branch is available yet. */
@@ -68,7 +68,7 @@ function writeStoredBranchId(branchId: string | null): void {
 }
 
 export function AdminBranchProvider({ children }: Readonly<{ children: ReactNode }>) {
-  const { user } = useAuth();
+  const { user, sessionId, activeBranchId } = useAuth();
   const branchIds = useMemo(() => user?.branchIds ?? [], [user]);
   // "userSelection" is what the admin explicitly picked (or what survived
   // reload via localStorage). The effective branchId is derived — that keeps
@@ -78,8 +78,8 @@ export function AdminBranchProvider({ children }: Readonly<{ children: ReactNode
     readStoredBranchId(),
   );
   const branchId = useMemo(
-    () => resolveActiveBranchId(userSelection, branchIds),
-    [userSelection, branchIds],
+    () => resolveActiveBranchId(userSelection ?? activeBranchId, branchIds),
+    [userSelection, activeBranchId, branchIds],
   );
 
   // Storage follows the effective branchId — a fall-back due to lost access
@@ -92,8 +92,16 @@ export function AdminBranchProvider({ children }: Readonly<{ children: ReactNode
     (next: string) => {
       if (!branchIds.includes(next)) return;
       setUserSelection(next);
+      // The access token carries the selected branch, so the switch has to
+      // reach the backend too — otherwise every admin request keeps reading
+      // the previous branch and the UI silently shows the wrong salon.
+      // Revert on failure so the header never claims a branch we did not get.
+      if (sessionId === null) return;
+      void authService
+        .switchAdminBranch(sessionId, { branchId: next })
+        .catch(() => setUserSelection(branchId));
     },
-    [branchIds],
+    [branchId, branchIds, sessionId],
   );
 
   const value = useMemo(
