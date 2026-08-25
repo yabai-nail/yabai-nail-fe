@@ -152,10 +152,22 @@ export function AdminPaymentsComponent() {
   const handleConfirm = () => {
     // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
-    if (result.ok) setInvoice(result.value);
     setIsConfirmOpen(false);
+    if (!result.ok) {
+      // The validation message used to be dropped on the floor: the dialog
+      // closed, no request went out, nothing on screen changed, and the staff
+      // member had every reason to believe the money was taken.
+      setConfirmError(result.error);
+      return;
+    }
+    setInvoice(result.value);
 
-    if (!isServerBacked || !invoice.paymentMethod) return;
+    if (!isServerBacked) {
+      setConfirmError(
+        "Hóa đơn này chưa gắn với lịch hẹn thật nên không ghi được giao dịch.",
+      );
+      return;
+    }
     setConfirmPending(true);
     setConfirmError(null);
     // Two-step: quote first so BE reconciles line items + discount + surcharges;
@@ -180,12 +192,21 @@ export function AdminPaymentsComponent() {
               .map((item) => ({ name: item.name, priceVnd: item.price, note: item.note })),
             discountVnd: invoice.discount,
           },
+          appointment?.version,
         );
-        await adminService.recordAppointmentPayment(branchId!, appointmentId!, {
-          method: invoice.paymentMethod!,
-          amountVnd: quote.totalVnd,
-          discountVnd: quote.discountVnd,
-        });
+        await adminService.recordAppointmentPayment(
+          branchId!,
+          appointmentId!,
+          {
+            method: invoice.paymentMethod!,
+            amountVnd: quote.totalVnd,
+            discountVnd: quote.discountVnd,
+          },
+          // Re-read the version: the quote above is itself a write, so the
+          // appointment may have moved on since this handler started. The
+          // quote's own field is loosely typed, so only trust a number.
+          typeof quote.version === "number" ? quote.version : appointment?.version,
+        );
         void mutateAppointment();
       } catch (thrown) {
         setConfirmError(
@@ -231,7 +252,7 @@ export function AdminPaymentsComponent() {
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
       </div>
-      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
+      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
     </AdminPageLayout>
   );

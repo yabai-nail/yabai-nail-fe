@@ -201,24 +201,28 @@ export const adminService = {
       "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
       { path: { branchId, appointmentId } },
     ),
+  // Both payment calls are version-checked by the backend: without `If-Match`
+  // it answers 422 "If-Match bat buoc." and no payment is ever recorded.
   recordAppointmentPayment: (
     branchId: string,
     appointmentId: string,
     input: AdminAppointmentPaymentInput,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminAppointmentPayment>(
       "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
-      { path: { branchId, appointmentId }, body: input, idempotencyKey },
+      { path: { branchId, appointmentId }, body: input, version, idempotencyKey },
     ),
   requestAppointmentPaymentQuote: (
     branchId: string,
     appointmentId: string,
     input?: Readonly<Record<string, unknown>>,
+    version?: string | number,
   ) =>
     executeApiOperation<AdminAppointmentPaymentQuote>(
       "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payment-quotes",
-      { path: { branchId, appointmentId }, body: input ?? {} },
+      { path: { branchId, appointmentId }, body: input ?? {}, version },
     ),
   attachAppointmentPhoto: (
     branchId: string,
