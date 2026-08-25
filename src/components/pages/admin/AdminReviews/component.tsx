@@ -4,7 +4,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { adminService, useAdminBranch, useAdminBranchReviews } from "@/service";
+import { adminService, useAdminBranch, useAdminBranchReviews, useAdminReviews } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
   adaptReview,
@@ -21,7 +21,12 @@ const pageSize = 8;
 
 export function AdminReviewsComponent() {
   const { branchId } = useAdminBranch();
-  const { data, isLoading, error, mutate } = useAdminBranchReviews(branchId);
+  const [scope, setScope] = useState<"branch" | "org">("branch");
+  const branchReviews = useAdminBranchReviews(scope === "branch" ? branchId : null);
+  const orgReviews = useAdminReviews();
+  // Org scope is a read-only overview: replies/handling need a per-review branch id,
+  // so those actions stay on the branch scope where the active branch is authoritative.
+  const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
 
   const source = useMemo<ReadonlyArray<ReviewRow>>(() => {
     if (!data?.items) return reviewFixtures;
@@ -53,6 +58,20 @@ export function AdminReviewsComponent() {
 
   return (
     <AdminPageLayout>
+      <div className="mb-4 flex gap-1 border-b border-admin-border">
+        {(["branch", "org"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => { setScope(value); setPage(1); }}
+            className={`min-h-11 rounded-t-lg px-4 text-sm font-semibold ${
+              scope === value ? "border-b-2 border-admin-accent text-admin-accent" : "text-admin-muted"
+            }`}
+          >
+            {value === "branch" ? "Chi nhánh" : "Toàn hệ thống"}
+          </button>
+        ))}
+      </div>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Trạng thái xử lý
@@ -117,20 +136,24 @@ export function AdminReviewsComponent() {
                     </td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.replyContent ?? "—"}</td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setReplyTo(row)}>
-                          Trả lời
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="rounded-lg"
-                          isDisabled={!branchId}
-                          onPress={() => void toggleResolved(row)}
-                        >
-                          {row.handlingStatus === "RESOLVED" ? "Mở lại" : "Đã xử lý"}
-                        </Button>
-                      </div>
+                      {scope === "branch" ? (
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setReplyTo(row)}>
+                            Trả lời
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-lg"
+                            isDisabled={!branchId}
+                            onPress={() => void toggleResolved(row)}
+                          >
+                            {row.handlingStatus === "RESOLVED" ? "Mở lại" : "Đã xử lý"}
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="block text-right text-xs text-admin-muted">Chỉ xem</span>
+                      )}
                     </td>
                   </tr>
                 ))

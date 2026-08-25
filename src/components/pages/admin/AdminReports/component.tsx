@@ -7,6 +7,7 @@ import {
   adminService,
   useAdminBranchesReport,
   useAdminCustomersReport,
+  useAdminReportExport,
   useAdminStaffPerformanceReport,
   useRevenueReport,
   type AdminReportExport,
@@ -36,6 +37,9 @@ export function AdminReportsComponent() {
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  // Live status of the created export, by id — a build can still be running when
+  // the create call returns, so the row reflects the freshest read.
+  const exportStatus = useAdminReportExport(exportInfo?.id ?? null);
 
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
@@ -107,8 +111,9 @@ export function AdminReportsComponent() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {exportInfo ? (
-            <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-              Xuất: {exportInfo.status}
+            <span className="inline-flex items-center gap-2 rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
+              Xuất: {(exportStatus.data?.status as string | undefined) ?? exportInfo.status}
+              <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>làm mới</button>
             </span>
           ) : null}
           {downloadUrl ? (
