@@ -245,11 +245,18 @@ export interface AdminAppointmentPaymentQuote {
   readonly [field: string]: unknown;
 }
 
+/**
+ * Shape confirmed against the live API: allocation candidates are staff rows,
+ * keyed by `id`. The previous declaration said `staffId`, so every candidate
+ * read as undefined - no radio could be selected and the assign dialog could
+ * never submit. There is no score or reasons field either.
+ */
 export interface AdminAppointmentAllocationCandidate {
-  readonly staffId: string;
+  readonly id: string;
   readonly displayName: string;
-  readonly score?: number;
-  readonly reasons?: ReadonlyArray<string>;
+  readonly branchId?: string;
+  readonly serviceIds?: ReadonlyArray<string>;
+  readonly active?: boolean;
   readonly [field: string]: unknown;
 }
 
