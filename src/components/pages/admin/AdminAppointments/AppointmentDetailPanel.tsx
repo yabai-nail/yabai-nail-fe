@@ -77,6 +77,10 @@ export function AppointmentDetailPanel({
   onAttachPhoto?: () => void;
 }>) {
   const router = useRouter();
+  // Mirrors the backend's own guard on the actual-services endpoint.
+  const canEditActualServices =
+    appointment.serverStatus === "IN_SERVICE" ||
+    appointment.serverStatus === "AWAITING_PAYMENT";
   const details = [
     { icon: ClockIcon, label: "Thời gian", value: `${appointment.startTime} - ${appointment.endTime} (${appointment.service.durationMinutes} phút)` },
     { icon: CalendarDaysIcon, label: "Ngày", value: appointment.date.split("-").reverse().join("/") },
@@ -171,7 +175,12 @@ export function AppointmentDetailPanel({
             <ArrowsRightLeftIcon className="size-4" />Đổi nhân viên
           </Button>
         ) : null}
-        {onEditActualServices && appointment.status !== "cancelled" ? (
+        {/*
+          Actual services can only be edited once the service is under way: the
+          backend accepts IN_SERVICE and AWAITING_PAYMENT and answers 409
+          otherwise. The button used to show on every status and fail on click.
+        */}
+        {onEditActualServices && canEditActualServices ? (
           <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEditActualServices}>
             <WrenchScrewdriverIcon className="size-4" />Cập nhật dịch vụ thực tế
           </Button>
