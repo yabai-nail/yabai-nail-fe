@@ -9,7 +9,6 @@ import { adminService, useAdminNailDesigns } from "@/service";
 import { DesignModal } from "./DesignModal";
 import {
   adaptDesign,
-  designFixtures,
   designStatusLabels,
   designStatuses,
   filterDesigns,
@@ -22,11 +21,10 @@ const pageSize = 8;
 export function AdminNailDesignsComponent() {
   const { data, isLoading, error, mutate } = useAdminNailDesigns();
 
-  const source = useMemo<ReadonlyArray<DesignRow>>(() => {
-    if (!data?.items) return designFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptDesign);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<DesignRow>>(
+    () => (data?.items ? data.items.map(adaptDesign) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -59,7 +57,7 @@ export function AdminNailDesignsComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải mẫu nail…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách mẫu nail.</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">

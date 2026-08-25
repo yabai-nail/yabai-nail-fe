@@ -10,7 +10,6 @@ import { useAdminBranchDetail, useAdminBranchList } from "@/service";
 import { BranchModal } from "./BranchModal";
 import {
   adaptBranch,
-  branchFixtures,
   branchStatusLabels,
   filterBranches,
   paginate,
@@ -22,11 +21,10 @@ const pageSize = 8;
 export function AdminBranchesComponent() {
   const { data, isLoading, error, mutate } = useAdminBranchList();
 
-  const source = useMemo<ReadonlyArray<BranchRow>>(() => {
-    if (!data?.items) return branchFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptBranch);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<BranchRow>>(
+    () => (data?.items ? data.items.map(adaptBranch) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -50,7 +48,7 @@ export function AdminBranchesComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải chi nhánh…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách chi nhánh.</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">

@@ -18,8 +18,6 @@ import {
   labelForKey,
   metricCards,
   reportKindLabels,
-  reportRowsFixture,
-  revenueFixture,
   tableColumns,
   type ReportKind,
 } from "./data";
@@ -44,19 +42,14 @@ export function AdminReportsComponent() {
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
 
-  const cards = useMemo(
-    () => metricCards(revenue.data ?? (revenue.isLoading ? undefined : revenueFixture)),
-    [revenue.data, revenue.isLoading],
-  );
+  const cards = useMemo(() => metricCards(revenue.data), [revenue.data]);
 
   const rows = useMemo<ReadonlyArray<Record<string, unknown>>>(() => {
     if (kind === "revenue") {
-      return (revenue.data?.rows ?? (revenue.data ? [] : revenueFixture.rows)) as ReadonlyArray<Record<string, unknown>>;
+      return (revenue.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
     }
-    const report = active.data;
-    if (!report) return active.isLoading ? [] : reportRowsFixture;
-    return report.rows as ReadonlyArray<Record<string, unknown>>;
-  }, [kind, revenue.data, active.data, active.isLoading]);
+    return (active.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
+  }, [kind, revenue.data, active.data]);
 
   const columns = useMemo(() => tableColumns(rows), [rows]);
 
@@ -144,7 +137,7 @@ export function AdminReportsComponent() {
 
       {exportError ? <p className="mb-3 text-xs text-admin-danger" role="alert">{exportError}</p> : null}
       {active.error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được báo cáo — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được báo cáo.</p>
       ) : active.isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải báo cáo…</p>
       ) : null}

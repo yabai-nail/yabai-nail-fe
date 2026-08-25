@@ -13,7 +13,6 @@ import {
   filterPromotions,
   formatDiscount,
   paginate,
-  promotionFixtures,
   promotionKindLabels,
   promotionStatusLabels,
   promotionStatuses,
@@ -27,11 +26,10 @@ export function AdminMarketingComponent() {
   const [tab, setTab] = useState<Tab>("promotions");
   const { data, isLoading, error, mutate } = useAdminPromotions();
 
-  const source = useMemo<ReadonlyArray<PromotionRow>>(() => {
-    if (!data?.items) return promotionFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptPromotion);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<PromotionRow>>(
+    () => (data?.items ? data.items.map(adaptPromotion) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -88,7 +86,7 @@ export function AdminMarketingComponent() {
           {isLoading ? (
             <p className="mb-3 text-xs text-admin-muted">Đang tải khuyến mãi…</p>
           ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+            <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách khuyến mãi.</p>
           ) : null}
 
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">

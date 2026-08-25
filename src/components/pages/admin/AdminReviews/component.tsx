@@ -13,7 +13,6 @@ import {
   handlingStatuses,
   paginate,
   ratingStars,
-  reviewFixtures,
   type ReviewRow,
 } from "./data";
 
@@ -28,11 +27,10 @@ export function AdminReviewsComponent() {
   // so those actions stay on the branch scope where the active branch is authoritative.
   const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
 
-  const source = useMemo<ReadonlyArray<ReviewRow>>(() => {
-    if (!data?.items) return reviewFixtures;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptReview);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<ReviewRow>>(
+    () => (data?.items ? data.items.map(adaptReview) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -97,7 +95,7 @@ export function AdminReviewsComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải đánh giá…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được đánh giá.</p>
       ) : null}
       {actionError ? <p className="mb-3 text-xs text-admin-danger" role="alert">{actionError}</p> : null}
 

@@ -9,7 +9,6 @@ import { useAdminAuditLog, useAdminAuditLogs } from "@/service";
 import {
   adaptAuditLog,
   auditActions,
-  auditEntries as fixtureEntries,
   filterAuditEntries,
   formatAuditTime,
   paginate,
@@ -21,11 +20,10 @@ const pageSize = 10;
 export function AdminAuditLogsComponent() {
   const { data, isLoading, error } = useAdminAuditLogs();
 
-  const source = useMemo<ReadonlyArray<AuditEntry>>(() => {
-    if (!data?.items) return fixtureEntries;
-    if (data.items.length === 0) return [];
-    return data.items.map(adaptAuditLog);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<AuditEntry>>(
+    () => (data?.items ? data.items.map(adaptAuditLog) : []),
+    [data],
+  );
 
   const [query, setQuery] = useState("");
   const [action, setAction] = useState("all");
@@ -75,7 +73,7 @@ export function AdminAuditLogsComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải nhật ký hệ thống…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được nhật ký hệ thống.</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
