@@ -5,7 +5,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { adminService, useAdminPromotions } from "@/service";
+import { adminService, useAdminNotificationCampaignMetrics, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
 import {
@@ -142,7 +142,10 @@ export function AdminMarketingComponent() {
           </Card>
         </>
       ) : (
-        <CampaignPanel />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <CampaignPanel />
+          <CampaignManagePanel />
+        </div>
       )}
 
       {creating ? <PromotionModal promotion={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
@@ -227,6 +230,83 @@ function CampaignPanel() {
           {busy ? "Đang tạo…" : "Tạo chiến dịch"}
         </Button>
       </div>
+    </Card>
+  );
+}
+
+// The backend exposes no campaign list endpoint, so a campaign is managed by its id
+// (metrics, cancellation) — consistent with the proposal-decision panel in nail designs.
+function CampaignManagePanel() {
+  const [idInput, setIdInput] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const metrics = useAdminNotificationCampaignMetrics(activeId);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [audience, setAudience] = useState<number | null>(null);
+
+  const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
+
+  const cancel = async () => {
+    if (!activeId) return;
+    setBusy(true); setError(null); setMessage(null);
+    try {
+      await adminService.cancelNotificationCampaign(activeId);
+      setMessage("Đã huỷ chiến dịch.");
+      void metrics.mutate();
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Không huỷ được chiến dịch.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const previewAudience = async () => {
+    setError(null);
+    try {
+      const result = await adminService.notificationCampaignAudiencePreview({ definition: { segment: "ALL" } });
+      setAudience(result.matchedCount);
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Không xem trước được audience.");
+    }
+  };
+
+  const metricRows = metrics.data
+    ? Object.entries(metrics.data).filter(([, value]) => typeof value === "number" || typeof value === "string")
+    : [];
+
+  return (
+    <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
+      <h2 className="text-sm font-bold text-admin-ink">Quản lý chiến dịch (theo ID)</h2>
+      <div className="flex gap-2">
+        <input className={`${inputClass} flex-1`} value={idInput} onChange={(event) => setIdInput(event.target.value)} placeholder="ID chiến dịch" />
+        <Button variant="outline" className="rounded-lg" isDisabled={idInput.trim().length < 1} onPress={() => setActiveId(idInput.trim() || null)}>Xem</Button>
+      </div>
+      {activeId ? (
+        metrics.isLoading ? (
+          <p className="text-xs text-admin-muted">Đang tải chỉ số…</p>
+        ) : metrics.error ? (
+          <p className="text-xs text-admin-danger">Không tải được chỉ số.</p>
+        ) : metricRows.length > 0 ? (
+          <dl className="grid grid-cols-2 gap-2 text-sm">
+            {metricRows.map(([key, value]) => (
+              <div key={key} className="flex justify-between gap-2 rounded-lg bg-admin-soft/50 px-3 py-1.5">
+                <dt className="text-admin-muted">{key}</dt>
+                <dd className="font-semibold text-admin-ink">{String(value)}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="text-xs text-admin-muted">Không có chỉ số hiển thị.</p>
+        )
+      ) : null}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>Xem trước audience</Button>
+        {audience !== null ? <span className="text-sm text-admin-muted">{audience.toLocaleString("vi-VN")} khách</span> : null}
+        <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!activeId || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
+      </div>
+      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
+      {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
     </Card>
   );
 }

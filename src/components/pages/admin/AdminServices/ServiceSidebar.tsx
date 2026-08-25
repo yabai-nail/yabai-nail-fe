@@ -1,9 +1,9 @@
 "use client";
 
-import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
-import { useAdminServiceCategories, type AdminServiceCategory } from "@/service";
+import { adminService, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { CategoryEditor } from "./CategoryEditor";
 import { SurchargePanel } from "./SurchargePanel";
 import { categoryLabels, type SalonService, type ServiceCategory } from "./data";
@@ -22,6 +22,24 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
   const beItems = beCategories.data?.items ?? [];
   const [editing, setEditing] = useState<AdminServiceCategory | null>(null);
   const [creating, setCreating] = useState(false);
+  const [reorderError, setReorderError] = useState<string | null>(null);
+
+  const move = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= beItems.length) return;
+    const orderedCategoryIds = beItems.map((category) => category.id);
+    [orderedCategoryIds[index], orderedCategoryIds[target]] = [
+      orderedCategoryIds[target],
+      orderedCategoryIds[index],
+    ];
+    setReorderError(null);
+    try {
+      await adminService.reorderServiceCategories({ orderedCategoryIds });
+      void beCategories.mutate();
+    } catch (error) {
+      setReorderError(error instanceof Error && error.message ? error.message : "Không đổi được thứ tự.");
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -49,12 +67,18 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
               <p className="text-xs text-admin-muted">Chưa có danh mục nào trên hệ thống.</p>
             ) : (
               <ul className="space-y-1">
-                {beItems.map((category) => (
-                  <li key={category.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
+                {beItems.map((category, index) => (
+                  <li key={category.id} className="flex items-center justify-between gap-1 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
                     <span className="min-w-0 flex-1 truncate">
                       <strong className="text-admin-ink">{category.nameVi ?? category.name}</strong>
                       <span className="ml-2 text-admin-muted">({category.code})</span>
                     </span>
+                    <Button isIconOnly size="sm" variant="ghost" aria-label={`Đưa ${category.name} lên`} isDisabled={index === 0} onPress={() => void move(index, -1)}>
+                      <ChevronUpIcon className="size-3.5" />
+                    </Button>
+                    <Button isIconOnly size="sm" variant="ghost" aria-label={`Đưa ${category.name} xuống`} isDisabled={index === beItems.length - 1} onPress={() => void move(index, 1)}>
+                      <ChevronDownIcon className="size-3.5" />
+                    </Button>
                     <Button
                       isIconOnly
                       size="sm"
@@ -68,6 +92,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
                 ))}
               </ul>
             )}
+            {reorderError ? <p role="alert" className="mt-1 text-xs text-admin-danger">{reorderError}</p> : null}
           </div>
 
           <Button
