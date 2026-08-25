@@ -142,6 +142,7 @@ body {
   --admin-info: #1686cd;
   --admin-violet: #a640e8;
   --admin-warning: #d88318;
+  --admin-danger: #d1113f;
 
   --background: var(--admin-canvas);
   --foreground: var(--admin-ink);
@@ -195,4 +196,5 @@ body:has(.admin-shell) {
   --color-admin-info: var(--admin-info);
   --color-admin-violet: var(--admin-violet);
   --color-admin-warning: var(--admin-warning);
+  --color-admin-danger: var(--admin-danger);
 }
