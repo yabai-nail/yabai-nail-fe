@@ -27,13 +27,13 @@ import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
 import { AssignStaffModal } from "./AssignStaffModal";
 import { ActualServicesModal } from "./ActualServicesModal";
 import { AttachPhotoModal } from "./AttachPhotoModal";
+import { todayAtSalon } from "@/lib/salon-date";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
 import { AppointmentToolbar } from "./AppointmentToolbar";
 import { CancelAppointmentDialog } from "./CancelAppointmentDialog";
 import {
-  DEFAULT_APPOINTMENT_DATE,
   initialAppointments,
   type Appointment,
   type AppointmentCustomer,
@@ -214,7 +214,10 @@ export function AdminAppointmentsComponent({
       .map((a) => (localEdits[a.id] ? { ...a, ...localEdits[a.id] } : a));
     return [...merged, ...localCreates];
   }, [source, localCreates, localEdits, localCancels]);
-  const [selectedDate, setSelectedDate] = useState(DEFAULT_APPOINTMENT_DATE);
+  // The calendar opens on the salon's today. It used to open on
+  // DEFAULT_APPOINTMENT_DATE — the date the demo fixtures were written for —
+  // so the screen asked the API for 16/08/2026 and looked empty forever.
+  const [selectedDate, setSelectedDate] = useState(todayAtSalon);
   const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
   const [selectedId, setSelectedId] = useState(initialSelectedId ?? initialAppointments[0]?.id ?? "");
@@ -478,7 +481,7 @@ export function AdminAppointmentsComponent({
         status={status}
         onPrevious={() => moveDate(-1)}
         onNext={() => moveDate(1)}
-        onToday={() => setSelectedDate(DEFAULT_APPOINTMENT_DATE)}
+        onToday={() => setSelectedDate(todayAtSalon())}
         onViewChange={setView}
         onStatusChange={setStatus}
         onCreate={() => setFormMode("create")}
