@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { formatVnd } from "@/lib/admin-format";
 import {
   adminService,
   useAdminAppointment,
@@ -194,14 +195,22 @@ export function AdminPaymentsComponent() {
           },
           appointment?.version,
         );
+        // The screen's own total is only ever a preview. If it disagrees with the
+        // quote the backend just issued, stop and say so rather than confirming a
+        // number the salon read off the screen and the till will never see.
+        if (typeof quote.totalVnd === "number" && quote.totalVnd !== totals.grandTotal) {
+          setConfirmError(
+            `Số tiền trên màn hình (${formatVnd(totals.grandTotal)}) khác số máy chủ tính (${formatVnd(quote.totalVnd)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
+          );
+          return;
+        }
         await adminService.recordAppointmentPayment(
           branchId!,
           appointmentId!,
-          {
-            method: invoice.paymentMethod!,
-            amountVnd: quote.totalVnd,
-            discountVnd: quote.discountVnd,
-          },
+          // Only `method` reaches the backend: it recomputes the amount from the
+          // appointment so a client can never set a price. Sending amountVnd and
+          // discountVnd looked like it did something and did not.
+          { method: invoice.paymentMethod! },
           // Re-read the version: the quote above is itself a write, so the
           // appointment may have moved on since this handler started. The
           // quote's own field is loosely typed, so only trust a number.
