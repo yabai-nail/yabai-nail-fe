@@ -3,6 +3,7 @@
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { formatVnd } from "@/lib/admin-format";
+import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
   useStaffCompensation,
@@ -15,6 +16,10 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
 
   const [baseSalary, setBaseSalary] = useState<string>("");
   const [rate, setRate] = useState<string>("");
+  // The backend requires effectiveFrom and rejects the request outright without
+  // it. The form never had this field, so saving a commission rate failed with
+  // 422 every time and no staff member could ever be configured.
+  const [effectiveFrom, setEffectiveFrom] = useState<string>(() => todayAtSalon());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +27,11 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
   const initialRate = compensation?.commissionRate ?? 60;
   const effectiveBase = baseSalary === "" ? initialBase : Number(baseSalary.replace(/\D/g, ""));
   const effectiveRate = rate === "" ? initialRate : Number(rate);
-  const canSubmit = !busy && Number.isFinite(effectiveBase) && Number.isFinite(effectiveRate);
+  const canSubmit =
+    !busy &&
+    Number.isFinite(effectiveBase) &&
+    Number.isFinite(effectiveRate) &&
+    effectiveFrom !== "";
 
   async function submit() {
     if (!canSubmit) return;
@@ -32,6 +41,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       await adminService.setStaffCompensation(staffId, {
         baseSalaryVnd: effectiveBase,
         commissionRate: effectiveRate,
+        effectiveFrom,
       });
       setBaseSalary("");
       setRate("");
@@ -67,23 +77,44 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       )}
 
       <div className="grid grid-cols-[1fr_5rem] gap-2 text-xs">
-        <input
-          inputMode="numeric"
-          value={baseSalary}
-          onChange={(event) => setBaseSalary(event.target.value)}
-          placeholder={`Lương cứng mới (VND) — hiện tại ${formatVnd(initialBase)}`}
-          className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
-        />
-        <input
-          type="number"
-          min={0}
-          max={100}
-          value={rate}
-          onChange={(event) => setRate(event.target.value)}
-          placeholder={`${initialRate}`}
-          className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
-        />
+        <label htmlFor={`${staffId}-base-salary`} className="flex flex-col gap-1">
+          <span className="font-semibold text-admin-ink">Lương cứng mới (VND)</span>
+          <input
+            id={`${staffId}-base-salary`}
+            inputMode="numeric"
+            value={baseSalary}
+            onChange={(event) => setBaseSalary(event.target.value)}
+            placeholder={formatVnd(initialBase)}
+            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+          />
+        </label>
+        <label htmlFor={`${staffId}-commission-rate`} className="flex flex-col gap-1">
+          <span className="font-semibold text-admin-ink">Hoa hồng (%)</span>
+          <input
+            id={`${staffId}-commission-rate`}
+            type="number"
+            min={0}
+            max={100}
+            value={rate}
+            onChange={(event) => setRate(event.target.value)}
+            placeholder={`${initialRate}`}
+            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+          />
+        </label>
       </div>
+      <label htmlFor={`${staffId}-effective-from`} className="flex flex-col gap-1 text-xs">
+        <span className="font-semibold text-admin-ink">Áp dụng từ ngày</span>
+        <input
+          id={`${staffId}-effective-from`}
+          type="date"
+          value={effectiveFrom}
+          onChange={(event) => setEffectiveFrom(event.target.value)}
+          className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+        />
+        <span className="text-admin-muted">
+          Phải sau ngày hiệu lực của cấu hình hiện tại. Hoa hồng đã chốt trước ngày này giữ nguyên.
+        </span>
+      </label>
       <div className="flex justify-end">
         <Button
           size="sm"

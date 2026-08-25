@@ -359,7 +359,12 @@ export interface AdminStaffPatch {
 export interface AdminStaffCompensationInput {
   readonly baseSalaryVnd: number;
   readonly commissionRate: number;
-  readonly effectiveFrom?: string;
+  /**
+   * Required, `YYYY-MM-DD`. The backend parses it unconditionally and rejects
+   * the whole request when it is absent, so an optional field here meant the
+   * form compiled fine and failed every single time at runtime.
+   */
+  readonly effectiveFrom: string;
   readonly note?: string;
   readonly [field: string]: unknown;
 }
