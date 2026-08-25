@@ -28,3 +28,34 @@ export function isoDateInTimeZone(
 export function todayAtSalon(timeZone: string = SALON_TIME_ZONE): string {
   return isoDateInTimeZone(new Date(), timeZone);
 }
+
+/**
+ * UTC offset of `timeZone` on `isoDate`, as `+07:00`. Read from the runtime's
+ * own zone data rather than hardcoded, so it stays right across a DST change
+ * and across branches in different countries.
+ */
+export function utcOffsetOn(isoDate: string, timeZone: string = SALON_TIME_ZONE): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    timeZoneName: "longOffset",
+  }).formatToParts(new Date(`${isoDate}T12:00:00Z`));
+  const name = parts.find((part) => part.type === "timeZoneName")?.value ?? "GMT+00:00";
+  // "GMT+07:00" -> "+07:00"; plain "GMT" (UTC) -> "+00:00".
+  const offset = name.replace("GMT", "");
+  return offset === "" ? "+00:00" : offset;
+}
+
+/**
+ * Combines the form's local date + time into an absolute instant for the API.
+ *
+ * The offset used to be hardcoded `+09:00` (Asia/Tokyo) while the live branch
+ * runs Asia/Ho_Chi_Minh, so every appointment was stored two hours before the
+ * time the salon actually typed.
+ */
+export function zonedIso(
+  isoDate: string,
+  time: string,
+  timeZone: string = SALON_TIME_ZONE,
+): string {
+  return `${isoDate}T${time}:00${utcOffsetOn(isoDate, timeZone)}`;
+}

@@ -27,7 +27,7 @@ import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
 import { AssignStaffModal } from "./AssignStaffModal";
 import { ActualServicesModal } from "./ActualServicesModal";
 import { AttachPhotoModal } from "./AttachPhotoModal";
-import { todayAtSalon } from "@/lib/salon-date";
+import { todayAtSalon, zonedIso } from "@/lib/salon-date";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
@@ -187,6 +187,13 @@ export function AdminAppointmentsComponent({
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
     services: new Map((servicesData?.items ?? []).map((s) => [s.id, s] as const)),
   }), [customersData, staffData, servicesData]);
+  // What the create/edit form may pick from: the branch's real customers,
+  // services and staff, adapted into the display shapes the form expects.
+  const formOptions = useMemo(() => ({
+    customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers)),
+    services: (servicesData?.items ?? []).map((s) => resolveService([s.id], lookups.services)),
+    staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff)),
+  }), [customersData, servicesData, staffData, lookups]);
   // Version and status stay off the fixture Appointment; keep a side lookup so
   // `If-Match` headers can attach to reschedule / cancel mutations.
   const versionsById = useMemo(() => {
@@ -257,10 +264,11 @@ export function AdminAppointmentsComponent({
     setSelectedDate((date) => shiftAppointmentDate(date, view, direction));
   }
 
-  // Salon operates in Asia/Tokyo per the platform contract. The form gives
-  // us local date + time strings; append the salon offset so the backend
-  // stores the exact wall-clock moment the admin selected.
-  const toIso = (date: string, time: string): string => `${date}T${time}:00+09:00`;
+  // The form gives local date + time strings; attach the branch's real UTC
+  // offset so the backend stores the wall-clock moment the admin selected.
+  // This used to hardcode +09:00 (Asia/Tokyo) while the live branch runs
+  // Asia/Ho_Chi_Minh, which shifted every saved appointment two hours early.
+  const toIso = (date: string, time: string): string => zonedIso(date, time);
 
   function saveAppointment(draft: AppointmentDraft) {
     // Optimistic overlay first so the calendar reflects the intent
@@ -555,6 +563,7 @@ export function AdminAppointmentsComponent({
           appointment={formMode === "edit" ? selectedAppointment : null}
           appointments={appointments}
           defaultDate={selectedDate}
+          options={formOptions}
           onClose={() => setFormMode(null)}
           onSubmit={saveAppointment}
         />
