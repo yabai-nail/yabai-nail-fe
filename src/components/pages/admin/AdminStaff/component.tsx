@@ -212,7 +212,12 @@ export function AdminStaffComponent() {
             }
           >
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-              <Card.Content className="min-w-0 p-0"><StaffTable staff={visibleStaff} selectedId={selected?.id ?? null} onSelect={setSelectedId} /></Card.Content>
+              <Card.Content className="min-w-0 p-0"><StaffTable
+                staff={visibleStaff}
+                selectedId={selected?.id ?? null}
+                onSelect={setSelectedId}
+                onEdit={(id) => { setSelectedId(id); setEditing(visibleStaff.find((member) => member.id === id) ?? null); }}
+              /></Card.Content>
             </Card>
             {selected && branchId ? (
               <RecentOrdersTable branchId={branchId} staffId={selected.id} staffName={selected.name} />

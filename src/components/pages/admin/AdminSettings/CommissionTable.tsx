@@ -1,5 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { formatVnd } from "@/lib/admin-format";
 import type { CommissionPolicy } from "./data";
 
@@ -10,6 +11,7 @@ function formatOptionalVnd(value: number | null): string {
 }
 
 export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray<CommissionPolicy> }>) {
+  const router = useRouter();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-left text-sm">
@@ -57,7 +59,9 @@ export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray
                 <td className="px-3 py-3 font-bold text-admin-accent">{formatOptionalVnd(policy.payout)}</td>
                 <td className="px-3 py-3">{formatOptionalVnd(salonShare)}</td>
                 <td className="px-3 py-3">
-                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><PencilSquareIcon className="size-4" />Sửa</Button>
+                  {/* The compensation form lives on the staff screen; this used to be a button
+                      with no handler at all. */}
+                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PencilSquareIcon className="size-4" />Sửa</Button>
                 </td>
               </tr>
             );

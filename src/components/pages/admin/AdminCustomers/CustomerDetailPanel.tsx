@@ -1,4 +1,5 @@
 import { CalendarDaysIcon, ChatBubbleLeftRightIcon, PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
@@ -16,6 +17,7 @@ export function CustomerDetailPanel({
   branchId?: string | null;
   onEdit?: () => void;
 }>) {
+  const router = useRouter();
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between px-4 pt-4">
@@ -61,7 +63,7 @@ export function CustomerDetailPanel({
           <Button variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
             <PencilSquareIcon className="size-4" />Chỉnh sửa thông tin
           </Button>
-          <Button variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent">
+          <Button variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/messages")}>
             <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
           </Button>
         </div>

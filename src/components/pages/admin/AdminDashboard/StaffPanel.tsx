@@ -1,12 +1,14 @@
 "use client";
 
 import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import { useAdminBranch, useAdminStaffPerformance } from "@/service";
 import { buildStaffCards, currentMonthPeriod } from "./adapters";
 
 export function StaffPanel() {
+  const router = useRouter();
   const { branchId } = useAdminBranch();
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const { data, error, isLoading } = useAdminStaffPerformance(branchId, { period });
@@ -19,7 +21,7 @@ export function StaffPanel() {
         <h2 className="text-sm font-bold text-admin-ink">
           Nhân viên <span className="font-normal text-admin-muted">(kỳ {period})</span>
         </h2>
-        <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent">
+        <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent" onPress={() => router.push("/admin/staff")}>
           Xem tất cả
         </Button>
       </Card.Header>

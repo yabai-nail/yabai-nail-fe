@@ -60,10 +60,9 @@ export function UtilityPanel() {
 
       <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Header className="flex flex-row items-center justify-between gap-2 px-4 pt-4">
+          {/* No notifications screen exists to open, so the header carries no
+              "Xem tất cả" — the card already lists everything there is. */}
           <h2 className="text-sm font-bold text-admin-ink">Thông báo</h2>
-          <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent">
-            Xem tất cả
-          </Button>
         </Card.Header>
         <Card.Content className="px-4 pb-4 pt-2">
           {error ? (

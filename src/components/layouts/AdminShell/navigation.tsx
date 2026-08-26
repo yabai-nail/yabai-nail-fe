@@ -5,6 +5,7 @@ import {
 import { Button, ScrollShadow } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/service";
 import { adminRoutes } from "./config";
 
 export function AdminBrand() {
@@ -31,6 +32,9 @@ export function AdminBrand() {
 
 export function AdminSidebarContent() {
   const pathname = usePathname();
+  // The sidebar's own sign-out was a button with no handler; the only working
+  // way out was the avatar menu in the header.
+  const { logout } = useAuth();
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -78,6 +82,7 @@ export function AdminSidebarContent() {
         variant="outline"
         fullWidth
         className="mb-1 justify-start rounded-lg border-admin-accent/25 text-admin-accent"
+        onPress={logout}
       >
         <ArrowLeftStartOnRectangleIcon aria-hidden="true" className="size-5" />
         Đăng xuất
