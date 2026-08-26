@@ -1,4 +1,5 @@
 import type { AdminBranch } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type BranchRow = {
   readonly id: string;
@@ -49,13 +50,7 @@ export function filterBranches(
   rows: ReadonlyArray<BranchRow>,
   query: string,
 ): ReadonlyArray<BranchRow> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
-  if (!normalized) return rows;
-  return rows.filter((row) =>
-    [row.name, row.address ?? "", row.phone ?? ""].some((field) =>
-      field.toLocaleLowerCase("vi").includes(normalized),
-    ),
-  );
+  return rows.filter((row) => matchesSearch(query, [row.name, row.address, row.phone]));
 }
 
 export function paginate<T>(

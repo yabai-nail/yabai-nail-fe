@@ -1,3 +1,5 @@
+import { matchesSearch } from "@/lib/admin-search";
+
 export type ServiceCategory = "primary" | "addon" | "combo";
 export type ServiceFilter = "all" | ServiceCategory;
 
@@ -38,13 +40,10 @@ export function filterServices(
   filter: ServiceFilter,
   query: string,
 ) {
-  const normalizedQuery = query.trim().toLocaleLowerCase("vi");
-
   return services.filter(
     (service) =>
       (filter === "all" || service.category === filter) &&
-      (!normalizedQuery ||
-        service.name.toLocaleLowerCase("vi").includes(normalizedQuery)),
+      matchesSearch(query, [service.name]),
   );
 }
 

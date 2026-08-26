@@ -1,4 +1,5 @@
 import type { AdminPromotion } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type PromotionRow = {
   readonly id: string;
@@ -59,14 +60,10 @@ export function filterPromotions(
   status: string,
   query: string,
 ): ReadonlyArray<PromotionRow> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
   return rows.filter(
     (row) =>
       (status === "all" || row.status === status) &&
-      (!normalized ||
-        [row.code, row.title].some((field) =>
-          field.toLocaleLowerCase("vi").includes(normalized),
-        )),
+      matchesSearch(query, [row.code, row.title]),
   );
 }
 
