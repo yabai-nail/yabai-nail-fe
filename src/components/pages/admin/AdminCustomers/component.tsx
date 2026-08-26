@@ -9,7 +9,7 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
-import { adminService, useAdminBranch, useAdminCustomers, type AdminCustomer } from "@/service";
+import { adminService, useAdminBranch, useAdminCustomer, useAdminCustomers, type AdminCustomer } from "@/service";
 import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerEditModal } from "./CustomerEditModal";
@@ -43,6 +43,8 @@ function toCustomerRow(server: AdminCustomer): Customer {
     const value = record[key];
     return typeof value === "string" ? value : "";
   };
+  const rawSegment = readString("segment").toUpperCase();
+  const rawRank = readString("membershipTier").toUpperCase();
   return {
     id: server.id,
     name,
@@ -50,13 +52,21 @@ function toCustomerRow(server: AdminCustomer): Customer {
     phone: server.phone ?? "",
     birthday: readString("birthday"),
     handle: readString("handle"),
-    preference: readString("preference"),
-    lastVisit: readString("lastVisit"),
-    totalSpend: readNumber("totalSpend"),
-    points: readNumber("points"),
-    visits: readNumber("visits"),
-    segment: (readString("segment") as CustomerSegment) || "regular",
-    rank: (readString("rank") as CustomerRank) || "none",
+    preference: readString("preferenceSummary"),
+    lastVisit: readString("lastVisitAt"),
+    totalSpend: readNumber("totalSpendVnd"),
+    points: readNumber("pointBalance"),
+    visits: readNumber("visitCount"),
+    segment:
+      rawSegment === "NEW"
+        ? "new"
+        : rawSegment === "LOYAL" || rawRank === "GOLD" || rawRank === "SILVER"
+          ? "loyal"
+          : "regular",
+    rank:
+      rawRank === "GOLD" || rawRank === "SILVER" || rawRank === "BRONZE"
+        ? (rawRank.toLowerCase() as CustomerRank)
+        : "none",
     note: readString("note"),
     version: server.version,
     locale: server.locale,
@@ -97,6 +107,8 @@ export function AdminCustomersComponent() {
   const visibleCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const firstShown = filteredCustomers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const selectedCustomer = resolveVisibleSelection(visibleCustomers, selectedId || visibleCustomers[0]?.id || "");
+  const customerDetail = useAdminCustomer(branchId, selectedCustomer?.id ?? null);
+  const detailedCustomer = customerDetail.data ? toCustomerRow(customerDetail.data) : selectedCustomer;
 
   return (
     <AdminPageLayout>
@@ -161,12 +173,12 @@ export function AdminCustomersComponent() {
       ) : (
         <AdminSplitLayout
           aside={
-            selectedCustomer ? (
+            detailedCustomer ? (
               <CustomerDetailPanel
-                customer={selectedCustomer}
+                customer={detailedCustomer}
                 branchId={branchId}
                 onEdit={
-                  branchId && selectedCustomer.version !== undefined
+                  branchId && detailedCustomer.version !== undefined
                     ? () => {
                         setEditError(null);
                         setIsEditOpen(true);
@@ -200,9 +212,9 @@ export function AdminCustomersComponent() {
           onCreated={() => void mutateCustomers()}
         />
       ) : null}
-      {isEditOpen && branchId && selectedCustomer ? (
+      {isEditOpen && branchId && detailedCustomer ? (
         <CustomerEditModal
-          customer={selectedCustomer}
+          customer={detailedCustomer}
           submitting={editSubmitting}
           error={editError}
           onClose={() => setIsEditOpen(false)}
@@ -212,9 +224,9 @@ export function AdminCustomersComponent() {
             try {
               await adminService.updateCustomer(
                 branchId,
-                selectedCustomer.id,
+                detailedCustomer.id,
                 patch,
-                selectedCustomer.version,
+                detailedCustomer.version,
               );
               setIsEditOpen(false);
               void mutateCustomers();

@@ -7,6 +7,7 @@ import { formatVnd } from "@/lib/admin-format";
 import {
   adminService,
   useAdminAppointment,
+  useAdminAppointmentPayments,
   useAdminBranch,
   useAdminCustomers,
   useAdminServices,
@@ -17,7 +18,7 @@ import {
   type AdminStaffMember,
 } from "@/service";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
-import { initialCheckoutInvoice, type CheckoutInvoice } from "./data";
+import type { CheckoutInvoice } from "./data";
 import { calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
@@ -114,13 +115,19 @@ export function AdminPaymentsComponent() {
   const { branchId } = useAdminBranch();
 
   // Parallel joins — same shape as the appointments page.
-  const { data: appointment, error: appointmentError, mutate: mutateAppointment } = useAdminAppointment(
+  const {
+    data: appointment,
+    error: appointmentError,
+    isLoading: appointmentLoading,
+    mutate: mutateAppointment,
+  } = useAdminAppointment(
     branchId,
     appointmentId,
   );
   const { data: customersData } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
+  const payments = useAdminAppointmentPayments(branchId, appointmentId);
   const lookups = useMemo(() => ({
     customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
@@ -131,26 +138,31 @@ export function AdminPaymentsComponent() {
   // the checkout panels for the rest of the session. useMemo (not useState
   // + effect) keeps setState out of an effect — the panels' `onChange`
   // handlers hydrate the working state below.
-  const seededInvoice = useMemo<CheckoutInvoice>(() => {
+  const seededInvoice = useMemo<CheckoutInvoice | null>(() => {
     if (appointment) return buildInvoiceFromServer(appointment, lookups);
-    return initialCheckoutInvoice;
+    return null;
   }, [appointment, lookups]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
-    setOverride((current) => (typeof next === "function" ? next(current ?? seededInvoice) : next));
+    setOverride((current) => {
+      const base = current ?? seededInvoice;
+      if (!base) return current;
+      return typeof next === "function" ? next(base) : next;
+    });
   };
 
   const [isAppointmentCancelled, setIsAppointmentCancelled] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const totals = useMemo(() => calculatePaymentTotals(invoice), [invoice]);
+  const totals = useMemo(() => (invoice ? calculatePaymentTotals(invoice) : null), [invoice]);
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
 
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
   const handleConfirm = () => {
+    if (!invoice || !totals) return;
     // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
     setIsConfirmOpen(false);
@@ -217,15 +229,51 @@ export function AdminPaymentsComponent() {
     })();
   };
 
+  if (!appointmentId) {
+    return (
+      <AdminPageLayout>
+        <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
+          Mở một lịch hẹn rồi chọn thanh toán để tải hóa đơn thật.
+        </p>
+      </AdminPageLayout>
+    );
+  }
+  if (appointmentError) {
+    return (
+      <AdminPageLayout>
+        <p role="alert" className="rounded-lg border border-admin-danger/40 bg-admin-surface px-4 py-8 text-center text-sm text-admin-danger">
+          Không tải được lịch hẹn. Không có giao dịch nào được tạo.
+        </p>
+      </AdminPageLayout>
+    );
+  }
+  if (appointmentLoading || !invoice || !totals) {
+    return (
+      <AdminPageLayout>
+        <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
+          Đang tải hóa đơn từ máy chủ…
+        </p>
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout>
       <p className="mb-4 rounded-lg border border-admin-border bg-admin-soft px-4 py-3 text-xs leading-5 text-admin-muted">
-        {isServerBacked
-          ? "Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán."
-          : appointmentError
-            ? "Không tải được lịch hẹn — hiển thị mô phỏng nội bộ, không tạo giao dịch thật."
-            : "Bản mô phỏng nội bộ: mở từ Chi tiết lịch hẹn để thanh toán một lịch thật."}
+        Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán.
       </p>
+      {payments.data?.items.length ? (
+        <div className="mb-4 rounded-lg border border-admin-border bg-admin-surface px-4 py-3">
+          <p className="text-xs font-semibold text-admin-ink">Giao dịch đã ghi nhận</p>
+          <ul className="mt-2 space-y-1 text-xs text-admin-muted">
+            {payments.data.items.map((payment) => (
+              <li key={payment.id}>
+                {payment.method} · {formatVnd(payment.amountVnd)} · {payment.status}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {confirmPending ? (
         <p className="mb-4 rounded-lg border border-admin-border bg-admin-surface px-4 py-2 text-xs text-admin-muted">
           Đang gọi quote và ghi giao dịch…

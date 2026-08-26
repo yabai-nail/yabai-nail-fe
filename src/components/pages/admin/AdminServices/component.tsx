@@ -16,7 +16,6 @@ import {
   categoryLabels,
   filterServices,
   paginateServices,
-  salonServices as fixtureServices,
   type SalonService,
   type ServiceCategory,
   type ServiceFilter,
@@ -49,11 +48,10 @@ export function AdminServicesComponent() {
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
-  const source = useMemo<ReadonlyArray<SalonService>>(() => {
-    if (!data?.items) return fixtureServices;
-    if (data.items.length === 0) return [];
-    return data.items.map(toFixtureService);
-  }, [data]);
+  const source = useMemo<ReadonlyArray<SalonService>>(
+    () => (data?.items ?? []).map(toFixtureService),
+    [data],
+  );
 
   const [filter, setFilter] = useState<ServiceFilter>("all");
   const [query, setQuery] = useState("");
@@ -111,7 +109,7 @@ export function AdminServicesComponent() {
       {isLoading ? (
         <p className="mb-3 text-xs text-admin-muted">Đang tải danh sách dịch vụ…</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách dịch vụ.</p>
       ) : null}
       <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
         <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">

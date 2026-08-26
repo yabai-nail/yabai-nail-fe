@@ -18,6 +18,7 @@ import {
 import {
   useAdminBranch,
   useAdminStaff,
+  useAdminStaffMember,
   useAdminStaffPerformance,
   type AdminStaffMember as ServerStaff,
 } from "@/service";
@@ -89,6 +90,10 @@ export function AdminStaffComponent() {
     [source, filter],
   );
   const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
+  const staffDetail = useAdminStaffMember(selected?.id ?? null);
+  const detailedStaff = staffDetail.data
+    ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id))
+    : selected;
 
   const kpi = performance.data?.kpi;
   const revenue = kpi?.revenueVnd ?? null;
@@ -196,12 +201,12 @@ export function AdminStaffComponent() {
         ) : (
           <AdminSplitLayout
             aside={
-              selected ? (
+              detailedStaff ? (
                 <StaffDetailPanel
-                  member={selected}
+                  member={detailedStaff}
                   branchId={branchId}
                   period={period}
-                  onEdit={() => setEditing(selected)}
+                  onEdit={() => setEditing(detailedStaff)}
                 />
               ) : (
                 <AdminEmptySelection
@@ -219,8 +224,8 @@ export function AdminStaffComponent() {
                 onEdit={(id) => { setSelectedId(id); setEditing(visibleStaff.find((member) => member.id === id) ?? null); }}
               /></Card.Content>
             </Card>
-            {selected && branchId ? (
-              <RecentOrdersTable branchId={branchId} staffId={selected.id} staffName={selected.name} />
+            {detailedStaff && branchId ? (
+              <RecentOrdersTable branchId={branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
             ) : null}
           </AdminSplitLayout>
         )}

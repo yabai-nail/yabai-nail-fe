@@ -3,7 +3,7 @@
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { adminService, useAdminBranch } from "@/service";
+import { adminService, useAdminBranch, useAdminPaymentRefund } from "@/service";
 import {
   formatVnd,
   parseVnd,
@@ -83,7 +83,9 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const [paymentId, setPaymentId] = useState("");
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
+  const [refundTarget, setRefundTarget] = useState<{ paymentId: string; refundId: string } | null>(null);
   const { busy, message, error, run } = useAction();
+  const refund = useAdminPaymentRefund(branchId, refundTarget?.paymentId ?? null, refundTarget?.refundId ?? null);
   const amountVnd = parseVnd(amount);
   const disabled = busy || !paymentId.trim() || amountVnd <= 0 || reason.trim().length < 2;
 
@@ -103,9 +105,16 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
         <input id="ops-refund-reason" className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Lý do hoàn" />
       </div>
       <Feedback message={message} error={error} />
+      {refund.data ? (
+        <p className="text-xs text-admin-muted">
+          Mã hoàn tiền {refund.data.id} · {refund.data.status} · {formatVnd(refund.data.amountVnd)}
+        </p>
+      ) : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={disabled} onPress={() => void run(async () => {
-          await adminService.refundPayment(branchId, paymentId.trim(), { amountVnd, reason: reason.trim() });
+          const normalizedPaymentId = paymentId.trim();
+          const created = await adminService.refundPayment(branchId, normalizedPaymentId, { amountVnd, reason: reason.trim() });
+          setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
           return "Đã ghi nhận hoàn tiền.";
         })}>{busy ? "Đang xử lý…" : "Hoàn tiền"}</Button>
       </div>

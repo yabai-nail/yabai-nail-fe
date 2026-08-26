@@ -7,7 +7,8 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   adminService,
-  useAdminAppointments,
+  useAdminAppointment,
+  useAdminCalendar,
   useAdminBranch,
   useAdminCustomers,
   useAdminServices,
@@ -34,7 +35,6 @@ import { AppointmentSummary } from "./AppointmentSummary";
 import { AppointmentToolbar } from "./AppointmentToolbar";
 import { CancelAppointmentDialog } from "./CancelAppointmentDialog";
 import {
-  initialAppointments,
   type Appointment,
   type AppointmentCustomer,
   type AppointmentDraft,
@@ -170,7 +170,20 @@ export function AdminAppointmentsComponent({
 }>) {
   const router = useRouter();
   const { branchId } = useAdminBranch();
-  const { data, isLoading, error, mutate: mutateAppointments } = useAdminAppointments(branchId);
+  const [selectedDate, setSelectedDate] = useState(todayAtSalon);
+  const [view, setView] = useState<AppointmentView>("day");
+  const viewRange = useMemo(
+    () => getAppointmentViewRange(selectedDate, view),
+    [selectedDate, view],
+  );
+  const calendarTo = shiftAppointmentDate(viewRange.end, "day", 1);
+  const { data, isLoading, error, mutate: mutateAppointments } = useAdminCalendar(
+    branchId,
+    zonedIso(viewRange.start, "00:00"),
+    zonedIso(calendarTo, "00:00"),
+    view,
+  );
+  const deepLinkAppointment = useAdminAppointment(branchId, initialSelectedId ?? null);
   // Parallel joins: appointment rows arrive with ids; the name-resolvers
   // hand back their own lookup, and the adapter fills the joined record so
   // the detail panel reads real names instead of "Khách #xxxxx".
@@ -193,20 +206,16 @@ export function AdminAppointmentsComponent({
   // `If-Match` headers can attach to reschedule / cancel mutations.
   const versionsById = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const item of data?.items ?? []) map[item.id] = item.version;
+    for (const item of data?.appointments ?? []) map[item.id] = item.version;
     return map;
   }, [data]);
   const isServerBacked = (id: string) => id in versionsById;
-  // Server is the source of truth once it responds; fixture stays as the
-  // fallback while there is no branch, the request is in flight, or errored.
   const source = useMemo<ReadonlyArray<Appointment>>(
-    () => (data?.items ? data.items.map((row) => toFixtureAppointment(row, lookups)) : initialAppointments),
+    () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups)),
     [data, lookups],
   );
-  // Session overlay: create/edit/cancel intents that this session made but
-  // haven't yet been sent to the backend. A follow-up PR wires the
-  // adminService round-trip and clears each overlay on the corresponding
-  // successful response.
+  // Optimistic overlays keep the calendar responsive while each existing
+  // adminService mutation is in flight, then disappear after the server reply.
   const [localCreates, setLocalCreates] = useState<ReadonlyArray<Appointment>>([]);
   const [localEdits, setLocalEdits] = useState<Readonly<Record<string, AppointmentDraft>>>({});
   const [localCancels, setLocalCancels] = useState<ReadonlySet<string>>(() => new Set());
@@ -219,16 +228,16 @@ export function AdminAppointmentsComponent({
   // The calendar opens on the salon's today. It used to open on
   // DEFAULT_APPOINTMENT_DATE — the date the demo fixtures were written for —
   // so the screen asked the API for 16/08/2026 and looked empty forever.
-  const [selectedDate, setSelectedDate] = useState(todayAtSalon);
-  const [view, setView] = useState<AppointmentView>("day");
   const [status, setStatus] = useState<AppointmentStatusFilter>("all");
-  const [selectedId, setSelectedId] = useState(initialSelectedId ?? initialAppointments[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState(initialSelectedId ?? "");
   // Deep-link: when the drill-down targets an appointment, jump the calendar
   // to its day so the detail panel resolves once the row loads. React 19
   // adjust-state-on-input pattern instead of useEffect + setState.
   const [drilldownConsumed, setDrilldownConsumed] = useState(false);
   if (initialSelectedId && !drilldownConsumed) {
-    const target = (data?.items ?? []).find((row) => row.id === initialSelectedId);
+    const target =
+      (data?.appointments ?? []).find((row) => row.id === initialSelectedId) ??
+      deepLinkAppointment.data;
     if (target) {
       setDrilldownConsumed(true);
       setSelectedDate(toDatePart(target.startsAt));
@@ -236,14 +245,10 @@ export function AdminAppointmentsComponent({
   }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const localId = useRef(initialAppointments.length + 1);
+  const localId = useRef(1);
   const visibleDayAppointments = useMemo(
     () => filterAppointments(appointments, { date: selectedDate, status }),
     [appointments, selectedDate, status],
-  );
-  const viewRange = useMemo(
-    () => getAppointmentViewRange(selectedDate, view),
-    [selectedDate, view],
   );
   const visibleCalendarAppointments = useMemo(() => {
     const inRange = getAppointmentsInRange(appointments, viewRange.start, viewRange.end);
@@ -476,7 +481,7 @@ export function AdminAppointmentsComponent({
       {isLoading && !data ? (
         <p className="mb-2 text-xs text-admin-muted">Đang tải lịch hẹn từ chi nhánh…</p>
       ) : error && !data ? (
-        <p className="mb-2 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-2 text-xs text-admin-danger">Không tải được lịch hẹn.</p>
       ) : null}
       <AppointmentToolbar
         dateLabel={formatAppointmentDateLabel(selectedDate, view)}
