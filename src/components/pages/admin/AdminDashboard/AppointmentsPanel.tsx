@@ -5,30 +5,45 @@ import { Button, Card, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
-import { useAdminBranch, useAdminDashboard, type AdminAppointment } from "@/service";
+import {
+  useAdminBranch,
+  useAdminCustomers,
+  useAdminDashboard,
+  useAdminServices,
+  type AdminAppointment,
+} from "@/service";
+// One mapping for the whole console. This panel used to keep its own two-way
+// guess, so a COMPLETED appointment read "Chờ xác nhận" directly beneath the
+// header counting it as finished.
+import {
+  appointmentStatusLabel,
+  normalizeAppointmentStatus,
+} from "../AdminAppointments/status";
 import { formatClock } from "./adapters";
 import type { Appointment as AppointmentRow } from "./data";
 
-// Server appointments do not carry rendered names — the admin dashboard
-// payload gives ids + timestamps. The panel fills the gaps as best it can
-// so a live list still reads, and callers who want richer information can
-// click through to the appointments page (which will resolve customers /
-// services separately).
-function toAppointmentRow(server: AdminAppointment, timeZone?: string): AppointmentRow {
-  const time = formatClock(server.startsAt, timeZone);
-  const isConfirmed =
-    server.status === "CONFIRMED" || server.status.toLowerCase().includes("confirm");
+/**
+ * The dashboard payload carries ids and timestamps only, so customer and
+ * service names are joined from the branch's own lists — the panel used to
+ * print `Khách #596b00` beside a screen that had the real name.
+ */
+function toAppointmentRow(
+  server: AdminAppointment,
+  lookups: { customers: ReadonlyMap<string, string>; services: ReadonlyMap<string, string> },
+  timeZone?: string,
+): AppointmentRow {
+  const serviceNames = server.serviceIds.map((id) => lookups.services.get(id)).filter(Boolean);
   return {
     id: server.id,
-    time,
-    customer: `Khách #${server.customerId.slice(0, 6)}`,
+    time: formatClock(server.startsAt, timeZone),
+    customer: lookups.customers.get(server.customerId) ?? `Khách #${server.customerId.slice(0, 6)}`,
     service:
       server.serviceIds.length === 0
         ? "Chưa chọn dịch vụ"
         : server.serviceIds.length === 1
-          ? `Dịch vụ #${server.serviceIds[0].slice(0, 6)}`
+          ? serviceNames[0] ?? `Dịch vụ #${server.serviceIds[0].slice(0, 6)}`
           : `${server.serviceIds.length} dịch vụ`,
-    status: isConfirmed ? "Đã xác nhận" : "Chờ xác nhận",
+    status: appointmentStatusLabel[normalizeAppointmentStatus(server.status)],
   };
 }
 
@@ -36,10 +51,17 @@ export function AppointmentsPanel() {
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const { data, error, isLoading } = useAdminDashboard(branchId);
+  const { data: customersData } = useAdminCustomers(branchId);
+  const { data: servicesData } = useAdminServices();
+
+  const lookups = useMemo(() => ({
+    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? c.id] as const)),
+    services: new Map((servicesData?.items ?? []).map((s) => [s.id, s.name] as const)),
+  }), [customersData, servicesData]);
 
   const rows = useMemo(
-    () => (data?.upcoming ?? []).map((item) => toAppointmentRow(item, data?.branchTimeZone)),
-    [data],
+    () => (data?.upcoming ?? []).map((item) => toAppointmentRow(item, lookups, data?.branchTimeZone)),
+    [data, lookups],
   );
 
   return (

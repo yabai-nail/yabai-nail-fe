@@ -3,7 +3,10 @@ import type { AdminReview } from "@/service";
 export type ReviewRow = {
   readonly id: string;
   readonly customerId: string;
-  readonly rating: number;
+  /** Display name once the customer list has loaded; the id until then. */
+  readonly customerName: string;
+  readonly serviceRating: number;
+  readonly staffRating: number;
   readonly content: string;
   readonly handlingStatus: string;
   readonly replyContent?: string;
@@ -11,28 +14,35 @@ export type ReviewRow = {
   readonly version: number;
 };
 
+// The API accepts exactly NEW, IN_PROGRESS and RESOLVED. The old map named
+// PENDING and ESCALATED, which it rejects with 422.
 export const handlingStatusLabels: Record<string, string> = {
-  PENDING: "Chờ xử lý",
+  NEW: "Chờ xử lý",
+  IN_PROGRESS: "Đang xử lý",
   RESOLVED: "Đã xử lý",
-  ESCALATED: "Chuyển cấp trên",
 };
 
 export const reviewFixtures: ReadonlyArray<ReviewRow> = [
-  { id: "rv1", customerId: "Nguyễn An", rating: 5, content: "Nhân viên làm rất tỉ mỉ, sẽ quay lại!", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị đã ủng hộ ạ!", createdAt: "2026-08-23T10:00:00.000Z", version: 2 },
-  { id: "rv2", customerId: "Trần Bích", rating: 4, content: "Móng đẹp nhưng chờ hơi lâu.", handlingStatus: "PENDING", createdAt: "2026-08-22T09:30:00.000Z", version: 1 },
-  { id: "rv3", customerId: "Lê Cường", rating: 2, content: "Màu lên không giống mẫu.", handlingStatus: "ESCALATED", createdAt: "2026-08-21T15:10:00.000Z", version: 1 },
-  { id: "rv4", customerId: "Phạm Dung", rating: 5, content: "Không gian sạch sẽ, thơm.", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị nhiều!", createdAt: "2026-08-20T13:45:00.000Z", version: 3 },
-  { id: "rv5", customerId: "Vũ Hà", rating: 3, content: "Ổn, giá hơi cao so với kỳ vọng.", handlingStatus: "PENDING", createdAt: "2026-08-19T11:20:00.000Z", version: 1 },
+  { id: "rv1", customerId: "cust-", customerName: "Nguyễn An", serviceRating: 5, staffRating: 5, content: "Nhân viên làm rất tỉ mỉ, sẽ quay lại!", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị đã ủng hộ ạ!", createdAt: "2026-08-23T10:00:00.000Z", version: 2 },
+  { id: "rv2", customerId: "cust-", customerName: "Trần Bích", serviceRating: 4, staffRating: 4, content: "Móng đẹp nhưng chờ hơi lâu.", handlingStatus: "NEW", createdAt: "2026-08-22T09:30:00.000Z", version: 1 },
+  { id: "rv3", customerId: "cust-", customerName: "Lê Cường", serviceRating: 2, staffRating: 2, content: "Màu lên không giống mẫu.", handlingStatus: "IN_PROGRESS", createdAt: "2026-08-21T15:10:00.000Z", version: 1 },
+  { id: "rv4", customerId: "cust-", customerName: "Phạm Dung", serviceRating: 5, staffRating: 5, content: "Không gian sạch sẽ, thơm.", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị nhiều!", createdAt: "2026-08-20T13:45:00.000Z", version: 3 },
+  { id: "rv5", customerId: "cust-", customerName: "Vũ Hà", serviceRating: 3, staffRating: 3, content: "Ổn, giá hơi cao so với kỳ vọng.", handlingStatus: "NEW", createdAt: "2026-08-19T11:20:00.000Z", version: 1 },
 ];
 
-export function adaptReview(review: AdminReview): ReviewRow {
+export function adaptReview(
+  review: AdminReview,
+  customerNames?: ReadonlyMap<string, string>,
+): ReviewRow {
   return {
     id: review.id,
     customerId: review.customerId,
-    rating: review.rating,
-    content: review.content ?? "",
-    handlingStatus: review.handling?.status ?? "PENDING",
-    replyContent: review.reply?.content,
+    customerName: customerNames?.get(review.customerId) ?? `Khách #${review.customerId.slice(0, 6)}`,
+    serviceRating: review.serviceRating,
+    staffRating: review.staffRating,
+    content: review.comment ?? "",
+    handlingStatus: review.handlingStatus,
+    replyContent: review.managerReply,
     createdAt: review.createdAt,
     version: review.version,
   };
@@ -52,7 +62,7 @@ export function filterReviews(
     (row) =>
       (status === "all" || row.handlingStatus === status) &&
       (!normalized ||
-        [row.customerId, row.content].some((field) =>
+        [row.customerName, row.content].some((field) =>
           field.toLocaleLowerCase("vi").includes(normalized),
         )),
   );

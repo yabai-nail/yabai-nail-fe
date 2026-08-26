@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { adminService, useAdminBranch, useAdminBranchReviews, useAdminReviews } from "@/service";
+import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminReviews } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
   adaptReview,
@@ -23,14 +23,22 @@ export function AdminReviewsComponent() {
   const { branchId } = useAdminBranch();
   const [scope, setScope] = useState<"branch" | "org">("branch");
   const branchReviews = useAdminBranchReviews(scope === "branch" ? branchId : null);
+  // The table printed the raw customer UUID. Every other list resolves ids to
+  // names the same way, from the branch's own customer list.
+  const { data: customersData } = useAdminCustomers(branchId);
   const orgReviews = useAdminReviews();
   // Org scope is a read-only overview: replies/handling need a per-review branch id,
   // so those actions stay on the branch scope where the active branch is authoritative.
   const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
 
+  const customerNames = useMemo(
+    () => new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? c.id] as const)),
+    [customersData],
+  );
+
   const source = useMemo<ReadonlyArray<ReviewRow>>(
-    () => (data?.items ? data.items.map(adaptReview) : []),
-    [data],
+    () => (data?.items ? data.items.map((review) => adaptReview(review, customerNames)) : []),
+    [data, customerNames],
   );
 
   const [query, setQuery] = useState("");
@@ -46,7 +54,9 @@ export function AdminReviewsComponent() {
   const toggleResolved = async (row: ReviewRow) => {
     if (!branchId) return;
     setActionError(null);
-    const next = row.handlingStatus === "RESOLVED" ? "PENDING" : "RESOLVED";
+    // The API accepts NEW, IN_PROGRESS and RESOLVED only; this used to send
+    // PENDING, so un-resolving a review always came back 422.
+    const next = row.handlingStatus === "RESOLVED" ? "NEW" : "RESOLVED";
     try {
       await adminService.updateBranchReviewHandling(branchId, row.id, { status: next }, row.version);
       void mutate();
@@ -122,9 +132,11 @@ export function AdminReviewsComponent() {
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border align-top last:border-0">
-                    <td className="px-4 py-3 font-medium text-admin-ink">{row.customerId}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={`${row.rating} sao`}>
-                      {ratingStars(row.rating)}
+                    <td className="px-4 py-3 font-medium text-admin-ink">{row.customerName}</td>
+                    {/* The API scores service and staff separately; one column showed neither. */}
+                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={`Dịch vụ ${row.serviceRating} sao, nhân viên ${row.staffRating} sao`}>
+                      <span className="block">{ratingStars(row.serviceRating)} <span className="text-xs text-admin-muted">dịch vụ</span></span>
+                      <span className="block">{ratingStars(row.staffRating)} <span className="text-xs text-admin-muted">nhân viên</span></span>
                     </td>
                     <td className="max-w-xs px-4 py-3 text-admin-ink">{row.content}</td>
                     <td className="px-4 py-3">

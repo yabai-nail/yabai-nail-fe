@@ -720,27 +720,25 @@ export interface AdminMessageDraft {
 
 // -- Admin reviews ---------------------------------------------------------------
 
+/**
+ * Verified against GET /admin/branches/{branchId}/reviews on the live API.
+ * The previous declaration named `rating`, `content`, `handling.status` and
+ * `reply.content`; none of those exist, so the reviews table rendered four
+ * empty columns while TypeScript reported no problem.
+ */
 export interface AdminReview {
   readonly id: string;
   readonly appointmentId: string;
   readonly customerId: string;
-  readonly branchId: string;
-  readonly rating: number;
-  readonly content?: string;
-  readonly status: string;
+  readonly serviceRating: number;
+  readonly staffRating: number;
+  readonly comment?: string;
+  readonly managerReply?: string;
+  readonly handlingStatus: string;
+  readonly consentToPublish?: boolean;
   readonly createdAt: string;
-  readonly handling?: {
-    readonly status: string;
-    readonly assignedTo?: string;
-    readonly note?: string;
-  };
-  readonly reply?: {
-    readonly id: string;
-    readonly content: string;
-    readonly createdAt: string;
-  };
+  readonly updatedAt?: string;
   readonly version: number;
-  readonly [field: string]: unknown;
 }
 
 export interface AdminReviewHandlingPatch {

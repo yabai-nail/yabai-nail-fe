@@ -128,7 +128,16 @@ body {
   color: var(--accent-soft-foreground);
 }
 
-.admin-shell {
+/*
+ * Also on <body>, not only on the shell element: HeroUI portals its modals,
+ * popovers and dialogs to the end of <body>, outside the shell subtree. A
+ * portalled panel therefore resolved `bg-admin-surface` to an undefined
+ * variable and rendered fully transparent, so the page showed straight
+ * through every modal in the console. `body:has(.admin-shell)` below already
+ * reached outside the shell for the page background for the same reason.
+ */
+.admin-shell,
+body:has(.admin-shell) {
   color-scheme: light;
   --admin-accent: #d8145b;
   --admin-accent-hover: #b90d49;
