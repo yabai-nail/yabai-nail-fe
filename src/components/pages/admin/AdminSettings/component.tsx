@@ -68,7 +68,7 @@ export function AdminSettingsComponent() {
     const byStaffId = indexStaffPerformance(performance.data?.rows);
     return (staff.data?.items ?? []).map((member) => {
       const row = byStaffId.get(member.id);
-      const name = member.displayName || `Nhân viên #${member.id.slice(0, 6)}`;
+      const name = member.displayName || "Nhân viên chưa có tên";
       return {
         id: `policy-${member.id}`,
         staffId: member.id,

@@ -32,7 +32,7 @@ export function AdminReviewsComponent() {
   const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
 
   const customerNames = useMemo(
-    () => new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? c.id] as const)),
+    () => new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? "Khách chưa có tên"] as const)),
     [customersData],
   );
 
@@ -193,7 +193,8 @@ export function AdminReviewsComponent() {
         <ReviewReplyModal
           branchId={branchId}
           reviewId={replyTo.id}
-          customerLabel={replyTo.customerId}
+          version={replyTo.version}
+          customerLabel={replyTo.customerName}
           onClose={() => setReplyTo(null)}
           onReplied={() => void mutate()}
         />

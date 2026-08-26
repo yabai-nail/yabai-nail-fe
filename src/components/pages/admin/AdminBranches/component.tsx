@@ -32,6 +32,18 @@ export function AdminBranchesComponent() {
   const [creating, setCreating] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = useAdminBranchDetail(detailId);
+  const detailRecord = detail.data as unknown as Record<string, unknown> | undefined;
+  const detailRows = detailRecord ? {
+    "Tên chi nhánh": String(detailRecord.name ?? "Chưa có tên"),
+    "Địa chỉ": String(detailRecord.address ?? "—"),
+    "Trạng thái": typeof detailRecord.active === "boolean"
+      ? branchStatusLabels[detailRecord.active ? "ACTIVE" : "INACTIVE"]
+      : "—",
+    "Múi giờ": String(detailRecord.timezone ?? detailRecord.timeZone ?? "—"),
+    "Nhân viên đang hoạt động": Number((detailRecord.staffSummary as { activeCount?: unknown } | undefined)?.activeCount ?? 0),
+    "Dịch vụ đang hoạt động": Number((detailRecord.serviceSummary as { activeCount?: unknown } | undefined)?.activeCount ?? 0),
+    "Tổng lịch hẹn": Number((detailRecord.kpi as { appointmentCount?: unknown } | undefined)?.appointmentCount ?? 0),
+  } : undefined;
 
   const filtered = useMemo(() => filterBranches(source, query), [source, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
@@ -39,7 +51,7 @@ export function AdminBranchesComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <AdminSearchField label="Tìm chi nhánh" placeholder="Tên, địa chỉ hoặc SĐT..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+        <AdminSearchField label="Tìm chi nhánh" placeholder="Tên hoặc địa chỉ..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
           <PlusIcon className="size-4" />Thêm chi nhánh
         </Button>
@@ -58,21 +70,18 @@ export function AdminBranchesComponent() {
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
                 <th className="px-4 py-3">Chi nhánh</th>
                 <th className="px-4 py-3">Địa chỉ</th>
-                <th className="px-4 py-3">Điện thoại</th>
                 <th className="px-4 py-3">Trạng thái</th>
                 <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">Không có chi nhánh phù hợp.</td></tr>
+                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-admin-muted">Không có chi nhánh phù hợp.</td></tr>
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.name}</td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.address ?? "—"}</td>
-                    {/* Backend chưa có cột phone cho chi nhánh; ô này luôn "—" cho tới khi API trả về. */}
-                    <td className="px-4 py-3 font-mono text-admin-muted">{row.phone ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
                         {row.status ? branchStatusLabels[row.status] ?? row.status : "—"}
@@ -107,7 +116,7 @@ export function AdminBranchesComponent() {
           title="Chi tiết chi nhánh"
           isLoading={detail.isLoading}
           error={detail.error}
-          data={detail.data as Record<string, unknown> | undefined}
+          data={detailRows}
           onClose={() => setDetailId(null)}
         />
       ) : null}

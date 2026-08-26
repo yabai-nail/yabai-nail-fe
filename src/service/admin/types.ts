@@ -173,7 +173,7 @@ export interface AdminAppointmentRescheduleInput {
 }
 
 export interface AdminAppointmentCancellationInput {
-  readonly reason: string;
+  readonly reasonCode: string;
   readonly refundVnd?: number;
   readonly [field: string]: unknown;
 }
@@ -279,16 +279,16 @@ export interface AdminCustomerPatch {
 
 export interface AdminCustomerBenefits {
   readonly customerId: string;
-  readonly membershipTier?: string;
-  readonly membershipProgress?: number;
-  readonly points?: number;
-  readonly activeCoupons?: ReadonlyArray<Record<string, unknown>>;
+  readonly pointBalance: number;
+  readonly tier: string;
+  readonly coupons: ReadonlyArray<Record<string, unknown>>;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminCustomerCouponIssuanceInput {
   readonly couponId: string;
-  readonly reason?: string;
+  readonly reasonCode?: string;
   readonly expiresAt?: string;
   readonly [field: string]: unknown;
 }
@@ -349,18 +349,16 @@ export interface AdminCustomerNotePatch {
 }
 
 export interface AdminCustomerPointAdjustmentInput {
-  readonly deltaPoints: number;
-  readonly reason: string;
-  readonly note?: string;
+  readonly pointsSigned: number;
+  readonly reasonCode: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminCustomerPointAdjustment {
-  readonly id: string;
   readonly customerId: string;
-  readonly deltaPoints: number;
-  readonly balanceAfter?: number;
-  readonly createdAt: string;
+  readonly pointBalance: number;
+  readonly transaction: Readonly<Record<string, unknown>>;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 
@@ -375,9 +373,7 @@ export interface AdminStaffDraft {
   readonly displayName: string;
   readonly branchId: string;
   readonly serviceIds?: ReadonlyArray<string>;
-  readonly phone?: string;
-  readonly role?: string;
-  readonly active?: boolean;
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly [field: string]: unknown;
 }
 
@@ -385,7 +381,7 @@ export interface AdminStaffPatch {
   readonly displayName?: string;
   readonly branchId?: string;
   readonly serviceIds?: ReadonlyArray<string>;
-  readonly active?: boolean;
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly [field: string]: unknown;
 }
 
@@ -484,7 +480,7 @@ export interface AdminLeaveRequestDraft {
 }
 
 export interface AdminLeaveRequestDecisionInput {
-  readonly decision: "approve" | "reject";
+  readonly decision: "APPROVE" | "REJECT";
   readonly note?: string;
   readonly [field: string]: unknown;
 }
@@ -519,7 +515,7 @@ export interface AdminServiceItemDraft {
   readonly durationMinutes: number;
   readonly description?: string;
   readonly nameJa?: string;
-  readonly active?: boolean;
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly [field: string]: unknown;
 }
 
@@ -530,7 +526,7 @@ export interface AdminServiceItemPatch {
   readonly durationMinutes?: number;
   readonly description?: string;
   readonly nameJa?: string;
-  readonly active?: boolean;
+  readonly status?: "ACTIVE" | "INACTIVE";
   readonly [field: string]: unknown;
 }
 
@@ -598,17 +594,20 @@ export interface AdminSurchargePatch {
 
 export interface AdminPaymentRefund {
   readonly id: string;
-  readonly paymentId: string;
+  readonly appointmentId: string;
+  readonly parentPaymentId: string;
+  readonly kind: "REFUND";
   readonly amountVnd: number;
-  readonly reason: string;
+  readonly method: string;
   readonly status: string;
   readonly createdAt: string;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminPaymentRefundInput {
   readonly amountVnd: number;
-  readonly reason: string;
+  readonly reasonCode: string;
   readonly note?: string;
   readonly [field: string]: unknown;
 }
@@ -630,18 +629,20 @@ export interface AdminReport {
 }
 
 export interface AdminReportExport {
-  readonly id: string;
-  readonly reportKind: string;
+  readonly exportId: string;
+  readonly reportType?: string;
   readonly status: string;
-  readonly requestedAt: string;
+  readonly expiresAt: string;
   readonly completedAt?: string;
-  readonly downloadUrl?: string;
+  readonly errorCode?: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminReportExportInput {
-  readonly reportKind: string;
-  readonly params?: Readonly<Record<string, unknown>>;
+  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE";
+  readonly format?: "CSV" | "XLSX";
+  readonly locale?: "vi" | "ja";
+  readonly filters?: Readonly<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
 
@@ -651,7 +652,8 @@ export interface AdminReportExportDownloadInput {
 }
 
 export interface AdminReportExportDownloadUrl {
-  readonly url: string;
+  readonly exportId: string;
+  readonly signedUrl: string;
   readonly expiresAt: string;
 }
 
@@ -804,7 +806,7 @@ export interface AdminPromotionDraft {
   /** Both dates are required on create. */
   readonly startAt: string;
   readonly endAt: string;
-  readonly issuanceLimit?: number;
+  readonly issuanceLimit: number;
   readonly [field: string]: unknown;
 }
 
@@ -834,40 +836,45 @@ export interface AdminPromotionIssuance {
 // -- Admin notification campaigns -----------------------------------------------
 
 export interface AdminNotificationCampaign {
-  readonly id: string;
-  readonly name: string;
-  readonly channel: string;
+  readonly campaignId: string;
+  readonly channel?: string;
   readonly status: string;
   readonly scheduledAt?: string;
-  readonly completedAt?: string;
+  readonly estimatedRecipients?: number;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminNotificationCampaignDraft {
-  readonly name: string;
+  readonly title: string;
   readonly channel: string;
-  readonly template: string;
-  readonly audience: Readonly<Record<string, unknown>>;
+  readonly message: string;
+  readonly branchIds?: ReadonlyArray<string>;
+  readonly minimumPoints?: number;
   readonly scheduledAt?: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminNotificationCampaignMetrics {
   readonly campaignId: string;
-  readonly delivered: number;
-  readonly opened?: number;
-  readonly clicked?: number;
-  readonly failed?: number;
+  readonly status: string;
+  readonly estimatedRecipients: number;
+  readonly sentCount: number;
+  readonly deliveredCount: number;
+  readonly failedCount: number;
+  readonly version: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminAudiencePreviewInput {
-  readonly definition: Readonly<Record<string, unknown>>;
+  readonly branchIds?: ReadonlyArray<string>;
+  readonly minimumPoints?: number;
+  readonly sampleLimit?: number;
   readonly [field: string]: unknown;
 }
 
 export interface AdminAudiencePreview {
-  readonly matchedCount: number;
+  readonly estimatedRecipients: number;
   readonly sample?: ReadonlyArray<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
@@ -908,14 +915,13 @@ export interface AdminNailDesignPatch {
 }
 
 export interface AdminNailDesignProposalDecisionInput {
-  readonly decision: "approve" | "reject";
-  readonly note?: string;
+  readonly decision: "APPROVE" | "REJECT";
+  readonly reason?: string;
   readonly [field: string]: unknown;
 }
 
 export interface AdminNailDesignProposal {
-  readonly id: string;
-  readonly designId: string;
+  readonly proposalId: string;
   readonly status: string;
   readonly decidedAt?: string;
   readonly note?: string;
@@ -928,9 +934,7 @@ export interface AdminNailDesignProposal {
 export interface AdminBranch {
   readonly id: string;
   readonly name: string;
-  readonly slug?: string;
   readonly address?: string;
-  readonly phone?: string;
   /** Backend trả về cờ boolean `active`, không phải chuỗi `status`. */
   readonly active?: boolean;
   readonly timezone?: string;
@@ -940,9 +944,7 @@ export interface AdminBranch {
 
 export interface AdminBranchDraft {
   readonly name: string;
-  readonly slug?: string;
-  readonly address?: string;
-  readonly phone?: string;
+  readonly address: string;
   readonly timezone?: string;
   readonly [field: string]: unknown;
 }
@@ -950,9 +952,8 @@ export interface AdminBranchDraft {
 export interface AdminBranchPatch {
   readonly name?: string;
   readonly address?: string;
-  readonly phone?: string;
-  readonly status?: string;
-  readonly timezone?: string;
+  readonly status?: "ACTIVE" | "INACTIVE";
+  readonly timeZone?: string;
   readonly [field: string]: unknown;
 }
 
@@ -973,7 +974,7 @@ export interface AdminAccountDraft {
   readonly displayName: string;
   readonly role: string;
   readonly branchIds?: ReadonlyArray<string>;
-  readonly password?: string;
+  readonly temporaryPassword?: string;
   readonly [field: string]: unknown;
 }
 

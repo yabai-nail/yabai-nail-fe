@@ -36,12 +36,12 @@ function toAppointmentRow(
   return {
     id: server.id,
     time: formatClock(server.startsAt, timeZone),
-    customer: lookups.customers.get(server.customerId) ?? `Khách #${server.customerId.slice(0, 6)}`,
+    customer: lookups.customers.get(server.customerId) ?? "Khách chưa có tên",
     service:
       server.serviceIds.length === 0
         ? "Chưa chọn dịch vụ"
         : server.serviceIds.length === 1
-          ? serviceNames[0] ?? `Dịch vụ #${server.serviceIds[0].slice(0, 6)}`
+          ? serviceNames[0] ?? "Dịch vụ chưa có tên"
           : `${server.serviceIds.length} dịch vụ`,
     status: appointmentStatusLabel[normalizeAppointmentStatus(server.status)],
   };
@@ -55,7 +55,7 @@ export function AppointmentsPanel() {
   const { data: servicesData } = useAdminServices();
 
   const lookups = useMemo(() => ({
-    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? c.id] as const)),
+    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? "Khách chưa có tên"] as const)),
     services: new Map((servicesData?.items ?? []).map((s) => [s.id, s.name] as const)),
   }), [customersData, servicesData]);
 

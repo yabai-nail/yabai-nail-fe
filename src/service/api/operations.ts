@@ -187,6 +187,8 @@ PATCH /api/v1/admin/conversations/{conversationId}
 GET /api/v1/admin/branches/{branchId}/staff-performance
 GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings
+GET /api/v1/admin/branches/{branchId}/payments/{paymentId}
+GET /api/v1/admin/nail-design-proposals/{proposalId}
 `;
 
 // Concrete NestJS controller routes present in runtime Swagger but absent from

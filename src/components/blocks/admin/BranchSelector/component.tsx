@@ -3,17 +3,16 @@
 import { BuildingStorefrontIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Dropdown } from "@heroui/react";
 
-import { useAdminBranch, useBranch } from "@/service";
+import { useAdminBranch, useAdminBranchList } from "@/service";
 
 // Sits in the admin shell header. Hides itself when there is nothing to
 // switch (unauthenticated admin, or admin with a single branch) so the
 // header does not carry a dead control.
 export function BranchSelector() {
   const { branchId, branchIds, setBranchId } = useAdminBranch();
-  // Enrich the label with the human-readable name; the id is what SWR keys
-  // by, but the salon admin reads the name they gave the branch.
-  const { data: branch } = useBranch(branchId);
-  const label = branch?.name ?? branchId;
+  const { data } = useAdminBranchList();
+  const branchNames = new Map((data?.items ?? []).map((branch) => [branch.id, branch.name] as const));
+  const label = branchNames.get(branchId ?? "") ?? "Chi nhánh chưa có tên";
 
   if (branchIds.length <= 1) return null;
   if (branchId === null) return null;
@@ -41,11 +40,14 @@ export function BranchSelector() {
             if (typeof next === "string") setBranchId(next);
           }}
         >
-          {branchIds.map((id) => (
-            <Dropdown.Item key={id} id={id} textValue={id}>
-              {id}
-            </Dropdown.Item>
-          ))}
+          {branchIds.map((id) => {
+            const name = branchNames.get(id) ?? "Chi nhánh chưa có tên";
+            return (
+              <Dropdown.Item key={id} id={id} textValue={name}>
+                {name}
+              </Dropdown.Item>
+            );
+          })}
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>

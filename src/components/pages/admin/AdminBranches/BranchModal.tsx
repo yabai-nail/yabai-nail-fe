@@ -8,7 +8,7 @@ import { branchStatusLabels, type BranchRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
-const statusOptions = ["ACTIVE", "INACTIVE", "CLOSED"];
+const statusOptions = ["ACTIVE", "INACTIVE"];
 
 export function BranchModal({
   branch,
@@ -21,15 +21,13 @@ export function BranchModal({
 }>) {
   const isEdit = branch !== null;
   const [name, setName] = useState(branch?.name ?? "");
-  const [slug, setSlug] = useState(branch?.slug ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
-  const [phone, setPhone] = useState(branch?.phone ?? "");
   const [timezone, setTimezone] = useState(branch?.timezone ?? "Asia/Ho_Chi_Minh");
-  const [status, setStatus] = useState(branch?.status ?? "ACTIVE");
+  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">(branch?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = name.trim().length >= 2 && !busy;
+  const canSubmit = name.trim().length >= 2 && address.trim().length >= 2 && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -39,15 +37,13 @@ export function BranchModal({
       if (isEdit && branch) {
         await adminService.updateBranch(
           branch.id,
-          { name: name.trim(), address: address.trim() || undefined, phone: phone.trim() || undefined, timezone, status },
+          { name: name.trim(), address: address.trim(), timeZone: timezone, status },
           branch.version,
         );
       } else {
         await adminService.createBranch({
           name: name.trim(),
-          slug: slug.trim() || undefined,
-          address: address.trim() || undefined,
-          phone: phone.trim() || undefined,
+          address: address.trim(),
           timezone,
         });
       }
@@ -75,21 +71,11 @@ export function BranchModal({
                 <span className="font-semibold text-admin-ink">Tên chi nhánh</span>
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="YABAI NAIL Quận 1" autoFocus />
               </label>
-              {!isEdit ? (
-                <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Slug (tuỳ chọn)</span>
-                  <input className={inputClass} value={slug} onChange={(event) => setSlug(event.target.value)} placeholder="quan-1" />
-                </label>
-              ) : null}
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Địa chỉ</span>
                 <input className={inputClass} value={address} onChange={(event) => setAddress(event.target.value)} placeholder="45 Lê Lợi, Quận 1" />
               </label>
               <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Điện thoại</span>
-                  <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="02839000002" inputMode="numeric" />
-                </label>
                 {isEdit ? (
                   <div className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold text-admin-ink">Trạng thái</span>
@@ -97,16 +83,15 @@ export function BranchModal({
                       label="Trạng thái chi nhánh"
                       fullWidth
                       value={status}
-                      onChange={setStatus}
+                      onChange={(value) => setStatus(value as "ACTIVE" | "INACTIVE")}
                       options={statusOptions.map((code) => ({ value: code, label: branchStatusLabels[code] ?? code }))}
                     />
                   </div>
-                ) : (
-                  <label className="flex flex-col gap-2 text-sm">
-                    <span className="font-semibold text-admin-ink">Múi giờ</span>
-                    <input className={inputClass} value={timezone} onChange={(event) => setTimezone(event.target.value)} />
-                  </label>
-                )}
+                ) : null}
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">Múi giờ</span>
+                  <input className={inputClass} value={timezone} onChange={(event) => setTimezone(event.target.value)} />
+                </label>
               </div>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>

@@ -9,15 +9,17 @@ export const reportKindLabels: Record<ReportKind, string> = {
   staff: "Nhân viên",
 };
 
-/** Backend reportKind slug for POST /admin/report-exports. */
-export const exportKindOf: Record<ReportKind, string> = {
-  revenue: "revenue-summary",
-  branches: "branches",
-  customers: "customers",
-  staff: "staff-performance",
-};
+/** Backend reportType enum for POST /admin/report-exports. */
+export const exportKindOf = {
+  revenue: "REVENUE_SUMMARY",
+  branches: "BRANCHES",
+  customers: "CUSTOMERS",
+  staff: "STAFF_PERFORMANCE",
+} as const;
 
 const metricLabels: Record<string, string> = {
+  branchName: "Chi nhánh",
+  customerName: "Khách hàng",
   grossRevenueVnd: "Doanh thu gộp",
   netRevenueVnd: "Doanh thu thuần",
   revenueVnd: "Doanh thu",
@@ -28,7 +30,38 @@ const metricLabels: Record<string, string> = {
   returningCustomers: "Khách quay lại",
   averageTicketVnd: "Trung bình/hoá đơn",
   commissionVnd: "Hoa hồng",
+  serviceName: "Dịch vụ",
+  staffName: "Nhân viên",
 };
+
+export type ReportLookups = {
+  readonly branches?: ReadonlyMap<string, string>;
+  readonly customers?: ReadonlyMap<string, string>;
+  readonly services?: ReadonlyMap<string, string>;
+  readonly staff?: ReadonlyMap<string, string>;
+};
+
+/** Replaces identifier columns with their human-readable counterpart. */
+export function resolveReportIdentifiers(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  lookups: ReportLookups,
+): ReadonlyArray<Record<string, unknown>> {
+  const identifierColumns: Record<string, readonly [string, ReadonlyMap<string, string> | undefined, string]> = {
+    branchId: ["branchName", lookups.branches, "Chi nhánh chưa có tên"],
+    customerId: ["customerName", lookups.customers, "Khách chưa có tên"],
+    serviceId: ["serviceName", lookups.services, "Dịch vụ chưa có tên"],
+    staffId: ["staffName", lookups.staff, "Nhân viên chưa có tên"],
+  };
+
+  return rows.map((row) => Object.fromEntries(Object.entries(row).flatMap(([key, value]) => {
+    const resolved = identifierColumns[key];
+    if (resolved) {
+      const [displayKey, names, fallback] = resolved;
+      return [[displayKey, names?.get(String(value)) ?? fallback]];
+    }
+    return key === "id" || /Ids?$/.test(key) ? [] : [[key, value]];
+  })));
+}
 
 export function humanizeKey(key: string): string {
   return key

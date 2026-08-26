@@ -96,7 +96,7 @@ export function IssueModal({
                         checked={selected.includes(row.id)}
                         onChange={() => toggle(row.id)}
                       />
-                      <span className="text-admin-ink">{row.displayName ?? row.name ?? row.id}</span>
+                      <span className="text-admin-ink">{row.displayName ?? row.name ?? "Khách chưa có tên"}</span>
                       <span className="ml-auto text-xs text-admin-muted">{row.phone ?? ""}</span>
                     </label>
                   ))

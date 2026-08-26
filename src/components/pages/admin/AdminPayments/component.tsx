@@ -55,14 +55,14 @@ function buildInvoiceFromServer(
   const start = new Date(appointment.startsAt);
   const date = start.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", weekday: "long" });
   const time = start.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-  const customerName = customer?.displayName ?? customer?.name ?? `Khách #${appointment.customerId.slice(0, 6)}`;
-  const staffName = staff?.displayName ?? `Nhân viên #${appointment.staffId.slice(0, 6)}`;
+  const customerName = customer?.displayName ?? customer?.name ?? "Khách chưa có tên";
+  const staffName = staff?.displayName ?? "Nhân viên chưa có tên";
 
   const asService = (serviceId: string) => {
     const server = lookups.services.get(serviceId);
     return {
       id: serviceId,
-      name: server?.name ?? `Dịch vụ #${serviceId.slice(0, 6)}`,
+      name: server?.name ?? "Dịch vụ chưa có tên",
       price: server?.priceVnd ?? 0,
     };
   };
@@ -87,12 +87,12 @@ function buildInvoiceFromServer(
     },
     bookedService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? `Dịch vụ #${primaryServiceId.slice(0, 6)}`,
+      name: primaryService?.name ?? "Dịch vụ chưa có tên",
       price: primaryService?.priceVnd ?? 0,
     },
     currentService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? `Dịch vụ #${primaryServiceId.slice(0, 6)}`,
+      name: primaryService?.name ?? "Dịch vụ chưa có tên",
       price: primaryService?.priceVnd ?? 0,
     },
     additionalItems: appointment.serviceIds.slice(1).map((serviceId) => ({
@@ -103,7 +103,7 @@ function buildInvoiceFromServer(
     discount: appointment.discountVnd,
     paymentMethod: null,
     orderNote: "",
-    status: appointment.status.toUpperCase().includes("PAID") ? "paid" : "draft",
+    status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
     paidAt: null,
   };
 }
@@ -151,7 +151,6 @@ export function AdminPaymentsComponent() {
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
   const handleConfirm = () => {
-    // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
     setIsConfirmOpen(false);
     if (!result.ok) {
@@ -161,8 +160,6 @@ export function AdminPaymentsComponent() {
       setConfirmError(result.error);
       return;
     }
-    setInvoice(result.value);
-
     if (!isServerBacked) {
       setConfirmError(
         "Hóa đơn này chưa gắn với lịch hẹn thật nên không ghi được giao dịch.",
@@ -206,6 +203,7 @@ export function AdminPaymentsComponent() {
           // quote's own field is loosely typed, so only trust a number.
           typeof quote.version === "number" ? quote.version : appointment?.version,
         );
+        setInvoice(result.value);
         void mutateAppointment();
       } catch (thrown) {
         setConfirmError(

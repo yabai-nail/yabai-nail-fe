@@ -3,11 +3,13 @@
 import { GiftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
 import {
   adminService,
   useAdminCustomerBenefits,
   useAdminCustomerNailHistory,
+  useAdminPromotions,
 } from "@/service";
 
 // Read-side (benefits + nail history) and the two write mutations (adjust
@@ -19,8 +21,10 @@ export function CustomerLoyaltyPanel({
 }: Readonly<{ branchId: string; customerId: string }>) {
   const benefitsQuery = useAdminCustomerBenefits(branchId, customerId);
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
+  const promotionsQuery = useAdminPromotions();
   const benefits = benefitsQuery.data;
   const history = historyQuery.data?.items ?? [];
+  const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 
   // Point-adjustment form state.
   const [deltaText, setDeltaText] = useState("");
@@ -34,12 +38,12 @@ export function CustomerLoyaltyPanel({
     setPointsError(null);
     try {
       await adminService.adjustCustomerPoints(branchId, customerId, {
-        deltaPoints: delta,
-        reason: reason.trim(),
-      });
+        pointsSigned: delta,
+        reasonCode: reason.trim(),
+      }, benefits?.version);
       setDeltaText("");
       setReason("");
-      void benefitsQuery.mutate();
+      await benefitsQuery.mutate();
     } catch (thrown) {
       setPointsError(
         thrown instanceof Error ? thrown.message : "Không điều chỉnh được điểm.",
@@ -60,9 +64,9 @@ export function CustomerLoyaltyPanel({
     try {
       await adminService.issueCustomerCoupon(branchId, customerId, {
         couponId: couponId.trim(),
-      });
+      }, benefits?.version);
       setCouponId("");
-      void benefitsQuery.mutate();
+      await benefitsQuery.mutate();
     } catch (thrown) {
       setCouponError(
         thrown instanceof Error ? thrown.message : "Không phát được coupon.",
@@ -86,18 +90,18 @@ export function CustomerLoyaltyPanel({
         <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
             <dt className="text-admin-muted">Hạng</dt>
-            <dd className="mt-1 font-bold text-admin-ink">{benefits?.membershipTier ?? "—"}</dd>
+            <dd className="mt-1 font-bold text-admin-ink">{benefits?.tier ?? "—"}</dd>
           </div>
           <div>
             <dt className="text-admin-muted">Điểm</dt>
             <dd className="mt-1 font-bold text-admin-accent">
-              {typeof benefits?.points === "number" ? formatNumber(benefits.points) : "—"}
+              {typeof benefits?.pointBalance === "number" ? formatNumber(benefits.pointBalance) : "—"}
             </dd>
           </div>
           <div>
             <dt className="text-admin-muted">Coupon</dt>
             <dd className="mt-1 font-bold text-admin-ink">
-              {benefits?.activeCoupons?.length ?? 0}
+              {benefits?.coupons?.length ?? 0}
             </dd>
           </div>
         </dl>
@@ -129,7 +133,7 @@ export function CustomerLoyaltyPanel({
             variant="primary"
             className="rounded-lg"
             onPress={() => void submitPoints()}
-            isDisabled={pointsPending || !reason.trim() || !Number.parseInt(deltaText, 10)}
+            isDisabled={pointsPending || benefits?.version === undefined || !reason.trim() || !Number.parseInt(deltaText, 10)}
           >
             {pointsPending ? "Đang xử lý…" : "Ghi nhận"}
           </Button>
@@ -142,19 +146,29 @@ export function CustomerLoyaltyPanel({
           <GiftIcon className="size-4 text-admin-accent" />
           Phát coupon
         </p>
-        <input
-          value={couponId}
-          onChange={(event) => setCouponId(event.target.value)}
-          placeholder="Mã coupon (couponId)"
-          className="w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-xs text-admin-ink"
-        />
+        {promotions.length > 0 ? (
+          <AdminSelectField
+            label="Chọn coupon"
+            value={couponId}
+            onChange={setCouponId}
+            fullWidth
+            options={promotions.map((promotion) => ({
+              value: promotion.id,
+              label: promotion.title ?? promotion.name ?? promotion.code ?? "Coupon chưa có tên",
+            }))}
+          />
+        ) : (
+          <p className="text-xs text-admin-muted">
+            {promotionsQuery.isLoading ? "Đang tải coupon…" : "Chưa có coupon đang hoạt động."}
+          </p>
+        )}
         <div className="flex justify-end">
           <Button
             size="sm"
             variant="primary"
             className="rounded-lg"
             onPress={() => void submitCoupon()}
-            isDisabled={couponPending || !couponId.trim()}
+            isDisabled={couponPending || benefits?.version === undefined || !couponId.trim()}
           >
             {couponPending ? "Đang phát…" : "Phát coupon"}
           </Button>

@@ -71,7 +71,7 @@ function resolveServiceLabel(
   if (serviceIds.length === 0) return MISSING;
   if (serviceIds.length > 1) return `${serviceIds.length} dịch vụ`;
   const service = byId.get(serviceIds[0]);
-  return service?.name ?? `Dịch vụ #${serviceIds[0].slice(0, 6)}`;
+  return service?.name ?? "Dịch vụ chưa có tên";
 }
 
 function toOrderRow(
@@ -86,7 +86,7 @@ function toOrderRow(
     customer:
       customer?.displayName
       ?? customer?.name
-      ?? `Khách #${appointment.customerId.slice(0, 6)}`,
+      ?? "Khách chưa có tên",
     service: resolveServiceLabel(appointment.serviceIds, services),
     total: appointment.totalVnd,
     status: appointment.status,

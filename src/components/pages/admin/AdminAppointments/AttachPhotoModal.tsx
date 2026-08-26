@@ -3,6 +3,7 @@
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
+import { mediaService } from "@/service";
 import type { Appointment } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -19,12 +20,43 @@ export function AttachPhotoModal({
   submitting?: boolean;
   error?: string | null;
 }>) {
-  const [mediaId, setMediaId] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [kind, setKind] = useState<"BEFORE" | "AFTER" | "OTHER">("AFTER");
   const [note, setNote] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const uploadAndAttach = async () => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    let mediaId: string | null = null;
+    try {
+      const upload = await mediaService.startUpload({
+        kind: "APPOINTMENT_PHOTO",
+        contentType: file.type || "application/octet-stream",
+        filename: file.name,
+        sizeBytes: file.size,
+      });
+      mediaId = upload.mediaId;
+      const response = await fetch(upload.uploadUrl, {
+        method: upload.method ?? "PUT",
+        headers: upload.headers,
+        body: file,
+      });
+      if (!response.ok) throw new Error("Không tải được ảnh lên kho lưu trữ.");
+      await mediaService.completeUpload(mediaId);
+      onConfirm({ mediaId, kind, note: note.trim() || undefined });
+    } catch (thrown) {
+      if (mediaId) await mediaService.abortUpload(mediaId).catch(() => undefined);
+      setUploadError(thrown instanceof Error ? thrown.message : "Không tải được ảnh.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <Modal isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Modal isOpen onOpenChange={(open) => { if (!open && !uploading && !submitting) onClose(); }}>
       <Modal.Backdrop>
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
@@ -34,18 +66,17 @@ export function AttachPhotoModal({
             </Modal.Header>
             <Modal.Body className="space-y-3 px-5 py-4 text-sm">
               <p className="text-[0.7rem] leading-4 text-admin-muted">
-                Lịch của <strong className="text-admin-ink">{appointment.customer.name}</strong>. Nhập
-                <code className="mx-1 rounded bg-admin-soft px-1 text-[0.65rem]">mediaId</code>
-                đã upload trước qua <code className="rounded bg-admin-soft px-1 text-[0.65rem]">/media/uploads</code>.
+                Chọn ảnh cần đính kèm vào lịch của <strong className="text-admin-ink">{appointment.customer.name}</strong>.
               </p>
 
-              <label htmlFor="attach-media-id" className="block text-xs font-semibold text-admin-ink">
-                Media ID
+              <label htmlFor="attach-photo-file" className="block text-xs font-semibold text-admin-ink">
+                Tệp ảnh
                 <input
-                  id="attach-media-id"
-                  value={mediaId}
-                  onChange={(event) => setMediaId(event.target.value)}
-                  placeholder="uuid từ media/uploads/complete"
+                  id="attach-photo-file"
+                  type="file"
+                  accept="image/*"
+                  disabled={uploading || submitting}
+                  onChange={(event) => setFile(event.target.files?.[0] ?? null)}
                   className="mt-1 block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-sm text-admin-ink"
                 />
               </label>
@@ -77,25 +108,19 @@ export function AttachPhotoModal({
                 />
               </label>
 
-              {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
+              {uploadError || error ? <p role="alert" className="text-xs text-admin-danger">{uploadError ?? error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="border-t border-admin-border px-5 py-4">
-              <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting}>
+              <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting || uploading}>
                 Đóng
               </Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
-                onPress={() =>
-                  onConfirm({
-                    mediaId: mediaId.trim(),
-                    kind,
-                    note: note.trim() || undefined,
-                  })
-                }
-                isDisabled={submitting || mediaId.trim().length === 0}
+                onPress={() => void uploadAndAttach()}
+                isDisabled={submitting || uploading || !file}
               >
-                {submitting ? "Đang gửi…" : "Đính kèm"}
+                {submitting || uploading ? "Đang gửi…" : "Đính kèm"}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

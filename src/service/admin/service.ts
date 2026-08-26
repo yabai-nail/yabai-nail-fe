@@ -267,11 +267,12 @@ export const adminService = {
     branchId: string,
     customerId: string,
     input: AdminCustomerCouponIssuanceInput,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminCustomerCouponIssuance>(
       "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/coupon-issuances",
-      { path: { branchId, customerId }, body: input, idempotencyKey },
+      { path: { branchId, customerId }, body: input, version, idempotencyKey },
     ),
   customerNailHistory: (
     branchId: string,
@@ -316,11 +317,12 @@ export const adminService = {
     branchId: string,
     customerId: string,
     input: AdminCustomerPointAdjustmentInput,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminCustomerPointAdjustment>(
       "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/point-adjustments",
-      { path: { branchId, customerId }, body: input, idempotencyKey },
+      { path: { branchId, customerId }, body: input, version, idempotencyKey },
     ),
   lookupCustomer: (branchId: string, query: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<AdminCustomerLookupResult>(
@@ -504,11 +506,17 @@ export const adminService = {
     branchId: string,
     paymentId: string,
     input: AdminPaymentRefundInput,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminPaymentRefund>(
       "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
-      { path: { branchId, paymentId }, body: input, idempotencyKey },
+      { path: { branchId, paymentId }, body: input, version, idempotencyKey },
+    ),
+  payment: (branchId: string, paymentId: string) =>
+    executeApiOperation<AdminAppointmentPayment>(
+      "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}",
+      { path: { branchId, paymentId } },
     ),
   paymentRefund: (branchId: string, paymentId: string, refundId: string) =>
     executeApiOperation<AdminPaymentRefund>(
@@ -574,11 +582,12 @@ export const adminService = {
     branchId: string,
     reviewId: string,
     input: AdminReviewReplyInput,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminReview>(
       "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
-      { path: { branchId, reviewId }, body: input, idempotencyKey },
+      { path: { branchId, reviewId }, body: input, version, idempotencyKey },
     ),
   reviews: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query }),
@@ -633,11 +642,12 @@ export const adminService = {
   cancelNotificationCampaign: (
     campaignId: string,
     input?: Readonly<Record<string, unknown>>,
+    version?: string | number,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminNotificationCampaign>(
       "POST /api/v1/admin/notification-campaigns/{campaignId}/cancellation",
-      { path: { campaignId }, body: input ?? {}, idempotencyKey },
+      { path: { campaignId }, body: input ?? {}, version, idempotencyKey },
     ),
   notificationCampaignMetrics: (campaignId: string) =>
     executeApiOperation<AdminNotificationCampaignMetrics>(
@@ -682,6 +692,11 @@ export const adminService = {
     executeApiOperation<AdminNailDesignProposal>(
       "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
       { path: { proposalId }, body: input, version },
+    ),
+  nailDesignProposal: (proposalId: string) =>
+    executeApiOperation<AdminNailDesignProposal>(
+      "GET /api/v1/admin/nail-design-proposals/{proposalId}",
+      { path: { proposalId } },
     ),
   branches: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminBranch>>("GET /api/v1/admin/branches", { query }),

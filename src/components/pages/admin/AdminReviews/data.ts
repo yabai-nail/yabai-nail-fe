@@ -4,7 +4,7 @@ import { matchesSearch } from "@/lib/admin-search";
 export type ReviewRow = {
   readonly id: string;
   readonly customerId: string;
-  /** Display name once the customer list has loaded; the id until then. */
+  /** Display name once the customer list has loaded. */
   readonly customerName: string;
   readonly serviceRating: number;
   readonly staffRating: number;
@@ -38,7 +38,7 @@ export function adaptReview(
   return {
     id: review.id,
     customerId: review.customerId,
-    customerName: customerNames?.get(review.customerId) ?? `Khách #${review.customerId.slice(0, 6)}`,
+    customerName: customerNames?.get(review.customerId) ?? "Khách chưa có tên",
     serviceRating: review.serviceRating,
     staffRating: review.staffRating,
     content: review.comment ?? "",

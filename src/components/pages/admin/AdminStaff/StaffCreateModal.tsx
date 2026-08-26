@@ -19,7 +19,6 @@ export function StaffCreateModal({
   onCreated: () => void;
 }>) {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +32,6 @@ export function StaffCreateModal({
       await adminService.createStaff({
         displayName: name.trim(),
         branchId,
-        phone: phone.trim() || undefined,
       });
       onCreated();
       onClose();
@@ -61,16 +59,6 @@ export function StaffCreateModal({
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Mai Linh"
                   autoFocus
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Số điện thoại (tùy chọn)</span>
-                <input
-                  type="tel"
-                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder="0901 234 567"
                 />
               </label>
               <p className="text-xs text-admin-muted">

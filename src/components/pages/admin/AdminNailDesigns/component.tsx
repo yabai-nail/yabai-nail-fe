@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { adminService, useAdminNailDesigns } from "@/service";
+import { useAdminNailDesigns } from "@/service";
 import { DesignModal } from "./DesignModal";
 import {
   adaptDesign,
@@ -118,67 +118,9 @@ export function AdminNailDesignsComponent() {
         </Card.Footer>
       </Card>
 
-      <ProposalDecisionPanel />
-
       {creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
       {editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
     </AdminPageLayout>
-  );
-}
-
-// The backend exposes only the decision endpoint for proposals (no list endpoint yet),
-// so review is by proposal id until a listing contract exists.
-function ProposalDecisionPanel() {
-  const [proposalId, setProposalId] = useState("");
-  const [note, setNote] = useState("");
-  const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const decide = async (decision: "approve" | "reject") => {
-    if (proposalId.trim().length < 1) return;
-    setBusy(decision);
-    setError(null);
-    setMessage(null);
-    try {
-      await adminService.decideNailDesignProposal(proposalId.trim(), {
-        decision,
-        note: note.trim() || undefined,
-      });
-      setMessage(decision === "approve" ? "Đã duyệt đề xuất." : "Đã từ chối đề xuất.");
-      setProposalId("");
-      setNote("");
-    } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không xử lý được đề xuất.");
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
-
-  return (
-    <Card className="mt-4 max-w-xl gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Duyệt đề xuất mẫu</h2>
-      <label className="flex flex-col gap-2 text-sm">
-        <span className="font-semibold text-admin-ink">ID đề xuất</span>
-        <input className={inputClass} value={proposalId} onChange={(event) => setProposalId(event.target.value)} placeholder="proposal-uuid" />
-      </label>
-      <label className="flex flex-col gap-2 text-sm">
-        <span className="font-semibold text-admin-ink">Ghi chú (tuỳ chọn)</span>
-        <input className={inputClass} value={note} onChange={(event) => setNote(event.target.value)} />
-      </label>
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
-      {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
-      <div className="flex gap-2">
-        <Button variant="primary" className="rounded-lg" isDisabled={busy !== null || !proposalId.trim()} onPress={() => void decide("approve")}>
-          {busy === "approve" ? "Đang duyệt…" : "Duyệt"}
-        </Button>
-        <Button variant="outline" className="rounded-lg" isDisabled={busy !== null || !proposalId.trim()} onPress={() => void decide("reject")}>
-          {busy === "reject" ? "Đang từ chối…" : "Từ chối"}
-        </Button>
-      </div>
-    </Card>
   );
 }
 

@@ -33,7 +33,7 @@ function deriveInitials(name: string): string {
  * invented value.
  */
 function toCustomerRow(server: AdminCustomer): Customer {
-  const name = server.displayName ?? server.name ?? `Khách #${server.id.slice(0, 6)}`;
+  const name = server.displayName ?? server.name ?? "Khách chưa có tên";
   const record = server as unknown as Record<string, unknown>;
   const readNumber = (key: string): number => {
     const value = record[key];

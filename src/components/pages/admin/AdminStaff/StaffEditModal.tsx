@@ -30,7 +30,7 @@ export function StaffEditModal({
     try {
       await adminService.updateStaff(
         member.id,
-        { displayName: displayName.trim(), active },
+        { displayName: displayName.trim(), status: active ? "ACTIVE" : "INACTIVE" },
         member.version,
       );
       onSaved();

@@ -25,7 +25,7 @@ export function ServiceCreateModal({
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
   const canSubmit =
-    name.trim().length >= 2 && priceNum > 0 && durationNum > 0 && !busy;
+    name.trim().length >= 2 && priceNum > 0 && durationNum > 0 && durationNum % 15 === 0 && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -36,7 +36,7 @@ export function ServiceCreateModal({
         name: name.trim(),
         priceVnd: priceNum,
         durationMinutes: durationNum,
-        active: isVisible,
+        status: isVisible ? "ACTIVE" : "INACTIVE",
       });
       onCreated();
       onClose();
@@ -81,8 +81,8 @@ export function ServiceCreateModal({
                   <span className="font-semibold text-admin-ink">Thời lượng (phút)</span>
                   <input
                     type="number"
-                    min={5}
-                    step={5}
+                    min={15}
+                    step={15}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={duration}
                     onChange={(event) => setDuration(event.target.value)}

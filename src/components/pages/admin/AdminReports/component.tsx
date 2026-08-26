@@ -5,9 +5,13 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import {
   adminService,
+  useAdminAccounts,
+  useAdminBranchList,
   useAdminBranchesReport,
   useAdminCustomersReport,
   useAdminReportExport,
+  useAdminServices,
+  useAdminStaff,
   useAdminStaffPerformanceReport,
   useRevenueReport,
   type AdminReportExport,
@@ -18,6 +22,7 @@ import {
   labelForKey,
   metricCards,
   reportKindLabels,
+  resolveReportIdentifiers,
   tableColumns,
   type ReportKind,
 } from "./data";
@@ -29,6 +34,10 @@ export function AdminReportsComponent() {
   const branches = useAdminBranchesReport();
   const customers = useAdminCustomersReport();
   const staff = useAdminStaffPerformanceReport();
+  const branchesList = useAdminBranchList();
+  const accountsList = useAdminAccounts();
+  const servicesList = useAdminServices();
+  const staffList = useAdminStaff();
 
   const [kind, setKind] = useState<ReportKind>("revenue");
   const [exportInfo, setExportInfo] = useState<AdminReportExport | null>(null);
@@ -37,19 +46,26 @@ export function AdminReportsComponent() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   // Live status of the created export, by id — a build can still be running when
   // the create call returns, so the row reflects the freshest read.
-  const exportStatus = useAdminReportExport(exportInfo?.id ?? null);
+  const exportStatus = useAdminReportExport(exportInfo?.exportId ?? null);
 
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
 
   const cards = useMemo(() => metricCards(revenue.data), [revenue.data]);
 
-  const rows = useMemo<ReadonlyArray<Record<string, unknown>>>(() => {
+  const rawRows = useMemo<ReadonlyArray<Record<string, unknown>>>(() => {
     if (kind === "revenue") {
       return (revenue.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
     }
     return (active.data?.rows ?? []) as ReadonlyArray<Record<string, unknown>>;
   }, [kind, revenue.data, active.data]);
+
+  const rows = useMemo(() => resolveReportIdentifiers(rawRows, {
+    branches: new Map((branchesList.data?.items ?? []).map((item) => [item.id, item.name] as const)),
+    customers: new Map((accountsList.data?.items ?? []).map((item) => [item.id, item.displayName ?? "Khách chưa có tên"] as const)),
+    services: new Map((servicesList.data?.items ?? []).map((item) => [item.id, item.name] as const)),
+    staff: new Map((staffList.data?.items ?? []).map((item) => [item.id, item.displayName ?? "Nhân viên chưa có tên"] as const)),
+  }), [rawRows, branchesList.data, accountsList.data, servicesList.data, staffList.data]);
 
   const columns = useMemo(() => tableColumns(rows), [rows]);
 
@@ -65,9 +81,8 @@ export function AdminReportsComponent() {
     setExportError(null);
     setDownloadUrl(null);
     try {
-      const info = await adminService.createReportExport({ reportKind: exportKindOf[kind] });
+      const info = await adminService.createReportExport({ reportType: exportKindOf[kind] });
       setExportInfo(info);
-      if (typeof info.downloadUrl === "string") setDownloadUrl(info.downloadUrl);
     } catch (err) {
       setExportError(err instanceof Error && err.message ? err.message : "Không tạo được file xuất.");
     } finally {
@@ -79,8 +94,8 @@ export function AdminReportsComponent() {
     if (!exportInfo) return;
     setExportError(null);
     try {
-      const res = await adminService.reportExportDownloadUrl(exportInfo.id);
-      setDownloadUrl(res.url);
+      const res = await adminService.reportExportDownloadUrl(exportInfo.exportId);
+      setDownloadUrl(res.signedUrl);
     } catch (err) {
       setExportError(err instanceof Error && err.message ? err.message : "Chưa lấy được link tải.");
     }

@@ -49,8 +49,8 @@ describe("audit log derivation", () => {
     expect(row).toMatchObject({
       id: "x1",
       action: "CUSTOMER_UPDATED",
-      actor: "user-9",
-      target: "Customer · CU-1",
+      actor: "Tài khoản không xác định",
+      target: "Khách hàng",
       branch: undefined,
     });
   });
@@ -74,16 +74,13 @@ describe("audit log derivation", () => {
       },
     );
     expect(row).toMatchObject({
-      actor: "OWNER · Chu chuoi YABAI",
-      actorTitle: actorId,
-      target: "Appointment · 3339ad7c",
-      targetTitle: "3339ad7c-22b7-4540-8916-4dc5c8271935",
+      actor: "Chủ chuỗi · Chu chuoi YABAI",
+      target: "Lịch hẹn",
       branch: "Thảo Điền",
-      branchTitle: branchId,
     });
   });
 
-  it("shortens unresolved uuids and keeps the full value for the tooltip", () => {
+  it("uses semantic labels instead of unresolved uuids", () => {
     const actorId = "a11ceafc-9c7d-4d6e-b712-58ad27b9eb64";
     const row = adaptAuditLog({
       id: "x3",
@@ -95,9 +92,8 @@ describe("audit log derivation", () => {
       createdAt: "2026-08-25T17:14:33.853Z",
     });
     expect(row).toMatchObject({
-      actor: "a11ceafc",
-      actorTitle: actorId,
-      target: "AuthSession · fc16bbb8",
+      actor: "Tài khoản không xác định",
+      target: "Phiên đăng nhập",
       branch: undefined,
     });
   });
