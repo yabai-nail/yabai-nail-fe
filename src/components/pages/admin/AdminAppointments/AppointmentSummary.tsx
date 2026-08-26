@@ -21,7 +21,11 @@ export function AppointmentSummary({ summary }: Readonly<{ summary: ReturnType<t
       <Card.Header className="border-b border-admin-border px-4 py-3">
         <h2 className="text-sm font-bold text-admin-ink">Tổng quan ngày</h2>
       </Card.Header>
-      <Card.Content className="grid grid-cols-2 divide-admin-border p-0 sm:grid-cols-5 lg:grid-cols-2 xl:grid-cols-5">
+      {/* Sized by the container, not the viewport: this card sits in the layout's
+          narrow left column, so at 1440px it is still only ~304px wide. Five fixed
+          columns gave each label 40px of a 71px word and the text ran into its
+          neighbour. auto-fit lets the row hold as many tiles as actually fit. */}
+      <Card.Content className="grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] divide-admin-border p-0">
         {metrics.map(({ key, label, icon: Icon, color }) => (
           <div key={key} className="border-r border-admin-border px-2 py-4 text-center last:border-r-0">
             <Icon className={`mx-auto size-5 ${color}`} />
