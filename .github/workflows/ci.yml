@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "17 1 * * *"
+  workflow_dispatch:
 
 jobs:
   verify:
@@ -40,9 +43,8 @@ jobs:
   # PR and must not gate one. Scheduled instead, where a contract drift shows up
   # as a failed run rather than as a blank column somebody notices months later.
   contract:
-    if: github.event_name == 'push' || github.event_name == 'schedule'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -56,9 +58,12 @@ jobs:
           YABAI_API_URL: ${{ vars.YABAI_API_URL }}
           YABAI_ADMIN_PHONE: ${{ secrets.YABAI_ADMIN_PHONE }}
           YABAI_ADMIN_PASSWORD: ${{ secrets.YABAI_ADMIN_PASSWORD }}
-        run: |
-          if [ -z "$YABAI_ADMIN_PHONE" ]; then
-            echo "Chưa cấu hình secret — bỏ qua contract check."
-            exit 0
-          fi
-          pnpm contract:check
+        run: pnpm contract:check
+      - name: Customer ↔ salon chat E2E
+        env:
+          YABAI_API_URL: ${{ vars.YABAI_API_URL }}
+          YABAI_ADMIN_PHONE: ${{ secrets.YABAI_ADMIN_PHONE }}
+          YABAI_ADMIN_PASSWORD: ${{ secrets.YABAI_ADMIN_PASSWORD }}
+          YABAI_CUSTOMER_PHONE: ${{ secrets.YABAI_CUSTOMER_PHONE }}
+          YABAI_CUSTOMER_OTP: ${{ secrets.YABAI_CUSTOMER_OTP }}
+        run: pnpm staging:chat

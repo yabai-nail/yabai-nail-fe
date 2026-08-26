@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "contract:check": "node ./scripts/check-api-contract.mjs",
+    "staging:chat": "node ./scripts/check-chat-e2e.mjs",
     "ui:check": "node ./scripts/check-ui-invariants.mjs"
   },
   "dependencies": {
