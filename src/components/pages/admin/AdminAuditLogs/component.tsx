@@ -11,9 +11,12 @@ import {
   useAdminAuditLog,
   useAdminAuditLogs,
   useAdminBranchList,
+  useAdminServices,
+  useAdminStaff,
 } from "@/service";
 import {
   adaptAuditLog,
+  auditActionLabel,
   auditActions,
   filterAuditEntries,
   formatAuditTime,
@@ -30,12 +33,16 @@ export function AdminAuditLogsComponent() {
   // AdminAppointments resolves its customer and staff ids.
   const { data: accountsData } = useAdminAccounts();
   const { data: branchesData } = useAdminBranchList();
+  const { data: staffData } = useAdminStaff();
+  const { data: servicesData } = useAdminServices();
   const lookups = useMemo(
     () => ({
       accounts: new Map((accountsData?.items ?? []).map((a) => [a.id, a] as const)),
       branches: new Map((branchesData?.items ?? []).map((b) => [b.id, b] as const)),
+      staff: new Map((staffData?.items ?? []).map((member) => [member.id, member] as const)),
+      services: new Map((servicesData?.items ?? []).map((service) => [service.id, service] as const)),
     }),
-    [accountsData, branchesData],
+    [accountsData, branchesData, staffData, servicesData],
   );
 
   const source = useMemo<ReadonlyArray<AuditEntry>>(
@@ -67,7 +74,7 @@ export function AdminAuditLogsComponent() {
             onChange={(value) => { setAction(value); setPage(1); }}
             options={[
               { value: "all", label: "Tất cả hành động" },
-              ...actions.map((code) => ({ value: code, label: code })),
+              ...actions.map((code) => ({ value: code, label: auditActionLabel(code) })),
             ]}
           />
         </div>
@@ -119,16 +126,16 @@ export function AdminAuditLogsComponent() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                        {entry.action}
+                        {auditActionLabel(entry.action)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-admin-ink" title={entry.actorTitle}>
+                    <td className="px-4 py-3 text-admin-ink">
                       {entry.actor}
                     </td>
-                    <td className="px-4 py-3 text-admin-ink" title={entry.targetTitle}>
+                    <td className="px-4 py-3 text-admin-ink">
                       {entry.target}
                     </td>
-                    <td className="px-4 py-3 text-admin-muted" title={entry.branchTitle}>
+                    <td className="px-4 py-3 text-admin-muted">
                       {entry.branch ?? "—"}
                     </td>
                   </tr>
@@ -166,7 +173,16 @@ export function AdminAuditLogsComponent() {
           title="Chi tiết nhật ký"
           isLoading={detail.isLoading}
           error={detail.error}
-          data={detail.data as Record<string, unknown> | undefined}
+          data={detail.data ? (() => {
+            const entry = adaptAuditLog(detail.data, lookups);
+            return {
+              "Hành động": auditActionLabel(entry.action),
+              "Người thực hiện": entry.actor,
+              "Đối tượng": entry.target,
+              "Chi nhánh": entry.branch ?? "Toàn hệ thống",
+              "Thời gian": formatAuditTime(entry.createdAt),
+            };
+          })() : undefined}
           onClose={() => setDetailId(null)}
         />
       ) : null}

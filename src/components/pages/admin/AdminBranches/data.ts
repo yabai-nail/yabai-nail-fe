@@ -4,9 +4,7 @@ import { matchesSearch } from "@/lib/admin-search";
 export type BranchRow = {
   readonly id: string;
   readonly name: string;
-  readonly slug?: string;
   readonly address?: string;
-  readonly phone?: string;
   readonly status?: string;
   readonly timezone?: string;
   readonly version: number;
@@ -15,7 +13,6 @@ export type BranchRow = {
 export const branchStatusLabels: Record<string, string> = {
   ACTIVE: "Hoạt động",
   INACTIVE: "Tạm ngưng",
-  CLOSED: "Đã đóng",
 };
 
 /**
@@ -31,9 +28,7 @@ export function adaptBranch(branch: AdminBranch): BranchRow {
   return {
     id: branch.id,
     name: branch.name,
-    slug: branch.slug,
     address: branch.address,
-    phone: branch.phone,
     status: branchStatusFromActive(branch.active),
     timezone: branch.timezone,
     version: branch.version,
@@ -41,16 +36,16 @@ export function adaptBranch(branch: AdminBranch): BranchRow {
 }
 
 export const branchFixtures: ReadonlyArray<BranchRow> = [
-  { id: "br1", name: "YABAI NAIL Thảo Điền", address: "12 Xuân Thủy, Thủ Đức, TP.HCM", phone: "02839000001", status: "ACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 1 },
-  { id: "br2", name: "YABAI NAIL Quận 1", address: "45 Lê Lợi, Quận 1, TP.HCM", phone: "02839000002", status: "ACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 2 },
-  { id: "br3", name: "YABAI NAIL Hà Nội", address: "88 Bà Triệu, Hoàn Kiếm, Hà Nội", phone: "02439000003", status: "INACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 1 },
+  { id: "br1", name: "YABAI NAIL Thảo Điền", address: "12 Xuân Thủy, Thủ Đức, TP.HCM", status: "ACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 1 },
+  { id: "br2", name: "YABAI NAIL Quận 1", address: "45 Lê Lợi, Quận 1, TP.HCM", status: "ACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 2 },
+  { id: "br3", name: "YABAI NAIL Hà Nội", address: "88 Bà Triệu, Hoàn Kiếm, Hà Nội", status: "INACTIVE", timezone: "Asia/Ho_Chi_Minh", version: 1 },
 ];
 
 export function filterBranches(
   rows: ReadonlyArray<BranchRow>,
   query: string,
 ): ReadonlyArray<BranchRow> {
-  return rows.filter((row) => matchesSearch(query, [row.name, row.address, row.phone]));
+  return rows.filter((row) => matchesSearch(query, [row.name, row.address]));
 }
 
 export function paginate<T>(

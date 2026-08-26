@@ -22,6 +22,7 @@ import {
 
 const pageSize = 8;
 type Tab = "promotions" | "campaigns";
+type ManagedCampaign = { readonly id: string; readonly name: string };
 
 export function AdminMarketingComponent() {
   const [tab, setTab] = useState<Tab>("promotions");
@@ -40,6 +41,7 @@ export function AdminMarketingComponent() {
   const [issuing, setIssuing] = useState<PromotionRow | null>(null);
   const [statusPending, setStatusPending] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [managedCampaign, setManagedCampaign] = useState<ManagedCampaign | null>(null);
 
   /**
    * Nothing else in this screen can move a promotion off DRAFT, and issuance
@@ -170,8 +172,8 @@ export function AdminMarketingComponent() {
         </>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <CampaignPanel />
-          <CampaignManagePanel />
+          <CampaignPanel onCreated={setManagedCampaign} />
+          <CampaignManagePanel campaign={managedCampaign} />
         </div>
       )}
 
@@ -182,7 +184,7 @@ export function AdminMarketingComponent() {
   );
 }
 
-function CampaignPanel() {
+function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCampaign) => void }>) {
   const [name, setName] = useState("");
   const [channel, setChannel] = useState("PUSH");
   const [template, setTemplate] = useState("");
@@ -191,13 +193,11 @@ function CampaignPanel() {
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
 
-  const audience = { segment: "ALL" as const };
-
   const runPreview = async () => {
     setError(null);
     try {
-      const result = await adminService.previewAudience({ definition: audience });
-      setPreview(result.matchedCount);
+      const result = await adminService.previewAudience({});
+      setPreview(result.estimatedRecipients);
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Không xem trước được audience.");
     }
@@ -209,12 +209,13 @@ function CampaignPanel() {
     setError(null);
     setMessage(null);
     try {
+      const campaignName = name.trim();
       const campaign = await adminService.createNotificationCampaign({
-        name: name.trim(),
+        title: campaignName,
         channel,
-        template: template.trim(),
-        audience,
+        message: template.trim(),
       });
+      onCreated({ id: campaign.campaignId, name: campaignName });
       setMessage(`Đã tạo chiến dịch (${campaign.status ?? "PENDING"}).`);
       setName("");
       setTemplate("");
@@ -267,24 +268,18 @@ function CampaignPanel() {
   );
 }
 
-// The backend exposes no campaign list endpoint, so a campaign is managed by its id
-// (metrics, cancellation) — consistent with the proposal-decision panel in nail designs.
-function CampaignManagePanel() {
-  const [idInput, setIdInput] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const metrics = useAdminNotificationCampaignMetrics(activeId);
+function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign | null }>) {
+  const metrics = useAdminNotificationCampaignMetrics(campaign?.id ?? null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audience, setAudience] = useState<number | null>(null);
 
-  const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
-
   const cancel = async () => {
-    if (!activeId) return;
+    if (!campaign) return;
     setBusy(true); setError(null); setMessage(null);
     try {
-      await adminService.cancelNotificationCampaign(activeId);
+      await adminService.cancelNotificationCampaign(campaign.id, undefined, metrics.data?.version);
       setMessage("Đã huỷ chiến dịch.");
       void metrics.mutate();
     } catch (err) {
@@ -297,25 +292,43 @@ function CampaignManagePanel() {
   const previewAudience = async () => {
     setError(null);
     try {
-      const result = await adminService.notificationCampaignAudiencePreview({ definition: { segment: "ALL" } });
-      setAudience(result.matchedCount);
+      const result = await adminService.notificationCampaignAudiencePreview({});
+      setAudience(result.estimatedRecipients);
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Không xem trước được audience.");
     }
   };
 
+  const metricLabels: Record<string, string> = {
+    status: "Trạng thái",
+    estimatedRecipients: "Khách dự kiến",
+    targetedCount: "Khách đã chọn",
+    processedRecipientCount: "Đã xử lý",
+    sentCount: "Đã gửi",
+    deliveredCount: "Đã nhận",
+    failedCount: "Gửi lỗi",
+    inboxOnlyCount: "Chỉ gửi hộp thư",
+    suppressedCount: "Đã bỏ qua",
+  };
+  const statusLabels: Record<string, string> = {
+    CANCELLED: "Đã huỷ",
+    COMPLETED: "Hoàn tất",
+    DRAFT: "Bản nháp",
+    FAILED: "Thất bại",
+    PROCESSING: "Đang gửi",
+    SCHEDULED: "Đã lên lịch",
+  };
   const metricRows = metrics.data
-    ? Object.entries(metrics.data).filter(([, value]) => typeof value === "number" || typeof value === "string")
+    ? Object.entries(metrics.data).filter(([key, value]) => key in metricLabels && (typeof value === "number" || typeof value === "string"))
     : [];
 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Quản lý chiến dịch (theo ID)</h2>
-      <div className="flex gap-2">
-        <input className={`${inputClass} flex-1`} value={idInput} onChange={(event) => setIdInput(event.target.value)} placeholder="ID chiến dịch" />
-        <Button variant="outline" className="rounded-lg" isDisabled={idInput.trim().length < 1} onPress={() => setActiveId(idInput.trim() || null)}>Xem</Button>
-      </div>
-      {activeId ? (
+      <h2 className="text-sm font-bold text-admin-ink">
+        {campaign ? `Chiến dịch — ${campaign.name}` : "Theo dõi chiến dịch vừa tạo"}
+      </h2>
+      {!campaign ? <p className="text-xs text-admin-muted">Tạo một chiến dịch để xem trạng thái và kết quả gửi tại đây.</p> : null}
+      {campaign ? (
         metrics.isLoading ? (
           <p className="text-xs text-admin-muted">Đang tải chỉ số…</p>
         ) : metrics.error ? (
@@ -324,8 +337,8 @@ function CampaignManagePanel() {
           <dl className="grid grid-cols-2 gap-2 text-sm">
             {metricRows.map(([key, value]) => (
               <div key={key} className="flex justify-between gap-2 rounded-lg bg-admin-soft/50 px-3 py-1.5">
-                <dt className="text-admin-muted">{key}</dt>
-                <dd className="font-semibold text-admin-ink">{String(value)}</dd>
+                <dt className="text-admin-muted">{metricLabels[key]}</dt>
+                <dd className="font-semibold text-admin-ink">{key === "status" ? statusLabels[String(value)] ?? String(value) : Number(value).toLocaleString("vi-VN")}</dd>
               </div>
             ))}
           </dl>
@@ -336,7 +349,7 @@ function CampaignManagePanel() {
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>Xem trước audience</Button>
         {audience !== null ? <span className="text-sm text-admin-muted">{audience.toLocaleString("vi-VN")} khách</span> : null}
-        <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!activeId || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
+        <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
       </div>
       {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}

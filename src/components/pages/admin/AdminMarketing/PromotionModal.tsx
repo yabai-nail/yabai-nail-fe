@@ -26,16 +26,18 @@ export function PromotionModal({
   const [value, setValue] = useState(String(promotion?.value ?? ""));
   const [startsAt, setStartsAt] = useState(promotion?.startAt?.slice(0, 10) ?? "");
   const [endsAt, setEndsAt] = useState(promotion?.endAt?.slice(0, 10) ?? "");
+  const [issuanceLimit, setIssuanceLimit] = useState("1000");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const numericValue = Number(value.replace(/[^\d]/g, ""));
+  const numericIssuanceLimit = Number(issuanceLimit.replace(/[^\d]/g, ""));
   // Creating a promotion requires both dates; the backend rejects the request
   // outright without them, and the code must be A-Z 0-9 _ - only.
   const canSubmit =
     name.trim().length >= 2 &&
     numericValue > 0 &&
-    (isEdit || (/^[A-Z0-9_-]{3,60}$/.test(code.trim().toUpperCase()) && startsAt !== "" && endsAt !== "")) &&
+    (isEdit || (/^[A-Z0-9_-]{3,60}$/.test(code.trim().toUpperCase()) && startsAt !== "" && endsAt !== "" && numericIssuanceLimit > 0)) &&
     !busy;
 
   // The backend takes one `value` alongside `type`; it has no `percentage`
@@ -60,6 +62,7 @@ export function PromotionModal({
           ...amountFields,
           startAt: startsAt,
           endAt: endsAt,
+          issuanceLimit: numericIssuanceLimit,
         });
       }
       onSaved();
@@ -118,6 +121,12 @@ export function PromotionModal({
                   <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} />
                 </label>
               </div>
+              {!isEdit ? (
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">Giới hạn phát hành</span>
+                  <input inputMode="numeric" className={inputClass} value={issuanceLimit} onChange={(event) => setIssuanceLimit(event.target.value)} placeholder="1000" />
+                </label>
+              ) : null}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Bắt đầu</span>

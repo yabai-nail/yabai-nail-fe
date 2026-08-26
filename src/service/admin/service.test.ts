@@ -1,4 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const { executeApiOperation } = vi.hoisted(() => ({ executeApiOperation: vi.fn() }));
+
+vi.mock("../api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../api")>()),
+  executeApiOperation,
+}));
 
 import { getApiOperation } from "../api";
 import { adminService } from "./service";
@@ -57,6 +64,7 @@ const MARKETING_OPERATION_IDS = [
   "GET /api/v1/admin/nail-designs",
   "POST /api/v1/admin/nail-designs",
   "PATCH /api/v1/admin/nail-designs/{designId}",
+  "GET /api/v1/admin/nail-design-proposals/{proposalId}",
   "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
 ] as const;
 
@@ -81,6 +89,7 @@ const FINANCE_OPERATION_IDS = [
   "POST /api/v1/admin/report-exports",
   "GET /api/v1/admin/report-exports/{exportId}",
   "POST /api/v1/admin/report-exports/{exportId}/download-url",
+  "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}",
   "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
   "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds/{refundId}",
   "GET /api/v1/admin/audit-logs",
@@ -212,6 +221,7 @@ describe("adminService marketing surface", () => {
       adminService.nailDesigns,
       adminService.createNailDesign,
       adminService.updateNailDesign,
+      adminService.nailDesignProposal,
       adminService.decideNailDesignProposal,
     ]) {
       expect(typeof fn).toBe("function");
@@ -242,6 +252,44 @@ describe("adminService messaging and reviews surface", () => {
       expect(typeof fn).toBe("function");
     }
   });
+
+  it("uses the campaign and proposal contracts required by the backend", async () => {
+    executeApiOperation.mockClear();
+
+    await adminService.createNotificationCampaign({ title: "Nhắc lịch", message: "Bạn có lịch hẹn.", channel: "PUSH" });
+    await adminService.cancelNotificationCampaign("campaign-a", undefined, 3, "cancel-key");
+    await adminService.decideNailDesignProposal("proposal-a", { decision: "APPROVE", reason: "Đủ điều kiện" }, 5);
+
+    expect(executeApiOperation).toHaveBeenNthCalledWith(
+      1,
+      "POST /api/v1/admin/notification-campaigns",
+      { body: { title: "Nhắc lịch", message: "Bạn có lịch hẹn.", channel: "PUSH" }, idempotencyKey: undefined },
+    );
+    expect(executeApiOperation).toHaveBeenNthCalledWith(
+      2,
+      "POST /api/v1/admin/notification-campaigns/{campaignId}/cancellation",
+      { path: { campaignId: "campaign-a" }, body: {}, version: 3, idempotencyKey: "cancel-key" },
+    );
+    expect(executeApiOperation).toHaveBeenNthCalledWith(
+      3,
+      "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
+      { path: { proposalId: "proposal-a" }, body: { decision: "APPROVE", reason: "Đủ điều kiện" }, version: 5 },
+    );
+  });
+
+  it("forwards the review version required by reply If-Match", async () => {
+    await adminService.replyToBranchReview("branch-a", "review-a", { content: "Cảm ơn bạn." }, 7, "reply-key");
+
+    expect(executeApiOperation).toHaveBeenCalledWith(
+      "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
+      {
+        path: { branchId: "branch-a", reviewId: "review-a" },
+        body: { content: "Cảm ơn bạn." },
+        version: 7,
+        idempotencyKey: "reply-key",
+      },
+    );
+  });
 });
 
 describe("adminService finance and audit surface", () => {
@@ -260,6 +308,7 @@ describe("adminService finance and audit surface", () => {
       adminService.createReportExport,
       adminService.reportExport,
       adminService.reportExportDownloadUrl,
+      adminService.payment,
       adminService.refundPayment,
       adminService.paymentRefund,
       adminService.auditLogs,
@@ -267,6 +316,28 @@ describe("adminService finance and audit surface", () => {
     ]) {
       expect(typeof fn).toBe("function");
     }
+  });
+
+  it("forwards the current payment version required by refund If-Match", async () => {
+    executeApiOperation.mockClear();
+
+    await adminService.refundPayment(
+      "branch-a",
+      "payment-a",
+      { amountVnd: 50_000, reasonCode: "CUSTOMER_REQUEST" },
+      4,
+      "refund-key",
+    );
+
+    expect(executeApiOperation).toHaveBeenCalledWith(
+      "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
+      {
+        path: { branchId: "branch-a", paymentId: "payment-a" },
+        body: { amountVnd: 50_000, reasonCode: "CUSTOMER_REQUEST" },
+        version: 4,
+        idempotencyKey: "refund-key",
+      },
+    );
   });
 });
 
@@ -347,5 +418,23 @@ describe("adminService customer surface", () => {
     ]) {
       expect(typeof fn).toBe("function");
     }
+  });
+
+  it("forwards customer versions and canonical loyalty fields", async () => {
+    executeApiOperation.mockClear();
+
+    await adminService.adjustCustomerPoints("branch-a", "customer-a", { pointsSigned: -10, reasonCode: "CORRECTION" }, 8, "points-key");
+    await adminService.issueCustomerCoupon("branch-a", "customer-a", { couponId: "coupon-a" }, 9, "coupon-key");
+
+    expect(executeApiOperation).toHaveBeenNthCalledWith(
+      1,
+      "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/point-adjustments",
+      { path: { branchId: "branch-a", customerId: "customer-a" }, body: { pointsSigned: -10, reasonCode: "CORRECTION" }, version: 8, idempotencyKey: "points-key" },
+    );
+    expect(executeApiOperation).toHaveBeenNthCalledWith(
+      2,
+      "POST /api/v1/admin/branches/{branchId}/customers/{customerId}/coupon-issuances",
+      { path: { branchId: "branch-a", customerId: "customer-a" }, body: { couponId: "coupon-a" }, version: 9, idempotencyKey: "coupon-key" },
+    );
   });
 });

@@ -37,7 +37,7 @@ function formatTimeLabel(iso: string): string {
 }
 
 function toFixtureCustomer(server: ServerConversation): MessageCustomer {
-  const name = server.customer.displayName ?? `Khách #${server.customer.customerId.slice(0, 6)}`;
+  const name = server.customer.displayName ?? "Khách chưa có tên";
   return {
     id: server.customer.customerId,
     name,

@@ -56,10 +56,10 @@ describe("review list derivation", () => {
     });
   });
 
-  it("resolves the customer name, and falls back to a short id before the list loads", () => {
+  it("resolves the customer name without exposing a technical id while the list loads", () => {
     const named = adaptReview(liveReview, new Map([[liveReview.customerId, "Test Khach A DA SUA"]]));
     expect(named.customerName).toBe("Test Khach A DA SUA");
-    expect(adaptReview(liveReview).customerName).toBe("Khách #596b00");
+    expect(adaptReview(liveReview).customerName).toBe("Khách chưa có tên");
   });
 
   it("keeps an unanswered review distinguishable from an answered one", () => {

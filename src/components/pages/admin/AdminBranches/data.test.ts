@@ -8,7 +8,7 @@ import {
 } from "./data";
 
 describe("branch list derivation", () => {
-  it("filters by name/address/phone query", () => {
+  it("filters by name/address query", () => {
     expect(filterBranches(branchFixtures, "hà nội").map((b) => b.id)).toEqual(["br3"]);
     expect(filterBranches(branchFixtures, "lê lợi").map((b) => b.id)).toEqual(["br2"]);
     expect(filterBranches(branchFixtures, "")).toHaveLength(branchFixtures.length);
@@ -25,8 +25,6 @@ describe("branch list derivation", () => {
     expect(row).toMatchObject({ id: "b1", address: "a", status: "ACTIVE", version: 4 });
 
     expect(adaptBranch({ id: "b2", name: "Y", active: false, version: 1 }).status).toBe("INACTIVE");
-    // Backend không có cột phone cho chi nhánh -> luôn undefined, bảng hiển thị "—".
-    expect(adaptBranch({ id: "b3", name: "Z", active: true, version: 1 }).phone).toBeUndefined();
   });
 
   it("paginates and rejects invalid page size", () => {

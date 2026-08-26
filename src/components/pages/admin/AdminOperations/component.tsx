@@ -3,7 +3,15 @@
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { adminService, useAdminBranch, useAdminPaymentRefund } from "@/service";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import {
+  adminService,
+  useAdminAppointmentPayments,
+  useAdminAppointments,
+  useAdminBranch,
+  useAdminCustomers,
+  useAdminPaymentRefund,
+} from "@/service";
 import {
   formatVnd,
   parseVnd,
@@ -45,7 +53,6 @@ export function AdminOperationsComponent() {
     <AdminPageLayout>
       <div className="grid gap-4 lg:grid-cols-2">
         <RefundForm branchId={branchId} />
-        <LeaveDecisionForm branchId={branchId} />
         <CheckInForm branchId={branchId} />
         <MembershipForm branchId={branchId} />
         <CustomerLookup branchId={branchId} />
@@ -80,7 +87,11 @@ function Feedback({ message, error }: Readonly<{ message: string | null; error: 
 }
 
 function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
+  const appointments = useAdminAppointments(branchId);
+  const customers = useAdminCustomers(branchId);
+  const [appointmentId, setAppointmentId] = useState("");
   const [paymentId, setPaymentId] = useState("");
+  const payments = useAdminAppointmentPayments(branchId, appointmentId || null);
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
   const [refundTarget, setRefundTarget] = useState<{ paymentId: string; refundId: string } | null>(null);
@@ -88,13 +99,45 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const refund = useAdminPaymentRefund(branchId, refundTarget?.paymentId ?? null, refundTarget?.refundId ?? null);
   const amountVnd = parseVnd(amount);
   const disabled = busy || !paymentId.trim() || amountVnd <= 0 || reason.trim().length < 2;
+  const customerNames = new Map((customers.data?.items ?? []).map((customer) => [
+    customer.id,
+    customer.displayName ?? customer.name ?? "Khách chưa có tên",
+  ] as const));
+  const appointmentOptions = (appointments.data?.items ?? []).map((appointment) => ({
+    value: appointment.id,
+    label: `${customerNames.get(appointment.customerId) ?? "Khách chưa có tên"} · ${new Date(appointment.startsAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`,
+  }));
+  const paymentOptions = (payments.data?.items ?? []).map((payment) => ({
+    value: payment.id,
+    label: `${formatVnd(payment.amountVnd)} · ${payment.method}`,
+  }));
 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">Hoàn tiền</h2>
       <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-refund-payment">ID thanh toán</label>
-        <input id="ops-refund-payment" className={inputClass} value={paymentId} onChange={(event) => setPaymentId(event.target.value)} placeholder="ID thanh toán" />
+        <span className={labelClass}>Lịch hẹn đã thanh toán</span>
+        <AdminSelectField
+          label="Chọn lịch hẹn"
+          fullWidth
+          value={appointmentId}
+          onChange={(value) => { setAppointmentId(value); setPaymentId(""); }}
+          options={appointmentOptions}
+        />
+      </div>
+      <div className="grid gap-1">
+        <span className={labelClass}>Giao dịch</span>
+        {appointmentId && paymentOptions.length === 0 ? (
+          <p className="text-xs text-admin-muted">{payments.isLoading ? "Đang tải giao dịch…" : "Lịch hẹn này chưa có giao dịch."}</p>
+        ) : (
+          <AdminSelectField
+            label="Chọn giao dịch"
+            fullWidth
+            value={paymentId}
+            onChange={setPaymentId}
+            options={paymentOptions}
+          />
+        )}
       </div>
       <div className="grid gap-1">
         <label className={labelClass} htmlFor="ops-refund-amount">Số tiền hoàn (VND)</label>
@@ -107,48 +150,22 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
       <Feedback message={message} error={error} />
       {refund.data ? (
         <p className="text-xs text-admin-muted">
-          Mã hoàn tiền {refund.data.id} · {refund.data.status} · {formatVnd(refund.data.amountVnd)}
+          Yêu cầu hoàn {formatVnd(refund.data.amountVnd)} · {refund.data.status}
         </p>
       ) : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={disabled} onPress={() => void run(async () => {
           const normalizedPaymentId = paymentId.trim();
-          const created = await adminService.refundPayment(branchId, normalizedPaymentId, { amountVnd, reason: reason.trim() });
+          const payment = await adminService.payment(branchId, normalizedPaymentId);
+          const created = await adminService.refundPayment(
+            branchId,
+            normalizedPaymentId,
+            { amountVnd, reasonCode: reason.trim() },
+            payment.version,
+          );
           setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
           return "Đã ghi nhận hoàn tiền.";
         })}>{busy ? "Đang xử lý…" : "Hoàn tiền"}</Button>
-      </div>
-    </Card>
-  );
-}
-
-function LeaveDecisionForm({ branchId }: Readonly<{ branchId: string }>) {
-  const [requestId, setRequestId] = useState("");
-  const [note, setNote] = useState("");
-  const { busy, message, error, run } = useAction();
-  const disabled = busy || !requestId.trim();
-
-  const decide = (decision: "approve" | "reject") =>
-    void run(async () => {
-      await adminService.decideLeaveRequest(branchId, requestId.trim(), { decision, note: note.trim() || undefined });
-      return decision === "approve" ? "Đã duyệt nghỉ phép." : "Đã từ chối nghỉ phép.";
-    });
-
-  return (
-    <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Duyệt nghỉ phép</h2>
-      <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-leave-request">ID yêu cầu nghỉ</label>
-        <input id="ops-leave-request" className={inputClass} value={requestId} onChange={(event) => setRequestId(event.target.value)} placeholder="ID yêu cầu nghỉ" />
-      </div>
-      <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-leave-note">Ghi chú (tuỳ chọn)</label>
-        <input id="ops-leave-note" className={inputClass} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Ghi chú (tuỳ chọn)" />
-      </div>
-      <Feedback message={message} error={error} />
-      <div className="flex gap-2">
-        <Button variant="primary" className="rounded-lg" isDisabled={disabled} onPress={() => decide("approve")}>Duyệt</Button>
-        <Button variant="outline" className="rounded-lg" isDisabled={disabled} onPress={() => decide("reject")}>Từ chối</Button>
       </div>
     </Card>
   );

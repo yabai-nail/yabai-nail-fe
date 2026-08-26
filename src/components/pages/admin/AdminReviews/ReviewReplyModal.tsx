@@ -8,12 +8,14 @@ import { adminService } from "@/service";
 export function ReviewReplyModal({
   branchId,
   reviewId,
+  version,
   customerLabel,
   onClose,
   onReplied,
 }: Readonly<{
   branchId: string;
   reviewId: string;
+  version: number;
   customerLabel: string;
   onClose: () => void;
   onReplied: () => void;
@@ -29,7 +31,7 @@ export function ReviewReplyModal({
     setBusy(true);
     setError(null);
     try {
-      await adminService.replyToBranchReview(branchId, reviewId, { content: content.trim() });
+      await adminService.replyToBranchReview(branchId, reviewId, { content: content.trim() }, version);
       onReplied();
       onClose();
     } catch (err) {

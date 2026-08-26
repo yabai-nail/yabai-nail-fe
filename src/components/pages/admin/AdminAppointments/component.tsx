@@ -79,8 +79,7 @@ function deriveInitials(name: string): string {
 
 function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>): AppointmentCustomer {
   const server = byId.get(customerId);
-  const short = customerId.slice(0, 6);
-  const name = server?.displayName ?? server?.name ?? `Khách #${short}`;
+  const name = server?.displayName ?? server?.name ?? "Khách chưa có tên";
   const record = server as unknown as Record<string, unknown> | undefined;
   return {
     id: customerId,
@@ -110,15 +109,14 @@ function resolveService(
   }
   return {
     id: first,
-    name: server?.name ?? `Dịch vụ #${first.slice(0, 6)}`,
+    name: server?.name ?? "Dịch vụ chưa có tên",
     durationMinutes: server?.durationMinutes ?? 60,
   };
 }
 
 function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>): AppointmentStaff {
   const server = byId.get(staffId);
-  const short = staffId.slice(0, 6);
-  const name = server?.displayName ?? `Nhân viên #${short}`;
+  const name = server?.displayName ?? "Nhân viên chưa có tên";
   return { id: staffId, name, initials: deriveInitials(name) };
 }
 
@@ -126,8 +124,8 @@ function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>): App
  * Server AdminAppointment carries ids + timestamps; the fixture Appointment
  * expects joined display shapes (customer / service / staff records) and
  * date / time split fields. Names come from parallel `useAdminCustomers` /
- * `useAdminStaff` / `useAdminServices` queries; unresolved ids fall back to
- * short-id placeholders so a partial load never blanks the calendar.
+ * `useAdminStaff` / `useAdminServices` queries; unresolved ids use semantic
+ * placeholders so a partial load never exposes database identifiers.
  */
 function toFixtureAppointment(
   server: ServerAppointment,
@@ -460,7 +458,7 @@ export function AdminAppointmentsComponent({
         await adminService.cancelAppointment(
           branchId,
           appointmentId,
-          { reason: "Cancelled by admin from the calendar." },
+          { reasonCode: "ADMIN_CALENDAR_CANCEL" },
           versionsById[appointmentId],
         );
         setLocalCancels((current) => {

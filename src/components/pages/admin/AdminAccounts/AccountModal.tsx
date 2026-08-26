@@ -29,8 +29,10 @@ export function AccountModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const temporaryPassword = password.trim();
+  const validTemporaryPassword = /[a-z]/.test(temporaryPassword) && /[A-Z]/.test(temporaryPassword) && /\d/.test(temporaryPassword) && temporaryPassword.length >= 8 && temporaryPassword.length <= 128;
   const canSubmit =
-    displayName.trim().length >= 2 && (isEdit || /^0\d{9}$/.test(phone.trim())) && !busy;
+    displayName.trim().length >= 2 && (isEdit || /^0\d{9}$/.test(phone.trim()) && validTemporaryPassword) && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -44,7 +46,7 @@ export function AccountModal({
           phone: phone.trim(),
           displayName: displayName.trim(),
           role,
-          password: password.trim() || undefined,
+          temporaryPassword,
         });
       }
       onSaved();
@@ -99,8 +101,8 @@ export function AccountModal({
                   </div>
                 ) : (
                   <label className="flex flex-col gap-2 text-sm">
-                    <span className="font-semibold text-admin-ink">Mật khẩu (tuỳ chọn)</span>
-                    <input type="password" className={inputClass} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Để trống nếu gửi OTP" />
+                    <span className="font-semibold text-admin-ink">Mật khẩu tạm</span>
+                    <input type="password" className={inputClass} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Ít nhất 8 ký tự, có A-z và số" />
                   </label>
                 )}
               </div>

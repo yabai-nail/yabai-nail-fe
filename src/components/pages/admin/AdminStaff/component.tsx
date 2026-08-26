@@ -51,7 +51,7 @@ function formatOptionalVnd(value: number | null): string {
  * keeps `null` money fields so the table can say so.
  */
 function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined): StaffMember {
-  const name = server.displayName || `Nhân viên #${server.id.slice(0, 6)}`;
+  const name = server.displayName || "Nhân viên chưa có tên";
   return {
     id: server.id,
     name,
