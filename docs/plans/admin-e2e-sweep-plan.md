@@ -77,6 +77,7 @@ bằng payload đọc thật từ production.
 | Màn Vận hành bắt dán UUID (hoàn tiền theo ID thanh toán, duyệt nghỉ theo ID yêu cầu) | không màn nào hiển thị các ID đó; cần BE có list hoặc FE có bộ chọn |
 | Cấu hình tích điểm sửa bằng JSON thô | cần thiết kế form |
 | Cột "Điện thoại" ở màn Chi nhánh luôn `—` | API `/branches` không trả trường này (BE-GAP-012) |
+| Dữ liệu test trên production | Không xoá được qua API — không-xoá-cứng là thiết kế cố ý, xem BE-GAP-013. Cần thao tác DB có backup. |
 | 7 thao tác nhật ký không kết luận được | handler BE không ghi audit row, không xác định được đã test hay chưa |
 | 3 thao tác bất khả thi | BE-GAP-001 / BE-GAP-011 |
 
