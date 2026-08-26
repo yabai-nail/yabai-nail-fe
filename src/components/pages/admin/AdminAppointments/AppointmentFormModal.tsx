@@ -117,8 +117,11 @@ export function AppointmentFormModal({
                 </Modal.Footer>
               </>
             ) : (
-            <form onSubmit={submit}>
-              <Modal.Body className="grid gap-4 px-5 py-5 sm:grid-cols-2">
+            <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+              {/* The dialog is a flex column that clips what overflows. A plain block
+                  form cannot shrink, so this form's body and footer used to be cut off
+                  the bottom: the note field and both buttons were unreachable. */}
+              <Modal.Body className="grid min-h-0 flex-1 gap-4 overflow-y-auto px-5 py-5 sm:grid-cols-2">
                 <Field id="appointment-date" label="Ngày" error={errors.date}><input id="appointment-date" aria-invalid={Boolean(errors.date)} aria-describedby={errors.date ? "appointment-date-error" : undefined} className={fieldClassName} type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} /></Field>
                 <Field id="appointment-status" label="Trạng thái" isControlLabelled={false}><AdminSelectField label="Trạng thái lịch hẹn" fullWidth value={draft.status} onChange={(value) => setDraft({ ...draft, status: value as AppointmentStatus })} options={[{ value: "confirmed", label: "Đã xác nhận" }, { value: "pending", label: "Chờ xác nhận" }, { value: "cancelled", label: "Đã hủy" }]} /></Field>
                 <Field id="appointment-start" label="Giờ bắt đầu" error={errors.startTime}><input id="appointment-start" aria-invalid={Boolean(errors.startTime)} aria-describedby={errors.startTime ? "appointment-start-error" : undefined} className={fieldClassName} type="time" value={draft.startTime} onChange={(event) => setDraft({ ...draft, startTime: event.target.value })} /></Field>
