@@ -1,6 +1,6 @@
 "use client";
 
-import { FunnelIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
@@ -115,8 +115,10 @@ export function AdminCustomersComponent() {
           </Tabs.ListContainer>
         </Tabs>
         <div className="flex flex-col gap-2 sm:flex-row">
+          {/* "Bộ lọc" was a button with no handler. The tabs above already filter by
+              segment and the search box filters by name and phone; there was no third
+              dimension for it to open, so it only ever looked like a control. */}
           <AdminSearchField label="Tìm khách hàng" placeholder="Tìm tên, SĐT..." value={query} onChange={setQuery} />
-          <Button variant="outline" className="rounded-lg border-admin-border"><FunnelIcon className="size-4" />Bộ lọc</Button>
           <Button
             variant="primary"
             className="rounded-lg"
@@ -172,7 +174,12 @@ export function AdminCustomersComponent() {
           }
         >
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Content className="min-w-0 p-0"><CustomerTable customers={filteredCustomers} selectedId={selectedCustomer?.id ?? null} onSelect={setSelectedId} /></Card.Content>
+            <Card.Content className="min-w-0 p-0"><CustomerTable
+              customers={filteredCustomers}
+              selectedId={selectedCustomer?.id ?? null}
+              onSelect={setSelectedId}
+              onEdit={branchId ? (id) => { setSelectedId(id); setEditError(null); setIsEditOpen(true); } : undefined}
+            /></Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
           </Card>
         </AdminSplitLayout>
