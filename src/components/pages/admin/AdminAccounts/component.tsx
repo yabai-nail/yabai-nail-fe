@@ -117,8 +117,18 @@ export function AdminAccountsComponent() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
-                            <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setResetting(row)}>Đặt lại MK</Button>
+                            {/* Both endpoints are for internal accounts only: the update
+                                rejects any role outside STAFF/MANAGER/OWNER, and the reset
+                                answers 404 for a customer. Offering the buttons on a
+                                customer row promised an action that could never run. */}
+                            {row.role === "CUSTOMER" ? (
+                              <span className="text-xs text-admin-muted">Tài khoản khách</span>
+                            ) : (
+                              <>
+                                <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
+                                <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setResetting(row)}>Đặt lại MK</Button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -49,7 +49,20 @@ export function getAppointmentSummary(appointments: ReadonlyArray<Appointment>) 
       total: summary.total + 1,
       [appointment.status]: summary[appointment.status] + 1,
     }),
-    { total: 0, confirmed: 0, pending: 0, cancelled: 0 },
+    // Every status is seeded: an unseeded key made summary[status] undefined and
+    // the tile rendered NaN the moment the API returned a state the old three-way
+    // union did not cover.
+    {
+      total: 0,
+      confirmed: 0,
+      pending: 0,
+      cancelled: 0,
+      checked_in: 0,
+      in_service: 0,
+      awaiting_payment: 0,
+      completed: 0,
+      no_show: 0,
+    },
   );
 }
 

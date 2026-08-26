@@ -110,7 +110,22 @@ describe("appointment selectors", () => {
       confirmed: 1,
       pending: 1,
       cancelled: 1,
+      // Every lifecycle state is seeded, so a status the fixtures do not use
+      // still counts as 0 rather than making its tile render NaN.
+      checked_in: 0,
+      in_service: 0,
+      awaiting_payment: 0,
+      completed: 0,
+      no_show: 0,
     });
+  });
+
+  it("counts a finished appointment as completed, not as confirmed", () => {
+    const summary = getAppointmentSummary([
+      { ...appointments[0], id: "done", status: "completed" },
+    ]);
+    expect(summary.completed).toBe(1);
+    expect(summary.confirmed).toBe(0);
   });
 });
 

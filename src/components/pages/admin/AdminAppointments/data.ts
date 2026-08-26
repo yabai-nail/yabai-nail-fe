@@ -1,6 +1,19 @@
 import type { CustomerSegment } from "@/lib/admin-customer";
 
-export type AppointmentStatus = "confirmed" | "pending" | "cancelled";
+/**
+ * Every lifecycle state the API can return, not just the three the booking form
+ * offers. Collapsing the rest into "confirmed" is what made a finished
+ * appointment read as still upcoming on the calendar.
+ */
+export type AppointmentStatus =
+  | "confirmed"
+  | "pending"
+  | "cancelled"
+  | "checked_in"
+  | "in_service"
+  | "awaiting_payment"
+  | "completed"
+  | "no_show";
 export type AppointmentStatusFilter = "all" | AppointmentStatus;
 export type AppointmentView = "day" | "week" | "month";
 

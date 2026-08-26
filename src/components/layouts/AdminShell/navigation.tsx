@@ -37,7 +37,7 @@ export function AdminSidebarContent() {
       <ScrollShadow className="min-h-0 flex-1 py-5" hideScrollBar>
         <nav aria-label="Điều hướng quản trị">
           <ul className="space-y-1">
-            {adminRoutes.map(({ href, label, icon: Icon, isAvailable, badge }) => {
+            {adminRoutes.map(({ href, label, icon: Icon, isAvailable }) => {
               const isCurrent =
                 pathname === href ||
                 (href !== "/admin" && pathname.startsWith(`${href}/`));
@@ -56,7 +56,6 @@ export function AdminSidebarContent() {
                     >
                       <Icon aria-hidden="true" className="size-5" />
                       <span>{label}</span>
-                      {badge ? <NavigationBadge value={badge} /> : null}
                     </Link>
                   ) : (
                     <span
@@ -66,7 +65,6 @@ export function AdminSidebarContent() {
                     >
                       <Icon aria-hidden="true" className="size-5" />
                       <span>{label}</span>
-                      {badge ? <NavigationBadge value={badge} /> : null}
                     </span>
                   )}
                 </li>
@@ -85,17 +83,6 @@ export function AdminSidebarContent() {
         Đăng xuất
       </Button>
     </div>
-  );
-}
-
-function NavigationBadge({ value }: Readonly<{ value: string }>) {
-  return (
-    <span
-      aria-label={`${value} tin nhắn chưa đọc`}
-      className="ml-auto rounded-full bg-admin-accent px-2 py-0.5 text-xs font-bold text-white"
-    >
-      {value}
-    </span>
   );
 }
 

@@ -18,6 +18,10 @@ export const promotionStatusLabels: Record<string, string> = {
   EXPIRED: "Hết hạn",
   DRAFT: "Nháp",
   DISABLED: "Tắt",
+  // What the API stores when a running promotion is paused; without it the
+  // table printed the raw code.
+  INACTIVE: "Tạm dừng",
+  PUBLISHED: "Đang chạy",
 };
 
 export const promotionKindLabels: Record<string, string> = {

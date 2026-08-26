@@ -11,6 +11,7 @@ const metrics = [
   { key: "total", label: "Tổng lịch hẹn", icon: CalendarDaysIcon, color: "text-admin-accent" },
   { key: "confirmed", label: "Đã xác nhận", icon: CheckCircleIcon, color: "text-admin-success" },
   { key: "pending", label: "Chờ xác nhận", icon: ClockIcon, color: "text-admin-warning" },
+  { key: "completed", label: "Hoàn tất", icon: CheckCircleIcon, color: "text-admin-success" },
   { key: "cancelled", label: "Đã hủy", icon: XCircleIcon, color: "text-admin-muted" },
 ] as const;
 
@@ -20,7 +21,7 @@ export function AppointmentSummary({ summary }: Readonly<{ summary: ReturnType<t
       <Card.Header className="border-b border-admin-border px-4 py-3">
         <h2 className="text-sm font-bold text-admin-ink">Tổng quan ngày</h2>
       </Card.Header>
-      <Card.Content className="grid grid-cols-2 divide-admin-border p-0 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+      <Card.Content className="grid grid-cols-2 divide-admin-border p-0 sm:grid-cols-5 lg:grid-cols-2 xl:grid-cols-5">
         {metrics.map(({ key, label, icon: Icon, color }) => (
           <div key={key} className="border-r border-admin-border px-2 py-4 text-center last:border-r-0">
             <Icon className={`mx-auto size-5 ${color}`} />

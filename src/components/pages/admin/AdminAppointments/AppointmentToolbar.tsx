@@ -64,6 +64,7 @@ export function AppointmentToolbar({
               <option value="all">Tất cả trạng thái</option>
               <option value="confirmed">Đã xác nhận</option>
               <option value="pending">Chờ xác nhận</option>
+              <option value="completed">Hoàn tất</option>
               <option value="cancelled">Đã hủy</option>
             </select>
           </label>

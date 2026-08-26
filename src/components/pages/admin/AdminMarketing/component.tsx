@@ -37,6 +37,28 @@ export function AdminMarketingComponent() {
   const [editing, setEditing] = useState<PromotionRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [issuing, setIssuing] = useState<PromotionRow | null>(null);
+  const [statusPending, setStatusPending] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  /**
+   * Nothing else in this screen can move a promotion off DRAFT, and issuance
+   * refuses anything that is not ACTIVE — so every promotion created here used
+   * to be permanently unissuable. Only `status` is sent: once a promotion is
+   * ACTIVE the API rejects a patch that also carries code, value or dates.
+   */
+  async function toggleStatus(row: PromotionRow) {
+    const next = row.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    setStatusPending(row.id);
+    setStatusError(null);
+    try {
+      await adminService.updatePromotion(row.id, { status: next }, row.version);
+      void mutate();
+    } catch (thrown) {
+      setStatusError(thrown instanceof Error ? thrown.message : "Không đổi được trạng thái.");
+    } finally {
+      setStatusPending(null);
+    }
+  }
 
   const statuses = useMemo(() => promotionStatuses(source), [source]);
   const filtered = useMemo(() => filterPromotions(source, status, query), [source, status, query]);
@@ -83,6 +105,10 @@ export function AdminMarketingComponent() {
             </div>
           </div>
 
+          {statusError ? (
+            <p role="alert" className="mb-3 rounded-lg bg-admin-soft px-3 py-2 text-sm text-admin-danger">{statusError}</p>
+          ) : null}
+
           {isLoading ? (
             <p className="mb-3 text-xs text-admin-muted">Đang tải khuyến mãi…</p>
           ) : error ? (
@@ -120,7 +146,10 @@ export function AdminMarketingComponent() {
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
                             <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
-                            <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setIssuing(row)}>Phát hành</Button>
+                            <Button size="sm" variant="outline" className="rounded-lg" isDisabled={statusPending === row.id} onPress={() => void toggleStatus(row)}>
+                              {row.status === "ACTIVE" ? "Tạm dừng" : "Kích hoạt"}
+                            </Button>
+                            <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>Phát hành</Button>
                           </div>
                         </td>
                       </tr>

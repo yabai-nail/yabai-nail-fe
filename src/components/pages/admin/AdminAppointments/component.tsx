@@ -41,7 +41,6 @@ import {
   type AppointmentLifecycleAction,
   type AppointmentService,
   type AppointmentStaff,
-  type AppointmentStatus,
   type AppointmentStatusFilter,
   type AppointmentView,
 } from "./data";
@@ -50,6 +49,7 @@ import {
   getAppointmentViewRange,
   shiftAppointmentDate,
 } from "./date-utils";
+import { normalizeAppointmentStatus } from "./status";
 
 function toDatePart(iso: string): string {
   // en-CA gives ISO YYYY-MM-DD, which matches the fixture's date shape.
@@ -68,12 +68,7 @@ function toTimePart(iso: string): string {
   }
 }
 
-function normalizeStatus(status: string): AppointmentStatus {
-  const lower = status.toLowerCase();
-  if (lower.includes("cancel")) return "cancelled";
-  if (lower.includes("confirm") || lower.includes("complete") || lower.includes("service")) return "confirmed";
-  return "pending";
-}
+
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -150,7 +145,7 @@ function toFixtureAppointment(
     customer: resolveCustomer(server.customerId, lookups.customers),
     service: resolveService(server.serviceIds, lookups.services),
     staff: resolveStaff(server.staffId, lookups.staff),
-    status: normalizeStatus(server.status),
+    status: normalizeAppointmentStatus(server.status),
     note: server.note ?? "",
     serverStatus: server.status,
     version: server.version,
