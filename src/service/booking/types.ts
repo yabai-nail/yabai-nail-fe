@@ -26,9 +26,9 @@ export interface BookingQuoteInput {
 }
 
 export interface BookingQuote {
-  readonly subtotalVnd: number;
-  readonly discountVnd: number;
-  readonly totalVnd: number;
+  readonly subtotal: number;
+  readonly discount: number;
+  readonly total: number;
   readonly durationMinutes: number;
   readonly lines: ReadonlyArray<Record<string, unknown>>;
   readonly [field: string]: unknown;
@@ -55,7 +55,7 @@ export interface Appointment {
   readonly startsAt: string;
   readonly endsAt: string;
   readonly status: string;
-  readonly totalVnd?: number;
+  readonly total?: number;
   readonly version: number;
   readonly [field: string]: unknown;
 }
@@ -83,8 +83,8 @@ export interface AppointmentCancellationInput {
 }
 
 export interface AppointmentCancellationPreview {
-  readonly refundVnd?: number;
-  readonly penaltyVnd?: number;
+  readonly refundTotal?: number;
+  readonly penalty?: number;
   readonly note?: string;
   readonly [field: string]: unknown;
 }

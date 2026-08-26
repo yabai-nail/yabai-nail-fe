@@ -13,8 +13,8 @@ import {
   useAdminPaymentRefund,
 } from "@/service";
 import {
-  formatVnd,
-  parseVnd,
+  formatMoney,
+  parseMoney,
   summarizeCheckIn,
   summarizeCustomer,
   summarizeMembership,
@@ -92,13 +92,13 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const [appointmentId, setAppointmentId] = useState("");
   const [paymentId, setPaymentId] = useState("");
   const payments = useAdminAppointmentPayments(branchId, appointmentId || null);
-  const [amount, setAmount] = useState("");
+  const [amountText, setAmountText] = useState("");
   const [reason, setReason] = useState("");
   const [refundTarget, setRefundTarget] = useState<{ paymentId: string; refundId: string } | null>(null);
   const { busy, message, error, run } = useAction();
   const refund = useAdminPaymentRefund(branchId, refundTarget?.paymentId ?? null, refundTarget?.refundId ?? null);
-  const amountVnd = parseVnd(amount);
-  const disabled = busy || !paymentId.trim() || amountVnd <= 0 || reason.trim().length < 2;
+  const amount = parseMoney(amountText);
+  const disabled = busy || !paymentId.trim() || amount <= 0 || reason.trim().length < 2;
   const customerNames = new Map((customers.data?.items ?? []).map((customer) => [
     customer.id,
     customer.displayName ?? customer.name ?? "Khách chưa có tên",
@@ -109,7 +109,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   }));
   const paymentOptions = (payments.data?.items ?? []).map((payment) => ({
     value: payment.id,
-    label: `${formatVnd(payment.amountVnd)} · ${payment.method}`,
+    label: `${formatMoney(payment.amount)} · ${payment.method}`,
   }));
 
   return (
@@ -140,8 +140,8 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
         )}
       </div>
       <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-refund-amount">Số tiền hoàn (VND)</label>
-        <input id="ops-refund-amount" className={inputClass} value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="Số tiền hoàn (VND)" inputMode="numeric" />
+        <label className={labelClass} htmlFor="ops-refund-amount">Số tiền hoàn (¥)</label>
+        <input id="ops-refund-amount" className={inputClass} value={amountText} onChange={(event) => setAmountText(event.target.value)} placeholder="Số tiền hoàn (¥)" inputMode="numeric" />
       </div>
       <div className="grid gap-1">
         <label className={labelClass} htmlFor="ops-refund-reason">Lý do hoàn</label>
@@ -150,7 +150,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
       <Feedback message={message} error={error} />
       {refund.data ? (
         <p className="text-xs text-admin-muted">
-          Yêu cầu hoàn {formatVnd(refund.data.amountVnd)} · {refund.data.status}
+          Yêu cầu hoàn {formatMoney(refund.data.amount)} · {refund.data.status}
         </p>
       ) : null}
       <div>
@@ -160,7 +160,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
           const created = await adminService.refundPayment(
             branchId,
             normalizedPaymentId,
-            { amountVnd, reasonCode: reason.trim() },
+            { amount, reasonCode: reason.trim() },
             payment.version,
           );
           setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
@@ -207,7 +207,7 @@ function CheckInForm({ branchId }: Readonly<{ branchId: string }>) {
                 <li key={appointment.id} className="flex items-center justify-between gap-2 py-1 text-sm">
                   <span className="font-mono text-admin-ink">{appointment.time}</span>
                   <span className="text-admin-muted">{appointment.status}</span>
-                  <span className="font-mono text-admin-muted">{formatVnd(appointment.totalVnd)}</span>
+                  <span className="font-mono text-admin-muted">{formatMoney(appointment.total)}</span>
                 </li>
               ))}
             </ul>

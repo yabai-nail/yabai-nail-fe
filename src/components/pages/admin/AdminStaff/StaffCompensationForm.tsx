@@ -2,7 +2,7 @@
 
 import { Button } from "@heroui/react";
 import { useState } from "react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
@@ -23,7 +23,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const initialBase = compensation?.baseSalaryVnd ?? 0;
+  const initialBase = compensation?.baseSalary ?? 0;
   const initialRate = compensation?.commissionRate ?? 60;
   const effectiveBase = baseSalary === "" ? initialBase : Number(baseSalary.replace(/\D/g, ""));
   const effectiveRate = rate === "" ? initialRate : Number(rate);
@@ -41,7 +41,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       await adminService.setStaffCompensation(
         staffId,
         {
-          baseSalaryVnd: effectiveBase,
+          baseSalary: effectiveBase,
           commissionRate: effectiveRate,
           effectiveFrom,
         },
@@ -74,7 +74,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
         <dl className="grid grid-cols-2 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
             <dt className="text-admin-muted">Lương cứng</dt>
-            <dd className="mt-1 font-bold text-admin-ink">{formatVnd(initialBase)}</dd>
+            <dd className="mt-1 font-bold text-admin-ink">{formatMoney(initialBase)}</dd>
           </div>
           <div>
             <dt className="text-admin-muted">Hoa hồng</dt>
@@ -85,13 +85,13 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
 
       <div className="grid grid-cols-[1fr_5rem] gap-2 text-xs">
         <label htmlFor={`${staffId}-base-salary`} className="flex flex-col gap-1">
-          <span className="font-semibold text-admin-ink">Lương cứng mới (VND)</span>
+          <span className="font-semibold text-admin-ink">Lương cứng mới (¥)</span>
           <input
             id={`${staffId}-base-salary`}
             inputMode="numeric"
             value={baseSalary}
             onChange={(event) => setBaseSalary(event.target.value)}
-            placeholder={formatVnd(initialBase)}
+            placeholder={formatMoney(initialBase)}
             className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
         </label>

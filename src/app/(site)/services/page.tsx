@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { useBranches, useBranchServices } from "@/service";
 
-const formatVnd = (value: number): string => `${value.toLocaleString("vi-VN")} ₫`;
+import { formatMoney } from "@/lib/admin-format";
 
 const ServicesRoute = () => {
   // The public services list is per-branch. Until the shell offers a branch
@@ -49,7 +49,7 @@ const ServicesRoute = () => {
                     <p className="mt-3 text-sm leading-6 text-muted">{service.description}</p>
                   ) : null}
                   <div className="mt-4 flex items-center justify-between text-sm">
-                    <span className="font-semibold text-accent">{formatVnd(service.priceVnd)}</span>
+                    <span className="font-semibold text-accent">{formatMoney(service.price)}</span>
                     <span className="text-muted">{service.durationMinutes} phút</span>
                   </div>
                 </li>

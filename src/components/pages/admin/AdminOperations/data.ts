@@ -1,3 +1,4 @@
+export { formatMoney } from "@/lib/admin-format";
 import { SALON_TIME_ZONE } from "@/lib/salon-date";
 import type {
   AdminCheckInResolution,
@@ -13,7 +14,7 @@ export type CustomerHit = {
 };
 
 /** Strips grouping characters so "1.000.000" or "1,000,000" become the integer amount. */
-export function parseVnd(input: string): number {
+export function parseMoney(input: string): number {
   const digits = input.replace(/[^\d]/g, "");
   return digits ? Number(digits) : 0;
 }
@@ -30,10 +31,6 @@ export function summarizeCustomer(customer: AdminCustomer): CustomerHit {
   return { id: customer.id, name, phone };
 }
 
-export function formatVnd(amount: number): string {
-  return `${amount.toLocaleString("vi-VN")} ₫`;
-}
-
 /** Customer identified by a check-in / membership-card lookup, ready to render. */
 export type ResolvedCustomer = {
   readonly id: string;
@@ -47,7 +44,7 @@ export type ResolvedAppointment = {
   readonly id: string;
   readonly time: string;
   readonly status: string;
-  readonly totalVnd: number;
+  readonly total: number;
 };
 
 export type CheckInResolutionView = {
@@ -109,7 +106,7 @@ export function summarizeCheckIn(resolution: AdminCheckInResolution): CheckInRes
       id: appointment.id,
       time: formatSalonClock(appointment.startsAt),
       status: appointmentStatusLabel(appointment.status),
-      totalVnd: appointment.totalVnd,
+      total: appointment.total,
     })),
   };
 }

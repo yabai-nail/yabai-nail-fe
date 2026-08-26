@@ -102,25 +102,25 @@ function contracts(ids) {
   const { branchId, customerId, appointmentId, staffId } = ids;
   return [
     ["GET /branches", "/branches", ["[].id", "[].name", "[].address", "[].timezone", "[].active"]],
-    ["GET /admin/services", "/admin/services", ["items.[].id", "items.[].name", "items.[].priceVnd", "items.[].durationMinutes", "items.[].version"]],
+    ["GET /admin/services", "/admin/services", ["items.[].id", "items.[].name", "items.[].price", "items.[].durationMinutes", "items.[].version"]],
     ["GET /admin/service-categories", "/admin/service-categories", ["items.[].id", "items.[].code", "items.[].version"]],
     ["GET /admin/surcharges", "/admin/surcharges", ["items.[].id", "items.[].code", "items.[].name", "items.[].type", "items.[].status", "items.[].version"]],
     ["GET /admin/accounts", "/admin/accounts", ["[].id", "[].displayName", "[].role", "[].accountStatus"]],
     ["GET /admin/nail-designs", "/admin/nail-designs", ["items.[].id", "items.[].title", "items.[].status", "items.[].version"]],
     ["GET /admin/promotions", "/admin/promotions", ["items.[].id", "items.[].code", "items.[].title", "items.[].type", "items.[].value", "items.[].status", "items.[].version"]],
     ["GET /admin/audit-logs", "/admin/audit-logs", ["[].action", "[].actorId", "[].resourceType", "[].resourceId"]],
-    ["GET /admin/loyalty-config", "/admin/loyalty-config", ["pointRate.points", "pointRate.spendVnd", "redemptionCapPercent", "redemptionIncrement", "version"]],
+    ["GET /admin/loyalty-config", "/admin/loyalty-config", ["pointRate.points", "pointRate.spend", "redemptionCapPercent", "redemptionIncrement", "version"]],
     ["GET /admin/staff", "/admin/staff", ["items.[].id", "items.[].displayName", "items.[].version"]],
     ["GET /admin/staff/{id}/skills", `/admin/staff/${staffId}/skills`, ["staffId", "version", "skills.[].skillId"]],
     ["GET /admin/staff/{id}/compensation", `/admin/staff/${staffId}/compensation`, ["commissionRate", "status", "version"]],
     ["GET /admin/branches/{b}/settings", `/admin/branches/${branchId}/settings`, ["booking.bookingWindowDays", "booking.cancellationCutoffMinutes", "booking.slotIntervalMinutes"]],
     ["GET /admin/branches/{b}/shifts", `/admin/branches/${branchId}/shifts`, ["[].id", "[].staffId", "[].localDate", "[].startLocalTime", "[].endLocalTime", "[].approvalStatus"]],
     ["GET /admin/branches/{b}/customers", `/admin/branches/${branchId}/customers`, ["items.[].id", "items.[].displayName", "items.[].version"]],
-    ["GET /admin/branches/{b}/dashboard", `/admin/branches/${branchId}/dashboard`, ["kpi.total", "kpi.revenueVnd", "kpi.workingStaffCount", "upcoming", "generatedAt"]],
-    ["GET /admin/branches/{b}/staff-performance", `/admin/branches/${branchId}/staff-performance?period=${new Date().toISOString().slice(0, 7)}`, ["kpi.revenueVnd", "rows.[].staff.id", "rows.[].commissionRate", "rows.[].commissionAmountVnd"]],
+    ["GET /admin/branches/{b}/dashboard", `/admin/branches/${branchId}/dashboard`, ["kpi.total", "kpi.revenue", "kpi.workingStaffCount", "upcoming", "generatedAt"]],
+    ["GET /admin/branches/{b}/staff-performance", `/admin/branches/${branchId}/staff-performance?period=${new Date().toISOString().slice(0, 7)}`, ["kpi.revenue", "rows.[].staff.id", "rows.[].commissionRate", "rows.[].commissionAmount"]],
     ["GET /admin/branches/{b}/appointments", `/admin/branches/${branchId}/appointments`, ["items.[].id", "items.[].customerId", "items.[].staffId", "items.[].serviceIds", "items.[].startsAt", "items.[].endsAt", "items.[].status", "items.[].version"]],
     ...(customerId
-      ? [["GET /admin/.../customers/{c}/nail-history", `/admin/branches/${branchId}/customers/${customerId}/nail-history`, ["items.[].appointmentId", "items.[].startsAt", "items.[].services.[].serviceName", "items.[].services.[].unitPriceVnd"]]]
+      ? [["GET /admin/.../customers/{c}/nail-history", `/admin/branches/${branchId}/customers/${customerId}/nail-history`, ["items.[].appointmentId", "items.[].startsAt", "items.[].services.[].serviceName", "items.[].services.[].unitPrice"]]]
       : []),
     ...(appointmentId
       ? [["GET /admin/.../appointments/{a}/allocation-candidates", `/admin/branches/${branchId}/appointments/${appointmentId}/allocation-candidates`, ["items.[].id", "items.[].displayName"]]]

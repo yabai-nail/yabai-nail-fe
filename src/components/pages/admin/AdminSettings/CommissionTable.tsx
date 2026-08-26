@@ -1,13 +1,13 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import type { CommissionPolicy } from "./data";
 
 const MISSING = "—";
 
-function formatOptionalVnd(value: number | null): string {
-  return typeof value === "number" ? formatVnd(value) : MISSING;
+function formatOptionalMoney(value: number | null): string {
+  return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
 export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray<CommissionPolicy> }>) {
@@ -55,9 +55,9 @@ export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray
                     {typeof policy.rate === "number" ? `${policy.rate}%` : MISSING}
                   </strong>
                 </td>
-                <td className="px-3 py-3 font-semibold">{formatOptionalVnd(policy.personalRevenue)}</td>
-                <td className="px-3 py-3 font-bold text-admin-accent">{formatOptionalVnd(policy.payout)}</td>
-                <td className="px-3 py-3">{formatOptionalVnd(salonShare)}</td>
+                <td className="px-3 py-3 font-semibold">{formatOptionalMoney(policy.personalRevenue)}</td>
+                <td className="px-3 py-3 font-bold text-admin-accent">{formatOptionalMoney(policy.payout)}</td>
+                <td className="px-3 py-3">{formatOptionalMoney(salonShare)}</td>
                 <td className="px-3 py-3">
                   {/* The compensation form lives on the staff screen; this used to be a button
                       with no handler at all. */}

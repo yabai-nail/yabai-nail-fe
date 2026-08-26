@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { formatNumber, formatMoney } from "@/lib/admin-format";
 import type { Appointment, AppointmentLifecycleAction } from "./data";
 import {
   appointmentStatusColor,
@@ -108,7 +108,7 @@ export function AppointmentDetailPanel({
 
         <dl className="grid grid-cols-2 gap-2 rounded-lg bg-admin-soft p-3 text-center">
           <div><dt className="text-[0.65rem] text-admin-muted">Số lần đến</dt><dd className="mt-1 text-sm font-bold text-admin-accent">{formatNumber(appointment.customer.visits)}</dd></div>
-          <div><dt className="text-[0.65rem] text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 text-sm font-bold text-admin-accent">{formatVnd(appointment.customer.totalSpend)}</dd></div>
+          <div><dt className="text-[0.65rem] text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 text-sm font-bold text-admin-accent">{formatMoney(appointment.customer.totalSpend)}</dd></div>
         </dl>
 
         <dl className="space-y-3">

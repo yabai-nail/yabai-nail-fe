@@ -2,7 +2,7 @@ import { CalendarDaysIcon, ChatBubbleLeftRightIcon, PencilSquareIcon, PhoneIcon 
 import { useRouter } from "next/navigation";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { getCustomerSegmentLabel } from "@/lib/admin-customer";
-import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { formatNumber, formatMoney } from "@/lib/admin-format";
 import { CustomerLoyaltyPanel } from "./CustomerLoyaltyPanel";
 import { CustomerNotesPanel } from "./CustomerNotesPanel";
 import type { Customer } from "./data";
@@ -45,7 +45,7 @@ export function CustomerDetailPanel({
           <div><dt className="sr-only">Sở thích</dt><dd>{customer.preference}</dd></div>
         </dl>
         <dl className="grid grid-cols-2 gap-3 border-y border-admin-border py-3 text-center text-xs sm:grid-cols-4 xl:grid-cols-2">
-          <div><dt className="text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 font-bold text-admin-accent">{formatVnd(customer.totalSpend)}</dd></div>
+          <div><dt className="text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 font-bold text-admin-accent">{formatMoney(customer.totalSpend)}</dd></div>
           <div><dt className="text-admin-muted">Lần đến</dt><dd className="mt-1 font-bold">{customer.visits}</dd></div>
           <div><dt className="text-admin-muted">Điểm</dt><dd className="mt-1 font-bold">{formatNumber(customer.points)}</dd></div>
           <div><dt className="text-admin-muted">Hạng</dt><dd className="mt-1 font-bold capitalize">{customer.rank}</dd></div>

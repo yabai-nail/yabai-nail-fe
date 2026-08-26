@@ -1,4 +1,5 @@
 import type { AdminPromotion } from "@/service";
+import { formatMoney } from "@/lib/admin-format";
 import { matchesSearch } from "@/lib/admin-search";
 
 export type PromotionRow = {
@@ -70,7 +71,7 @@ export function filterPromotions(
 /** One `value`, read as a percentage or an amount depending on `type`. */
 export function formatDiscount(row: Pick<PromotionRow, "type" | "value">): string {
   if (typeof row.value !== "number") return "—";
-  return row.type === "PERCENT" ? `${row.value}%` : `${row.value.toLocaleString("vi-VN")} ₫`;
+  return row.type === "PERCENT" ? `${row.value}%` : formatMoney(row.value);
 }
 
 export function paginate<T>(

@@ -1,6 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Chip } from "@heroui/react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import { categoryLabels, type SalonService } from "./data";
 
 export function ServiceTable({
@@ -39,7 +39,7 @@ export function ServiceTable({
                   <Chip.Label>{categoryLabels[service.category]}</Chip.Label>
                 </Chip>
               </td>
-              <td className="px-3 py-2 font-semibold">{formatVnd(service.price)}</td>
+              <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
               <td className="px-3 py-2">{service.durationMinutes} phút</td>
               <td className="px-3 py-2">
                 <Chip size="sm" variant="soft" color={service.isVisible ? "success" : "default"}>

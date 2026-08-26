@@ -1,6 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
-import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { formatNumber, formatMoney } from "@/lib/admin-format";
 import type { Customer, CustomerRank } from "./data";
 
 const rankLabel: Record<CustomerRank, string> = {
@@ -46,7 +46,7 @@ export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Reado
               </td>
               <td className="px-3 py-2 whitespace-nowrap">{customer.phone}</td>
               <td className="px-3 py-2 whitespace-nowrap">{customer.lastVisit}</td>
-              <td className="px-3 py-2 whitespace-nowrap font-medium">{formatVnd(customer.totalSpend)}</td>
+              <td className="px-3 py-2 whitespace-nowrap font-medium">{formatMoney(customer.totalSpend)}</td>
               <td className="px-3 py-2 whitespace-nowrap">{formatNumber(customer.points)} pt</td>
               <td className="px-3 py-2"><Chip size="sm" variant="soft" color={customer.rank === "gold" ? "warning" : "default"}><Chip.Label>{rankLabel[customer.rank]}</Chip.Label></Chip></td>
               <td className="px-3 py-2">

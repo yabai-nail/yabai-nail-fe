@@ -54,7 +54,7 @@ function toCustomerRow(server: AdminCustomer): Customer {
     handle: readString("handle"),
     preference: readString("preferenceSummary"),
     lastVisit: readString("lastVisitAt"),
-    totalSpend: readNumber("totalSpendVnd"),
+    totalSpend: readNumber("totalSpend"),
     points: readNumber("pointBalance"),
     visits: readNumber("visitCount"),
     segment:

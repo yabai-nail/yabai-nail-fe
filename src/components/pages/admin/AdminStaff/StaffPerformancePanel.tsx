@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import { currentMonthPeriod, indexStaffPerformance } from "@/lib/admin-staff-performance";
 import { useAdminStaffPerformance } from "@/service";
 
@@ -46,7 +46,7 @@ export function StaffPerformancePanel({
           <div>
             <dt className="text-admin-muted">Doanh thu</dt>
             <dd className="mt-1 font-bold text-admin-ink">
-              {typeof row.revenueVnd === "number" ? formatVnd(row.revenueVnd) : MISSING}
+              {typeof row.revenue === "number" ? formatMoney(row.revenue) : MISSING}
             </dd>
           </div>
           <div>
@@ -56,7 +56,7 @@ export function StaffPerformancePanel({
           <div>
             <dt className="text-admin-muted">Hoa hồng</dt>
             <dd className="mt-1 font-bold text-admin-accent">
-              {typeof row.commissionAmountVnd === "number" ? formatVnd(row.commissionAmountVnd) : MISSING}
+              {typeof row.commissionAmount === "number" ? formatMoney(row.commissionAmount) : MISSING}
             </dd>
           </div>
         </dl>

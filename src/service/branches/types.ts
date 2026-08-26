@@ -29,7 +29,7 @@ export interface BranchService {
   readonly name: string;
   readonly nameJa?: string;
   readonly description?: string;
-  readonly priceVnd: number;
+  readonly price: number;
   readonly durationMinutes: number;
   readonly active: boolean;
   readonly [field: string]: unknown;

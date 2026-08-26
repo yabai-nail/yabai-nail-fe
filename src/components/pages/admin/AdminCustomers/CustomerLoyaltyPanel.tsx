@@ -4,7 +4,7 @@ import { GiftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { formatNumber, formatVnd } from "@/lib/admin-format";
+import { formatMoney, formatNumber } from "@/lib/admin-format";
 import {
   adminService,
   useAdminCustomerBenefits,
@@ -198,8 +198,8 @@ export function CustomerLoyaltyPanel({
                   {(entry.services ?? []).map((service) => service.serviceName).join(", ") || "—"}
                 </span>
                 <strong>
-                  {formatVnd(
-                    (entry.services ?? []).reduce((sum, service) => sum + (service.unitPriceVnd ?? 0), 0),
+                  {formatMoney(
+                    (entry.services ?? []).reduce((sum, service) => sum + (service.unitPrice ?? 0), 0),
                   )}
                 </strong>
               </li>

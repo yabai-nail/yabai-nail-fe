@@ -7,7 +7,7 @@ import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelecti
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   averageCommissionRate,
@@ -40,8 +40,8 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-function formatOptionalVnd(value: number | null): string {
-  return typeof value === "number" ? formatVnd(value) : MISSING;
+function formatOptionalMoney(value: number | null): string {
+  return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
 /**
@@ -58,9 +58,9 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
     initials: deriveInitials(name),
     phone: server.account?.phone ?? "",
     status: server.active ? "working" : "leave",
-    revenue: performance?.revenueVnd ?? null,
+    revenue: performance?.revenue ?? null,
     commissionRate: performance?.commissionRate ?? null,
-    commissionAmount: performance?.commissionAmountVnd ?? null,
+    commissionAmount: performance?.commissionAmount ?? null,
     orders: performance?.orderCount ?? null,
     version: server.version,
   };
@@ -96,8 +96,8 @@ export function AdminStaffComponent() {
     : selected;
 
   const kpi = performance.data?.kpi;
-  const revenue = kpi?.revenueVnd ?? null;
-  const commission = kpi?.commissionAmountVnd ?? null;
+  const revenue = kpi?.revenue ?? null;
+  const commission = kpi?.commissionAmount ?? null;
   const salonShare =
     typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
   const averageRate = averageCommissionRate(source.map((member) => member.commissionRate));
@@ -106,7 +106,7 @@ export function AdminStaffComponent() {
     {
       id: "revenue",
       label: `Doanh thu kỳ ${period}`,
-      value: formatOptionalVnd(revenue),
+      value: formatOptionalMoney(revenue),
       detail: typeof kpi?.orderCount === "number" ? `${kpi.orderCount} đơn hàng` : "Chưa có số đơn",
       icon: BanknotesIcon,
       tone: "text-admin-accent bg-admin-soft",
@@ -114,7 +114,7 @@ export function AdminStaffComponent() {
     {
       id: "commission",
       label: "Tổng hoa hồng phải trả",
-      value: formatOptionalVnd(commission),
+      value: formatOptionalMoney(commission),
       detail: averageRate === null ? "Chưa có tỷ lệ" : `${averageRate}% / Trung bình`,
       icon: WalletIcon,
       tone: "text-admin-success bg-green-50",
@@ -122,7 +122,7 @@ export function AdminStaffComponent() {
     {
       id: "shop",
       label: "Quán thực nhận",
-      value: formatOptionalVnd(salonShare),
+      value: formatOptionalMoney(salonShare),
       detail: `Kỳ ${period}`,
       icon: BuildingStorefrontIcon,
       tone: "text-admin-info bg-sky-50",

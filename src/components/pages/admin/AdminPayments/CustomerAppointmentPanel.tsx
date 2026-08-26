@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { AlertDialog, Button, Card, Chip, Modal } from "@heroui/react";
 import { useState, type FormEvent } from "react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import type { CheckoutInvoice, PaymentAppointmentSnapshot } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -51,7 +51,7 @@ export function CustomerAppointmentPanel({ invoice, isCancelled, onAppointmentCh
             <InfoRow icon={PhoneIcon} label="Điện thoại" value={invoice.customer.phone} />
             <InfoRow icon={CalendarDaysIcon} label="Ngày sinh" value={invoice.customer.birthday} />
             <InfoRow icon={UserIcon} label="Lần đến" value={`${invoice.customer.visits} lần`} />
-            <div className="flex justify-between gap-3 border-t border-admin-border pt-3"><dt>Tổng chi tiêu</dt><dd className="font-semibold text-admin-ink">{formatVnd(invoice.customer.totalSpend)}</dd></div>
+            <div className="flex justify-between gap-3 border-t border-admin-border pt-3"><dt>Tổng chi tiêu</dt><dd className="font-semibold text-admin-ink">{formatMoney(invoice.customer.totalSpend)}</dd></div>
           </dl>
           <div className="border-t border-admin-border pt-4">
             <div className="mb-3 flex items-center justify-between gap-2"><h3 className="text-sm font-bold text-admin-ink">Thông tin lịch hẹn</h3><Chip size="sm" variant="soft" color={isCancelled ? "danger" : "success"}><Chip.Label>{isCancelled ? "Đã hủy" : "Đã xác nhận"}</Chip.Label></Chip></div>

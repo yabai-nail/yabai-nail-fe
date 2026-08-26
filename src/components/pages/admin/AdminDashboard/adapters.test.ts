@@ -29,16 +29,16 @@ const fullKpi: AdminDashboardKpi = {
   confirmed: 8,
   inService: 1,
   completed: 1,
-  revenueVnd: 7_860_000,
-  previousRevenueVnd: 6_630_000,
+  revenue: 7_860_000,
+  previousRevenue: 6_630_000,
   revenueChangePercent: 18.55,
   customerCount: 10,
   newCustomerCount: 2,
   workingStaffCount: 3,
   offStaffCount: 1,
-  expensesVnd: 1_230_000,
-  commissionVnd: 3_548_000,
-  salonShareVnd: 3_082_000,
+  expenses: 1_230_000,
+  commission: 3_548_000,
+  salonShare: 3_082_000,
 };
 
 // The four counters are all an older deploy is guaranteed to return.
@@ -121,8 +121,8 @@ describe("revenue rows", () => {
   it("reads a wider range from the revenue report metrics", () => {
     const report = {
       metrics: {
-        recognizedRevenueVnd: { value: 124_560_000 },
-        refundVnd: { value: 0 },
+        recognizedRevenue: { value: 124_560_000 },
+        refundTotal: { value: 0 },
         completedAppointmentCount: { value: 42 },
       },
     } as unknown as RevenueReport;
@@ -133,7 +133,7 @@ describe("revenue rows", () => {
   });
 
   it("shows a placeholder for a report metric the backend returned as null", () => {
-    const report = { metrics: { recognizedRevenueVnd: { value: null } } } as unknown as RevenueReport;
+    const report = { metrics: { recognizedRevenue: { value: null } } } as unknown as RevenueReport;
     expect(amountOf(buildRangeRevenueRows(report), "gross")).toBe(MISSING);
   });
 });
@@ -146,8 +146,8 @@ describe("buildPaymentMethodRows", () => {
 
   it("maps known method codes to Vietnamese labels", () => {
     const rows = buildPaymentMethodRows([
-      { method: "cash", amountVnd: 4_560_000 },
-      { method: "BANK_TRANSFER", totalVnd: 2_800_000 },
+      { method: "cash", amount: 4_560_000 },
+      { method: "BANK_TRANSFER", total: 2_800_000 },
     ]);
     expect(rows[0].label).toBe("Tiền mặt");
     expect(rows[0].value).toContain("4.560.000");
@@ -168,14 +168,14 @@ describe("buildStaffCards", () => {
       {
         staff: { id: "97ea397d", displayName: "Mai Linh" },
         workingStatus: "ACTIVE",
-        revenueVnd: 2_680_000,
-        commissionAmountVnd: 1_608_000,
+        revenue: 2_680_000,
+        commissionAmount: 1_608_000,
       },
       {
         staff: { id: "b2", displayName: "Bảo Ngọc" },
         workingStatus: "INACTIVE",
-        revenueVnd: 0,
-        commissionAmountVnd: 0,
+        revenue: 0,
+        commissionAmount: 0,
       },
     ]);
 
@@ -186,7 +186,7 @@ describe("buildStaffCards", () => {
   });
 
   it("survives a row without a staff object", () => {
-    const cards = buildStaffCards([{ revenueVnd: 10 }]);
+    const cards = buildStaffCards([{ revenue: 10 }]);
     expect(cards[0].id).toBe("staff-0");
     expect(cards[0].name).toBe("Chưa rõ tên");
     expect(cards[0].payout).toBe(MISSING);
@@ -207,9 +207,9 @@ describe("toInitials", () => {
 describe("monthly summary", () => {
   const report = {
     metrics: {
-      recognizedRevenueVnd: { value: 124_560_000 },
-      refundVnd: { value: 1_000_000 },
-      netRevenueVnd: { value: 123_560_000 },
+      recognizedRevenue: { value: 124_560_000 },
+      refundTotal: { value: 1_000_000 },
+      netRevenue: { value: 123_560_000 },
     },
   } as unknown as RevenueReport;
 

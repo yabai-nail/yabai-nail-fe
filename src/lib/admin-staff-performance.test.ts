@@ -9,10 +9,10 @@ import {
 const verifiedRow = {
   staff: { id: "staff-1", displayName: "Mai Linh" },
   workingStatus: "ACTIVE",
-  revenueVnd: 2840000,
+  revenue: 2840000,
   orderCount: 4,
   commissionRate: 60,
-  commissionAmountVnd: 1704000,
+  commissionAmount: 1704000,
   version: 3,
 };
 
@@ -30,10 +30,10 @@ describe("readStaffPerformanceRows", () => {
         staffId: "staff-1",
         displayName: "Mai Linh",
         workingStatus: "ACTIVE",
-        revenueVnd: 2840000,
+        revenue: 2840000,
         orderCount: 4,
         commissionRate: 60,
-        commissionAmountVnd: 1704000,
+        commissionAmount: 1704000,
       },
     ]);
   });
@@ -48,20 +48,20 @@ describe("readStaffPerformanceRows", () => {
     const rows = readStaffPerformanceRows([{ staff: { id: "staff-3" } }]);
     expect(rows[0]).toMatchObject({
       displayName: null,
-      revenueVnd: null,
+      revenue: null,
       orderCount: null,
       commissionRate: null,
-      commissionAmountVnd: null,
+      commissionAmount: null,
     });
   });
 
   it("keeps a real zero distinct from a missing field", () => {
-    const rows = readStaffPerformanceRows([{ staff: { id: "staff-4" }, revenueVnd: 0 }]);
-    expect(rows[0].revenueVnd).toBe(0);
+    const rows = readStaffPerformanceRows([{ staff: { id: "staff-4" }, revenue: 0 }]);
+    expect(rows[0].revenue).toBe(0);
   });
 
   it("drops rows that carry no staff id", () => {
-    expect(readStaffPerformanceRows([{ revenueVnd: 100 }])).toEqual([]);
+    expect(readStaffPerformanceRows([{ revenue: 100 }])).toEqual([]);
   });
 
   it("returns an empty list while the request is still in flight", () => {
@@ -72,16 +72,16 @@ describe("readStaffPerformanceRows", () => {
 describe("indexStaffPerformance", () => {
   it("keys rows by staff id", () => {
     const index = indexStaffPerformance([verifiedRow]);
-    expect(index.get("staff-1")?.revenueVnd).toBe(2840000);
+    expect(index.get("staff-1")?.revenue).toBe(2840000);
     expect(index.get("missing")).toBeUndefined();
   });
 
   it("keeps the first row when the backend repeats a staff id", () => {
     const index = indexStaffPerformance([
-      { staff: { id: "dup" }, revenueVnd: 1 },
-      { staff: { id: "dup" }, revenueVnd: 2 },
+      { staff: { id: "dup" }, revenue: 1 },
+      { staff: { id: "dup" }, revenue: 2 },
     ]);
-    expect(index.get("dup")?.revenueVnd).toBe(1);
+    expect(index.get("dup")?.revenue).toBe(1);
   });
 });
 

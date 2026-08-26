@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import {
   adminService,
   useAdminAppointment,
@@ -64,7 +64,7 @@ function buildInvoiceFromServer(
     return {
       id: serviceId,
       name: server?.name ?? "Dịch vụ chưa có tên",
-      price: server?.priceVnd ?? 0,
+      price: server?.price ?? 0,
     };
   };
 
@@ -89,19 +89,19 @@ function buildInvoiceFromServer(
     bookedService: {
       id: primaryServiceId,
       name: primaryService?.name ?? "Dịch vụ chưa có tên",
-      price: primaryService?.priceVnd ?? 0,
+      price: primaryService?.price ?? 0,
     },
     currentService: {
       id: primaryServiceId,
       name: primaryService?.name ?? "Dịch vụ chưa có tên",
-      price: primaryService?.priceVnd ?? 0,
+      price: primaryService?.price ?? 0,
     },
     additionalItems: appointment.serviceIds.slice(1).map((serviceId) => ({
       ...asService(serviceId),
       note: "",
       source: "catalog" as const,
     })),
-    discount: appointment.discountVnd,
+    discount: appointment.discount,
     paymentMethod: null,
     orderNote: "",
     status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
@@ -195,12 +195,12 @@ export function AdminPaymentsComponent() {
         // The screen's own total is only ever a preview. If it disagrees with the
         // amount the backend is about to charge, stop and say so rather than
         // confirming a number the salon read off the screen and the till will
-        // never see. The field is amountDueVnd — an earlier version of this
-        // check read quote.totalVnd, which the endpoint does not return, so the
+        // never see. The field is amountDue — an earlier version of this
+        // check read quote.total, which the endpoint does not return, so the
         // comparison silently never ran.
-        if (typeof quote.amountDueVnd === "number" && quote.amountDueVnd !== totals.grandTotal) {
+        if (typeof quote.amountDue === "number" && quote.amountDue !== totals.grandTotal) {
           setConfirmError(
-            `Số tiền trên màn hình (${formatVnd(totals.grandTotal)}) khác số máy chủ sẽ thu (${formatVnd(quote.amountDueVnd)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
+            `Số tiền trên màn hình (${formatMoney(totals.grandTotal)}) khác số máy chủ sẽ thu (${formatMoney(quote.amountDue)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
           );
           return;
         }
@@ -208,8 +208,8 @@ export function AdminPaymentsComponent() {
           branchId!,
           appointmentId!,
           // Only `method` reaches the backend: it recomputes the amount from the
-          // appointment so a client can never set a price. Sending amountVnd and
-          // discountVnd looked like it did something and did not.
+          // appointment so a client can never set a price. Sending amount and
+          // discount looked like it did something and did not.
           { method: invoice.paymentMethod! },
           // Re-read the version: the quote above is itself a write, so the
           // appointment may have moved on since this handler started. The
@@ -267,7 +267,7 @@ export function AdminPaymentsComponent() {
           <ul className="mt-2 space-y-1 text-xs text-admin-muted">
             {payments.data.items.map((payment) => (
               <li key={payment.id}>
-                {payment.method} · {formatVnd(payment.amountVnd)} · {payment.status}
+                {payment.method} · {formatMoney(payment.amount)} · {payment.status}
               </li>
             ))}
           </ul>
@@ -294,7 +294,7 @@ export function AdminPaymentsComponent() {
           onCancel={() => setIsAppointmentCancelled(true)}
         />
         <ServiceCheckoutPanel invoice={invoice} onChange={setInvoice}>
-          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">Xác nhận & thanh toán</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">Tổng tiền khách thanh toán</span><strong className="text-xl text-admin-accent">{totals.grandTotal.toLocaleString("vi-VN")} ₫</strong></div></div>
+          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">Xác nhận & thanh toán</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">Tổng tiền khách thanh toán</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
       </div>

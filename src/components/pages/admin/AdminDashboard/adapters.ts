@@ -3,7 +3,7 @@
 // answers "chưa có dữ liệu" instead of inventing a number when the backend does
 // not carry the field yet.
 
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import type { AdminDashboardKpi, RevenueReport } from "@/service";
 import type { DashboardMetric, MetricIcon, MetricTone, StaffMember } from "./data";
 
@@ -39,8 +39,8 @@ function readString(source: Record<string, unknown>, keys: ReadonlyArray<string>
   return null;
 }
 
-export function formatOptionalVnd(value: number | null | undefined): string {
-  return typeof value === "number" && Number.isFinite(value) ? formatVnd(value) : MISSING;
+export function formatOptionalMoney(value: number | null | undefined): string {
+  return typeof value === "number" && Number.isFinite(value) ? formatMoney(value) : MISSING;
 }
 
 export function formatOptionalCount(value: number | null | undefined): string {
@@ -116,10 +116,10 @@ export function buildDashboardMetrics(
       case "revenue":
         return {
           ...base,
-          value: formatOptionalVnd(kpi.revenueVnd),
+          value: formatOptionalMoney(kpi.revenue),
           detail:
-            typeof kpi.previousRevenueVnd === "number"
-              ? `Hôm qua: ${formatVnd(kpi.previousRevenueVnd)}`
+            typeof kpi.previousRevenue === "number"
+              ? `Hôm qua: ${formatMoney(kpi.previousRevenue)}`
               : "Chưa có số liệu hôm qua",
           trend: hasChange ? formatPercent(change) : undefined,
           trendDirection: hasChange ? (change < 0 ? "down" : "up") : undefined,
@@ -154,9 +154,9 @@ export function buildTodayRevenueRows(
   kpi: AdminDashboardKpi | undefined,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "gross", label: "Tổng doanh thu", value: formatOptionalVnd(kpi?.revenueVnd) },
-    { id: "cost", label: "Tổng chi phí (vật tư, khác)", value: formatOptionalVnd(kpi?.expensesVnd) },
-    { id: "commission", label: "Tổng hoa hồng nhân viên", value: formatOptionalVnd(kpi?.commissionVnd) },
+    { id: "gross", label: "Tổng doanh thu", value: formatOptionalMoney(kpi?.revenue) },
+    { id: "cost", label: "Tổng chi phí (vật tư, khác)", value: formatOptionalMoney(kpi?.expenses) },
+    { id: "commission", label: "Tổng hoa hồng nhân viên", value: formatOptionalMoney(kpi?.commission) },
   ];
 }
 
@@ -170,8 +170,8 @@ export function buildRangeRevenueRows(
   report: RevenueReport | undefined,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "gross", label: "Doanh thu ghi nhận", value: formatOptionalVnd(readMetric(report, "recognizedRevenueVnd")) },
-    { id: "refund", label: "Hoàn tiền", value: formatOptionalVnd(readMetric(report, "refundVnd")) },
+    { id: "gross", label: "Doanh thu ghi nhận", value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
+    { id: "refund", label: "Hoàn tiền", value: formatOptionalMoney(readMetric(report, "refundTotal")) },
     { id: "orders", label: "Lượt hoàn tất", value: formatOptionalCount(readMetric(report, "completedAppointmentCount")) },
   ];
 }
@@ -195,7 +195,7 @@ export function buildPaymentMethodRows(
     return {
       id: method ?? `method-${index}`,
       label: label ?? (method ? paymentMethodLabels[method.toLowerCase()] ?? method : "Không rõ"),
-      value: formatOptionalVnd(readNumber(entry, ["amountVnd", "totalVnd", "amount", "valueVnd"])),
+      value: formatOptionalMoney(readNumber(entry, ["amount", "total", "amount", "value"])),
     };
   });
 }
@@ -219,8 +219,8 @@ export function buildStaffCards(
       name,
       initials: toInitials(name),
       status: status?.toUpperCase() === "ACTIVE" ? "Đang làm" : "Nghỉ",
-      revenue: formatOptionalVnd(readNumber(row, ["revenueVnd", "revenue"])),
-      payout: formatOptionalVnd(readNumber(row, ["commissionAmountVnd", "commissionVnd", "commission"])),
+      revenue: formatOptionalMoney(readNumber(row, ["revenue", "revenue"])),
+      payout: formatOptionalMoney(readNumber(row, ["commissionAmount", "commission", "commission"])),
     };
   });
 }
@@ -229,22 +229,22 @@ export function buildStaffCards(
 
 export function buildMonthlyRows(
   report: RevenueReport | undefined,
-  commissionVnd: number | null,
+  commission: number | null,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "revenue", label: "Doanh thu ghi nhận", value: formatOptionalVnd(readMetric(report, "recognizedRevenueVnd")) },
-    { id: "refund", label: "Hoàn tiền", value: formatOptionalVnd(readMetric(report, "refundVnd")) },
-    { id: "commission", label: "Hoa hồng nhân viên", value: formatOptionalVnd(commissionVnd) },
+    { id: "revenue", label: "Doanh thu ghi nhận", value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
+    { id: "refund", label: "Hoàn tiền", value: formatOptionalMoney(readMetric(report, "refundTotal")) },
+    { id: "commission", label: "Hoa hồng nhân viên", value: formatOptionalMoney(commission) },
   ];
 }
 
 export function buildMonthlyNet(
   report: RevenueReport | undefined,
-  commissionVnd: number | null,
+  commission: number | null,
 ): string {
-  const net = readMetric(report, "netRevenueVnd");
-  if (net === null || commissionVnd === null) return MISSING;
-  return formatVnd(net - commissionVnd);
+  const net = readMetric(report, "netRevenue");
+  if (net === null || commission === null) return MISSING;
+  return formatMoney(net - commission);
 }
 
 // -- Activity feed ---------------------------------------------------------------
@@ -301,12 +301,12 @@ export function buildActivityItems(
     });
   }
 
-  if (typeof data.kpi.previousRevenueVnd === "number") {
+  if (typeof data.kpi.previousRevenue === "number") {
     items.push({
       id: "previous-revenue",
       kind: "revenue",
       title: "Doanh thu hôm qua",
-      detail: formatVnd(data.kpi.previousRevenueVnd),
+      detail: formatMoney(data.kpi.previousRevenue),
       time: "Hôm qua",
     });
   }

@@ -1,3 +1,4 @@
+import { formatMoney } from "@/lib/admin-format";
 import type { RevenueReport } from "@/service";
 
 export type ReportKind = "revenue" | "branches" | "customers" | "staff";
@@ -20,16 +21,16 @@ export const exportKindOf = {
 const metricLabels: Record<string, string> = {
   branchName: "Chi nhánh",
   customerName: "Khách hàng",
-  grossRevenueVnd: "Doanh thu gộp",
-  netRevenueVnd: "Doanh thu thuần",
-  revenueVnd: "Doanh thu",
+  grossRevenue: "Doanh thu gộp",
+  netRevenue: "Doanh thu thuần",
+  revenue: "Doanh thu",
   appointments: "Lượt hẹn",
   completedAppointments: "Hoàn tất",
   cancelledAppointments: "Đã huỷ",
   newCustomers: "Khách mới",
   returningCustomers: "Khách quay lại",
-  averageTicketVnd: "Trung bình/hoá đơn",
-  commissionVnd: "Hoa hồng",
+  averageTicket: "Trung bình/hoá đơn",
+  commission: "Hoa hồng",
   serviceName: "Dịch vụ",
   staffName: "Nhân viên",
 };
@@ -65,7 +66,6 @@ export function resolveReportIdentifiers(
 
 export function humanizeKey(key: string): string {
   return key
-    .replace(/Vnd$/i, "")
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replace(/[_-]+/g, " ")
     .trim()
@@ -79,8 +79,8 @@ export function labelForKey(key: string): string {
 export function formatReportValue(key: string, value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "number") {
-    return /vnd|revenue|amount|ticket|commission/i.test(key)
-      ? `${value.toLocaleString("vi-VN")} ₫`
+    return /revenue|amount|ticket|commission|refund|salary|price|total/i.test(key)
+      ? formatMoney(value)
       : value.toLocaleString("vi-VN");
   }
   return String(value);
@@ -107,24 +107,24 @@ export function tableColumns(
 
 export const revenueFixture: RevenueReport = {
   metricVersion: "1",
-  currency: "VND",
+  currency: "JPY",
   from: "2026-08-01",
   toExclusive: "2026-08-25",
   generatedAt: "2026-08-24T00:00:00.000Z",
   metrics: {
-    grossRevenueVnd: { value: 128500000 },
-    netRevenueVnd: { value: 96200000 },
+    grossRevenue: { value: 734000 },
+    netRevenue: { value: 549000 },
     appointments: { value: 142 },
     newCustomers: { value: 23 },
   },
   rows: [
-    { date: "2026-08-22", revenueVnd: 8200000, appointments: 9 },
-    { date: "2026-08-23", revenueVnd: 10450000, appointments: 12 },
-    { date: "2026-08-24", revenueVnd: 7600000, appointments: 8 },
+    { date: "2026-08-22", revenue: 46800, appointments: 9 },
+    { date: "2026-08-23", revenue: 59700, appointments: 12 },
+    { date: "2026-08-24", revenue: 43400, appointments: 8 },
   ],
 };
 
 export const reportRowsFixture: ReadonlyArray<Record<string, unknown>> = [
-  { name: "Yuki", revenueVnd: 42000000, orders: 51, commissionVnd: 6300000 },
-  { name: "Mai", revenueVnd: 31500000, orders: 38, commissionVnd: 4725000 },
+  { name: "Yuki", revenue: 240000, orders: 51, commission: 36000 },
+  { name: "Mai", revenue: 180000, orders: 38, commission: 27000 },
 ];

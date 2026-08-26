@@ -37,7 +37,7 @@ export function ServiceEditModal({
         service.id,
         {
           name: name.trim(),
-          priceVnd: priceNum,
+          price: priceNum,
           durationMinutes: durationNum,
         },
         service.version,
@@ -71,7 +71,7 @@ export function ServiceEditModal({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Giá (VND)</span>
+                  <span className="font-semibold text-admin-ink">Giá (¥)</span>
                   <input
                     inputMode="numeric"
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"

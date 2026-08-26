@@ -10,7 +10,7 @@ import {
   buildPaymentMethodRows,
   buildRangeRevenueRows,
   buildTodayRevenueRows,
-  formatOptionalVnd,
+  formatOptionalMoney,
   revenueRange,
   revenueRangeLabels,
   type RevenueRangePreset,
@@ -44,10 +44,10 @@ export function RevenuePanel() {
 
   const netLabel = isToday ? "Tiền quán thực nhận" : "Doanh thu thuần";
   const netValue = isToday
-    ? formatOptionalVnd(dashboard.data?.kpi.salonShareVnd)
-    : formatOptionalVnd(
-        typeof report.data?.metrics?.netRevenueVnd?.value === "number"
-          ? report.data.metrics.netRevenueVnd.value
+    ? formatOptionalMoney(dashboard.data?.kpi.salonShare)
+    : formatOptionalMoney(
+        typeof report.data?.metrics?.netRevenue?.value === "number"
+          ? report.data.metrics.netRevenue.value
           : null,
       );
 

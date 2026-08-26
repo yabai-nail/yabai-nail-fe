@@ -3,8 +3,8 @@
 // The service layer keeps `rows` as `Record<string, unknown>` because the
 // backend contract is not in OpenAPI yet (BE-GAP-010). The shape verified
 // against https://apiyabai.tedo.vn is
-//   { staff: { id, displayName }, workingStatus, revenueVnd, orderCount,
-//     commissionRate, commissionAmountVnd, version }
+//   { staff: { id, displayName }, workingStatus, revenue, orderCount,
+//     commissionRate, commissionAmount, version }
 // so every read here accepts the verified key first and a plausible alias
 // second, and answers `null` rather than `0` when the field is absent — a
 // missing number and a real zero are different facts on a money screen.
@@ -13,10 +13,10 @@ export type StaffPerformanceRow = {
   readonly staffId: string;
   readonly displayName: string | null;
   readonly workingStatus: string | null;
-  readonly revenueVnd: number | null;
+  readonly revenue: number | null;
   readonly orderCount: number | null;
   readonly commissionRate: number | null;
-  readonly commissionAmountVnd: number | null;
+  readonly commissionAmount: number | null;
 };
 
 function readRecord(source: Record<string, unknown>, key: string): Record<string, unknown> | null {
@@ -66,10 +66,10 @@ export function readStaffPerformanceRows(
         readString(staff, ["displayName", "name"])
         ?? readString(row, ["displayName", "staffName"]),
       workingStatus: readString(row, ["workingStatus", "status"]),
-      revenueVnd: readNumber(row, ["revenueVnd", "revenue"]),
+      revenue: readNumber(row, ["revenue", "revenue"]),
       orderCount: readNumber(row, ["orderCount", "count"]),
       commissionRate: readNumber(row, ["commissionRate", "rate"]),
-      commissionAmountVnd: readNumber(row, ["commissionAmountVnd", "commissionVnd", "commission"]),
+      commissionAmount: readNumber(row, ["commissionAmount", "commission", "commission"]),
     });
   }
   return parsed;

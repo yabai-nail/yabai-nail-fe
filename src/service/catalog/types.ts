@@ -32,7 +32,7 @@ export interface PublicPromotion {
   readonly code: string;
   readonly title: string;
   readonly description?: string;
-  readonly discountVnd?: number;
+  readonly discount?: number;
   readonly percentage?: number;
   readonly startsAt?: string;
   readonly endsAt?: string;

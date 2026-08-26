@@ -7,7 +7,7 @@ export type StaffStatus = "working" | "leave";
  *
  * The money fields are nullable on purpose. The performance read model has no
  * row for a member who did nothing in the period, and it may omit a field the
- * branch has not configured; rendering `0 ₫` or `0%` there would state a fact
+ * branch has not configured; rendering `0 ¥` or `0%` there would state a fact
  * the backend never sent.
  */
 export type StaffMember = {

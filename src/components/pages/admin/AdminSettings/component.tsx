@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import {
   averageCommissionRate,
   currentMonthPeriod,
@@ -47,8 +47,8 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-function formatOptionalVnd(value: number | null): string {
-  return typeof value === "number" ? formatVnd(value) : MISSING;
+function formatOptionalMoney(value: number | null): string {
+  return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
 export function AdminSettingsComponent() {
@@ -77,15 +77,15 @@ export function AdminSettingsComponent() {
         roleLabel: ROLE_LABELS[member.account?.role?.toUpperCase() ?? ""] ?? null,
         status: member.active ? "working" : "leave",
         rate: row?.commissionRate ?? null,
-        personalRevenue: row?.revenueVnd ?? null,
-        payout: row?.commissionAmountVnd ?? null,
+        personalRevenue: row?.revenue ?? null,
+        payout: row?.commissionAmount ?? null,
       } satisfies CommissionPolicy;
     });
   }, [staff.data, performance.data]);
 
   const kpi = performance.data?.kpi;
-  const revenue = kpi?.revenueVnd ?? null;
-  const commission = kpi?.commissionAmountVnd ?? null;
+  const revenue = kpi?.revenue ?? null;
+  const commission = kpi?.commissionAmount ?? null;
   const salonShare =
     typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
   const averageRate = averageCommissionRate(commissionPolicies.map((policy) => policy.rate));
@@ -110,7 +110,7 @@ export function AdminSettingsComponent() {
     {
       id: "commission",
       label: "Tổng tiền hoa hồng kỳ này",
-      value: formatOptionalVnd(commission),
+      value: formatOptionalMoney(commission),
       detail: period,
       icon: WalletIcon,
       tone: "bg-green-50 text-admin-success",
@@ -118,7 +118,7 @@ export function AdminSettingsComponent() {
     {
       id: "shop",
       label: "Phần doanh thu thuộc tiệm",
-      value: formatOptionalVnd(salonShare),
+      value: formatOptionalMoney(salonShare),
       detail: period,
       icon: BuildingStorefrontIcon,
       tone: "bg-purple-50 text-admin-violet",

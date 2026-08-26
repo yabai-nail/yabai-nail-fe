@@ -20,7 +20,7 @@ describe("marketing promotion derivation", () => {
 
   it("formats percentage and fixed discounts, dash otherwise", () => {
     expect(formatDiscount({ type: "PERCENT", value: 20 })).toBe("20%");
-    expect(formatDiscount({ type: "FIXED", value: 50000 })).toBe("50.000 ₫");
+    expect(formatDiscount({ type: "FIXED", value: 50000 })).toBe("50.000 ¥");
     expect(formatDiscount({ type: "FIXED", value: undefined as unknown as number })).toBe("—");
   });
 

@@ -36,7 +36,7 @@ function toFixtureService(server: ServerService): SalonService {
     id: server.id,
     name: server.name,
     category,
-    price: server.priceVnd,
+    price: server.price,
     durationMinutes: server.durationMinutes,
     isVisible: server.active,
     soldCount: typeof soldRaw === "number" ? soldRaw : 0,

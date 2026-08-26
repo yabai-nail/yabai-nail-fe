@@ -10,8 +10,8 @@ import {
 } from "./data";
 
 describe("report derivation", () => {
-  it("humanizes camelCase and drops the Vnd suffix", () => {
-    expect(humanizeKey("grossRevenueVnd")).toBe("Gross Revenue");
+  it("humanizes camelCase keys", () => {
+    expect(humanizeKey("grossRevenue")).toBe("Gross Revenue");
     expect(humanizeKey("new_customers")).toBe("New customers");
   });
 
@@ -20,8 +20,8 @@ describe("report derivation", () => {
     expect(labelForKey("someUnknownKey")).toBe("Some Unknown Key");
   });
 
-  it("formats currency keys with ₫ and plain numbers otherwise", () => {
-    expect(formatReportValue("revenueVnd", 1000000)).toBe("1.000.000 ₫");
+  it("formats currency keys as yen and plain numbers otherwise", () => {
+    expect(formatReportValue("revenue", 1000000)).toBe("1.000.000 ¥");
     expect(formatReportValue("appointments", 12)).toBe("12");
     expect(formatReportValue("appointments", null)).toBe("—");
     expect(formatReportValue("note", "abc")).toBe("abc");
@@ -29,7 +29,7 @@ describe("report derivation", () => {
 
   it("builds metric cards from the revenue report", () => {
     const cards = metricCards(revenueFixture);
-    expect(cards.map((card) => card.key)).toContain("grossRevenueVnd");
+    expect(cards.map((card) => card.key)).toContain("grossRevenue");
     expect(cards.find((card) => card.key === "appointments")?.display).toBe("142");
     expect(metricCards(undefined)).toEqual([]);
   });

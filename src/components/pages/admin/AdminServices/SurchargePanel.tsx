@@ -3,7 +3,7 @@
 import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Modal } from "@heroui/react";
 import { useState } from "react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import {
   adminService,
   useAdminSurcharges,
@@ -50,8 +50,8 @@ export function SurchargePanel() {
                 <span className="min-w-0 flex-1 truncate">
                   <strong className="text-admin-ink">{surcharge.name}</strong>
                   <span className="ml-2 text-admin-muted">
-                    {typeof surcharge.amountVnd === "number"
-                      ? formatVnd(surcharge.amountVnd)
+                    {typeof surcharge.amount === "number"
+                      ? formatMoney(surcharge.amount)
                       : typeof surcharge.percent === "number"
                         ? `${surcharge.percent}%`
                         : "—"}
@@ -104,7 +104,7 @@ function SurchargeEditor({
     surcharge?.type === "PERCENT" ? "PERCENT" : "FIXED",
   );
   const [amount, setAmount] = useState(
-    typeof surcharge?.amountVnd === "number" ? String(surcharge.amountVnd) : "",
+    typeof surcharge?.amount === "number" ? String(surcharge.amount) : "",
   );
   const [percent, setPercent] = useState(
     typeof surcharge?.percent === "number" ? String(surcharge.percent) : "",
@@ -134,7 +134,7 @@ function SurchargeEditor({
       name: name.trim(),
       type: kind,
       status: (active ? "ACTIVE" : "INACTIVE") as "ACTIVE" | "INACTIVE",
-      ...(kind === "FIXED" ? { amountVnd: numericAmount } : { percent: numericPercent }),
+      ...(kind === "FIXED" ? { amount: numericAmount } : { percent: numericPercent }),
     };
     try {
       if (isEdit) {
@@ -198,7 +198,7 @@ function SurchargeEditor({
               </div>
               {kind === "FIXED" ? (
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">Số tiền (VND)</span>
+                  <span className="text-xs font-semibold text-admin-ink">Số tiền (¥)</span>
                   <input
                     inputMode="numeric"
                     value={amount}

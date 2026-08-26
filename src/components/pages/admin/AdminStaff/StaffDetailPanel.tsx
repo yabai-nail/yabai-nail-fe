@@ -1,6 +1,6 @@
 import { PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import { StaffCompensationForm } from "./StaffCompensationForm";
 import { StaffPerformancePanel } from "./StaffPerformancePanel";
 import { StaffShiftsPanel } from "./StaffShiftsPanel";
@@ -9,8 +9,8 @@ import type { StaffMember } from "./data";
 
 const MISSING = "—";
 
-function formatOptionalVnd(value: number | null): string {
-  return typeof value === "number" ? formatVnd(value) : MISSING;
+function formatOptionalMoney(value: number | null): string {
+  return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
 export function StaffDetailPanel({
@@ -58,14 +58,14 @@ export function StaffDetailPanel({
         <section className="border-t border-admin-border pt-4">
           <h3 className="font-bold">Doanh thu kỳ {period}</h3>
           <dl className="mt-3 space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-admin-muted">Tổng doanh thu</dt><dd className="font-semibold">{formatOptionalVnd(member.revenue)}</dd></div>
-            <div className="flex justify-between"><dt className="text-admin-muted">Hoa hồng</dt><dd className="font-semibold text-admin-accent">{formatOptionalVnd(member.commissionAmount)}</dd></div>
-            <div className="flex justify-between"><dt className="text-admin-muted">Quán thực nhận</dt><dd className="font-semibold">{formatOptionalVnd(salonShare)}</dd></div>
+            <div className="flex justify-between"><dt className="text-admin-muted">Tổng doanh thu</dt><dd className="font-semibold">{formatOptionalMoney(member.revenue)}</dd></div>
+            <div className="flex justify-between"><dt className="text-admin-muted">Hoa hồng</dt><dd className="font-semibold text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</dd></div>
+            <div className="flex justify-between"><dt className="text-admin-muted">Quán thực nhận</dt><dd className="font-semibold">{formatOptionalMoney(salonShare)}</dd></div>
             <div className="flex justify-between"><dt className="text-admin-muted">Số đơn hoàn thành</dt><dd className="font-semibold">{member.orders ?? MISSING}</dd></div>
           </dl>
           <div className="mt-4 flex items-center justify-between rounded-lg bg-admin-soft p-3">
             <span className="font-semibold text-admin-accent">Nhận được</span>
-            <strong className="text-xl text-admin-accent">{formatOptionalVnd(member.commissionAmount)}</strong>
+            <strong className="text-xl text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</strong>
           </div>
         </section>
         <StaffCompensationForm staffId={member.id} />

@@ -12,7 +12,7 @@ import {
   useBranchService,
 } from "@/service";
 
-const formatVnd = (value: number): string => `${value.toLocaleString("vi-VN")} ₫`;
+import { formatMoney } from "@/lib/admin-format";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -149,7 +149,7 @@ const BookingConfirmRoute = () => {
             </h2>
             {service ? (
               <div className="text-right">
-                <p className="text-sm font-semibold text-accent">{formatVnd(service.priceVnd)}</p>
+                <p className="text-sm font-semibold text-accent">{formatMoney(service.price)}</p>
                 <p className="text-xs text-muted">{service.durationMinutes} phút</p>
               </div>
             ) : null}

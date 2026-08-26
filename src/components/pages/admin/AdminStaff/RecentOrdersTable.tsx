@@ -2,7 +2,7 @@
 
 import { Card, Chip } from "@heroui/react";
 import { useMemo } from "react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import {
   useAdminAppointments,
   useAdminCustomers,
@@ -88,7 +88,7 @@ function toOrderRow(
       ?? customer?.name
       ?? "Khách chưa có tên",
     service: resolveServiceLabel(appointment.serviceIds, services),
-    total: appointment.totalVnd,
+    total: appointment.total,
     status: appointment.status,
   };
 }
@@ -146,7 +146,7 @@ export function RecentOrdersTable({
                   <td className="px-3 py-3 font-semibold">{order.customer}</td>
                   <td className="px-3 py-3">{order.service}</td>
                   <td className="px-3 py-3">
-                    {typeof order.total === "number" ? formatVnd(order.total) : MISSING}
+                    {typeof order.total === "number" ? formatMoney(order.total) : MISSING}
                   </td>
                   <td className="px-3 py-3">
                     <Chip size="sm" variant="soft" color={statusColor(order.status)}>

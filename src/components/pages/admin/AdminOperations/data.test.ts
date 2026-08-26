@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
   formatSalonClock,
-  formatVnd,
-  parseVnd,
+  formatMoney,
+  parseMoney,
   summarizeCheckIn,
   summarizeCustomer,
   summarizeMembership,
 } from "./data";
 
 describe("operations helpers", () => {
-  it("parses grouped VND strings to an integer", () => {
-    expect(parseVnd("1.000.000")).toBe(1000000);
-    expect(parseVnd("1,250,000 ₫")).toBe(1250000);
-    expect(parseVnd("abc")).toBe(0);
+  it("parses grouped money strings to an integer", () => {
+    expect(parseMoney("1.000.000")).toBe(1000000);
+    expect(parseMoney("1,250,000 ¥")).toBe(1250000);
+    expect(parseMoney("abc")).toBe(0);
   });
 
-  it("formats VND with grouping and symbol", () => {
-    expect(formatVnd(50000)).toBe("50.000 ₫");
+  it("formats yen with grouping and symbol", () => {
+    expect(formatMoney(50000)).toBe("50.000 ¥");
   });
 
   it("summarizes a customer, preferring masked phone", () => {
@@ -35,7 +35,7 @@ describe("check-in resolution view", () => {
     customer: { id: "c1", displayName: "Test Khach A", phone: "0911000001", tier: "MEMBER", pointBalance: 250 },
     localDate: "2026-08-26",
     todaysAppointments: [
-      { id: "a1", customerId: "c1", branchId: "b1", staffId: "s1", serviceIds: ["sv1"], startsAt: "2026-08-26T03:00:00.000Z", endsAt: "2026-08-26T04:00:00.000Z", status: "COMPLETED", totalVnd: 250000, discountVnd: 0, version: 5 },
+      { id: "a1", customerId: "c1", branchId: "b1", staffId: "s1", serviceIds: ["sv1"], startsAt: "2026-08-26T03:00:00.000Z", endsAt: "2026-08-26T04:00:00.000Z", status: "COMPLETED", total: 250000, discount: 0, version: 5 },
     ],
   } as const;
 
@@ -51,7 +51,7 @@ describe("check-in resolution view", () => {
 
   it("renders each appointment in salon time with a Vietnamese status", () => {
     expect(summarizeCheckIn(resolution).appointments).toEqual([
-      { id: "a1", time: "10:00", status: "Hoàn tất", totalVnd: 250000 },
+      { id: "a1", time: "10:00", status: "Hoàn tất", total: 250000 },
     ]);
   });
 

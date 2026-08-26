@@ -1,6 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
-import { formatVnd } from "@/lib/admin-format";
+import { formatMoney } from "@/lib/admin-format";
 import type { StaffMember } from "./data";
 
 type StaffTableProps = {
@@ -13,8 +13,8 @@ type StaffTableProps = {
 
 const MISSING = "—";
 
-function formatOptionalVnd(value: number | null): string {
-  return typeof value === "number" ? formatVnd(value) : MISSING;
+function formatOptionalMoney(value: number | null): string {
+  return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
 export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTableProps) {
@@ -47,11 +47,11 @@ export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTablePr
                   <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
                 </Chip>
               </td>
-              <td className="px-3 py-2 font-medium">{formatOptionalVnd(member.revenue)}</td>
+              <td className="px-3 py-2 font-medium">{formatOptionalMoney(member.revenue)}</td>
               <td className="px-3 py-2">
                 {typeof member.commissionRate === "number" ? `${member.commissionRate}%` : MISSING}
               </td>
-              <td className="px-3 py-2 font-bold text-admin-accent">{formatOptionalVnd(member.commissionAmount)}</td>
+              <td className="px-3 py-2 font-bold text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</td>
               <td className="px-3 py-2">{member.orders ?? MISSING}</td>
               <td className="px-3 py-2">
                 {/* Was a "..." with no handler and no prop to call. One action, so it

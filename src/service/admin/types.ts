@@ -26,16 +26,16 @@ export interface AdminDashboardKpi {
   readonly confirmed: number;
   readonly inService: number;
   readonly completed: number;
-  readonly revenueVnd?: number;
-  readonly previousRevenueVnd?: number;
+  readonly revenue?: number;
+  readonly previousRevenue?: number;
   readonly revenueChangePercent?: number | null;
   readonly customerCount?: number;
   readonly newCustomerCount?: number;
   readonly workingStaffCount?: number;
   readonly offStaffCount?: number;
-  readonly expensesVnd?: number;
-  readonly commissionVnd?: number;
-  readonly salonShareVnd?: number;
+  readonly expenses?: number;
+  readonly commission?: number;
+  readonly salonShare?: number;
 }
 
 export interface AdminDashboardData {
@@ -62,8 +62,8 @@ export interface AdminAppointment {
   readonly startsAt: string;
   readonly endsAt: string;
   readonly status: string;
-  readonly totalVnd: number;
-  readonly discountVnd: number;
+  readonly total: number;
+  readonly discount: number;
   readonly note?: string;
   readonly version: number;
 }
@@ -90,7 +90,7 @@ export interface AdminServiceItem {
   readonly name: string;
   readonly nameJa?: string | null;
   readonly description?: string;
-  readonly priceVnd: number;
+  readonly price: number;
   readonly durationMinutes: number;
   readonly active: boolean;
   readonly version: number;
@@ -126,12 +126,12 @@ export interface AdminStaffMember {
 export interface StaffCompensation {
   readonly staffId: string;
   readonly branchId: string;
-  readonly baseSalaryVnd: number;
+  readonly baseSalary: number;
   readonly commissionRate: number;
   readonly effectiveFrom: string | null;
   readonly monthlySummary: {
     readonly period: string | null;
-    readonly totalCommissionVnd: number;
+    readonly totalCommission: number;
     readonly transactionCount: number;
   };
   readonly lines: ReadonlyArray<Record<string, unknown>>;
@@ -141,7 +141,7 @@ export interface StaffCompensation {
 
 export interface RevenueReport {
   readonly metricVersion: string;
-  readonly currency: "VND";
+  readonly currency: "JPY";
   readonly from: string;
   readonly toExclusive: string;
   readonly generatedAt: string;
@@ -174,7 +174,7 @@ export interface AdminAppointmentRescheduleInput {
 
 export interface AdminAppointmentCancellationInput {
   readonly reasonCode: string;
-  readonly refundVnd?: number;
+  readonly refundTotal?: number;
   readonly [field: string]: unknown;
 }
 
@@ -194,8 +194,8 @@ export interface AdminAppointmentServiceCompletionInput {
 /**
  * What the backend actually reads when capturing a payment: `method`, and
  * `reference` for card/transfer receipts. The amount is recomputed server-side
- * from the appointment so a client can never set a price — `amountVnd` and
- * `discountVnd` used to be declared here and sent, and were silently dropped.
+ * from the appointment so a client can never set a price — `amount` and
+ * `discount` used to be declared here and sent, and were silently dropped.
  */
 export interface AdminAppointmentPaymentInput {
   readonly method: string;
@@ -219,7 +219,7 @@ export interface AdminAppointmentPayment {
   readonly id: string;
   readonly appointmentId: string;
   readonly method: string;
-  readonly amountVnd: number;
+  readonly amount: number;
   readonly status: string;
   readonly paidAt?: string;
   readonly version: number;
@@ -227,9 +227,9 @@ export interface AdminAppointmentPayment {
 }
 
 /**
- * Shape confirmed against the live API. The amount to collect is `amountDueVnd`;
- * there is no `totalVnd` and no `lines`, which is what this used to declare — so
- * a reader checking `quote.totalVnd` was checking a field that never arrives.
+ * Shape confirmed against the live API. The amount to collect is `amountDue`;
+ * there is no `total` and no `lines`, which is what this used to declare — so
+ * a reader checking `quote.total` was checking a field that never arrives.
  *
  * The endpoint also ignores its request body entirely: it echoes the totals
  * already stored on the appointment. Sending serviceIds, customItems or a
@@ -237,9 +237,9 @@ export interface AdminAppointmentPayment {
  */
 export interface AdminAppointmentPaymentQuote {
   readonly appointmentId: string;
-  readonly subtotalVnd: number;
-  readonly discountVnd: number;
-  readonly amountDueVnd: number;
+  readonly subtotal: number;
+  readonly discount: number;
+  readonly amountDue: number;
   readonly currency: string;
   readonly version: number;
   readonly [field: string]: unknown;
@@ -312,7 +312,7 @@ export interface AdminCustomerCouponIssuance {
 export interface AdminCustomerNailHistoryService {
   readonly serviceId: string;
   readonly serviceName: string;
-  readonly unitPriceVnd: number;
+  readonly unitPrice: number;
   readonly durationMinutes?: number;
 }
 
@@ -386,7 +386,7 @@ export interface AdminStaffPatch {
 }
 
 export interface AdminStaffCompensationInput {
-  readonly baseSalaryVnd: number;
+  readonly baseSalary: number;
   readonly commissionRate: number;
   /**
    * Required, `YYYY-MM-DD`. The backend parses it unconditionally and rejects
@@ -486,9 +486,9 @@ export interface AdminLeaveRequestDecisionInput {
 }
 
 export interface AdminStaffPerformanceKpi {
-  readonly revenueVnd?: number;
+  readonly revenue?: number;
   readonly orderCount?: number;
-  readonly commissionAmountVnd?: number;
+  readonly commissionAmount?: number;
   readonly activeStaffCount?: number;
 }
 
@@ -497,8 +497,8 @@ export interface AdminStaffPerformance {
   readonly period: string;
   readonly currency?: string;
   readonly branchTimeZone?: string;
-  // Verified live: { staff: { id, displayName }, workingStatus, revenueVnd,
-  // orderCount, commissionRate, commissionAmountVnd, version }. Kept loose here
+  // Verified live: { staff: { id, displayName }, workingStatus, revenue,
+  // orderCount, commissionRate, commissionAmount, version }. Kept loose here
   // because existing callers already narrow the rows themselves.
   readonly rows: ReadonlyArray<Record<string, unknown>>;
   readonly kpi?: AdminStaffPerformanceKpi;
@@ -511,7 +511,7 @@ export interface AdminStaffPerformance {
 export interface AdminServiceItemDraft {
   readonly name: string;
   readonly categoryId?: string;
-  readonly priceVnd: number;
+  readonly price: number;
   readonly durationMinutes: number;
   readonly description?: string;
   readonly nameJa?: string;
@@ -522,7 +522,7 @@ export interface AdminServiceItemDraft {
 export interface AdminServiceItemPatch {
   readonly name?: string;
   readonly categoryId?: string;
-  readonly priceVnd?: number;
+  readonly price?: number;
   readonly durationMinutes?: number;
   readonly description?: string;
   readonly nameJa?: string;
@@ -564,7 +564,7 @@ export interface AdminSurcharge {
   readonly name: string;
   readonly type: "FIXED" | "PERCENT";
   readonly status: "ACTIVE" | "INACTIVE";
-  readonly amountVnd?: number;
+  readonly amount?: number;
   readonly percent?: number;
   readonly version: number;
   readonly [field: string]: unknown;
@@ -576,7 +576,7 @@ export interface AdminSurchargeDraft {
   readonly name: string;
   readonly type: "FIXED" | "PERCENT";
   readonly status?: "ACTIVE" | "INACTIVE";
-  readonly amountVnd?: number;
+  readonly amount?: number;
   readonly percent?: number;
   readonly [field: string]: unknown;
 }
@@ -585,7 +585,7 @@ export interface AdminSurchargePatch {
   readonly name?: string;
   readonly type?: "FIXED" | "PERCENT";
   readonly status?: "ACTIVE" | "INACTIVE";
-  readonly amountVnd?: number;
+  readonly amount?: number;
   readonly percent?: number;
   readonly [field: string]: unknown;
 }
@@ -597,7 +597,7 @@ export interface AdminPaymentRefund {
   readonly appointmentId: string;
   readonly parentPaymentId: string;
   readonly kind: "REFUND";
-  readonly amountVnd: number;
+  readonly amount: number;
   readonly method: string;
   readonly status: string;
   readonly createdAt: string;
@@ -606,7 +606,7 @@ export interface AdminPaymentRefund {
 }
 
 export interface AdminPaymentRefundInput {
-  readonly amountVnd: number;
+  readonly amount: number;
   readonly reasonCode: string;
   readonly note?: string;
   readonly [field: string]: unknown;
@@ -1006,7 +1006,7 @@ export interface AdminAccountPasswordReset {
  */
 export interface AdminLoyaltyConfig {
   readonly version: number;
-  readonly pointRate?: { readonly spendVnd: number; readonly points: number };
+  readonly pointRate?: { readonly spend: number; readonly points: number };
   readonly tiers?: ReadonlyArray<Record<string, unknown>>;
   readonly redemptionCapPercent?: number;
   readonly redemptionIncrement?: number;

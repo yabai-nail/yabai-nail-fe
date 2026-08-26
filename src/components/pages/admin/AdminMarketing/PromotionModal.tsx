@@ -110,13 +110,13 @@ export function PromotionModal({
                     onChange={setKind}
                     options={[
                       { value: "PERCENT", label: "Phần trăm (%)" },
-                      { value: "FIXED", label: "Số tiền (₫)" },
+                      { value: "FIXED", label: "Số tiền (¥)" },
                     ]}
                   />
                 </div>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">
-                    {kind === "PERCENT" ? "Phần trăm" : "Số tiền (₫)"}
+                    {kind === "PERCENT" ? "Phần trăm" : "Số tiền (¥)"}
                   </span>
                   <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} />
                 </label>

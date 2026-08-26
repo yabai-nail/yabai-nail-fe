@@ -22,13 +22,13 @@ export function MonthlySummaryPanel() {
   // the revenue report does not expose it.
   const performance = useAdminStaffPerformance(branchId, { period });
 
-  const commissionVnd = useMemo(() => {
-    const value = performance.data?.kpi?.commissionAmountVnd;
+  const commission = useMemo(() => {
+    const value = performance.data?.kpi?.commissionAmount;
     return typeof value === "number" && Number.isFinite(value) ? value : null;
   }, [performance.data]);
 
-  const rows = useMemo(() => buildMonthlyRows(report.data, commissionVnd), [report.data, commissionVnd]);
-  const net = useMemo(() => buildMonthlyNet(report.data, commissionVnd), [report.data, commissionVnd]);
+  const rows = useMemo(() => buildMonthlyRows(report.data, commission), [report.data, commission]);
+  const net = useMemo(() => buildMonthlyNet(report.data, commission), [report.data, commission]);
 
   const hasError = report.error !== undefined && performance.error !== undefined;
   const isLoading = report.isLoading || (branchId !== null && performance.isLoading);
