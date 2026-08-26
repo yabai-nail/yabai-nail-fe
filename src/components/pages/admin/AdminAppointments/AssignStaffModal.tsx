@@ -34,7 +34,7 @@ export function AssignStaffModal({
       <Modal.Backdrop>
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
-            <Modal.Header className="flex items-center gap-3 border-b border-admin-border px-5 py-4">
+            <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4">
               <UserGroupIcon className="size-5 text-admin-accent" />
               <Modal.Heading className="text-base font-bold text-admin-ink">Đổi nhân viên phụ trách</Modal.Heading>
             </Modal.Header>

@@ -137,7 +137,7 @@ export function AdminStaffComponent() {
       <section aria-label="Tổng quan nhân viên" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(({ id, label, value, detail, icon: Icon, tone }) => (
           <Card key={id} className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Content className="flex items-start gap-3 p-4">
+            <Card.Content className="flex flex-row items-start gap-3 p-4">
               <span className={`grid size-11 place-items-center rounded-lg ${tone}`}><Icon className="size-6" /></span>
               <div><p className="text-xs font-semibold">{label}</p><p className="mt-1 text-xl font-bold">{value}</p><p className="mt-2 text-xs text-admin-muted">{detail}</p></div>
             </Card.Content>

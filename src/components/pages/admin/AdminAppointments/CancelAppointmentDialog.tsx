@@ -12,7 +12,7 @@ export function CancelAppointmentDialog({ appointment, onClose, onConfirm }: Rea
       <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
         <AlertDialog.Container size="sm" placement="center">
           <AlertDialog.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
-            <AlertDialog.Header className="flex items-center gap-3 px-5 pt-5">
+            <AlertDialog.Header className="flex flex-row items-center gap-3 px-5 pt-5">
               <AlertDialog.Icon status="danger"><ExclamationTriangleIcon className="size-5" /></AlertDialog.Icon>
               <AlertDialog.Heading className="text-lg font-bold text-admin-ink">Hủy lịch hẹn?</AlertDialog.Heading>
             </AlertDialog.Header>

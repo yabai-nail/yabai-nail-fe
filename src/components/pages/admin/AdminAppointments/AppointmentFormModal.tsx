@@ -98,7 +98,7 @@ export function AppointmentFormModal({
         <Modal.Container size="lg" placement="center" scroll="inside">
           <Modal.Dialog className="overflow-hidden rounded-xl border border-admin-border bg-admin-surface">
             <Modal.CloseTrigger className="rounded-lg" />
-            <Modal.Header className="flex items-center gap-3 border-b border-admin-border px-5 py-4 pr-14">
+            <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4 pr-14">
               <span className="grid size-10 place-items-center rounded-lg bg-admin-soft text-admin-accent"><CalendarDaysIcon className="size-5" /></span>
               <div>
                 <Modal.Heading className="text-lg font-bold text-admin-ink">{appointment ? "Chỉnh sửa lịch hẹn" : "Thêm lịch hẹn"}</Modal.Heading>

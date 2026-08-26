@@ -97,7 +97,7 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
               <Drawer.Backdrop className="admin-shell lg:hidden">
                 <Drawer.Content placement="left" className="w-72 max-w-[88vw] lg:hidden">
                   <Drawer.Dialog>
-                    <Drawer.Header className="flex items-center justify-between border-b border-admin-border">
+                    <Drawer.Header className="flex flex-row items-center justify-between border-b border-admin-border">
                       <Drawer.Heading className="sr-only">Điều hướng quản trị</Drawer.Heading>
                       <AdminBrand />
                       <Drawer.CloseTrigger

@@ -23,7 +23,7 @@ Consumer: `yabai-nail-fe`
 | BE-GAP-010 | P1 | API contract | Swagger không liệt kê đầy đủ registry chuẩn. |
 | BE-GAP-011 | P1 | Mẫu nail | Không có endpoint tạo và liệt kê đề xuất mẫu nail. |
 | BE-GAP-012 | P2 | Chi nhánh | `/branches` không trả số điện thoại chi nhánh. |
-| BE-GAP-013 | P2 | Dịch vụ | Không có `DELETE` cho dịch vụ. |
+| BE-GAP-013 | P2 | Xoá dữ liệu | Không-xoá-cứng là thiết kế cố ý (RESTRICT + ẩn danh). Trống thật: admin không khởi tạo được luồng ẩn danh thay khách. |
 
 ## BE-GAP-001 — Hội thoại và gửi tin nhắn
 
@@ -220,13 +220,48 @@ Bảng chi nhánh của admin có cột "Điện thoại" và luôn hiển thị
 
 Đề xuất: thêm `phone` vào branch payload, hoặc bỏ cột nếu chi nhánh không có số riêng.
 
-## BE-GAP-013 — Không có `DELETE` cho dịch vụ
+## BE-GAP-013 — Xoá dữ liệu: thiết kế cố ý, và một khoảng trống thật bên trong nó
 
-Toàn bộ operation catalog không có một `DELETE` nào. Màn dịch vụ từng có nút "Xóa"
-không nối được gì; nút đó đã gỡ ở `231a93a`, dịch vụ ngừng bán bằng cách tắt hiển thị.
+**Không phải khoảng trống.** Lần ghi đầu của mục này gọi việc thiếu `DELETE` trên
+`/admin/*` là thiếu sót. Đọc kỹ backend thì đây là quyết định kiến trúc, có ba bằng
+chứng độc lập:
 
-Đề xuất: hoặc xác nhận "tắt hiển thị" là cơ chế chính thức và ghi vào spec, hoặc bổ
-sung soft-delete có kiểm ràng buộc lịch hẹn đang tham chiếu.
+1. **16 khoá ngoại, toàn bộ `ON DELETE RESTRICT`**, không một `CASCADE` nào
+   (`1723600002000-canonical-domains.ts`). Xoá cứng một khách hàng bất khả thi ở
+   tầng CSDL vì `appointments`, `payments`, `point_transactions` đều tham chiếu tới.
+2. **Xoá tài khoản là quy trình, không phải động từ**: `POST /me/account-deletion-requests`
+   tạo bản ghi `ACCOUNT_DELETION` có `scheduledAt`, đẩy qua outbox
+   (`account.deletion.scheduled`), rồi worker mới thực thi.
+3. **Và nó ẩn danh chứ không xoá** (`provider.service.ts`, `executeAccountDeletion`):
+   `phone → deleted<id>`, `displayName → "Deleted customer"`, `passwordHash → null`,
+   ghi chú lịch hẹn và nội dung review bị xoá rỗng, **dòng user giữ nguyên**. Audit
+   action là `ACCOUNT_ANONYMIZED`.
+
+Nghĩa là sổ sách tài chính giữ nguyên vẹn, dữ liệu cá nhân bị gỡ. **Không nên thêm
+`DELETE` cho CRUD admin**: hoặc va vào `RESTRICT`, hoặc phải nới `CASCADE` và thế là
+xoá luôn lịch sử tiền. Danh mục (dịch vụ, phụ thu, mẫu nail, khuyến mãi) đã có cơ chế
+đúng sẵn — tắt hiển thị / `ARCHIVED` / `INACTIVE`.
+
+### Khoảng trống thật nằm ở chỗ khác
+
+Luồng ẩn danh **chỉ có bản self-service** (`/me/...`). Không có route nào để admin
+khởi tạo nó thay khách. Khi khách gọi điện yêu cầu xoá dữ liệu, hoặc khi cần xử lý
+theo yêu cầu pháp lý, bảng quản trị không có đường nào làm.
+
+Đề xuất: `POST /admin/branches/{branchId}/customers/{customerId}/deletion-requests`,
+dùng lại đúng `ACCOUNT_DELETION` + outbox đã có, kèm ghi audit ai là người khởi tạo.
+
+### Hệ quả cho việc dọn dữ liệu test
+
+Dữ liệu test trên production **không gỡ được qua API** — chỉ ẩn được, và ẩn không gỡ
+được số khỏi báo cáo vì báo cáo dựng từ bảng `payments`. Muốn sạch thật phải thao tác
+thẳng vào DB, có backup trước. Cách phòng đúng là **không tạo dữ liệu test trên
+production**, không phải mở thêm `DELETE`.
+
+Ghi chú triển khai nếu sau này vẫn cần soft-delete cho danh mục: `handleRecord`
+(`platform.controller.ts`, nhánh `method === "DELETE"`) đã có sẵn cơ chế theo
+`kind` + `externalKey`, nhưng lọc `ownerId: principal.id` trong khi bản ghi do admin
+tạo có `ownerId: null`.
 
 ## Những API không thiếu
 
