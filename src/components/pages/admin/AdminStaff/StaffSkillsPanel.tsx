@@ -73,7 +73,7 @@ export function StaffSkillsPanel({
             <li key={service.id}>
               <label className="flex cursor-pointer items-center gap-2">
                 <input
-                  type="checkbox"
+                  type="checkbox" className="accent-admin-accent"
                   checked={currentSet.has(service.id)}
                   onChange={() => toggle(service.id)}
                 />

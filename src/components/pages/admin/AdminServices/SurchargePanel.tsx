@@ -221,7 +221,7 @@ function SurchargeEditor({
               )}
               <label className="flex items-center gap-2 text-xs text-admin-ink">
                 <input
-                  type="checkbox"
+                  type="checkbox" className="accent-admin-accent"
                   checked={active}
                   onChange={(event) => setActive(event.target.checked)}
                 />
