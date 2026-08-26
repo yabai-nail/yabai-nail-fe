@@ -1,4 +1,5 @@
 import type { AdminAuditLog } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type AuditEntry = {
   readonly id: string;
@@ -89,14 +90,10 @@ export function filterAuditEntries(
   query: string,
   action: string,
 ): ReadonlyArray<AuditEntry> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
   return entries.filter(
     (entry) =>
       (action === "all" || entry.action === action) &&
-      (!normalized ||
-        [entry.action, entry.actor, entry.target].some((field) =>
-          field.toLocaleLowerCase("vi").includes(normalized),
-        )),
+      matchesSearch(query, [entry.action, entry.actor, entry.target]),
   );
 }
 

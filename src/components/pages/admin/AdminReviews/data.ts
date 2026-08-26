@@ -1,4 +1,5 @@
 import type { AdminReview } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type ReviewRow = {
   readonly id: string;
@@ -57,14 +58,10 @@ export function filterReviews(
   status: string,
   query: string,
 ): ReadonlyArray<ReviewRow> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
   return rows.filter(
     (row) =>
       (status === "all" || row.handlingStatus === status) &&
-      (!normalized ||
-        [row.customerName, row.content].some((field) =>
-          field.toLocaleLowerCase("vi").includes(normalized),
-        )),
+      matchesSearch(query, [row.customerName, row.content]),
   );
 }
 

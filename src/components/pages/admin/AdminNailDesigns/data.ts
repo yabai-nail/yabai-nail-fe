@@ -1,4 +1,5 @@
 import type { AdminNailDesign } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type DesignRow = {
   readonly id: string;
@@ -39,11 +40,8 @@ export function filterDesigns(
   status: string,
   query: string,
 ): ReadonlyArray<DesignRow> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
   return rows.filter(
-    (row) =>
-      (status === "all" || row.status === status) &&
-      (!normalized || row.title.toLocaleLowerCase("vi").includes(normalized)),
+    (row) => (status === "all" || row.status === status) && matchesSearch(query, [row.title]),
   );
 }
 

@@ -1,4 +1,5 @@
 import type { AdminAccount } from "@/service";
+import { matchesSearch } from "@/lib/admin-search";
 
 export type AccountRow = {
   readonly id: string;
@@ -55,14 +56,10 @@ export function filterAccounts(
   role: string,
   query: string,
 ): ReadonlyArray<AccountRow> {
-  const normalized = query.trim().toLocaleLowerCase("vi");
   return rows.filter(
     (row) =>
       (role === "all" || row.role === role) &&
-      (!normalized ||
-        [row.displayName, row.phone].some((field) =>
-          field.toLocaleLowerCase("vi").includes(normalized),
-        )),
+      matchesSearch(query, [row.displayName, row.phone]),
   );
 }
 
