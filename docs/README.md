@@ -41,6 +41,7 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin payments tasks](./plans/admin-payments-todo.md)
 - [Admin operations plan](./plans/admin-operations-plan.md)
 - [Admin operations tasks](./plans/admin-operations-todo.md)
+- [Admin E2E sweep — rà 16 màn và vá lỗi](./plans/admin-e2e-sweep-plan.md)
 
 ## Quy ước
 
