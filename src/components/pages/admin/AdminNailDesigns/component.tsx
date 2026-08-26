@@ -5,6 +5,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { adminService, useAdminNailDesigns } from "@/service";
 import { DesignModal } from "./DesignModal";
 import {
@@ -39,13 +40,18 @@ export function AdminNailDesignsComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+        <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Trạng thái
-          <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink">
-            <option value="all">Tất cả</option>
-            {statuses.map((code) => (<option key={code} value={code}>{designStatusLabels[code] ?? code}</option>))}
-          </select>
-        </label>
+          <AdminSelectField
+            label="Lọc theo trạng thái mẫu nail"
+            value={status}
+            onChange={(value) => { setStatus(value); setPage(1); }}
+            options={[
+              { value: "all", label: "Tất cả" },
+              ...statuses.map((code) => ({ value: code, label: designStatusLabels[code] ?? code })),
+            ]}
+          />
+        </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label="Tìm mẫu nail" placeholder="Tên mẫu..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
           <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { adminService } from "@/service";
 import type { PromotionRow } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass =
   "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
@@ -97,13 +98,19 @@ export function PromotionModal({
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="Hè rực rỡ 20%" />
               </label>
               <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-2 text-sm">
+                <div className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Loại</span>
-                  <select className={inputClass} value={kind} onChange={(event) => setKind(event.target.value)}>
-                    <option value="PERCENT">Phần trăm (%)</option>
-                    <option value="FIXED">Số tiền (₫)</option>
-                  </select>
-                </label>
+                  <AdminSelectField
+                    label="Loại khuyến mãi"
+                    fullWidth
+                    value={kind}
+                    onChange={setKind}
+                    options={[
+                      { value: "PERCENT", label: "Phần trăm (%)" },
+                      { value: "FIXED", label: "Số tiền (₫)" },
+                    ]}
+                  />
+                </div>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">
                     {kind === "PERCENT" ? "Phần trăm" : "Số tiền (₫)"}

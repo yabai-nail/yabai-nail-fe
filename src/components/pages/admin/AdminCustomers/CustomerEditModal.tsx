@@ -4,6 +4,7 @@ import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import type { Customer } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 export function CustomerEditModal({
   customer,
@@ -44,31 +45,35 @@ export function CustomerEditModal({
                 />
               </label>
 
-              <label htmlFor="edit-cust-locale" className="block text-xs font-semibold text-admin-ink">
+              <div className="block text-xs font-semibold text-admin-ink">
                 Ngôn ngữ ưu tiên
-                <select
-                  id="edit-cust-locale"
+                <AdminSelectField
+                  label="Ngôn ngữ ưu tiên"
+                  fullWidth
+                  className="mt-1"
                   value={locale}
-                  onChange={(event) => setLocale(event.target.value as typeof locale)}
-                  className="mt-1 block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-sm text-admin-ink"
-                >
-                  <option value="vi">Tiếng Việt</option>
-                  <option value="ja">日本語</option>
-                </select>
-              </label>
+                  onChange={(value) => setLocale(value as typeof locale)}
+                  options={[
+                    { value: "vi", label: "Tiếng Việt" },
+                    { value: "ja", label: "日本語" },
+                  ]}
+                />
+              </div>
 
-              <label htmlFor="edit-cust-status" className="block text-xs font-semibold text-admin-ink">
+              <div className="block text-xs font-semibold text-admin-ink">
                 Trạng thái tài khoản
-                <select
-                  id="edit-cust-status"
+                <AdminSelectField
+                  label="Trạng thái tài khoản"
+                  fullWidth
+                  className="mt-1"
                   value={status}
-                  onChange={(event) => setStatus(event.target.value as typeof status)}
-                  className="mt-1 block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-sm text-admin-ink"
-                >
-                  <option value="ACTIVE">Hoạt động</option>
-                  <option value="INACTIVE">Tạm ngưng</option>
-                </select>
-              </label>
+                  onChange={(value) => setStatus(value as typeof status)}
+                  options={[
+                    { value: "ACTIVE", label: "Hoạt động" },
+                    { value: "INACTIVE", label: "Tạm ngưng" },
+                  ]}
+                />
+              </div>
 
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>

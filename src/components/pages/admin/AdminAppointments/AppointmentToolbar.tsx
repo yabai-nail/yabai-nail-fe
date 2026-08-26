@@ -6,10 +6,19 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Tabs } from "@heroui/react";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import type {
   AppointmentStatusFilter,
   AppointmentView,
 } from "./data";
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "confirmed", label: "Đã xác nhận" },
+  { value: "pending", label: "Chờ xác nhận" },
+  { value: "completed", label: "Hoàn tất" },
+  { value: "cancelled", label: "Đã hủy" },
+] as const;
 
 export function AppointmentToolbar({
   dateLabel,
@@ -53,21 +62,13 @@ export function AppointmentToolbar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <label className="relative">
-            <span className="sr-only">Lọc trạng thái lịch hẹn</span>
-            <FunnelIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-admin-muted" />
-            <select
-              value={status}
-              onChange={(event) => onStatusChange(event.target.value as AppointmentStatusFilter)}
-              className="min-h-10 rounded-lg border border-admin-border bg-admin-surface py-2 pl-9 pr-8 text-sm font-medium text-admin-ink outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="confirmed">Đã xác nhận</option>
-              <option value="pending">Chờ xác nhận</option>
-              <option value="completed">Hoàn tất</option>
-              <option value="cancelled">Đã hủy</option>
-            </select>
-          </label>
+          <AdminSelectField
+            label="Lọc trạng thái lịch hẹn"
+            value={status}
+            options={STATUS_FILTER_OPTIONS}
+            icon={FunnelIcon}
+            onChange={(value) => onStatusChange(value as AppointmentStatusFilter)}
+          />
           <Button variant="primary" className="rounded-lg" onPress={onCreate}>
             <PlusIcon className="size-4" />Thêm lịch hẹn
           </Button>

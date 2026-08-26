@@ -5,6 +5,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import {
   adminService,
   useAdminAccounts,
@@ -68,13 +69,18 @@ export function AdminAccountsComponent() {
       {tab === "accounts" ? (
         <>
           <div className="mb-4 flex min-w-0 flex-col gap-3 pb-1 sm:flex-row sm:items-end sm:justify-between">
-            <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+            <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
               Vai trò
-              <select value={role} onChange={(event) => { setRole(event.target.value); setPage(1); }} className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink">
-                <option value="all">Tất cả</option>
-                {roles.map((code) => (<option key={code} value={code}>{roleLabels[code] ?? code}</option>))}
-              </select>
-            </label>
+              <AdminSelectField
+                label="Lọc theo vai trò"
+                value={role}
+                onChange={(value) => { setRole(value); setPage(1); }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  ...roles.map((code) => ({ value: code, label: roleLabels[code] ?? code })),
+                ]}
+              />
+            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <AdminSearchField label="Tìm tài khoản" placeholder="Tên hoặc SĐT..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
