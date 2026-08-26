@@ -35,7 +35,9 @@ function OwnerMenu() {
 
   return (
     <Dropdown>
-      <Dropdown.Trigger className="flex min-h-11 items-center gap-3 rounded-lg px-2 text-left outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
+      {/* Same border token as the branch selector beside it, so the header's two
+          controls read as the same kind of thing. */}
+      <Dropdown.Trigger className="flex min-h-11 items-center gap-3 rounded-lg border border-admin-border px-3 text-left outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
         <Avatar size="sm" color="accent">
           <Avatar.Fallback>{initialsOf(displayName)}</Avatar.Fallback>
         </Avatar>
