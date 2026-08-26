@@ -32,10 +32,10 @@ export function CustomerSummary({ customer }: Readonly<{ customer: MessageCustom
           <div><dt className="text-admin-muted">Lần đến</dt><dd className="mt-1 font-bold">{customer.visits}</dd></div>
           <div><dt className="text-admin-muted">Điểm</dt><dd className="mt-1 font-bold">{formatNumber(customer.points)}</dd></div>
         </dl>
-        <section>
-          <h3 className="font-bold">Lịch hẹn gần nhất</h3>
-          <div className="mt-3 rounded-lg border border-admin-border p-3 text-sm"><p>17/05/2025 (Thứ 7)</p><p className="mt-2 text-admin-muted">14:00 - 15:30 · Sơn gel đơn sắc</p><Chip className="mt-2" size="sm" variant="soft" color="accent"><Chip.Label>Đã xác nhận</Chip.Label></Chip></div>
-        </section>
+        {/* "Lịch hẹn gần nhất" was a fixed date in 2025 with a fixed service and a
+            "Đã xác nhận" chip, shown for whichever customer was selected.
+            MessageCustomer carries no appointment at all, so there was nothing to
+            render it from — the panel links to the appointment screen instead. */}
         <div className="grid gap-2">
           <Button variant="primary" className="rounded-lg" onPress={() => router.push("/admin/appointments?create=1")}><PlusIcon className="size-4" />Tạo lịch hẹn</Button>
           {/* "Gửi mẫu / Báo giá" is dropped: no quote or template feature exists to open. */}

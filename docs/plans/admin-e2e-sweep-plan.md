@@ -61,18 +61,25 @@ bằng payload đọc thật từ production.
 |---|---|---|
 | `<Button>`/`<button>` không `onPress`/`onClick`/`submit`/`href` | 16 | **0** |
 | `<a>`/`<Link>` với `href` rỗng hoặc `#` | 0 | 0 |
-| Dữ liệu demo hiển thị như thật (không tính `placeholder`) | 2 | 2 (xem phần chưa vá) |
+| Dữ liệu demo hiển thị như thật (không tính `placeholder`) | 2 | **0** — khối "lịch hẹn gần nhất" bịa đã gỡ; danh sách nhân viên trong bản mô phỏng đánh dấu ngoại lệ có lý do |
 
-> Script quét hiện nằm ngoài repo. **Nên đưa vào `scripts/` và chạy trong CI** —
-> chúng tìm ra 16 nút chết trong vài giây, và đây là lớp lỗi `lint`/`test`/`build`
-> đều không thấy.
+Ba phép dò trên, cộng phép thứ tư (canh chỉnh ngược hướng flex — xem mục dưới),
+nay nằm trong `scripts/check-ui-invariants.mjs` và chạy trong CI qua `pnpm ui:check`.
+Ngoại lệ có chủ đích đánh dấu bằng `ui-check: allow <lý do>` trên cùng dòng.
+
+Danh sách slot bị ép `flex-direction: column` được **đọc từ chính stylesheet của
+HeroUI** lúc chạy, không chép cứng — nâng cấp HeroUI đổi slot nào thì phép dò thấy
+ngay thay vì im lặng.
+
+**Phép dò này không thấy được gì:** mọi thứ cần layout thật. Chữ tràn khỏi ô
+(`scrollWidth > clientWidth`) là lớp lỗi có thật ở console này — nhãn thẻ "Tổng quan
+ngày" đè nhau vài commit liền — và bắt nó cần trang đã render, nên nó thuộc về test
+trình duyệt chứ không phải script tĩnh.
 
 ## Chưa vá — cần quyết định
 
 | Vấn đề | Vì sao chưa vá |
 |---|---|
-| `AdminMessages/CustomerSummary.tsx:37` hiện lịch hẹn giả `17/05/2025` | chỉ lộ khi có hội thoại, mà hội thoại không tạo được (BE-GAP-001) |
-| `AdminPayments/CustomerAppointmentPanel.tsx` danh sách nhân viên cứng `Mai Linh / Thảo Vy / Quỳnh Anh` | chỉ hiện ở chế độ mô phỏng, đã có nhãn "Bản mô phỏng nội bộ" |
 | Màn Báo cáo hiện nhãn khoá API thô: `RECOGNIZED REVENUE`, `COMPLETED APPOINTMENT COUNT`, `BRANCH ID` | cần chốt bản dịch |
 | Màn Vận hành bắt dán UUID (hoàn tiền theo ID thanh toán, duyệt nghỉ theo ID yêu cầu) | không màn nào hiển thị các ID đó; cần BE có list hoặc FE có bộ chọn |
 | Cấu hình tích điểm sửa bằng JSON thô | cần thiết kế form |
