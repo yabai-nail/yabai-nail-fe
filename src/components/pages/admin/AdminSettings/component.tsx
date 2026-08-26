@@ -1,6 +1,7 @@
 "use client";
 
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import { Button, Card, Switch, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -197,6 +198,7 @@ function CommissionSettings({
   onAutoCalculateChange: (value: boolean) => void;
   onShowRateChange: (value: boolean) => void;
 }>) {
+  const router = useRouter();
   return (
     <>
       <section className="mt-4" aria-labelledby="commission-settings-heading">
@@ -205,7 +207,7 @@ function CommissionSettings({
             <h2 id="commission-settings-heading" className="text-lg font-bold">Nhân viên &amp; Cài đặt hoa hồng</h2>
             <p className="mt-1 text-sm text-admin-muted">Tỷ lệ, doanh thu và hoa hồng của kỳ {period}.</p>
           </div>
-          <Button variant="outline" className="rounded-lg border-admin-border">Hướng dẫn tính hoa hồng</Button>
+          {/* "Hướng dẫn tính hoa hồng" pointed at documentation that does not exist. */}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map(({ id, label, value, detail, icon: Icon, tone }) => (
@@ -218,7 +220,7 @@ function CommissionSettings({
       <div className="mt-4">
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent"><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
+            <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
             <Card.Content className="min-w-0 p-0 pt-2">
               {staffError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">

@@ -36,7 +36,8 @@ export function CustomerAppointmentPanel({ invoice, isCancelled, onAppointmentCh
       <Card className="h-fit gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Header className="flex flex-row items-center justify-between border-b border-admin-border px-4 py-3">
           <h2 className="text-sm font-bold text-admin-ink">Thông tin khách hàng</h2>
-          <Button isIconOnly size="sm" variant="ghost" aria-label="Tùy chọn khách hàng">•••</Button>
+          {/* A "..." with no menu behind it. Customer actions live on the customer
+              screen; this only looked like an affordance. */}
         </Card.Header>
         <Card.Content className="space-y-5 px-4 py-4">
           <div className="flex items-center gap-3">

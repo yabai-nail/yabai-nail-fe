@@ -64,6 +64,8 @@ function toCustomerRow(server: AdminCustomer): Customer {
   };
 }
 
+const pageSize = 8;
+
 export function AdminCustomersComponent() {
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId);
@@ -82,12 +84,19 @@ export function AdminCustomersComponent() {
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
+  const [page, setPage] = useState(1);
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("vi");
     return source.filter((customer) => (filter === "all" || customer.segment === filter) && (!normalizedQuery || `${customer.name} ${customer.phone}`.toLocaleLowerCase("vi").includes(normalizedQuery)));
   }, [source, filter, query]);
-  const selectedCustomer = resolveVisibleSelection(filteredCustomers, selectedId || filteredCustomers[0]?.id || "");
-  const totalLabel = data?.pageInfo?.limit ?? source.length;
+  // The footer used to print `pageInfo.limit` as if it were the customer count
+  // and render three hardcoded page buttons with no handler, so a branch with
+  // two customers advertised twenty across three dead pages.
+  const pageCount = Math.max(1, Math.ceil(filteredCustomers.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const visibleCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const firstShown = filteredCustomers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const selectedCustomer = resolveVisibleSelection(visibleCustomers, selectedId || visibleCustomers[0]?.id || "");
 
   return (
     <AdminPageLayout>
@@ -175,12 +184,12 @@ export function AdminCustomersComponent() {
         >
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
             <Card.Content className="min-w-0 p-0"><CustomerTable
-              customers={filteredCustomers}
+              customers={visibleCustomers}
               selectedId={selectedCustomer?.id ?? null}
               onSelect={setSelectedId}
               onEdit={branchId ? (id) => { setSelectedId(id); setEditError(null); setIsEditOpen(true); } : undefined}
             /></Card.Content>
-            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị 1 - {filteredCustomers.length} trong tổng số {totalLabel} khách hàng</span><div className="flex gap-1"><Button size="sm" variant="outline" className="min-w-9 rounded-lg border-admin-accent text-admin-accent">1</Button><Button size="sm" variant="ghost">2</Button><Button size="sm" variant="ghost">3</Button></div></Card.Footer>
+            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị {firstShown} - {firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1} trong tổng số {filteredCustomers.length} khách hàng</span><div className="flex gap-1">{Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (<Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>))}</div></Card.Footer>
           </Card>
         </AdminSplitLayout>
       )}

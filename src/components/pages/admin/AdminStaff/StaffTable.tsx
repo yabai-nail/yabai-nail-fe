@@ -1,4 +1,4 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { formatVnd } from "@/lib/admin-format";
 import type { StaffMember } from "./data";
@@ -7,6 +7,8 @@ type StaffTableProps = {
   readonly staff: ReadonlyArray<StaffMember>;
   readonly selectedId: string | null;
   readonly onSelect: (id: string) => void;
+  /** Absent until a branch is chosen, since editing needs one. */
+  readonly onEdit?: (id: string) => void;
 };
 
 const MISSING = "—";
@@ -15,7 +17,7 @@ function formatOptionalVnd(value: number | null): string {
   return typeof value === "number" ? formatVnd(value) : MISSING;
 }
 
-export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
+export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] text-left text-sm">
@@ -52,9 +54,13 @@ export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
               <td className="px-3 py-2 font-bold text-admin-accent">{formatOptionalVnd(member.commissionAmount)}</td>
               <td className="px-3 py-2">{member.orders ?? MISSING}</td>
               <td className="px-3 py-2">
-                <Button isIconOnly size="sm" variant="ghost" aria-label={`Thao tác cho ${member.name}`}>
-                  <EllipsisHorizontalIcon className="size-4" />
-                </Button>
+                {/* Was a "..." with no handler and no prop to call. One action, so it
+                    names that action instead of promising a menu. */}
+                {onEdit ? (
+                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Sửa thông tin ${member.name}`} onPress={() => onEdit(member.id)}>
+                    <PencilSquareIcon className="size-4" />
+                  </Button>
+                ) : null}
               </td>
             </tr>
           ))}

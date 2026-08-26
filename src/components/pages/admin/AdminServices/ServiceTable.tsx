@@ -1,4 +1,4 @@
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Chip } from "@heroui/react";
 import { formatVnd } from "@/lib/admin-format";
 import { categoryLabels, type SalonService } from "./data";
@@ -58,7 +58,9 @@ export function ServiceTable({
                   >
                     <PencilSquareIcon className="size-4" />
                   </Button>
-                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Xóa ${service.name}`}><TrashIcon className="size-4" /></Button>
+                  {/* No delete button here: the admin API exposes no DELETE for a
+                      service. A service is retired by turning its visibility off,
+                      which the edit form already does. */}
                 </div>
               </td>
             </tr>

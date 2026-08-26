@@ -77,8 +77,9 @@ export function StaffDetailPanel({
           </>
         ) : null}
         <div className="grid gap-2">
-          <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử đơn hàng</Button>
-          <Button variant="outline" className="rounded-lg border-admin-border">Lịch sử thanh toán</Button>
+          {/* Neither had a handler. The order history is already rendered below
+              this panel by RecentOrdersTable, and no per-staff payment history
+              exists to open. */}
           <Button
             variant="primary"
             className="rounded-lg"
