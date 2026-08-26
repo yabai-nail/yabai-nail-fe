@@ -23,7 +23,7 @@ Consumer: `yabai-nail-fe`
 | BE-GAP-010 | P1 | API contract | Swagger không liệt kê đầy đủ registry chuẩn. |
 | BE-GAP-011 | P1 | Mẫu nail | Không có endpoint tạo và liệt kê đề xuất mẫu nail. |
 | BE-GAP-012 | P2 | Chi nhánh | `/branches` không trả số điện thoại chi nhánh. |
-| BE-GAP-013 | P2 | Dịch vụ | Không có `DELETE` cho dịch vụ. |
+| BE-GAP-013 | P2 | Toàn hệ | Không có `DELETE` nào trên `/admin/*`; dữ liệu chỉ ẩn được, không xoá được. |
 
 ## BE-GAP-001 — Hội thoại và gửi tin nhắn
 
@@ -220,13 +220,35 @@ Bảng chi nhánh của admin có cột "Điện thoại" và luôn hiển thị
 
 Đề xuất: thêm `phone` vào branch payload, hoặc bỏ cột nếu chi nhánh không có số riêng.
 
-## BE-GAP-013 — Không có `DELETE` cho dịch vụ
+## BE-GAP-013 — Không có `DELETE` nào trên `/admin/*`
 
-Toàn bộ operation catalog không có một `DELETE` nào. Màn dịch vụ từng có nút "Xóa"
-không nối được gì; nút đó đã gỡ ở `231a93a`, dịch vụ ngừng bán bằng cách tắt hiển thị.
+Registry có đúng 6 route `DELETE`, và **không route nào thuộc `/admin/*`**:
+
+```
+DELETE /api/v1/auth/sessions
+DELETE /api/v1/auth/sessions/current
+DELETE /api/v1/me/devices/{installationId}
+DELETE /api/v1/me/favorite-designs/{designId}
+DELETE /api/v1/media/{mediaId}
+DELETE /api/v1/media/uploads/{mediaId}
+```
+
+Hệ quả: không thực thể nghiệp vụ nào của admin — khách hàng, nhân viên, dịch vụ,
+chi nhánh, lịch hẹn, khuyến mãi, danh mục, phụ thu, mẫu nail, tài khoản — xoá được
+qua API. Dọn dữ liệu test chỉ có thể là vô hiệu hoá/ẩn, và cách đó **không gỡ được
+số liệu khỏi báo cáo** vì báo cáo dựng từ bảng `payments`. Muốn sạch thật phải thao
+tác thẳng vào DB.
+
+Màn dịch vụ từng có nút "Xóa" không nối được gì; nút đó đã gỡ ở `231a93a`.
+
+Điểm đáng chú ý khi triển khai: `handleRecord` (`platform.controller.ts`, nhánh
+`method === "DELETE"`) **đã có sẵn soft-delete chung** theo `kind` + `externalKey`,
+nên phần lớn việc là đăng ký route chứ không phải viết logic mới. Một vướng: nhánh
+đó lọc `ownerId: principal.id`, trong khi bản ghi do admin tạo có `ownerId: null`
+nên sẽ không khớp — cần nới điều kiện cho principal quyền admin.
 
 Đề xuất: hoặc xác nhận "tắt hiển thị" là cơ chế chính thức và ghi vào spec, hoặc bổ
-sung soft-delete có kiểm ràng buộc lịch hẹn đang tham chiếu.
+sung soft-delete có kiểm ràng buộc (lịch hẹn đang tham chiếu dịch vụ, v.v.).
 
 ## Những API không thiếu
 
