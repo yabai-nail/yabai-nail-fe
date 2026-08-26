@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      # Four defects the three gates above all report clean on, because none of
+      # them is a type error, a failing assertion or a broken import: a button
+      # with no handler, a link to nowhere, demo data rendered as real, and an
+      # alignment class fighting a design-system slot laid out as a column.
+      - name: UI invariants
+        run: pnpm ui:check
+
+      - name: Build
+        run: pnpm build
+
+  # Reads the live API and needs an admin credential, so it cannot run on a fork
+  # PR and must not gate one. Scheduled instead, where a contract drift shows up
+  # as a failed run rather than as a blank column somebody notices months later.
+  contract:
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: API contract
+        env:
+          YABAI_API_URL: ${{ vars.YABAI_API_URL }}
+          YABAI_ADMIN_PHONE: ${{ secrets.YABAI_ADMIN_PHONE }}
+          YABAI_ADMIN_PASSWORD: ${{ secrets.YABAI_ADMIN_PASSWORD }}
+        run: |
+          if [ -z "$YABAI_ADMIN_PHONE" ]; then
+            echo "Chưa cấu hình secret — bỏ qua contract check."
+            exit 0
+          fi
+          pnpm contract:check
