@@ -92,7 +92,7 @@ export function IssueModal({
                   customers.map((row) => (
                     <label key={row.id} className="flex cursor-pointer items-center gap-3 border-b border-admin-border px-3 py-2 text-sm last:border-0">
                       <input
-                        type="checkbox"
+                        type="checkbox" className="accent-admin-accent"
                         checked={selected.includes(row.id)}
                         onChange={() => toggle(row.id)}
                       />

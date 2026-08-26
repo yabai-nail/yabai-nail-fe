@@ -11,7 +11,9 @@
  *   3. demo data rendered as if it were real — a badge reading "18 unread" on a
  *      system holding zero conversations, a customer's "last appointment"
  *      hardcoded to a date in 2025.
- *   4. an alignment class fighting the design system — HeroUI sets
+ *   4. a checkbox or radio left on the browser's default accent — a blue tick
+ *      in a pink console, because nothing had told it otherwise.
+ *   5. an alignment class fighting the design system — HeroUI sets
  *      flex-direction: column on several slots, so `flex items-center gap-3`
  *      written for a row silently centres everything into a stack instead.
  *
@@ -114,7 +116,18 @@ for (const file of walk(ROOT)) {
     if (hit) report("dữ liệu demo hiển thị như thật", name, index + 1, hit[0]);
   });
 
-  // 4 — alignment written for a row on a slot the design system lays out as a column
+  // 4 — native tick left on the browser's blue
+  // Scans to `/>` rather than to `>`: an inline arrow handler contains `>`, so a
+  // [^>] window stops before reaching a className written after onChange and
+  // reports a tick that is already styled.
+  for (const match of source.matchAll(/<input[^]*?\/>/g)) {
+    const type = match[0].match(/type="(checkbox|radio)"/);
+    if (!type) continue;
+    if (/accent-/.test(match[0]) || allowed(source, match.index)) continue;
+    report("tick màu mặc định trình duyệt", name, lineOf(source, match.index), `type="${type[1]}" — thiếu accent-admin-accent`);
+  }
+
+  // 5 — alignment written for a row on a slot the design system lays out as a column
   for (const match of source.matchAll(SLOT_PATTERN)) {
     const classes = match[2];
     if (!/\bflex\b/.test(classes) || !/\b(items|justify)-/.test(classes)) continue;

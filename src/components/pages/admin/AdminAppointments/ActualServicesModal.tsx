@@ -62,7 +62,7 @@ export function ActualServicesModal({
                     <li key={service.id} className="border-b border-admin-border last:border-b-0">
                       <label className="flex cursor-pointer items-center gap-3 p-3 hover:bg-admin-soft">
                         <input
-                          type="checkbox"
+                          type="checkbox" className="accent-admin-accent"
                           checked={selected.has(service.id)}
                           onChange={() => toggle(service.id)}
                         />

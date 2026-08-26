@@ -219,7 +219,7 @@ function SystemFeaturesForm({
         Object.entries(features).map(([key, value]) => (
           <label key={key} className="flex items-center justify-between gap-3 text-sm text-admin-ink">
             <span>{key}</span>
-            <input type="checkbox" checked={value} onChange={(event) => setFeatures((prev) => ({ ...prev, [key]: event.target.checked }))} />
+            <input type="checkbox" className="accent-admin-accent" checked={value} onChange={(event) => setFeatures((prev) => ({ ...prev, [key]: event.target.checked }))} />
           </label>
         ))
       )}

@@ -65,7 +65,7 @@ export function AssignStaffModal({
                         value={candidate.id}
                         checked={staffId === candidate.id}
                         onChange={() => setStaffId(candidate.id)}
-                        className="mt-1"
+                        className="mt-1 accent-admin-accent"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-admin-ink">{candidate.displayName}</p>

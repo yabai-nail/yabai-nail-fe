@@ -91,7 +91,7 @@ export function ServiceCreateModal({
               </div>
               <label className="flex items-center gap-3 text-sm text-admin-ink">
                 <input
-                  type="checkbox"
+                  type="checkbox" className="accent-admin-accent"
                   checked={isVisible}
                   onChange={(event) => setIsVisible(event.target.checked)}
                 />
