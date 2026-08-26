@@ -1,8 +1,6 @@
-import { CalendarDaysIcon, PhoneIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { PhoneIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Avatar, Button, Card } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { getCustomerSegmentLabel } from "@/lib/admin-customer";
-import { formatNumber, formatVnd } from "@/lib/admin-format";
 import type { MessageCustomer } from "./data";
 
 export function CustomerSummary({ customer }: Readonly<{ customer: MessageCustomer }>) {
@@ -17,20 +15,10 @@ export function CustomerSummary({ customer }: Readonly<{ customer: MessageCustom
           </Avatar>
           <div className="min-w-0">
             <p className="truncate font-bold">{customer.name}</p>
-            <Chip size="sm" color="accent" variant="soft">
-              <Chip.Label>{getCustomerSegmentLabel(customer.segment)}</Chip.Label>
-            </Chip>
           </div>
         </div>
         <dl className="space-y-2 text-sm">
           <div className="flex gap-2"><PhoneIcon className="size-4 text-admin-muted" /><dd>{customer.phone}</dd></div>
-          <div className="flex gap-2"><CalendarDaysIcon className="size-4 text-admin-muted" /><dd>{customer.birthday}</dd></div>
-          <div><dt className="sr-only">Sở thích</dt><dd>{customer.preference}</dd></div>
-        </dl>
-        <dl className="grid grid-cols-3 gap-2 border-y border-admin-border py-3 text-center text-xs">
-          <div><dt className="text-admin-muted">Chi tiêu</dt><dd className="mt-1 font-bold text-admin-accent">{formatVnd(customer.totalSpend)}</dd></div>
-          <div><dt className="text-admin-muted">Lần đến</dt><dd className="mt-1 font-bold">{customer.visits}</dd></div>
-          <div><dt className="text-admin-muted">Điểm</dt><dd className="mt-1 font-bold">{formatNumber(customer.points)}</dd></div>
         </dl>
         {/* "Lịch hẹn gần nhất" was a fixed date in 2025 with a fixed service and a
             "Đã xác nhận" chip, shown for whichever customer was selected.

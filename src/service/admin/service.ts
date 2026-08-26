@@ -521,42 +521,36 @@ export const adminService = {
     executeApiOperation<AdminAuditLog>("GET /api/v1/admin/audit-logs/{logId}", {
       path: { logId },
     }),
-  conversations: (
-    branchId: string,
-    query?: Readonly<Record<string, string | number | undefined>>,
-  ) =>
+  conversations: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminConversation>>(
-      "GET /api/v1/admin/branches/{branchId}/conversations",
-      { path: { branchId }, query },
+      "GET /api/v1/admin/conversations",
+      { query },
     ),
   conversationMessages: (
-    branchId: string,
     conversationId: string,
     query?: Readonly<Record<string, string | number | undefined>>,
   ) =>
     executeApiOperation<BackendList<AdminMessage>>(
-      "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
-      { path: { branchId, conversationId }, query },
+      "GET /api/v1/admin/conversations/{conversationId}/messages",
+      { path: { conversationId }, query },
     ),
   sendConversationMessage: (
-    branchId: string,
     conversationId: string,
     draft: AdminMessageDraft,
     idempotencyKey?: string,
   ) =>
     executeApiOperation<AdminMessage>(
-      "POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
-      { path: { branchId, conversationId }, body: draft, idempotencyKey },
+      "POST /api/v1/admin/conversations/{conversationId}/messages",
+      { path: { conversationId }, body: draft, idempotencyKey },
     ),
   updateConversation: (
-    branchId: string,
     conversationId: string,
     patch: AdminConversationPatch,
     version?: string | number,
   ) =>
     executeApiOperation<AdminConversation>(
-      "PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}",
-      { path: { branchId, conversationId }, body: patch, version },
+      "PATCH /api/v1/admin/conversations/{conversationId}",
+      { path: { conversationId }, body: patch, version },
     ),
   branchReviews: (
     branchId: string,

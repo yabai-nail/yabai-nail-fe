@@ -2,7 +2,6 @@ import {
   ArchiveBoxIcon,
   CheckCircleIcon,
   PaperAirplaneIcon,
-  PaperClipIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, InputGroup } from "@heroui/react";
 import type { FormEvent } from "react";
@@ -20,6 +19,8 @@ type MessageThreadProps = {
   readonly onArchive?: () => void;
   readonly statusPending?: boolean;
   readonly statusError?: string | null;
+  readonly sendPending?: boolean;
+  readonly sendError?: string | null;
 };
 
 export function MessageThread({
@@ -32,6 +33,8 @@ export function MessageThread({
   onArchive,
   statusPending = false,
   statusError = null,
+  sendPending = false,
+  sendError = null,
 }: MessageThreadProps) {
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -77,10 +80,10 @@ export function MessageThread({
         ))}
       </ol>
       <form onSubmit={submit} className="border-t border-admin-border p-3">
+        {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
         <InputGroup fullWidth>
-          <InputGroup.Prefix><PaperClipIcon className="size-4 text-admin-muted" /></InputGroup.Prefix>
-          <InputGroup.Input aria-label="Nhập tin nhắn" placeholder="Nhập tin nhắn..." value={draft} onChange={(event) => onDraftChange(event.target.value)} />
-          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim()} className="rounded-lg"><PaperAirplaneIcon className="size-4" />Gửi</Button></InputGroup.Suffix>
+          <InputGroup.Input aria-label="Nhập tin nhắn" maxLength={2000} placeholder="Nhập tin nhắn..." value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />Gửi</Button></InputGroup.Suffix>
         </InputGroup>
       </form>
     </section>

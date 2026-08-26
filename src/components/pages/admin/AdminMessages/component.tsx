@@ -7,7 +7,6 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   adminService,
-  useAdminBranch,
   useAdminConversations,
   useAdminConversationMessages,
   type AdminConversation as ServerConversation,
@@ -16,7 +15,7 @@ import {
 import { ConversationList, type InboxFilter } from "./ConversationList";
 import { CustomerSummary } from "./CustomerSummary";
 import { MessageThread } from "./MessageThread";
-import { conversations as fixtureConversations, type ChatMessage, type Conversation, type MessageCustomer } from "./data";
+import { type ChatMessage, type Conversation, type MessageCustomer } from "./data";
 import {
   appendConversationMessage,
   type ConversationMessages,
@@ -44,12 +43,6 @@ function toFixtureCustomer(server: ServerConversation): MessageCustomer {
     name,
     initials: deriveInitials(name),
     phone: server.customer.phone ?? "",
-    birthday: "",
-    preference: "",
-    totalSpend: 0,
-    visits: 0,
-    points: 0,
-    segment: "regular",
   };
 }
 
@@ -80,20 +73,19 @@ function toChatMessage(server: ServerMessage): ChatMessage {
 }
 
 export function AdminMessagesComponent() {
-  const { branchId } = useAdminBranch();
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
   const [draft, setDraft] = useState("");
   const [localMessages, setLocalMessages] = useState<ConversationMessages>({});
 
-  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations(branchId);
+  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations();
+  const [sendPending, setSendPending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
-    if (!conversationsData?.items) return fixtureConversations;
-    if (conversationsData.items.length === 0) return [];
-    return conversationsData.items.map(toFixtureConversation);
+    return conversationsData?.items?.map(toFixtureConversation) ?? [];
   }, [conversationsData]);
 
   const visibleConversations = useMemo(() => {
@@ -106,12 +98,8 @@ export function AdminMessagesComponent() {
   }, [source, filter, query]);
   const selected = resolveVisibleSelection(visibleConversations, selectedId || visibleConversations[0]?.id || "");
 
-  // The message thread comes from a separate paginated endpoint; only fetch
-  // when a real (server-loaded) conversation is selected. Fixture conversations
-  // carry their own baseline messages.
-  const shouldFetchThread = Boolean(selected && conversationsData?.items);
-  const { data: threadData, mutate: mutateThread } = useAdminConversationMessages(
-    shouldFetchThread ? branchId : null,
+  const shouldFetchThread = Boolean(selected);
+  const { data: threadData, error: threadError, mutate: mutateThread } = useAdminConversationMessages(
     shouldFetchThread ? selected?.id ?? null : null,
   );
 
@@ -125,26 +113,27 @@ export function AdminMessagesComponent() {
     const content = draft.trim();
     if (!selected) return;
     if (!content) return;
+    if (sendPending) return;
     setDraft("");
+    setSendError(null);
+    setSendPending(true);
+    const localId = `local-${crypto.randomUUID()}`;
 
     // Optimistic: drop the salon-side bubble into the thread immediately so the
-    // composer feels responsive; if the request errors, the local bubble stays
+    // composer feels responsive; if the request errors, the draft is restored
     // so the salon can retry — the message they typed is never silently lost.
     setLocalMessages((messagesByConversation) =>
       appendConversationMessage(messagesByConversation, selected.id, {
-        id: `local-${selected.id}-${(messagesByConversation[selected.id]?.length ?? 0) + 1}`,
+        id: localId,
         sender: "salon",
         content,
         time: "Bây giờ",
       }),
     );
 
-    // Only round-trip if this is a real server conversation. Fixture rows have
-    // no matching backend record — those stay local like they were before.
-    if (!branchId || !shouldFetchThread) return;
     void (async () => {
       try {
-        await adminService.sendConversationMessage(branchId, selected.id, { content });
+        await adminService.sendConversationMessage(selected.id, { content });
         // Server accepted; drop the local bubble and let the refetch bring
         // the canonical message (with real id + timestamp + delivery status).
         setLocalMessages((current) => {
@@ -153,21 +142,23 @@ export function AdminMessagesComponent() {
           delete next[selected.id];
           return next;
         });
-        void mutateThread();
-      } catch {
-        // Silent: the local bubble already reflects the salon's intent. A
-        // toast belongs here once the shell has a notification surface.
+        await Promise.all([mutateThread(), mutateConversations()]);
+      } catch (thrown) {
+        setLocalMessages((current) => ({ ...current, [selected.id]: (current[selected.id] ?? []).filter(message => message.id !== localId) }));
+        setDraft((current) => current || content);
+        setSendError(thrown instanceof Error ? thrown.message : "Không gửi được tin nhắn.");
+      } finally {
+        setSendPending(false);
       }
     })();
   };
 
   async function changeStatus(next: "READ" | "UNREAD" | "ARCHIVED") {
-    if (!branchId || !selected || selected.version === undefined) return;
+    if (!selected || selected.version === undefined) return;
     setStatusPending(true);
     setStatusError(null);
     try {
       await adminService.updateConversation(
-        branchId,
         selected.id,
         { status: next },
         selected.version,
@@ -185,7 +176,7 @@ export function AdminMessagesComponent() {
   return (
     <AdminPageLayout>
       {conversationsError ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được — hiển thị dữ liệu mẫu.</p>
+        <p className="mb-3 text-xs text-admin-danger">Không tải được hội thoại.</p>
       ) : null}
       <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none xl:grid-cols-[17rem_minmax(0,1fr)_19rem]">
         <ConversationList
@@ -195,7 +186,7 @@ export function AdminMessagesComponent() {
           query={query}
           onFilterChange={setFilter}
           onQueryChange={setQuery}
-          onSelect={setSelectedId}
+          onSelect={(id) => { setSelectedId(id); setSendError(null); setStatusError(null); }}
         />
         {selected ? (
           <MessageThread
@@ -205,14 +196,16 @@ export function AdminMessagesComponent() {
             onDraftChange={setDraft}
             onSend={sendMessage}
             statusPending={statusPending}
-            statusError={statusError}
+            statusError={threadError ? "Không tải được nội dung hội thoại." : statusError}
+            sendPending={sendPending}
+            sendError={sendError}
             onMarkRead={
-              branchId && selected.version !== undefined
+              selected.version !== undefined
                 ? () => void changeStatus("READ")
                 : undefined
             }
             onArchive={
-              branchId && selected.version !== undefined
+              selected.version !== undefined
                 ? () => void changeStatus("ARCHIVED")
                 : undefined
             }

@@ -683,7 +683,6 @@ export interface AdminConversationCustomerSummary {
 
 export interface AdminConversation {
   readonly id: string;
-  readonly branchId: string;
   readonly status: string;
   readonly unreadCount: number;
   readonly customer: AdminConversationCustomerSummary;
@@ -714,7 +713,6 @@ export interface AdminMessage {
 
 export interface AdminMessageDraft {
   readonly content: string;
-  readonly attachments?: ReadonlyArray<Record<string, unknown>>;
   readonly [field: string]: unknown;
 }
 

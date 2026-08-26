@@ -180,10 +180,10 @@ POST /internal/v1/jobs/membership-evaluation/runs
 // frozen 164-operation SRS catalog.
 const featureOperationSource = `
 GET /api/v1/admin/auth/session
-GET /api/v1/admin/branches/{branchId}/conversations
-GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
-POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages
-PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}
+GET /api/v1/admin/conversations
+GET /api/v1/admin/conversations/{conversationId}/messages
+POST /api/v1/admin/conversations/{conversationId}/messages
+PATCH /api/v1/admin/conversations/{conversationId}
 GET /api/v1/admin/branches/{branchId}/staff-performance
 GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings

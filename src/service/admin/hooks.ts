@@ -299,28 +299,26 @@ export function useAdminAuditLog(logId: string | null) {
 }
 
 export function useAdminConversations(
-  branchId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
   return useApiOperation<BackendList<AdminConversation>>(
-    branchId ? "GET /api/v1/admin/branches/{branchId}/conversations" : null,
-    { path: branchId ? { branchId } : undefined, query },
+    "GET /api/v1/admin/conversations",
+    { query },
+    { refreshInterval: 5_000 },
   );
 }
 
 export function useAdminConversationMessages(
-  branchId: string | null,
   conversationId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
   return useApiOperation<BackendList<AdminMessage>>(
-    branchId && conversationId
-      ? "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages"
-      : null,
+    conversationId ? "GET /api/v1/admin/conversations/{conversationId}/messages" : null,
     {
-      path: branchId && conversationId ? { branchId, conversationId } : undefined,
+      path: conversationId ? { conversationId } : undefined,
       query,
     },
+    { refreshInterval: 5_000 },
   );
 }
 

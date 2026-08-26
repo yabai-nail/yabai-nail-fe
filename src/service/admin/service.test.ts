@@ -61,10 +61,10 @@ const MARKETING_OPERATION_IDS = [
 ] as const;
 
 const MESSAGING_OPERATION_IDS = [
-  "GET /api/v1/admin/branches/{branchId}/conversations",
-  "GET /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
-  "POST /api/v1/admin/branches/{branchId}/conversations/{conversationId}/messages",
-  "PATCH /api/v1/admin/branches/{branchId}/conversations/{conversationId}",
+  "GET /api/v1/admin/conversations",
+  "GET /api/v1/admin/conversations/{conversationId}/messages",
+  "POST /api/v1/admin/conversations/{conversationId}/messages",
+  "PATCH /api/v1/admin/conversations/{conversationId}",
   "GET /api/v1/admin/branches/{branchId}/reviews",
   "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling",
   "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
