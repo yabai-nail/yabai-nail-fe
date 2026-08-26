@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, Modal } from "@heroui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { adminService } from "@/service";
+import { adminService, useAdminBranch, useAdminCustomers } from "@/service";
 
 export function IssueModal({
   promotionId,
@@ -16,16 +16,30 @@ export function IssueModal({
   onClose: () => void;
   onIssued: () => void;
 }>) {
-  const [raw, setRaw] = useState("");
+  const { branchId } = useAdminBranch();
+  const { data, isLoading } = useAdminCustomers(branchId);
+  const [selected, setSelected] = useState<ReadonlyArray<string>>([]);
+  const [query, setQuery] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const customerIds = raw
-    .split(/[\s,]+/)
-    .map((value) => value.trim())
-    .filter(Boolean);
-  const canSubmit = customerIds.length > 0 && !busy;
+  const customers = useMemo(() => {
+    const rows = data?.items ?? [];
+    const term = query.trim().toLocaleLowerCase();
+    if (!term) return rows;
+    return rows.filter((row) => {
+      const name = String(row.displayName ?? row.name ?? "").toLocaleLowerCase();
+      return name.includes(term) || String(row.phone ?? "").includes(term);
+    });
+  }, [data, query]);
+
+  const canSubmit = selected.length > 0 && !busy;
+
+  const toggle = (id: string) =>
+    setSelected((current) =>
+      current.includes(id) ? current.filter((value) => value !== id) : [...current, id],
+    );
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -33,7 +47,7 @@ export function IssueModal({
     setError(null);
     try {
       await adminService.issuePromotion(promotionId, {
-        customerIds,
+        customerIds: [...selected],
         note: note.trim() || undefined,
       });
       onIssued();
@@ -56,17 +70,39 @@ export function IssueModal({
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
+              {/* Chosen from the branch's own customer list. Asking an operator to
+                  paste raw UUIDs made a routine action depend on data no admin
+                  screen shows, and a mistyped id fails as a plain 409. */}
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">ID khách hàng</span>
-                <textarea
-                  className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink"
-                  value={raw}
-                  onChange={(event) => setRaw(event.target.value)}
-                  placeholder="Nhập các ID, cách nhau bởi dấu phẩy hoặc xuống dòng"
+                <span className="font-semibold text-admin-ink">Chọn khách hàng</span>
+                <input
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Tìm theo tên hoặc số điện thoại..."
                   autoFocus
                 />
-                <span className="text-xs text-admin-muted">{customerIds.length} khách được chọn</span>
               </label>
+              <div className="max-h-56 overflow-y-auto rounded-lg border border-admin-border">
+                {isLoading ? (
+                  <p className="px-3 py-4 text-sm text-admin-muted">Đang tải khách hàng…</p>
+                ) : customers.length === 0 ? (
+                  <p className="px-3 py-4 text-sm text-admin-muted">Không có khách hàng phù hợp.</p>
+                ) : (
+                  customers.map((row) => (
+                    <label key={row.id} className="flex cursor-pointer items-center gap-3 border-b border-admin-border px-3 py-2 text-sm last:border-0">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(row.id)}
+                        onChange={() => toggle(row.id)}
+                      />
+                      <span className="text-admin-ink">{row.displayName ?? row.name ?? row.id}</span>
+                      <span className="ml-auto text-xs text-admin-muted">{row.phone ?? ""}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+              <span className="text-xs text-admin-muted">{selected.length} khách được chọn</span>
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Ghi chú (tuỳ chọn)</span>
                 <input

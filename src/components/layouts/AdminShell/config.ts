@@ -43,7 +43,6 @@ export type AdminRoute = {
   readonly title: string;
   readonly description: string;
   readonly icon: AdminNavigationIcon;
-  readonly badge?: string;
   readonly isAvailable: boolean;
 };
 
@@ -52,8 +51,8 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     id: "dashboard",
     href: "/admin",
     label: "Tổng quan",
-    title: "Chào buổi sáng, Chủ tiệm! 🌸",
-    description: "Hôm nay là Chủ nhật, 16/08/2026",
+    title: "Tổng quan",
+    description: "Tình hình cửa hàng hôm nay.",
     icon: HomeIcon,
     isAvailable: true,
   },
@@ -82,7 +81,6 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     title: "Tin nhắn",
     description: "Quản lý tin nhắn từ khách hàng.",
     icon: ChatBubbleLeftRightIcon,
-    badge: "18",
     isAvailable: true,
   },
   {
