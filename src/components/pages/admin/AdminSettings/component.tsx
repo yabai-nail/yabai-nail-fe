@@ -212,7 +212,7 @@ function CommissionSettings({
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map(({ id, label, value, detail, icon: Icon, tone }) => (
             <Card key={id} className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-              <Card.Content className="flex items-start gap-3 p-4"><span className={`grid size-11 place-items-center rounded-lg ${tone}`}><Icon className="size-6" /></span><div><p className="text-xs">{label}</p><p className="mt-1 text-xl font-bold">{value}</p><p className="mt-1 text-xs text-admin-muted">{detail}</p></div></Card.Content>
+              <Card.Content className="flex flex-row items-start gap-3 p-4"><span className={`grid size-11 place-items-center rounded-lg ${tone}`}><Icon className="size-6" /></span><div><p className="text-xs">{label}</p><p className="mt-1 text-xl font-bold">{value}</p><p className="mt-1 text-xs text-admin-muted">{detail}</p></div></Card.Content>
             </Card>
           ))}
         </div>
@@ -220,7 +220,7 @@ function CommissionSettings({
       <div className="mt-4">
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Header className="flex items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
+            <Card.Header className="flex flex-row items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
             <Card.Content className="min-w-0 p-0 pt-2">
               {staffError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">

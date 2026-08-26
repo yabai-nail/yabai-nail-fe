@@ -21,7 +21,7 @@ export function SurchargePanel() {
 
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-      <Card.Header className="flex items-center justify-between px-4 pt-4">
+      <Card.Header className="flex flex-row items-center justify-between px-4 pt-4">
         <h2 className="font-bold">Phụ thu</h2>
         <Button
           isIconOnly
