@@ -1,4 +1,4 @@
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { formatNumber, formatVnd } from "@/lib/admin-format";
 import type { Customer, CustomerRank } from "./data";
@@ -10,10 +10,12 @@ const rankLabel: Record<CustomerRank, string> = {
   none: "—",
 };
 
-export function CustomerTable({ customers, selectedId, onSelect }: Readonly<{
+export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Readonly<{
   customers: ReadonlyArray<Customer>;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** Absent until a branch is chosen, since editing needs one. */
+  onEdit?: (id: string) => void;
 }>) {
   return (
     <div className="overflow-x-auto">
@@ -47,7 +49,21 @@ export function CustomerTable({ customers, selectedId, onSelect }: Readonly<{
               <td className="px-3 py-2 whitespace-nowrap font-medium">{formatVnd(customer.totalSpend)}</td>
               <td className="px-3 py-2 whitespace-nowrap">{formatNumber(customer.points)} pt</td>
               <td className="px-3 py-2"><Chip size="sm" variant="soft" color={customer.rank === "gold" ? "warning" : "default"}><Chip.Label>{rankLabel[customer.rank]}</Chip.Label></Chip></td>
-              <td className="px-3 py-2"><Button isIconOnly size="sm" variant="ghost" aria-label={`Mở thao tác cho ${customer.name}`}><EllipsisVerticalIcon className="size-4" /></Button></td>
+              <td className="px-3 py-2">
+                {/* Was a "..." with no handler and no prop to call. It is a single
+                    action, so it says so rather than promising a menu. */}
+                {onEdit ? (
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Sửa thông tin ${customer.name}`}
+                    onPress={() => onEdit(customer.id)}
+                  >
+                    <PencilSquareIcon className="size-4" />
+                  </Button>
+                ) : null}
+              </td>
             </tr>
           ))}
         </tbody>
