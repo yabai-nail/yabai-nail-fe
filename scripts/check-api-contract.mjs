@@ -137,12 +137,20 @@ async function main() {
     console.error("No branch to check against — seed one first.");
     process.exit(2);
   }
+  const permittedBranchIds = new Set(session.user?.branchIds ?? []);
+  const readableBranches = permittedBranchIds.size
+    ? branches.filter((branch) => permittedBranchIds.has(branch.id))
+    : branches;
+  if (!readableBranches.length) {
+    console.error("The admin session has no readable staging branch.");
+    process.exit(2);
+  }
   // Prefer a branch that actually holds rows: checking element shapes against an
   // empty branch reports "unverified" for everything and proves nothing.
-  let branchId = branches[0].id;
+  let branchId = readableBranches[0].id;
   let customers = { items: [] };
   let appointments = { items: [] };
-  for (const branch of branches) {
+  for (const branch of readableBranches) {
     const [theseCustomers, theseAppointments] = await Promise.all([
       call(`/admin/branches/${branch.id}/customers`),
       call(`/admin/branches/${branch.id}/appointments`),
