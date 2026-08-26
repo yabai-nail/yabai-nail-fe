@@ -4,6 +4,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { adminService, useAdminBranch, useAdminBranchReviews, useAdminReviews } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
@@ -71,19 +72,18 @@ export function AdminReviewsComponent() {
         ))}
       </div>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+        <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Trạng thái xử lý
-          <select
+          <AdminSelectField
+            label="Lọc theo trạng thái xử lý"
             value={status}
-            onChange={(event) => { setStatus(event.target.value); setPage(1); }}
-            className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
-          >
-            <option value="all">Tất cả</option>
-            {statuses.map((code) => (
-              <option key={code} value={code}>{handlingStatusLabels[code] ?? code}</option>
-            ))}
-          </select>
-        </label>
+            onChange={(value) => { setStatus(value); setPage(1); }}
+            options={[
+              { value: "all", label: "Tất cả" },
+              ...statuses.map((code) => ({ value: code, label: handlingStatusLabels[code] ?? code })),
+            ]}
+          />
+        </div>
         <AdminSearchField
           label="Tìm đánh giá"
           placeholder="Tìm theo khách hàng hoặc nội dung..."

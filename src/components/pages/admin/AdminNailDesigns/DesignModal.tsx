@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { adminService } from "@/service";
 import { designStatusLabels, type DesignRow } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED", "HIDDEN"];
@@ -80,14 +81,16 @@ export function DesignModal({
                 the upload flow and never reads a URL, so anything typed here
                 was discarded on save.
               */}
-              <label className="flex flex-col gap-2 text-sm">
+              <div className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Trạng thái</span>
-                <select className={inputClass} value={status} onChange={(event) => setStatus(event.target.value)}>
-                  {statusOptions.map((code) => (
-                    <option key={code} value={code}>{designStatusLabels[code] ?? code}</option>
-                  ))}
-                </select>
-              </label>
+                <AdminSelectField
+                  label="Trạng thái mẫu nail"
+                  fullWidth
+                  value={status}
+                  onChange={setStatus}
+                  options={statusOptions.map((code) => ({ value: code, label: designStatusLabels[code] ?? code }))}
+                />
+              </div>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">

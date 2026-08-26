@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 export function ResetPasswordModal({
   accountId,
@@ -51,13 +52,19 @@ export function ResetPasswordModal({
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
-              <label className="flex flex-col gap-2 text-sm">
+              <div className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Kênh thông báo</span>
-                <select className={inputClass} value={notifyChannel} onChange={(event) => setNotifyChannel(event.target.value)}>
-                  <option value="SMS">SMS</option>
-                  <option value="EMAIL">Email</option>
-                </select>
-              </label>
+                <AdminSelectField
+                  label="Kênh thông báo"
+                  fullWidth
+                  value={notifyChannel}
+                  onChange={setNotifyChannel}
+                  options={[
+                    { value: "SMS", label: "SMS" },
+                    { value: "EMAIL", label: "Email" },
+                  ]}
+                />
+              </div>
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">Lý do (tuỳ chọn)</span>
                 <input className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Nhân viên quên mật khẩu" autoFocus />

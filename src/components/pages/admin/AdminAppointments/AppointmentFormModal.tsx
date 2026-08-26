@@ -14,6 +14,7 @@ import type {
   AppointmentStaff,
   AppointmentStatus,
 } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 /**
  * The people, services and staff this form may pick from. They come from the
@@ -119,12 +120,12 @@ export function AppointmentFormModal({
             <form onSubmit={submit}>
               <Modal.Body className="grid gap-4 px-5 py-5 sm:grid-cols-2">
                 <Field id="appointment-date" label="Ngày" error={errors.date}><input id="appointment-date" aria-invalid={Boolean(errors.date)} aria-describedby={errors.date ? "appointment-date-error" : undefined} className={fieldClassName} type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} /></Field>
-                <Field id="appointment-status" label="Trạng thái"><select id="appointment-status" className={fieldClassName} value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AppointmentStatus })}><option value="confirmed">Đã xác nhận</option><option value="pending">Chờ xác nhận</option><option value="cancelled">Đã hủy</option></select></Field>
+                <Field id="appointment-status" label="Trạng thái" isControlLabelled={false}><AdminSelectField label="Trạng thái lịch hẹn" fullWidth value={draft.status} onChange={(value) => setDraft({ ...draft, status: value as AppointmentStatus })} options={[{ value: "confirmed", label: "Đã xác nhận" }, { value: "pending", label: "Chờ xác nhận" }, { value: "cancelled", label: "Đã hủy" }]} /></Field>
                 <Field id="appointment-start" label="Giờ bắt đầu" error={errors.startTime}><input id="appointment-start" aria-invalid={Boolean(errors.startTime)} aria-describedby={errors.startTime ? "appointment-start-error" : undefined} className={fieldClassName} type="time" value={draft.startTime} onChange={(event) => setDraft({ ...draft, startTime: event.target.value })} /></Field>
                 <Field id="appointment-end" label="Giờ kết thúc" error={errors.endTime}><input id="appointment-end" aria-invalid={Boolean(errors.endTime)} aria-describedby={errors.endTime ? "appointment-end-error" : undefined} className={fieldClassName} type="time" value={draft.endTime} onChange={(event) => setDraft({ ...draft, endTime: event.target.value })} /></Field>
-                <Field id="appointment-customer" label="Khách hàng" error={errors.customer}><select id="appointment-customer" aria-invalid={Boolean(errors.customer)} aria-describedby={errors.customer ? "appointment-customer-error" : undefined} className={fieldClassName} value={draft.customer.id} onChange={(event) => setDraft({ ...draft, customer: options.customers.find((item) => item.id === event.target.value) ?? options.customers[0] })}>{options.customers.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
-                <Field id="appointment-service" label="Dịch vụ" error={errors.service}><select id="appointment-service" aria-invalid={Boolean(errors.service)} aria-describedby={errors.service ? "appointment-service-error" : undefined} className={fieldClassName} value={draft.service.id} onChange={(event) => setDraft({ ...draft, service: options.services.find((item) => item.id === event.target.value) ?? options.services[0] })}>{options.services.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
-                <Field id="appointment-staff" label="Nhân viên" error={errors.staff}><select id="appointment-staff" aria-invalid={Boolean(errors.staff)} aria-describedby={errors.staff ? "appointment-staff-error" : undefined} className={fieldClassName} value={draft.staff.id} onChange={(event) => setDraft({ ...draft, staff: options.staff.find((item) => item.id === event.target.value) ?? options.staff[0] })}>{options.staff.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
+                <Field id="appointment-customer" label="Khách hàng" error={errors.customer} isControlLabelled={false}><AdminSelectField label="Khách hàng" fullWidth isInvalid={Boolean(errors.customer)} describedBy={errors.customer ? "appointment-customer-error" : undefined} value={draft.customer.id} onChange={(value) => setDraft({ ...draft, customer: options.customers.find((item) => item.id === value) ?? options.customers[0] })} options={options.customers.map((item) => ({ value: item.id, label: item.name }))} /></Field>
+                <Field id="appointment-service" label="Dịch vụ" error={errors.service} isControlLabelled={false}><AdminSelectField label="Dịch vụ" fullWidth isInvalid={Boolean(errors.service)} describedBy={errors.service ? "appointment-service-error" : undefined} value={draft.service.id} onChange={(value) => setDraft({ ...draft, service: options.services.find((item) => item.id === value) ?? options.services[0] })} options={options.services.map((item) => ({ value: item.id, label: item.name }))} /></Field>
+                <Field id="appointment-staff" label="Nhân viên" error={errors.staff} isControlLabelled={false}><AdminSelectField label="Nhân viên" fullWidth isInvalid={Boolean(errors.staff)} describedBy={errors.staff ? "appointment-staff-error" : undefined} value={draft.staff.id} onChange={(value) => setDraft({ ...draft, staff: options.staff.find((item) => item.id === value) ?? options.staff[0] })} options={options.staff.map((item) => ({ value: item.id, label: item.name }))} /></Field>
                 <div className="sm:col-span-2"><Field id="appointment-note" label="Ghi chú"><textarea id="appointment-note" className={`${fieldClassName} min-h-24 py-2`} value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} placeholder="Yêu cầu hoặc lưu ý của khách..." /></Field></div>
                 {formMessage ? <p role="alert" className="rounded-lg bg-admin-soft px-3 py-2 text-sm text-admin-accent sm:col-span-2">{formMessage}</p> : null}
               </Modal.Body>
@@ -141,6 +142,15 @@ export function AppointmentFormModal({
   );
 }
 
-function Field({ id, label, error, children }: Readonly<{ id: string; label: string; error?: string; children: React.ReactNode }>) {
-  return <label htmlFor={id} className="block text-sm font-semibold text-admin-ink"><span className="mb-2 block">{label}</span>{children}{error ? <span id={`${id}-error`} className="mt-1 block text-xs font-normal text-danger">{error}</span> : null}</label>;
+/**
+ * `htmlFor` only associates with a real form control. A Select renders a button
+ * trigger, so those fields opt out of the label element and name themselves
+ * through the control's own aria-label instead.
+ */
+function Field({ id, label, error, children, isControlLabelled = true }: Readonly<{ id: string; label: string; error?: string; children: React.ReactNode; isControlLabelled?: boolean }>) {
+  const body = <><span className="mb-2 block">{label}</span>{children}{error ? <span id={`${id}-error`} className="mt-1 block text-xs font-normal text-danger">{error}</span> : null}</>;
+  const className = "block text-sm font-semibold text-admin-ink";
+  return isControlLabelled
+    ? <label htmlFor={id} className={className}>{body}</label>
+    : <div className={className}>{body}</div>;
 }

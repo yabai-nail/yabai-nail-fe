@@ -4,6 +4,7 @@ import { PhotoIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import type { Appointment } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 export function AttachPhotoModal({
   appointment,
@@ -49,19 +50,21 @@ export function AttachPhotoModal({
                 />
               </label>
 
-              <label htmlFor="attach-media-kind" className="block text-xs font-semibold text-admin-ink">
+              <div className="block text-xs font-semibold text-admin-ink">
                 Loại ảnh
-                <select
-                  id="attach-media-kind"
+                <AdminSelectField
+                  label="Loại ảnh"
+                  fullWidth
+                  className="mt-1"
                   value={kind}
-                  onChange={(event) => setKind(event.target.value as typeof kind)}
-                  className="mt-1 block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-sm text-admin-ink"
-                >
-                  <option value="BEFORE">Trước dịch vụ</option>
-                  <option value="AFTER">Sau dịch vụ</option>
-                  <option value="OTHER">Khác</option>
-                </select>
-              </label>
+                  onChange={(value) => setKind(value as typeof kind)}
+                  options={[
+                    { value: "BEFORE", label: "Trước dịch vụ" },
+                    { value: "AFTER", label: "Sau dịch vụ" },
+                    { value: "OTHER", label: "Khác" },
+                  ]}
+                />
+              </div>
 
               <label htmlFor="attach-media-note" className="block text-xs font-semibold text-admin-ink">
                 Ghi chú (tuỳ chọn)

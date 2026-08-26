@@ -2,6 +2,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState, type FormEvent } from "react";
 import { paymentServiceCatalog, type PaymentLineItem, type PaymentServiceSnapshot } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const fieldClassName = "min-h-10 w-full rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink outline-none focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20";
 
@@ -33,7 +34,7 @@ export function LineItemModal({ item, onClose, onSubmit }: Readonly<{
         <Modal.CloseTrigger className="rounded-lg" />
         <Modal.Header className="flex items-center gap-3 border-b border-admin-border px-5 py-4"><span className="grid size-9 place-items-center rounded-lg bg-admin-soft text-admin-accent"><PlusIcon className="size-5" /></span><Modal.Heading className="text-lg font-bold text-admin-ink">{item ? "Sửa dịch vụ phát sinh" : "Thêm dịch vụ phát sinh"}</Modal.Heading></Modal.Header>
         <form onSubmit={submit}><Modal.Body className="space-y-4 px-5 py-5">
-          {!item ? <label className="block text-sm font-semibold text-admin-ink">Nguồn dịch vụ<select className={`${fieldClassName} mt-2`} value={selectedId} onChange={(event) => { const value = event.target.value; setSelectedId(value); const service = catalog.find((entry) => entry.id === value); if (service) { setName(service.name); setPrice(String(service.price)); } }}><option value="custom">Khoản tùy chỉnh</option>{catalog.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label> : null}
+          {!item ? <div className="block text-sm font-semibold text-admin-ink">Nguồn dịch vụ<AdminSelectField label="Nguồn dịch vụ" fullWidth className="mt-2" value={selectedId} onChange={(value) => { setSelectedId(value); const service = catalog.find((entry) => entry.id === value); if (service) { setName(service.name); setPrice(String(service.price)); } }} options={[{ value: "custom", label: "Khoản tùy chỉnh" }, ...catalog.map((service) => ({ value: service.id, label: service.name }))]} /></div> : null}
           <label className="block text-sm font-semibold text-admin-ink">Tên dịch vụ<input className={`${fieldClassName} mt-2`} value={name} onChange={(event) => setName(event.target.value)} disabled={!isCustom} maxLength={80} required /></label>
           <label className="block text-sm font-semibold text-admin-ink">Giá (VND)<input className={`${fieldClassName} mt-2`} type="number" min="0" step="1" value={price} onChange={(event) => setPrice(event.target.value)} disabled={!isCustom} required /></label>
           <label className="block text-sm font-semibold text-admin-ink">Ghi chú<textarea className={`${fieldClassName} mt-2 min-h-20 py-2`} value={note} onChange={(event) => setNote(event.target.value)} maxLength={160} /></label>

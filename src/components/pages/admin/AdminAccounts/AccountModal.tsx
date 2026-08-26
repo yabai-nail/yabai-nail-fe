@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { adminService } from "@/service";
 import { accountStatusLabels, roleLabels, type AccountRow } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const roleOptions = ["STAFF", "MANAGER", "OWNER"];
@@ -75,19 +76,27 @@ export function AccountModal({
                 <input className={inputClass} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Nguyễn Văn A" autoFocus />
               </label>
               <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-2 text-sm">
+                <div className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Vai trò</span>
-                  <select className={inputClass} value={role} onChange={(event) => setRole(event.target.value)}>
-                    {roleOptions.map((code) => (<option key={code} value={code}>{roleLabels[code] ?? code}</option>))}
-                  </select>
-                </label>
+                  <AdminSelectField
+                    label="Vai trò"
+                    fullWidth
+                    value={role}
+                    onChange={setRole}
+                    options={roleOptions.map((code) => ({ value: code, label: roleLabels[code] ?? code }))}
+                  />
+                </div>
                 {isEdit ? (
-                  <label className="flex flex-col gap-2 text-sm">
+                  <div className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold text-admin-ink">Trạng thái</span>
-                    <select className={inputClass} value={status} onChange={(event) => setStatus(event.target.value)}>
-                      {statusOptions.map((code) => (<option key={code} value={code}>{accountStatusLabels[code] ?? code}</option>))}
-                    </select>
-                  </label>
+                    <AdminSelectField
+                      label="Trạng thái tài khoản"
+                      fullWidth
+                      value={status}
+                      onChange={setStatus}
+                      options={statusOptions.map((code) => ({ value: code, label: accountStatusLabels[code] ?? code }))}
+                    />
+                  </div>
                 ) : (
                   <label className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold text-admin-ink">Mật khẩu (tuỳ chọn)</span>

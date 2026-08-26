@@ -2,6 +2,7 @@ import {
   CalendarDaysIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  FunnelIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Tabs } from "@heroui/react";
@@ -65,6 +66,7 @@ export function AppointmentToolbar({
             label="Lọc trạng thái lịch hẹn"
             value={status}
             options={STATUS_FILTER_OPTIONS}
+            icon={FunnelIcon}
             onChange={(value) => onStatusChange(value as AppointmentStatusFilter)}
           />
           <Button variant="primary" className="rounded-lg" onPress={onCreate}>

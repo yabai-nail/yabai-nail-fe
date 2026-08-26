@@ -9,6 +9,7 @@ import {
   useAdminSurcharges,
   type AdminSurcharge,
 } from "@/service";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 // Compact org-scope surcharge management. Same-file editor mirrors the
 // pattern from CategoryEditor: one modal covers create + edit.
@@ -182,17 +183,19 @@ function SurchargeEditor({
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                 />
               </label>
-              <label className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-admin-ink">Kiểu</span>
-                <select
+                <AdminSelectField
+                  label="Kiểu phụ thu"
+                  fullWidth
                   value={kind}
-                  onChange={(event) => setKind(event.target.value as typeof kind)}
-                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                >
-                  <option value="FIXED">Số tiền cố định</option>
-                  <option value="PERCENT">Phần trăm</option>
-                </select>
-              </label>
+                  onChange={(value) => setKind(value as typeof kind)}
+                  options={[
+                    { value: "FIXED", label: "Số tiền cố định" },
+                    { value: "PERCENT", label: "Phần trăm" },
+                  ]}
+                />
+              </div>
               {kind === "FIXED" ? (
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-admin-ink">Số tiền (VND)</span>

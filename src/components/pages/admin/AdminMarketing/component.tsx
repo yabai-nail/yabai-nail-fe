@@ -5,6 +5,7 @@ import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { adminService, useAdminNotificationCampaignMetrics, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
@@ -84,19 +85,18 @@ export function AdminMarketingComponent() {
       {tab === "promotions" ? (
         <>
           <div className="mb-4 flex min-w-0 flex-col gap-3 pb-1 sm:flex-row sm:items-end sm:justify-between">
-            <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+            <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
               Trạng thái
-              <select
+              <AdminSelectField
+                label="Lọc theo trạng thái khuyến mãi"
                 value={status}
-                onChange={(event) => { setStatus(event.target.value); setPage(1); }}
-                className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink"
-              >
-                <option value="all">Tất cả</option>
-                {statuses.map((code) => (
-                  <option key={code} value={code}>{promotionStatusLabels[code] ?? code}</option>
-                ))}
-              </select>
-            </label>
+                onChange={(value) => { setStatus(value); setPage(1); }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  ...statuses.map((code) => ({ value: code, label: promotionStatusLabels[code] ?? code })),
+                ]}
+              />
+            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <AdminSearchField label="Tìm khuyến mãi" placeholder="Mã hoặc tên..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
@@ -234,14 +234,20 @@ function CampaignPanel() {
         <span className="font-semibold text-admin-ink">Tên chiến dịch</span>
         <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="Nhắc lịch tháng 9" />
       </label>
-      <label className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">Kênh</span>
-        <select className={inputClass} value={channel} onChange={(event) => setChannel(event.target.value)}>
-          <option value="PUSH">Push</option>
-          <option value="SMS">SMS</option>
-          <option value="EMAIL">Email</option>
-        </select>
-      </label>
+        <AdminSelectField
+          label="Kênh gửi"
+          fullWidth
+          value={channel}
+          onChange={setChannel}
+          options={[
+            { value: "PUSH", label: "Push" },
+            { value: "SMS", label: "SMS" },
+            { value: "EMAIL", label: "Email" },
+          ]}
+        />
+      </div>
       <label className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">Nội dung mẫu</span>
         <textarea className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder="Chào {{name}}, ưu đãi tháng 9..." />

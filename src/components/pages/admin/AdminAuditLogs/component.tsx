@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import {
   useAdminAccounts,
   useAdminAuditLog,
@@ -58,24 +59,18 @@ export function AdminAuditLogsComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+        <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Hành động
-          <select
+          <AdminSelectField
+            label="Lọc theo hành động"
             value={action}
-            onChange={(event) => {
-              setAction(event.target.value);
-              setPage(1);
-            }}
-            className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
-          >
-            <option value="all">Tất cả hành động</option>
-            {actions.map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
-        </label>
+            onChange={(value) => { setAction(value); setPage(1); }}
+            options={[
+              { value: "all", label: "Tất cả hành động" },
+              ...actions.map((code) => ({ value: code, label: code })),
+            ]}
+          />
+        </div>
         <AdminSearchField
           label="Tìm nhật ký"
           placeholder="Tìm theo hành động, người thực hiện, đối tượng..."

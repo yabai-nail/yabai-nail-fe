@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { adminService } from "@/service";
 import { branchStatusLabels, type BranchRow } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const statusOptions = ["ACTIVE", "INACTIVE", "CLOSED"];
@@ -90,12 +91,16 @@ export function BranchModal({
                   <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="02839000002" inputMode="numeric" />
                 </label>
                 {isEdit ? (
-                  <label className="flex flex-col gap-2 text-sm">
+                  <div className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold text-admin-ink">Trạng thái</span>
-                    <select className={inputClass} value={status} onChange={(event) => setStatus(event.target.value)}>
-                      {statusOptions.map((code) => (<option key={code} value={code}>{branchStatusLabels[code] ?? code}</option>))}
-                    </select>
-                  </label>
+                    <AdminSelectField
+                      label="Trạng thái chi nhánh"
+                      fullWidth
+                      value={status}
+                      onChange={setStatus}
+                      options={statusOptions.map((code) => ({ value: code, label: branchStatusLabels[code] ?? code }))}
+                    />
+                  </div>
                 ) : (
                   <label className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold text-admin-ink">Múi giờ</span>

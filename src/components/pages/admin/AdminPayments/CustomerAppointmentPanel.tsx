@@ -9,6 +9,7 @@ import { AlertDialog, Button, Card, Chip, Modal } from "@heroui/react";
 import { useState, type FormEvent } from "react";
 import { formatVnd } from "@/lib/admin-format";
 import type { CheckoutInvoice, PaymentAppointmentSnapshot } from "./data";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const fieldClassName = "min-h-10 w-full rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink outline-none focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20";
 
@@ -74,7 +75,7 @@ export function CustomerAppointmentPanel({ invoice, isCancelled, onAppointmentCh
             <Modal.CloseTrigger className="rounded-lg" />
             <Modal.Header className="border-b border-admin-border px-5 py-4"><Modal.Heading className="text-lg font-bold text-admin-ink">{mode === "staff" ? "Đổi nhân viên" : "Đổi ngày giờ"}</Modal.Heading></Modal.Header>
             <form onSubmit={saveContext}><Modal.Body className="space-y-4 px-5 py-5">
-              {mode === "staff" ? <label className="block text-sm font-semibold text-admin-ink">Nhân viên<select className={`${fieldClassName} mt-2`} value={staffName} onChange={(event) => setStaffName(event.target.value)}><option>Mai Linh</option><option>Thảo Vy</option><option>Quỳnh Anh</option></select></label> : <><label className="block text-sm font-semibold text-admin-ink">Ngày<input className={`${fieldClassName} mt-2`} type="date" value={date} onChange={(event) => setDate(event.target.value)} required /></label><label className="block text-sm font-semibold text-admin-ink">Giờ<input className={`${fieldClassName} mt-2`} type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></label></>}
+              {mode === "staff" ? <div className="block text-sm font-semibold text-admin-ink">Nhân viên<AdminSelectField label="Nhân viên" fullWidth className="mt-2" value={staffName} onChange={setStaffName} options={["Mai Linh", "Thảo Vy", "Quỳnh Anh"].map((name) => ({ value: name, label: name }))} /></div> : <><label className="block text-sm font-semibold text-admin-ink">Ngày<input className={`${fieldClassName} mt-2`} type="date" value={date} onChange={(event) => setDate(event.target.value)} required /></label><label className="block text-sm font-semibold text-admin-ink">Giờ<input className={`${fieldClassName} mt-2`} type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></label></>}
             </Modal.Body><Modal.Footer className="border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" className="rounded-lg border-admin-border" onPress={() => setMode(null)}>Đóng</Button><Button type="submit" variant="primary" className="rounded-lg">Lưu thay đổi</Button></Modal.Footer></form>
           </Modal.Dialog></Modal.Container></Modal.Backdrop>
         </Modal>
