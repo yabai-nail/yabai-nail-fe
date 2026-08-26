@@ -3,7 +3,7 @@
 > Lưu ý: đây là snapshot phân tích ngày 2026-08-21, không phải nguồn inventory
 > hiện hành. Bản đồ method/path mới nhất nằm tại `docs/frontend-api-map.md`.
 
-Cập nhật: 2026-08-21
+Cập nhật: 2026-08-26 (bổ sung BE-GAP-011..013 từ đợt rà E2E; BE-GAP-001..010 vẫn là snapshot 2026-08-21)
 
 Consumer: `yabai-nail-fe`
 
@@ -21,6 +21,9 @@ Consumer: `yabai-nail-fe`
 | BE-GAP-008 | P1 | Nhân viên/hoa hồng | Chưa có aggregate branch compensation/performance cho bảng UI. |
 | BE-GAP-009 | P2 | Cài đặt | Thiếu cấu hình theo chi nhánh cho booking/payment/automation/notification/backup. |
 | BE-GAP-010 | P1 | API contract | Swagger không liệt kê đầy đủ registry chuẩn. |
+| BE-GAP-011 | P1 | Mẫu nail | Không có endpoint tạo và liệt kê đề xuất mẫu nail. |
+| BE-GAP-012 | P2 | Chi nhánh | `/branches` không trả số điện thoại chi nhánh. |
+| BE-GAP-013 | P2 | Dịch vụ | Không có `DELETE` cho dịch vụ. |
 
 ## BE-GAP-001 — Hội thoại và gửi tin nhắn
 
@@ -193,6 +196,37 @@ Yêu cầu BE:
 - schema đầy đủ cho envelope, request, response, error, enum;
 - khai báo `Idempotency-Key`, `If-Match`, auth, query và status code trên từng operation;
 - CI so sánh OpenAPI operation set với `operation-registry.ts` để chặn lệch contract.
+
+## BE-GAP-011 — Đề xuất mẫu nail không có đường sinh ra
+
+Phát hiện khi rà E2E ngày 2026-08-26. `POST /admin/nail-design-proposals/{id}/decision`
+tồn tại, nhưng **không một dòng code nào trong backend tạo ra `NAIL_DESIGN_PROPOSAL`**:
+không endpoint, không seed, không migration. Cũng không có endpoint liệt kê, nên màn
+`/admin/nail-designs` phải bắt admin **gõ tay UUID đề xuất**.
+
+Hệ quả: thao tác duyệt đề xuất không thể kiểm thử và trên thực tế không dùng được.
+
+Đề xuất tối thiểu: endpoint cho khách/nhân viên gửi đề xuất, và `GET /admin/nail-design-proposals`
+có phân trang + filter theo trạng thái.
+
+Ghi chú: BE-GAP-001 (hội thoại) cùng dạng — `PATCH .../conversations/{id}` và
+`POST .../conversations/{id}/messages` đều thao tác lên `CONVERSATION` mà không có
+đường nào tạo ra nó.
+
+## BE-GAP-012 — `/branches` thiếu số điện thoại
+
+Payload trả về chỉ có `id`, `name`, `address`, `timezone`, `active`, `version`.
+Bảng chi nhánh của admin có cột "Điện thoại" và luôn hiển thị `—`.
+
+Đề xuất: thêm `phone` vào branch payload, hoặc bỏ cột nếu chi nhánh không có số riêng.
+
+## BE-GAP-013 — Không có `DELETE` cho dịch vụ
+
+Toàn bộ operation catalog không có một `DELETE` nào. Màn dịch vụ từng có nút "Xóa"
+không nối được gì; nút đó đã gỡ ở `231a93a`, dịch vụ ngừng bán bằng cách tắt hiển thị.
+
+Đề xuất: hoặc xác nhận "tắt hiển thị" là cơ chế chính thức và ghi vào spec, hoặc bổ
+sung soft-delete có kiểm ràng buộc lịch hẹn đang tham chiếu.
 
 ## Những API không thiếu
 
