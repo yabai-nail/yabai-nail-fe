@@ -23,7 +23,9 @@ export type Appointment = {
   readonly time: string;
   readonly customer: string;
   readonly service: string;
-  readonly status: "Đã xác nhận" | "Chờ xác nhận";
+  // Any lifecycle label the shared status map can produce, not the two this
+  // panel used to collapse everything into.
+  readonly status: string;
 };
 
 export type StaffMember = {
