@@ -460,10 +460,11 @@ export interface AdminStaffShiftDraft {
 
 export interface AdminLeaveRequest {
   readonly id: string;
+  readonly requestId?: string;
   readonly staffId: string;
   readonly branchId: string;
-  readonly startsAt: string;
-  readonly endsAt: string;
+  readonly from: string;
+  readonly to: string;
   readonly reason?: string;
   readonly status: string;
   readonly decidedAt?: string;
@@ -837,6 +838,7 @@ export interface AdminPromotionIssuance {
 
 export interface AdminNotificationCampaign {
   readonly campaignId: string;
+  readonly title?: string;
   readonly channel?: string;
   readonly status: string;
   readonly scheduledAt?: string;

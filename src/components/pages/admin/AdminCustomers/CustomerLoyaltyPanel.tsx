@@ -23,6 +23,7 @@ export function CustomerLoyaltyPanel({
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
   const promotionsQuery = useAdminPromotions();
   const benefits = benefitsQuery.data;
+  const tierLabel = benefits?.tier ? ({ MEMBER: "Thành viên", SILVER: "Bạc", GOLD: "Vàng", PLATINUM: "Bạch kim" }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
   const history = historyQuery.data?.items ?? [];
   const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 
@@ -90,7 +91,7 @@ export function CustomerLoyaltyPanel({
         <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
             <dt className="text-admin-muted">Hạng</dt>
-            <dd className="mt-1 font-bold text-admin-ink">{benefits?.tier ?? "—"}</dd>
+            <dd className="mt-1 font-bold text-admin-ink">{tierLabel}</dd>
           </div>
           <div>
             <dt className="text-admin-muted">Điểm</dt>

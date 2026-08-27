@@ -18,7 +18,7 @@ import {
   type AdminStaffMember,
 } from "@/service";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
-import type { CheckoutInvoice } from "./data";
+import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
 import { calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
@@ -139,9 +139,22 @@ export function AdminPaymentsComponent() {
   // + effect) keeps setState out of an effect — the panels' `onChange`
   // handlers hydrate the working state below.
   const seededInvoice = useMemo<CheckoutInvoice | null>(() => {
-    if (appointment) return buildInvoiceFromServer(appointment, lookups);
+    if (appointment) {
+      const invoice = buildInvoiceFromServer(appointment, lookups);
+      const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
+      if (captured) {
+        const method = captured.method.toLowerCase();
+        return {
+          ...invoice,
+          paymentMethod: (["cash", "card", "paypay", "bank_transfer", "other"].includes(method) ? method : "other") as PaymentMethod,
+          status: "paid",
+          paidAt: typeof captured.createdAt === "string" ? captured.createdAt : null,
+        };
+      }
+      return invoice;
+    }
     return null;
-  }, [appointment, lookups]);
+  }, [appointment, lookups, payments.data]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
@@ -267,7 +280,7 @@ export function AdminPaymentsComponent() {
           <ul className="mt-2 space-y-1 text-xs text-admin-muted">
             {payments.data.items.map((payment) => (
               <li key={payment.id}>
-                {payment.method} · {formatMoney(payment.amount)} · {payment.status}
+                {paymentMethodLabel(payment.method)} · {formatMoney(payment.amount)} · {paymentStatusLabel(payment.status)}
               </li>
             ))}
           </ul>

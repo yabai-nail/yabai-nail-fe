@@ -66,11 +66,17 @@ const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
   AWAITING_PAYMENT: "Chờ thanh toán",
   COMPLETED: "Hoàn tất",
   CANCELLED: "Đã huỷ",
+  CANCELLED_BY_CUSTOMER: "Khách đã huỷ",
+  CANCELLED_BY_SALON: "Salon đã huỷ",
   NO_SHOW: "Không đến",
 };
 
 export function appointmentStatusLabel(status: string): string {
   return APPOINTMENT_STATUS_LABELS[status.toUpperCase()] ?? status;
+}
+
+export function membershipTierLabel(tier: string): string {
+  return { MEMBER: "Thành viên", SILVER: "Bạc", GOLD: "Vàng", PLATINUM: "Bạch kim" }[tier.toUpperCase()] ?? tier;
 }
 
 /**

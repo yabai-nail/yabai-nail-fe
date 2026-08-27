@@ -455,6 +455,11 @@ export const adminService = {
       "POST /api/v1/admin/branches/{branchId}/leave-requests",
       { path: { branchId }, body: draft, idempotencyKey },
     ),
+  leaveRequests: (branchId: string) =>
+    executeApiOperation<BackendList<AdminLeaveRequest>>(
+      "GET /api/v1/admin/branches/{branchId}/leave-requests",
+      { path: { branchId } },
+    ),
   decideLeaveRequest: (
     branchId: string,
     requestId: string,
@@ -639,6 +644,10 @@ export const adminService = {
       body: draft,
       idempotencyKey,
     }),
+  notificationCampaigns: () =>
+    executeApiOperation<BackendList<AdminNotificationCampaign>>(
+      "GET /api/v1/admin/notification-campaigns",
+    ),
   cancelNotificationCampaign: (
     campaignId: string,
     input?: Readonly<Record<string, unknown>>,

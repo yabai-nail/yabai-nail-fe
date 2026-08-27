@@ -18,6 +18,7 @@ import {
   summarizeCheckIn,
   summarizeCustomer,
   summarizeMembership,
+  membershipTierLabel,
   type CheckInResolutionView,
   type CustomerHit,
   type MembershipResolutionView,
@@ -109,7 +110,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   }));
   const paymentOptions = (payments.data?.items ?? []).map((payment) => ({
     value: payment.id,
-    label: `${formatMoney(payment.amount)} · ${payment.method}`,
+    label: `${formatMoney(payment.amount)} · ${{ cash: "Tiền mặt", card: "Thẻ", paypay: "PayPay", bank_transfer: "Chuyển khoản" }[payment.method.toLowerCase()] ?? payment.method}`,
   }));
 
   return (
@@ -178,7 +179,7 @@ function CustomerCard({ customer }: Readonly<{ customer: ResolvedCustomer }>) {
       <span className="text-sm font-semibold text-admin-ink">{customer.name}</span>
       <span className="font-mono text-sm text-admin-muted">{customer.phone}</span>
       <span className="text-xs text-admin-muted">
-        Hạng {customer.tier} · {customer.points.toLocaleString("vi-VN")} điểm
+        Hạng {membershipTierLabel(customer.tier)} · {customer.points.toLocaleString("vi-VN")} điểm
       </span>
     </div>
   );

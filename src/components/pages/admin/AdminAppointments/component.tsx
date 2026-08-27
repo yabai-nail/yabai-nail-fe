@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -200,29 +200,11 @@ export function AdminAppointmentsComponent({
     services: (servicesData?.items ?? []).map((s) => resolveService([s.id], lookups.services)),
     staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff)),
   }), [customersData, servicesData, staffData, lookups]);
-  // Version and status stay off the fixture Appointment; keep a side lookup so
-  // `If-Match` headers can attach to reschedule / cancel mutations.
-  const versionsById = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const item of data?.appointments ?? []) map[item.id] = item.version;
-    return map;
-  }, [data]);
-  const isServerBacked = (id: string) => id in versionsById;
   const source = useMemo<ReadonlyArray<Appointment>>(
     () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups)),
     [data, lookups],
   );
-  // Optimistic overlays keep the calendar responsive while each existing
-  // adminService mutation is in flight, then disappear after the server reply.
-  const [localCreates, setLocalCreates] = useState<ReadonlyArray<Appointment>>([]);
-  const [localEdits, setLocalEdits] = useState<Readonly<Record<string, AppointmentDraft>>>({});
-  const [localCancels, setLocalCancels] = useState<ReadonlySet<string>>(() => new Set());
-  const appointments = useMemo<ReadonlyArray<Appointment>>(() => {
-    const merged = source
-      .filter((a) => !localCancels.has(a.id))
-      .map((a) => (localEdits[a.id] ? { ...a, ...localEdits[a.id] } : a));
-    return [...merged, ...localCreates];
-  }, [source, localCreates, localEdits, localCancels]);
+  const appointments = source;
   // The calendar opens on the salon's today. It used to open on
   // DEFAULT_APPOINTMENT_DATE — the date the demo fixtures were written for —
   // so the screen asked the API for 16/08/2026 and looked empty forever.
@@ -243,7 +225,6 @@ export function AdminAppointmentsComponent({
   }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const localId = useRef(1);
   const visibleDayAppointments = useMemo(
     () => filterAppointments(appointments, { date: selectedDate, status }),
     [appointments, selectedDate, status],
@@ -268,67 +249,34 @@ export function AdminAppointmentsComponent({
   // Asia/Ho_Chi_Minh, which shifted every saved appointment two hours early.
   const toIso = (date: string, time: string): string => zonedIso(date, time);
 
-  function saveAppointment(draft: AppointmentDraft) {
-    // Optimistic overlay first so the calendar reflects the intent
-    // immediately; the server round-trip (below) will reconcile via
-    // `mutateAppointments` on success.
-    if (formMode === "edit" && selectedAppointment) {
-      setLocalEdits((current) => ({ ...current, [selectedAppointment.id]: draft }));
-    } else {
-      const id = `appointment-local-${localId.current++}`;
-      setLocalCreates((current) => [...current, { ...draft, id }]);
-      setSelectedId(id);
+  async function saveAppointment(draft: AppointmentDraft) {
+    if (!branchId) throw new Error("Hãy chọn chi nhánh trước khi lưu lịch hẹn.");
+    if (formMode === "edit" && selectedAppointment?.version !== undefined) {
+      await adminService.rescheduleAppointment(
+        branchId,
+        selectedAppointment.id,
+        {
+          startsAt: toIso(draft.date, draft.startTime),
+          staffId: draft.staff.id,
+        },
+        selectedAppointment.version,
+      );
       setSelectedDate(draft.date);
+    } else if (formMode === "create") {
+      const created = await adminService.createAppointment(branchId, {
+        customerId: draft.customer.id,
+        staffId: draft.staff.id,
+        serviceIds: [draft.service.id],
+        startsAt: toIso(draft.date, draft.startTime),
+        note: draft.note,
+      });
+      setSelectedId(created.id);
+      setSelectedDate(draft.date);
+    } else {
+      throw new Error("Lịch hẹn chưa tải xong. Vui lòng thử lại.");
     }
+    await mutateAppointments();
     setFormMode(null);
-
-    if (!branchId) return; // Nothing to persist to when signed out.
-
-    if (formMode === "edit" && selectedAppointment && isServerBacked(selectedAppointment.id)) {
-      const appointmentId = selectedAppointment.id;
-      void (async () => {
-        try {
-          await adminService.rescheduleAppointment(
-            branchId,
-            appointmentId,
-            {
-              startsAt: toIso(draft.date, draft.startTime),
-              endsAt: toIso(draft.date, draft.endTime),
-              staffId: draft.staff.id,
-            },
-            versionsById[appointmentId],
-          );
-          setLocalEdits((current) => {
-            if (!(appointmentId in current)) return current;
-            const next = { ...current };
-            delete next[appointmentId];
-            return next;
-          });
-          void mutateAppointments();
-        } catch {
-          // Overlay stays; a follow-up wires a toast for real feedback.
-        }
-      })();
-    } else if (formMode !== "edit") {
-      void (async () => {
-        try {
-          await adminService.createAppointment(branchId, {
-            customerId: draft.customer.id,
-            staffId: draft.staff.id,
-            serviceIds: [draft.service.id],
-            startsAt: toIso(draft.date, draft.startTime),
-            endsAt: toIso(draft.date, draft.endTime),
-            note: draft.note,
-          });
-          // Drop the placeholder local create; the server's canonical row
-          // will land through the revalidate below.
-          setLocalCreates((current) => current.slice(0, -1));
-          void mutateAppointments();
-        } catch {
-          // Overlay stays.
-        }
-      })();
-    }
   }
 
   // Server-side lifecycle transitions the detail panel exposes. Each call
@@ -442,36 +390,26 @@ export function AdminAppointmentsComponent({
     }
   }
 
-  function confirmCancel() {
-    if (!selectedAppointment) return;
-    const appointmentId = selectedAppointment.id;
-    setLocalCancels((current) => {
-      const next = new Set(current);
-      next.add(appointmentId);
-      return next;
-    });
-    setIsCancelOpen(false);
-
-    if (!branchId || !isServerBacked(appointmentId)) return;
-    void (async () => {
-      try {
-        await adminService.cancelAppointment(
-          branchId,
-          appointmentId,
-          { reasonCode: "ADMIN_CALENDAR_CANCEL" },
-          versionsById[appointmentId],
-        );
-        setLocalCancels((current) => {
-          if (!current.has(appointmentId)) return current;
-          const next = new Set(current);
-          next.delete(appointmentId);
-          return next;
-        });
-        void mutateAppointments();
-      } catch {
-        // Overlay stays.
-      }
-    })();
+  const [cancelPending, setCancelPending] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  async function confirmCancel() {
+    if (!branchId || !selectedAppointment || selectedAppointment.version === undefined) return;
+    setCancelPending(true);
+    setCancelError(null);
+    try {
+      await adminService.cancelAppointment(
+        branchId,
+        selectedAppointment.id,
+        { reasonCode: "ADMIN_CALENDAR_CANCEL" },
+        selectedAppointment.version,
+      );
+      await mutateAppointments();
+      setIsCancelOpen(false);
+    } catch (thrown) {
+      setCancelError(thrown instanceof Error ? thrown.message : "Không hủy được lịch hẹn.");
+    } finally {
+      setCancelPending(false);
+    }
   }
 
   return (
@@ -522,7 +460,7 @@ export function AdminAppointmentsComponent({
                 runLifecycle(action, selectedAppointment.id, selectedAppointment.version)
               }
               onEdit={() => setFormMode("edit")}
-              onCancel={() => setIsCancelOpen(true)}
+              onCancel={() => { setCancelError(null); setIsCancelOpen(true); }}
               onMessage={() => router.push("/admin/messages")}
               onAssignStaff={
                 selectedAppointment.version !== undefined
@@ -567,7 +505,7 @@ export function AdminAppointmentsComponent({
         />
       ) : null}
       {isCancelOpen && selectedAppointment ? (
-        <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} />
+        <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} pending={cancelPending} error={cancelError} />
       ) : null}
       {isAssignOpen && selectedAppointment ? (
         <AssignStaffModal

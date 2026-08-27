@@ -12,7 +12,6 @@ import type {
   AppointmentDraft,
   AppointmentService,
   AppointmentStaff,
-  AppointmentStatus,
 } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -30,18 +29,27 @@ export interface AppointmentFormOptions {
 
 const fieldClassName = "min-h-10 w-full rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink outline-none focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20";
 
+function endTimeFor(startTime: string, durationMinutes: number): string {
+  const [hour, minute] = startTime.split(":").map(Number);
+  const total = hour * 60 + minute + durationMinutes;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 function initialDraft(
   appointment: Appointment | null,
   defaultDate: string,
   options: AppointmentFormOptions,
 ): AppointmentDraft {
+  const customer = options.customers[0] ?? { id: "", name: "", initials: "", phone: "", birthday: "", segment: "regular", preference: "", visits: 0, totalSpend: 0 };
+  const service = options.services[0] ?? { id: "", name: "", durationMinutes: 60 };
+  const staff = options.staff[0] ?? { id: "", name: "", initials: "" };
   return appointment ?? {
     date: defaultDate,
     startTime: "09:00",
-    endTime: "10:30",
-    customer: options.customers[0],
-    service: options.services[0],
-    staff: options.staff[0],
+    endTime: endTimeFor("09:00", service.durationMinutes),
+    customer,
+    service,
+    staff,
     status: "confirmed",
     note: "",
   };
@@ -60,7 +68,7 @@ export function AppointmentFormModal({
   defaultDate: string;
   options: AppointmentFormOptions;
   onClose: () => void;
-  onSubmit: (draft: AppointmentDraft) => void;
+  onSubmit: (draft: AppointmentDraft) => Promise<void>;
 }>) {
   // A branch with no customers, services or staff yet cannot produce a valid
   // appointment. Say so plainly instead of rendering a form whose submit can
@@ -76,8 +84,9 @@ export function AppointmentFormModal({
   );
   const [errors, setErrors] = useState<AppointmentDraftErrors>({});
   const [formMessage, setFormMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validateAppointmentDraft(draft);
     setErrors(nextErrors);
@@ -89,7 +98,14 @@ export function AppointmentFormModal({
       return;
     }
 
-    onSubmit(draft);
+    setSubmitting(true);
+    try {
+      await onSubmit(draft);
+    } catch (thrown) {
+      setFormMessage(thrown instanceof Error ? thrown.message : "Không lưu được lịch hẹn.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -123,18 +139,17 @@ export function AppointmentFormModal({
                   the bottom: the note field and both buttons were unreachable. */}
               <Modal.Body className="grid min-h-0 flex-1 gap-4 overflow-y-auto px-5 py-5 sm:grid-cols-2">
                 <Field id="appointment-date" label="Ngày" error={errors.date}><input id="appointment-date" aria-invalid={Boolean(errors.date)} aria-describedby={errors.date ? "appointment-date-error" : undefined} className={fieldClassName} type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} /></Field>
-                <Field id="appointment-status" label="Trạng thái" isControlLabelled={false}><AdminSelectField label="Trạng thái lịch hẹn" fullWidth value={draft.status} onChange={(value) => setDraft({ ...draft, status: value as AppointmentStatus })} options={[{ value: "confirmed", label: "Đã xác nhận" }, { value: "pending", label: "Chờ xác nhận" }, { value: "cancelled", label: "Đã hủy" }]} /></Field>
-                <Field id="appointment-start" label="Giờ bắt đầu" error={errors.startTime}><input id="appointment-start" aria-invalid={Boolean(errors.startTime)} aria-describedby={errors.startTime ? "appointment-start-error" : undefined} className={fieldClassName} type="time" value={draft.startTime} onChange={(event) => setDraft({ ...draft, startTime: event.target.value })} /></Field>
-                <Field id="appointment-end" label="Giờ kết thúc" error={errors.endTime}><input id="appointment-end" aria-invalid={Boolean(errors.endTime)} aria-describedby={errors.endTime ? "appointment-end-error" : undefined} className={fieldClassName} type="time" value={draft.endTime} onChange={(event) => setDraft({ ...draft, endTime: event.target.value })} /></Field>
-                <Field id="appointment-customer" label="Khách hàng" error={errors.customer} isControlLabelled={false}><AdminSelectField label="Khách hàng" fullWidth isInvalid={Boolean(errors.customer)} describedBy={errors.customer ? "appointment-customer-error" : undefined} value={draft.customer.id} onChange={(value) => setDraft({ ...draft, customer: options.customers.find((item) => item.id === value) ?? options.customers[0] })} options={options.customers.map((item) => ({ value: item.id, label: item.name }))} /></Field>
-                <Field id="appointment-service" label="Dịch vụ" error={errors.service} isControlLabelled={false}><AdminSelectField label="Dịch vụ" fullWidth isInvalid={Boolean(errors.service)} describedBy={errors.service ? "appointment-service-error" : undefined} value={draft.service.id} onChange={(value) => setDraft({ ...draft, service: options.services.find((item) => item.id === value) ?? options.services[0] })} options={options.services.map((item) => ({ value: item.id, label: item.name }))} /></Field>
+                <Field id="appointment-start" label="Giờ bắt đầu" error={errors.startTime}><input id="appointment-start" aria-invalid={Boolean(errors.startTime)} aria-describedby={errors.startTime ? "appointment-start-error" : undefined} className={fieldClassName} type="time" value={draft.startTime} onChange={(event) => setDraft({ ...draft, startTime: event.target.value, endTime: endTimeFor(event.target.value, draft.service.durationMinutes) })} /></Field>
+                <Field id="appointment-end" label="Giờ kết thúc"><input id="appointment-end" className={`${fieldClassName} opacity-70`} type="time" value={draft.endTime} readOnly aria-readonly="true" /></Field>
+                {appointment ? <Field id="appointment-customer" label="Khách hàng"><p className={`${fieldClassName} flex items-center`}>{draft.customer.name}</p></Field> : <Field id="appointment-customer" label="Khách hàng" error={errors.customer} isControlLabelled={false}><AdminSelectField label="Khách hàng" fullWidth isInvalid={Boolean(errors.customer)} describedBy={errors.customer ? "appointment-customer-error" : undefined} value={draft.customer.id} onChange={(value) => setDraft({ ...draft, customer: options.customers.find((item) => item.id === value) ?? draft.customer })} options={options.customers.map((item) => ({ value: item.id, label: item.name }))} /></Field>}
+                {appointment ? <Field id="appointment-service" label="Dịch vụ"><p className={`${fieldClassName} flex items-center`}>{draft.service.name}</p></Field> : <Field id="appointment-service" label="Dịch vụ" error={errors.service} isControlLabelled={false}><AdminSelectField label="Dịch vụ" fullWidth isInvalid={Boolean(errors.service)} describedBy={errors.service ? "appointment-service-error" : undefined} value={draft.service.id} onChange={(value) => { const service = options.services.find((item) => item.id === value) ?? draft.service; setDraft({ ...draft, service, endTime: endTimeFor(draft.startTime, service.durationMinutes) }); }} options={options.services.map((item) => ({ value: item.id, label: item.name }))} /></Field>}
                 <Field id="appointment-staff" label="Nhân viên" error={errors.staff} isControlLabelled={false}><AdminSelectField label="Nhân viên" fullWidth isInvalid={Boolean(errors.staff)} describedBy={errors.staff ? "appointment-staff-error" : undefined} value={draft.staff.id} onChange={(value) => setDraft({ ...draft, staff: options.staff.find((item) => item.id === value) ?? options.staff[0] })} options={options.staff.map((item) => ({ value: item.id, label: item.name }))} /></Field>
-                <div className="sm:col-span-2"><Field id="appointment-note" label="Ghi chú"><textarea id="appointment-note" className={`${fieldClassName} min-h-24 py-2`} value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} placeholder="Yêu cầu hoặc lưu ý của khách..." /></Field></div>
+                {!appointment ? <div className="sm:col-span-2"><Field id="appointment-note" label="Ghi chú"><textarea id="appointment-note" className={`${fieldClassName} min-h-24 py-2`} value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} placeholder="Yêu cầu hoặc lưu ý của khách..." /></Field></div> : null}
                 {formMessage ? <p role="alert" className="rounded-lg bg-admin-soft px-3 py-2 text-sm text-admin-accent sm:col-span-2">{formMessage}</p> : null}
               </Modal.Body>
               <Modal.Footer className="border-t border-admin-border px-5 py-4">
-                <Button type="button" variant="outline" className="rounded-lg border-admin-border" onPress={onClose}>Đóng</Button>
-                <Button type="submit" variant="primary" className="rounded-lg">{appointment ? "Lưu thay đổi" : "Tạo lịch hẹn"}</Button>
+                <Button type="button" variant="outline" className="rounded-lg border-admin-border" isDisabled={submitting} onPress={onClose}>Đóng</Button>
+                <Button type="submit" variant="primary" className="rounded-lg" isDisabled={submitting}>{submitting ? "Đang lưu…" : appointment ? "Lưu thay đổi" : "Tạo lịch hẹn"}</Button>
               </Modal.Footer>
             </form>
             )}

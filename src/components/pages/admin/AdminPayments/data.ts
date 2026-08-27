@@ -96,3 +96,11 @@ export const paymentMethodLabels: Record<PaymentMethod, string> = {
   other: "Khác",
 };
 
+export function paymentMethodLabel(method: string): string {
+  return paymentMethodLabels[method.toLowerCase() as PaymentMethod] ?? method;
+}
+
+export function paymentStatusLabel(status: string): string {
+  return { SUCCEEDED: "Thành công", REQUESTED: "Đang yêu cầu", PROCESSING: "Đang xử lý", RETRY_SCHEDULED: "Chờ thử lại", FAILED: "Thất bại" }[status.toUpperCase()] ?? status;
+}
+

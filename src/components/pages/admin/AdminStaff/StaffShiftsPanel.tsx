@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
+  useAdminLeaveRequests,
   useAdminStaffShifts,
   type AdminStaffShift,
 } from "@/service";
@@ -21,12 +22,35 @@ export function StaffShiftsPanel({
   staffId,
 }: Readonly<{ branchId: string; staffId: string }>) {
   const shifts = useAdminStaffShifts(branchId);
+  const leaveRequests = useAdminLeaveRequests(branchId);
   const staffShifts = useMemo(
     () => ((shifts.data?.items ?? []) as AdminStaffShift[]).filter((shift) => shift.staffId === staffId),
     [shifts.data, staffId],
   );
 
   const [openMode, setOpenMode] = useState<"shift" | "leave" | null>(null);
+  const [decisionPending, setDecisionPending] = useState<string | null>(null);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const staffLeaveRequests = (leaveRequests.data?.items ?? []).filter((request) => request.staffId === staffId);
+
+  async function decide(requestId: string, decision: "APPROVE" | "REJECT") {
+    setDecisionPending(requestId);
+    setDecisionError(null);
+    try {
+      await adminService.decideLeaveRequest(
+        branchId,
+        requestId,
+        decision === "APPROVE"
+          ? { decision, resolution: { action: "CANCEL" } }
+          : { decision },
+      );
+      await Promise.all([leaveRequests.mutate(), shifts.mutate()]);
+    } catch (thrown) {
+      setDecisionError(thrown instanceof Error ? thrown.message : "Không xử lý được yêu cầu nghỉ.");
+    } finally {
+      setDecisionPending(null);
+    }
+  }
 
   return (
     <section aria-labelledby="staff-shifts-heading" className="space-y-2 border-t border-admin-border pt-4">
@@ -53,11 +77,34 @@ export function StaffShiftsPanel({
           {staffShifts.slice(0, 20).map((shift) => (
             <li key={shift.id} className="flex items-center justify-between gap-2">
               <span className="text-admin-ink">{shift.localDate.split("-").reverse().join("/")} · {shift.startLocalTime.slice(0, 5)} → {shift.endLocalTime.slice(0, 5)}</span>
-              <span className="text-[0.65rem] text-admin-muted">{shift.approvalStatus ?? ""}</span>
+              <span className="text-[0.65rem] text-admin-muted">{{ APPROVED: "Đã duyệt", PENDING: "Chờ duyệt", REJECTED: "Từ chối" }[shift.approvalStatus ?? ""] ?? shift.approvalStatus ?? ""}</span>
             </li>
           ))}
         </ul>
       )}
+
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-admin-ink">Yêu cầu nghỉ</h4>
+        {staffLeaveRequests.length === 0 ? (
+          <p className="text-xs text-admin-muted">Chưa có yêu cầu nghỉ.</p>
+        ) : (
+          <ul className="space-y-2">
+            {staffLeaveRequests.map((request) => (
+              <li key={request.id} className="rounded-lg border border-admin-border p-2 text-xs">
+                <p className="text-admin-ink">{request.from?.split("-").reverse().join("/")} → {request.to?.split("-").reverse().join("/")}</p>
+                <p className="text-admin-muted">{request.reason || "Không có lý do"} · {{ PENDING: "Chờ duyệt", APPROVED: "Đã duyệt", REJECTED: "Đã từ chối" }[request.status] ?? request.status}</p>
+                {request.status === "PENDING" ? (
+                  <div className="mt-2 flex gap-2">
+                    <Button size="sm" variant="primary" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "APPROVE")}>Duyệt (hủy lịch trùng)</Button>
+                    <Button size="sm" variant="outline" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "REJECT")}>Từ chối</Button>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+        {decisionError ? <p role="alert" className="text-xs text-admin-danger">{decisionError}</p> : null}
+      </div>
 
       {openMode ? (
         <ShiftOrLeaveDialog
@@ -65,7 +112,7 @@ export function StaffShiftsPanel({
           staffId={staffId}
           mode={openMode}
           onClose={() => setOpenMode(null)}
-          onSaved={() => void shifts.mutate()}
+          onSaved={() => { void shifts.mutate(); void leaveRequests.mutate(); }}
         />
       ) : null}
     </section>

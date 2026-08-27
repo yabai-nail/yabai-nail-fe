@@ -7,6 +7,8 @@ import { CustomerLoyaltyPanel } from "./CustomerLoyaltyPanel";
 import { CustomerNotesPanel } from "./CustomerNotesPanel";
 import type { Customer } from "./data";
 
+const rankLabels = { gold: "Vàng", silver: "Bạc", bronze: "Đồng", none: "Chưa xếp hạng" } as const;
+
 export function CustomerDetailPanel({
   customer,
   branchId,
@@ -48,7 +50,7 @@ export function CustomerDetailPanel({
           <div><dt className="text-admin-muted">Tổng chi tiêu</dt><dd className="mt-1 font-bold text-admin-accent">{formatMoney(customer.totalSpend)}</dd></div>
           <div><dt className="text-admin-muted">Lần đến</dt><dd className="mt-1 font-bold">{customer.visits}</dd></div>
           <div><dt className="text-admin-muted">Điểm</dt><dd className="mt-1 font-bold">{formatNumber(customer.points)}</dd></div>
-          <div><dt className="text-admin-muted">Hạng</dt><dd className="mt-1 font-bold capitalize">{customer.rank}</dd></div>
+          <div><dt className="text-admin-muted">Hạng</dt><dd className="mt-1 font-bold">{rankLabels[customer.rank]}</dd></div>
         </dl>
         {/* The real service history is rendered by CustomerLoyaltyPanel below
             from the nail-history read model; there is no second, local copy. */}

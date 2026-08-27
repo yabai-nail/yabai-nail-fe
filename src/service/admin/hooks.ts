@@ -28,6 +28,8 @@ import type {
   AdminConversation,
   AdminMessage,
   AdminNailDesign,
+  AdminLeaveRequest,
+  AdminNotificationCampaign,
   AdminNotificationCampaignMetrics,
   AdminPaymentRefund,
   AdminPromotion,
@@ -355,6 +357,19 @@ export function useAdminNotificationCampaignMetrics(campaignId: string | null) {
   return useApiOperation<AdminNotificationCampaignMetrics>(
     campaignId ? "GET /api/v1/admin/notification-campaigns/{campaignId}/metrics" : null,
     { path: campaignId ? { campaignId } : undefined },
+  );
+}
+
+export function useAdminNotificationCampaigns() {
+  return useApiOperation<BackendList<AdminNotificationCampaign>>(
+    "GET /api/v1/admin/notification-campaigns",
+  );
+}
+
+export function useAdminLeaveRequests(branchId: string | null) {
+  return useApiOperation<BackendList<AdminLeaveRequest>>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/leave-requests" : null,
+    { path: branchId ? { branchId } : undefined },
   );
 }
 

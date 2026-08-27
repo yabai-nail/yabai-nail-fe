@@ -57,6 +57,7 @@ const MARKETING_OPERATION_IDS = [
   "PATCH /api/v1/admin/promotions/{promotionId}",
   "POST /api/v1/admin/promotions/{promotionId}/issuances",
   "POST /api/v1/admin/notification-campaigns",
+  "GET /api/v1/admin/notification-campaigns",
   "POST /api/v1/admin/notification-campaigns/{campaignId}/cancellation",
   "GET /api/v1/admin/notification-campaigns/{campaignId}/metrics",
   "POST /api/v1/admin/notification-campaigns/audience-previews",
@@ -121,6 +122,7 @@ const STAFF_OPERATION_IDS = [
   "GET /api/v1/admin/branches/{branchId}/shifts",
   "POST /api/v1/admin/branches/{branchId}/shifts",
   "POST /api/v1/admin/branches/{branchId}/leave-requests",
+  "GET /api/v1/admin/branches/{branchId}/leave-requests",
   "POST /api/v1/admin/branches/{branchId}/leave-requests/{requestId}/decision",
   "GET /api/v1/admin/branches/{branchId}/staff-performance",
 ] as const;
@@ -214,6 +216,7 @@ describe("adminService marketing surface", () => {
       adminService.updatePromotion,
       adminService.issuePromotion,
       adminService.createNotificationCampaign,
+      adminService.notificationCampaigns,
       adminService.cancelNotificationCampaign,
       adminService.notificationCampaignMetrics,
       adminService.notificationCampaignAudiencePreview,
@@ -324,7 +327,7 @@ describe("adminService finance and audit surface", () => {
     await adminService.refundPayment(
       "branch-a",
       "payment-a",
-      { amountVnd: 50_000, reasonCode: "CUSTOMER_REQUEST" },
+      { amount: 50_000, reasonCode: "CUSTOMER_REQUEST" },
       4,
       "refund-key",
     );
@@ -333,7 +336,7 @@ describe("adminService finance and audit surface", () => {
       "POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds",
       {
         path: { branchId: "branch-a", paymentId: "payment-a" },
-        body: { amountVnd: 50_000, reasonCode: "CUSTOMER_REQUEST" },
+        body: { amount: 50_000, reasonCode: "CUSTOMER_REQUEST" },
         version: 4,
         idempotencyKey: "refund-key",
       },
@@ -386,6 +389,7 @@ describe("adminService staff surface", () => {
       adminService.staffShifts,
       adminService.createStaffShift,
       adminService.createLeaveRequest,
+      adminService.leaveRequests,
       adminService.decideLeaveRequest,
       adminService.staffPerformance,
     ]) {

@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { adminService, useAdminNotificationCampaignMetrics, useAdminPromotions } from "@/service";
+import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
 import {
@@ -42,6 +42,12 @@ export function AdminMarketingComponent() {
   const [statusPending, setStatusPending] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [managedCampaign, setManagedCampaign] = useState<ManagedCampaign | null>(null);
+  const campaigns = useAdminNotificationCampaigns();
+  const persistedCampaigns = (campaigns.data?.items ?? []).map((campaign) => ({
+    id: campaign.campaignId,
+    name: campaign.title ?? "Chiến dịch chưa có tên",
+  }));
+  const currentCampaign = managedCampaign ?? persistedCampaigns[0] ?? null;
 
   /**
    * Nothing else in this screen can move a promotion off DRAFT, and issuance
@@ -171,9 +177,19 @@ export function AdminMarketingComponent() {
           </Card>
         </>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <CampaignPanel onCreated={setManagedCampaign} />
-          <CampaignManagePanel campaign={managedCampaign} />
+        <div className="space-y-4">
+          {persistedCampaigns.length > 0 ? (
+            <AdminSelectField
+              label="Chiến dịch cần theo dõi"
+              value={currentCampaign?.id ?? ""}
+              onChange={(id) => setManagedCampaign(persistedCampaigns.find((campaign) => campaign.id === id) ?? null)}
+              options={persistedCampaigns.map((campaign) => ({ value: campaign.id, label: campaign.name }))}
+            />
+          ) : null}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <CampaignPanel onCreated={(campaign) => { setManagedCampaign(campaign); void campaigns.mutate(); }} />
+            <CampaignManagePanel campaign={currentCampaign} />
+          </div>
         </div>
       )}
 
