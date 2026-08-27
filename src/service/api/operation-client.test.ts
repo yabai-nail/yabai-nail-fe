@@ -50,4 +50,18 @@ describe("executeApiOperation", () => {
       },
     });
   });
+
+  it("forwards an explicit auth scope for shared media routes", async () => {
+    await executeApiOperation("POST /api/v1/media/uploads", {
+      body: { filename: "after.png" },
+      authScope: "admin",
+    });
+
+    expect(apiRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "/media/uploads",
+        authScope: "admin",
+      }),
+    );
+  });
 });

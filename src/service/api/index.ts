@@ -7,6 +7,7 @@ export {
   setCustomerAccessToken,
   getAccessTokenForUrl,
 } from "./auth-token";
+export type { AuthScope } from "./auth-token";
 export {
   API_BASE_URL,
   apiClient,

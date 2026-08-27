@@ -1,5 +1,6 @@
 import type { AxiosRequestConfig } from "axios";
 
+import type { AuthScope } from "./auth-token";
 import { getApiOperation, buildOperationPath, type ApiOperationId, type ApiPathParams } from "./operations";
 import { apiRequest } from "./request";
 
@@ -12,6 +13,7 @@ export interface ExecuteApiOperationOptions {
   readonly idempotencyKey?: string;
   readonly version?: string | number;
   readonly signal?: AbortSignal;
+  readonly authScope?: AuthScope;
   readonly config?: Omit<AxiosRequestConfig, "method" | "url" | "params" | "data" | "headers" | "signal">;
 }
 
@@ -29,7 +31,7 @@ export async function executeApiOperation<T>(
     headers["If-Match"] = String(options.version);
   }
 
-  return apiRequest<T>({
+  const requestConfig: AxiosRequestConfig & { authScope?: AuthScope } = {
     ...options.config,
     method: operation.method,
     url: buildOperationPath(operation, options.path),
@@ -37,5 +39,7 @@ export async function executeApiOperation<T>(
     ...(options.body !== undefined ? { data: options.body } : {}),
     ...(Object.keys(headers).length ? { headers } : {}),
     ...(options.signal ? { signal: options.signal } : {}),
-  });
+    ...(options.authScope ? { authScope: options.authScope } : {}),
+  };
+  return apiRequest<T>(requestConfig);
 }

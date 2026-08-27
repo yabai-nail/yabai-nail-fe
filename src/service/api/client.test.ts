@@ -39,4 +39,21 @@ describe("createApiClient", () => {
 
     await client.get("https://example.com/data", { adapter });
   });
+
+  it("uses an explicit admin token for a shared media route", async () => {
+    const client = createApiClient({
+      getAccessToken: (_url, scope) => scope === "admin" ? "admin-token" : "customer-token",
+    });
+    const adapter: AxiosAdapter = async (config) => {
+      expect(config.headers.get("Authorization")).toBe("Bearer admin-token");
+      return { config, data: {}, headers: {}, status: 200, statusText: "OK" };
+    };
+
+    await client.request({
+      url: "/media/uploads",
+      method: "POST",
+      authScope: "admin",
+      adapter,
+    } as Parameters<typeof client.request>[0] & { authScope: "admin" });
+  });
 });

@@ -6,6 +6,8 @@
 let adminToken: string | null = null;
 let customerToken: string | null = null;
 
+export type AuthScope = "admin" | "customer";
+
 export function getAdminAccessToken(): string | null {
   return adminToken;
 }
@@ -23,11 +25,13 @@ export function setCustomerAccessToken(token: string | null): void {
 }
 
 /**
- * Route-aware bearer picker. Called by the axios interceptor. Any request
- * to `/admin/*` gets the admin bearer; everything else (customer, public,
- * media, /me/*) gets the customer bearer.
+ * Route-aware bearer picker. Shared routes such as `/media/*` declare their
+ * scope explicitly; otherwise `/admin/*` gets the admin bearer and customer,
+ * public and `/me/*` routes use the customer bearer.
  */
-export function getAccessTokenForUrl(url: string): string | null {
+export function getAccessTokenForUrl(url: string, scope?: AuthScope): string | null {
+  if (scope === "admin") return adminToken;
+  if (scope === "customer") return customerToken;
   return url.includes("/admin/") ? adminToken : customerToken;
 }
 

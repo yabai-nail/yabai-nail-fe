@@ -3,7 +3,7 @@
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
-import { mediaService } from "@/service";
+import { adminMediaService } from "@/service";
 import type { Appointment } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -32,7 +32,7 @@ export function AttachPhotoModal({
     setUploadError(null);
     let mediaId: string | null = null;
     try {
-      const upload = await mediaService.startUpload({
+      const upload = await adminMediaService.startUpload({
         kind: "APPOINTMENT_PHOTO",
         contentType: file.type || "application/octet-stream",
         filename: file.name,
@@ -45,10 +45,10 @@ export function AttachPhotoModal({
         body: file,
       });
       if (!response.ok) throw new Error("Không tải được ảnh lên kho lưu trữ.");
-      await mediaService.completeUpload(mediaId);
+      await adminMediaService.completeUpload(mediaId);
       onConfirm({ mediaId, kind, note: note.trim() || undefined });
     } catch (thrown) {
-      if (mediaId) await mediaService.abortUpload(mediaId).catch(() => undefined);
+      if (mediaId) await adminMediaService.abortUpload(mediaId).catch(() => undefined);
       setUploadError(thrown instanceof Error ? thrown.message : "Không tải được ảnh.");
     } finally {
       setUploading(false);
