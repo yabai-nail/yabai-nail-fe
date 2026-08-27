@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  exportStatusLabel,
   formatReportValue,
   humanizeKey,
   labelForKey,
@@ -10,6 +11,15 @@ import {
 } from "./data";
 
 describe("report derivation", () => {
+  it.each([
+    ["QUEUED", "Đang chờ tạo"],
+    ["PROCESSING", "Đang tạo"],
+    ["READY", "Sẵn sàng tải"],
+    ["FAILED", "Thất bại"],
+  ])("localizes export status %s", (status, expected) => {
+    expect(exportStatusLabel(status)).toBe(expected);
+  });
+
   it("humanizes camelCase keys", () => {
     expect(humanizeKey("grossRevenue")).toBe("Gross Revenue");
     expect(humanizeKey("new_customers")).toBe("New customers");

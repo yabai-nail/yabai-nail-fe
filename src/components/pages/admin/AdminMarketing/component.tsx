@@ -11,6 +11,8 @@ import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
 import {
   adaptPromotion,
+  campaignCanCancel,
+  campaignStatusLabel,
   filterPromotions,
   formatDiscount,
   paginate,
@@ -232,7 +234,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         message: template.trim(),
       });
       onCreated({ id: campaign.campaignId, name: campaignName });
-      setMessage(`Đã tạo chiến dịch (${campaign.status ?? "PENDING"}).`);
+      setMessage(`Đã tạo chiến dịch (${campaignStatusLabel(campaign.status)}).`);
       setName("");
       setTemplate("");
     } catch (err) {
@@ -326,14 +328,6 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
     inboxOnlyCount: "Chỉ gửi hộp thư",
     suppressedCount: "Đã bỏ qua",
   };
-  const statusLabels: Record<string, string> = {
-    CANCELLED: "Đã huỷ",
-    COMPLETED: "Hoàn tất",
-    DRAFT: "Bản nháp",
-    FAILED: "Thất bại",
-    PROCESSING: "Đang gửi",
-    SCHEDULED: "Đã lên lịch",
-  };
   const metricRows = metrics.data
     ? Object.entries(metrics.data).filter(([key, value]) => key in metricLabels && (typeof value === "number" || typeof value === "string"))
     : [];
@@ -354,7 +348,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
             {metricRows.map(([key, value]) => (
               <div key={key} className="flex justify-between gap-2 rounded-lg bg-admin-soft/50 px-3 py-1.5">
                 <dt className="text-admin-muted">{metricLabels[key]}</dt>
-                <dd className="font-semibold text-admin-ink">{key === "status" ? statusLabels[String(value)] ?? String(value) : Number(value).toLocaleString("vi-VN")}</dd>
+                <dd className="font-semibold text-admin-ink">{key === "status" ? campaignStatusLabel(String(value)) : Number(value).toLocaleString("vi-VN")}</dd>
               </div>
             ))}
           </dl>
@@ -365,7 +359,9 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>Xem trước audience</Button>
         {audience !== null ? <span className="text-sm text-admin-muted">{audience.toLocaleString("vi-VN")} khách</span> : null}
-        <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
+        {campaignCanCancel(metrics.data?.status) ? (
+          <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
+        ) : null}
       </div>
       {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}

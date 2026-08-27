@@ -18,6 +18,19 @@ export const exportKindOf = {
   staff: "STAFF_PERFORMANCE",
 } as const;
 
+const exportStatusLabels: Record<string, string> = {
+  CANCELLED: "Đã huỷ",
+  COMPLETED: "Đã hoàn tất",
+  FAILED: "Thất bại",
+  PROCESSING: "Đang tạo",
+  QUEUED: "Đang chờ tạo",
+  READY: "Sẵn sàng tải",
+};
+
+export function exportStatusLabel(status: string | undefined): string {
+  return exportStatusLabels[String(status ?? "QUEUED").toUpperCase()] ?? "Không xác định";
+}
+
 const metricLabels: Record<string, string> = {
   branchName: "Chi nhánh",
   customerName: "Khách hàng",

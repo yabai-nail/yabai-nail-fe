@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  campaignCanCancel,
+  campaignStatusLabel,
   adaptPromotion,
   filterPromotions,
   formatDiscount,
@@ -7,6 +9,27 @@ import {
   promotionFixtures,
   promotionStatuses,
 } from "./data";
+
+describe("campaignStatusLabel", () => {
+  it.each([
+    ["SCHEDULED", "Đã lên lịch"],
+    ["DISPATCHING", "Đang gửi"],
+    ["COMPLETED", "Hoàn tất"],
+    ["CANCELLED", "Đã huỷ"],
+  ])("localizes %s", (status, expected) => {
+    expect(campaignStatusLabel(status)).toBe(expected);
+  });
+
+  it("does not expose an unknown backend code", () => {
+    expect(campaignStatusLabel("NEW_SERVER_STATE")).toBe("Không xác định");
+  });
+
+  it("offers cancellation only before dispatch starts", () => {
+    expect(campaignCanCancel("SCHEDULED")).toBe(true);
+    expect(campaignCanCancel("DISPATCHING")).toBe(false);
+    expect(campaignCanCancel("COMPLETED")).toBe(false);
+  });
+});
 
 describe("marketing promotion derivation", () => {
   it("filters by status and query on code/name", () => {

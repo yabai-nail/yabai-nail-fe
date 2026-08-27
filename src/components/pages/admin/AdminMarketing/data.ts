@@ -31,6 +31,26 @@ export const promotionKindLabels: Record<string, string> = {
   FIXED: "Số tiền",
 };
 
+const campaignStatusLabels: Record<string, string> = {
+  CANCELLED: "Đã huỷ",
+  COMPLETED: "Hoàn tất",
+  DISPATCHING: "Đang gửi",
+  DRAFT: "Bản nháp",
+  FAILED: "Thất bại",
+  PENDING: "Đang chờ",
+  PROCESSING: "Đang gửi",
+  QUEUED: "Đang chờ gửi",
+  SCHEDULED: "Đã lên lịch",
+};
+
+export function campaignStatusLabel(status: string | undefined): string {
+  return campaignStatusLabels[String(status ?? "PENDING").toUpperCase()] ?? "Không xác định";
+}
+
+export function campaignCanCancel(status: string | undefined): boolean {
+  return ["DRAFT", "SCHEDULED"].includes(String(status ?? "").toUpperCase());
+}
+
 export function adaptPromotion(promotion: AdminPromotion): PromotionRow {
   return {
     id: promotion.id,

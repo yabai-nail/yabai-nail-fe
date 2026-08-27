@@ -18,6 +18,7 @@ import {
 } from "@/service";
 import {
   exportKindOf,
+  exportStatusLabel,
   formatReportValue,
   labelForKey,
   metricCards,
@@ -120,7 +121,7 @@ export function AdminReportsComponent() {
         <div className="flex flex-wrap items-center gap-2">
           {exportInfo ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-              Xuất: {(exportStatus.data?.status as string | undefined) ?? exportInfo.status}
+              Xuất: {exportStatusLabel((exportStatus.data?.status as string | undefined) ?? exportInfo.status)}
               <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>làm mới</button>
             </span>
           ) : null}
