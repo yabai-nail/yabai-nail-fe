@@ -3,40 +3,36 @@
 // and sign a short-lived URL to read a finished media item.
 
 export interface MediaUploadInput {
-  readonly kind: string;
-  readonly contentType: string;
-  readonly filename?: string;
-  readonly sizeBytes?: number;
-  readonly checksum?: string;
-  readonly [field: string]: unknown;
+  readonly fileName: string;
+  readonly contentType: "image/jpeg" | "image/png" | "image/webp";
+  readonly sizeBytes: number;
 }
 
 export interface MediaUpload {
   readonly mediaId: string;
+  readonly status: string;
   readonly uploadUrl: string;
-  readonly method?: string;
-  readonly headers?: Readonly<Record<string, string>>;
-  readonly expiresAt: string;
-  readonly [field: string]: unknown;
+  readonly expiresInSeconds: number;
+  readonly requiredHeaders: Readonly<Record<string, string>>;
 }
 
 export interface MediaUploadCompleteInput {
-  readonly checksum?: string;
-  readonly [field: string]: unknown;
+  readonly etag?: string;
+  readonly checksumSha256?: string;
 }
 
 export interface Media {
-  readonly id: string;
-  readonly kind: string;
-  readonly contentType: string;
-  readonly sizeBytes?: number;
+  readonly externalKey: string;
   readonly status: string;
-  readonly createdAt: string;
-  readonly [field: string]: unknown;
+  readonly payload: {
+    readonly contentType?: string;
+    readonly sizeBytes?: number;
+    readonly fileName?: string;
+  };
 }
 
 export interface MediaAccessUrl {
-  readonly url: string;
-  readonly expiresAt: string;
-  readonly [field: string]: unknown;
+  readonly mediaId: string;
+  readonly accessUrl: string;
+  readonly expiresInSeconds: number;
 }

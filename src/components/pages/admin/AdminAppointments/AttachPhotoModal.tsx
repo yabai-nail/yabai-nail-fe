@@ -32,16 +32,21 @@ export function AttachPhotoModal({
     setUploadError(null);
     let mediaId: string | null = null;
     try {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        throw new Error("Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.");
+      }
+      if (file.size < 1 || file.size > 10_000_000) {
+        throw new Error("Ảnh phải nhỏ hơn 10 MB.");
+      }
       const upload = await adminMediaService.startUpload({
-        kind: "APPOINTMENT_PHOTO",
-        contentType: file.type || "application/octet-stream",
-        filename: file.name,
+        fileName: file.name,
+        contentType: file.type as "image/jpeg" | "image/png" | "image/webp",
         sizeBytes: file.size,
       });
       mediaId = upload.mediaId;
       const response = await fetch(upload.uploadUrl, {
-        method: upload.method ?? "PUT",
-        headers: upload.headers,
+        method: "PUT",
+        headers: upload.requiredHeaders,
         body: file,
       });
       if (!response.ok) throw new Error("Không tải được ảnh lên kho lưu trữ.");
