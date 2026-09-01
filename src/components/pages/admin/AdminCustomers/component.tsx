@@ -9,6 +9,7 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminBranch, useAdminCustomer, useAdminCustomers, type AdminCustomer } from "@/service";
 import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
@@ -228,6 +229,7 @@ export function AdminCustomersComponent() {
                 patch,
                 detailedCustomer.version,
               );
+              notifySuccess("Đã cập nhật khách hàng");
               setIsEditOpen(false);
               void mutateCustomers();
             } catch (thrown) {

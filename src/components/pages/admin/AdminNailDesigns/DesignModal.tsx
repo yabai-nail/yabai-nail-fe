@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import { designStatusLabels, type DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -52,6 +53,7 @@ export function DesignModal({
           ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật mẫu nail" : "Đã thêm mẫu nail");
       onSaved();
       onClose();
     } catch (err) {

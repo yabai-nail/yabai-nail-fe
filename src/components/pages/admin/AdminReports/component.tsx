@@ -3,6 +3,7 @@
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAccounts,
@@ -83,6 +84,7 @@ export function AdminReportsComponent() {
     setDownloadUrl(null);
     try {
       const info = await adminService.createReportExport({ reportType: exportKindOf[kind] });
+      notifySuccess("Đã tạo yêu cầu xuất báo cáo");
       setExportInfo(info);
     } catch (err) {
       setExportError(err instanceof Error && err.message ? err.message : "Không tạo được file xuất.");

@@ -3,6 +3,7 @@
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { adminService, useAdminBranchSettings } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
 type BookingConfig = {
   windowDays: number;
@@ -73,6 +74,7 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
         },
         settings?.version,
       );
+      notifySuccess("Đã cập nhật cài đặt đặt lịch");
       void query.mutate();
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : "Không lưu được cài đặt đặt lịch.");

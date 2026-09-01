@@ -4,6 +4,7 @@ import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Modal } from "@heroui/react";
 import { useState } from "react";
 import { formatMoney } from "@/lib/admin-format";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminSurcharges,
@@ -142,6 +143,7 @@ function SurchargeEditor({
       } else {
         await adminService.createSurcharge(payload);
       }
+      notifySuccess(isEdit ? "Đã cập nhật phụ thu" : "Đã thêm phụ thu");
       onSaved();
       onClose();
     } catch (thrown) {

@@ -5,6 +5,7 @@ import { Button } from "@heroui/react";
 import { useState } from "react";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { formatMoney, formatNumber } from "@/lib/admin-format";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminCustomerBenefits,
@@ -42,6 +43,7 @@ export function CustomerLoyaltyPanel({
         pointsSigned: delta,
         reasonCode: reason.trim(),
       }, benefits?.version);
+      notifySuccess("Đã cập nhật điểm khách hàng");
       setDeltaText("");
       setReason("");
       await benefitsQuery.mutate();
@@ -66,6 +68,7 @@ export function CustomerLoyaltyPanel({
       await adminService.issueCustomerCoupon(branchId, customerId, {
         couponId: couponId.trim(),
       }, benefits?.version);
+      notifySuccess("Đã phát coupon cho khách hàng");
       setCouponId("");
       await benefitsQuery.mutate();
     } catch (thrown) {

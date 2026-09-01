@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
 // Minimal create form. Server accepts a rich body (birthday, preferences,
 // segment) — those live on the edit surface once it exists. For now the
@@ -37,6 +38,7 @@ export function CustomerCreateModal({
         phone: phone.trim(),
         note: note.trim() || undefined,
       });
+      notifySuccess("Đã thêm khách hàng");
       onCreated();
       onClose();
     } catch (err) {

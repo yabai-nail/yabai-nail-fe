@@ -207,3 +207,78 @@ body:has(.admin-shell) {
   --color-admin-warning: var(--admin-warning);
   --color-admin-danger: var(--admin-danger);
 }
+
+@layer components {
+  .app-toast-region .toast {
+    --app-toast-status: var(--accent);
+    overflow: hidden;
+    gap: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--app-toast-status) 22%, var(--border));
+    border-radius: 0.75rem;
+    background: var(--surface);
+    padding: 0.875rem 2.75rem 0.875rem 1rem;
+    color: var(--surface-foreground);
+    box-shadow: 0 14px 36px rgb(37 27 32 / 14%), 0 2px 8px rgb(37 27 32 / 6%);
+  }
+
+  .app-toast-region .toast::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 0.2rem;
+    background: var(--app-toast-status);
+    content: "";
+  }
+
+  .app-toast-region .toast--success {
+    --app-toast-status: var(--success);
+  }
+
+  .app-toast-region .toast--warning {
+    --app-toast-status: var(--warning);
+  }
+
+  .app-toast-region .toast--danger {
+    --app-toast-status: var(--danger);
+  }
+
+  .app-toast-region .toast__indicator {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--app-toast-status) 12%, transparent);
+    padding: 0;
+    color: var(--app-toast-status);
+  }
+
+  .app-toast-region .toast__title {
+    color: var(--surface-foreground);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+  }
+
+  .app-toast-region .toast__description {
+    margin-top: 0.125rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+  }
+
+  .app-toast-region .toast__close-button {
+    pointer-events: auto;
+    inset-block-start: 0.625rem;
+    inset-inline-end: 0.625rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  .app-toast-region .toast__close-button:hover {
+    background: var(--surface-secondary);
+    color: var(--surface-foreground);
+  }
+}

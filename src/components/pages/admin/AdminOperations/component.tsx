@@ -4,6 +4,7 @@ import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAppointmentPayments,
@@ -66,7 +67,7 @@ function useAction() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const run = async (task: () => Promise<string>) => {
+  const run = async (task: () => Promise<string | null>) => {
     setBusy(true);
     setError(null);
     setMessage(null);
@@ -165,7 +166,8 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
             payment.version,
           );
           setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
-          return "Đã ghi nhận hoàn tiền.";
+          notifySuccess("Đã ghi nhận hoàn tiền");
+          return null;
         })}>{busy ? "Đang xử lý…" : "Hoàn tiền"}</Button>
       </div>
     </Card>

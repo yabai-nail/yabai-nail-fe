@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import { accountStatusLabels, roleLabels, type AccountRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -49,6 +50,7 @@ export function AccountModal({
           temporaryPassword,
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật tài khoản" : "Đã thêm tài khoản");
       onSaved();
       onClose();
     } catch (err) {

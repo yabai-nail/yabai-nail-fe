@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import { branchStatusLabels, type BranchRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -47,6 +48,7 @@ export function BranchModal({
           timezone,
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật chi nhánh" : "Đã thêm chi nhánh");
       onSaved();
       onClose();
     } catch (err) {

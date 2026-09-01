@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
@@ -63,6 +64,7 @@ export function AdminMarketingComponent() {
     setStatusError(null);
     try {
       await adminService.updatePromotion(row.id, { status: next }, row.version);
+      notifySuccess(next === "ACTIVE" ? "Đã kích hoạt khuyến mãi" : "Đã tạm ngưng khuyến mãi");
       void mutate();
     } catch (thrown) {
       setStatusError(thrown instanceof Error ? thrown.message : "Không đổi được trạng thái.");
@@ -207,7 +209,6 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
   const [channel, setChannel] = useState("PUSH");
   const [template, setTemplate] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
 
@@ -225,7 +226,6 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
     if (name.trim().length < 2 || template.trim().length < 2) return;
     setBusy(true);
     setError(null);
-    setMessage(null);
     try {
       const campaignName = name.trim();
       const campaign = await adminService.createNotificationCampaign({
@@ -234,7 +234,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         message: template.trim(),
       });
       onCreated({ id: campaign.campaignId, name: campaignName });
-      setMessage(`Đã tạo chiến dịch (${campaignStatusLabel(campaign.status)}).`);
+      notifySuccess("Đã tạo chiến dịch", `Trạng thái: ${campaignStatusLabel(campaign.status)}.`);
       setName("");
       setTemplate("");
     } catch (err) {
@@ -275,7 +275,6 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         <Button variant="outline" className="rounded-lg" onPress={() => void runPreview()}>Xem trước audience</Button>
         {preview !== null ? <span className="text-sm text-admin-muted">{preview.toLocaleString("vi-VN")} khách phù hợp</span> : null}
       </div>
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy || name.trim().length < 2 || template.trim().length < 2} onPress={() => void createCampaign()}>
@@ -289,16 +288,15 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
 function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign | null }>) {
   const metrics = useAdminNotificationCampaignMetrics(campaign?.id ?? null);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audience, setAudience] = useState<number | null>(null);
 
   const cancel = async () => {
     if (!campaign) return;
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.cancelNotificationCampaign(campaign.id, undefined, metrics.data?.version);
-      setMessage("Đã huỷ chiến dịch.");
+      notifySuccess("Đã hủy chiến dịch");
       void metrics.mutate();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Không huỷ được chiến dịch.");
@@ -363,7 +361,6 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
           <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
         ) : null}
       </div>
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
     </Card>
   );

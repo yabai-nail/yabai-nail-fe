@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAppointment,
@@ -50,6 +51,13 @@ import {
   shiftAppointmentDate,
 } from "./date-utils";
 import { normalizeAppointmentStatus } from "./status";
+
+const lifecycleSuccessMessages: Record<AppointmentLifecycleAction, string> = {
+  "check-in": "Đã check-in lịch hẹn",
+  "service-start": "Đã bắt đầu dịch vụ",
+  "service-complete": "Đã hoàn tất dịch vụ",
+  "no-show": "Đã đánh dấu khách không đến",
+};
 
 function toDatePart(iso: string): string {
   // en-CA gives ISO YYYY-MM-DD, which matches the fixture's date shape.
@@ -275,6 +283,7 @@ export function AdminAppointmentsComponent({
     } else {
       throw new Error("Lịch hẹn chưa tải xong. Vui lòng thử lại.");
     }
+    notifySuccess(formMode === "edit" ? "Đã cập nhật lịch hẹn" : "Đã tạo lịch hẹn");
     await mutateAppointments();
     setFormMode(null);
   }
@@ -303,6 +312,7 @@ export function AdminAppointmentsComponent({
       } else {
         await adminService.markAppointmentNoShow(branchId, appointmentId, version);
       }
+      notifySuccess(lifecycleSuccessMessages[action]);
       void mutateAppointments();
     } catch (thrown) {
       setLifecycleError(
@@ -329,6 +339,7 @@ export function AdminAppointmentsComponent({
         note ? { staffId, note } : { staffId },
         selectedAppointment.version,
       );
+      notifySuccess("Đã phân công nhân viên");
       setIsAssignOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -357,6 +368,7 @@ export function AdminAppointmentsComponent({
         { serviceIds: [...serviceIds] },
         selectedAppointment.version,
       );
+      notifySuccess("Đã cập nhật dịch vụ thực tế");
       setIsActualOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -379,6 +391,7 @@ export function AdminAppointmentsComponent({
     setPhotoError(null);
     try {
       await adminService.attachAppointmentPhoto(branchId, selectedAppointment.id, input);
+      notifySuccess("Đã đính kèm ảnh vào lịch hẹn");
       setIsPhotoOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -403,6 +416,7 @@ export function AdminAppointmentsComponent({
         { reasonCode: "ADMIN_CALENDAR_CANCEL" },
         selectedAppointment.version,
       );
+      notifySuccess("Đã hủy lịch hẹn");
       await mutateAppointments();
       setIsCancelOpen(false);
     } catch (thrown) {

@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAccounts,
@@ -194,14 +195,13 @@ function SystemFeaturesForm({
 }: Readonly<{ config: AdminSystemConfig; onSaved: () => void }>) {
   const [features, setFeatures] = useState<Record<string, boolean>>(() => ({ ...(config.features ?? {}) }));
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.updateSystemConfig({ features }, config.version);
-      setMessage("Đã lưu cấu hình hệ thống.");
+      notifySuccess("Đã lưu cấu hình hệ thống");
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Không lưu được cấu hình hệ thống.");
@@ -223,7 +223,6 @@ function SystemFeaturesForm({
           </label>
         ))
       )}
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>Lưu tính năng</Button>
@@ -248,7 +247,6 @@ function LoyaltyConfigForm({
     return JSON.stringify(editable, null, 2);
   });
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
@@ -259,10 +257,10 @@ function LoyaltyConfigForm({
       setError("JSON cấu hình loyalty không hợp lệ.");
       return;
     }
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.updateLoyaltyConfig(parsed, config.version);
-      setMessage("Đã lưu cấu hình loyalty.");
+      notifySuccess("Đã lưu cấu hình loyalty");
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Không lưu được cấu hình loyalty.");
@@ -275,7 +273,6 @@ function LoyaltyConfigForm({
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">Cấu hình loyalty (JSON)</h2>
       <textarea className="min-h-40 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 font-mono text-xs text-admin-ink" value={text} onChange={(event) => setText(event.target.value)} />
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>Lưu loyalty</Button>

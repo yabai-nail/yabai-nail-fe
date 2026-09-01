@@ -4,6 +4,7 @@ import { Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { notifySuccess } from "@/lib/app-toast";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   adminService,
@@ -163,6 +164,7 @@ export function AdminMessagesComponent() {
         { status: next },
         selected.version,
       );
+      notifySuccess(next === "ARCHIVED" ? "Đã lưu trữ hội thoại" : "Đã cập nhật trạng thái hội thoại");
       void mutateConversations();
     } catch (thrown) {
       setStatusError(

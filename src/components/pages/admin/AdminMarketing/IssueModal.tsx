@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
 
 import { adminService, useAdminBranch, useAdminCustomers } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
 export function IssueModal({
   promotionId,
@@ -50,6 +51,7 @@ export function IssueModal({
         customerIds: [...selected],
         note: note.trim() || undefined,
       });
+      notifySuccess("Đã phát hành khuyến mãi", `Đã gửi cho ${selected.length} khách hàng.`);
       onIssued();
       onClose();
     } catch (err) {

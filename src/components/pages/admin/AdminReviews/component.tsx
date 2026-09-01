@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminReviews } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
@@ -59,6 +60,7 @@ export function AdminReviewsComponent() {
     const next = row.handlingStatus === "RESOLVED" ? "NEW" : "RESOLVED";
     try {
       await adminService.updateBranchReviewHandling(branchId, row.id, { status: next }, row.version);
+      notifySuccess(next === "RESOLVED" ? "Đã xử lý đánh giá" : "Đã mở lại đánh giá");
       void mutate();
     } catch (err) {
       setActionError(err instanceof Error && err.message ? err.message : "Không cập nhật được trạng thái.");
