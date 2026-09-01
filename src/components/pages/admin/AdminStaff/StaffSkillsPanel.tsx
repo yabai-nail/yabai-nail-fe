@@ -2,6 +2,7 @@
 
 import { Button } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminServices,
@@ -50,6 +51,7 @@ export function StaffSkillsPanel({
         // different resource and would fail the optimistic check.
         skills.data?.version ?? staffVersion,
       );
+      notifySuccess("Đã cập nhật kỹ năng nhân viên");
       setSelected(null);
       void skills.mutate();
     } catch (thrown) {
@@ -60,7 +62,7 @@ export function StaffSkillsPanel({
   }
 
   return (
-    <section aria-labelledby="staff-skills-heading" className="space-y-2 border-t border-admin-border pt-4">
+    <section aria-labelledby="staff-skills-heading" className="space-y-2">
       <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">Kỹ năng</h3>
 
       {services.isLoading || skills.isLoading ? (

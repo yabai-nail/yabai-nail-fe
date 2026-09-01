@@ -4,6 +4,7 @@ import { CalendarDaysIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { todayAtSalon } from "@/lib/salon-date";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminLeaveRequests,
@@ -44,6 +45,7 @@ export function StaffShiftsPanel({
           ? { decision, resolution: { action: "CANCEL" } }
           : { decision },
       );
+      notifySuccess(decision === "APPROVE" ? "Đã duyệt yêu cầu nghỉ" : "Đã từ chối yêu cầu nghỉ");
       await Promise.all([leaveRequests.mutate(), shifts.mutate()]);
     } catch (thrown) {
       setDecisionError(thrown instanceof Error ? thrown.message : "Không xử lý được yêu cầu nghỉ.");
@@ -53,7 +55,7 @@ export function StaffShiftsPanel({
   }
 
   return (
-    <section aria-labelledby="staff-shifts-heading" className="space-y-2 border-t border-admin-border pt-4">
+    <section aria-labelledby="staff-shifts-heading" className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 id="staff-shifts-heading" className="text-sm font-bold text-admin-ink">Ca làm và ngày nghỉ</h3>
         <div className="flex gap-1">
@@ -177,6 +179,7 @@ function ShiftOrLeaveDialog({
           reason: reason.trim(),
         });
       }
+      notifySuccess(mode === "shift" ? "Đã thêm ca làm việc" : "Đã gửi yêu cầu nghỉ");
       onSaved();
       onClose();
     } catch (thrown) {

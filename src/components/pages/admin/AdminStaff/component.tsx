@@ -5,7 +5,6 @@ import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -199,35 +198,31 @@ export function AdminStaffComponent() {
             </Card.Content>
           </Card>
         ) : (
-          <AdminSplitLayout
-            aside={
-              detailedStaff ? (
-                <StaffDetailPanel
-                  member={detailedStaff}
-                  branchId={branchId}
-                  period={period}
-                  onEdit={() => setEditing(detailedStaff)}
-                />
-              ) : (
-                <AdminEmptySelection
-                  title="Không có nhân viên"
-                  description="Thay đổi bộ lọc để xem thông tin nhân viên."
-                />
-              )
-            }
-          >
+          <div className="space-y-4">
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
               <Card.Content className="min-w-0 p-0"><StaffTable
                 staff={visibleStaff}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
-                onEdit={(id) => { setSelectedId(id); setEditing(visibleStaff.find((member) => member.id === id) ?? null); }}
               /></Card.Content>
             </Card>
+            {detailedStaff ? (
+              <StaffDetailPanel
+                member={detailedStaff}
+                branchId={branchId}
+                period={period}
+                onEdit={() => setEditing(detailedStaff)}
+              />
+            ) : (
+              <AdminEmptySelection
+                title="Không có nhân viên"
+                description="Thay đổi bộ lọc để xem thông tin nhân viên."
+              />
+            )}
             {detailedStaff && branchId ? (
               <RecentOrdersTable branchId={branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
             ) : null}
-          </AdminSplitLayout>
+          </div>
         )}
       </div>
       {isCreateOpen && branchId ? (
