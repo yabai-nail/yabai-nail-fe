@@ -1,7 +1,7 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Chip } from "@heroui/react";
 import { formatMoney } from "@/lib/admin-format";
-import { categoryLabels, type SalonService } from "./data";
+import type { SalonService } from "./data";
 
 export function ServiceTable({
   services,
@@ -18,7 +18,7 @@ export function ServiceTable({
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
             <th scope="col" className="px-4 py-3">Dịch vụ</th>
-            <th scope="col" className="px-3 py-3">Loại</th>
+            <th scope="col" className="px-3 py-3">Danh mục</th>
             <th scope="col" className="px-3 py-3">Giá</th>
             <th scope="col" className="px-3 py-3">Thời gian</th>
             <th scope="col" className="px-3 py-3">Trạng thái</th>
@@ -30,13 +30,22 @@ export function ServiceTable({
             <tr key={service.id}>
               <td className="px-4 py-2">
                 <div className="flex items-center gap-3">
-                  <span aria-hidden="true" className={`size-11 shrink-0 rounded-lg border border-admin-border ${index % 2 ? "bg-gradient-to-br from-rose-100 to-amber-50" : "bg-gradient-to-br from-pink-100 to-fuchsia-50"}`} />
+                  {service.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={service.imageUrl}
+                      alt=""
+                      className="size-11 shrink-0 rounded-lg border border-admin-border object-cover"
+                    />
+                  ) : (
+                    <span aria-hidden="true" className={`size-11 shrink-0 rounded-lg border border-admin-border ${index % 2 ? "bg-gradient-to-br from-rose-100 to-amber-50" : "bg-gradient-to-br from-pink-100 to-fuchsia-50"}`} />
+                  )}
                   <strong>{service.name}</strong>
                 </div>
               </td>
               <td className="px-3 py-2">
-                <Chip size="sm" variant="soft" color={service.category === "primary" ? "accent" : service.category === "addon" ? "warning" : "default"}>
-                  <Chip.Label>{categoryLabels[service.category]}</Chip.Label>
+                <Chip size="sm" variant="soft" color={service.category ? "accent" : "warning"}>
+                  <Chip.Label>{service.category?.name || "Chưa phân loại"}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>

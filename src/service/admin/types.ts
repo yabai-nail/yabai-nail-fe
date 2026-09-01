@@ -92,6 +92,11 @@ export interface AdminServiceItem {
   readonly description?: string;
   readonly price: number;
   readonly durationMinutes: number;
+  // Filled by the admin list endpoint, which resolves the stored key to the public one.
+  readonly categoryId?: string | null;
+  readonly categoryName?: string | null;
+  readonly imageUrl?: string | null;
+  readonly soldCount?: number;
   readonly active: boolean;
   readonly version: number;
 }
@@ -101,6 +106,10 @@ export interface AdminServiceCategory {
   readonly code: string;
   readonly name: string;
   readonly nameVi?: string;
+  // Stored in the record payload and returned by both the admin and the public read.
+  readonly nameJa?: string | null;
+  // Empty means every branch shows the category.
+  readonly branchIds?: ReadonlyArray<string>;
   readonly status: string;
   readonly serviceIds: ReadonlyArray<string>;
   readonly sortOrder: number;

@@ -2,12 +2,13 @@
 
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
-import { adminService } from "@/service";
+import { adminService, useAdminServiceCategories } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { SalonService } from "./data";
 
-// Mirror of ServiceCreateModal: same four fields, plus PATCH with If-Match
-// so we don't clobber a concurrent edit. Keeping the two modals separate
-// keeps each form self-contained until a third caller shows up.
+// Mirror of ServiceCreateModal, plus PATCH with If-Match so we don't clobber a concurrent
+// edit. Moving a service between categories happens here: the API assigns whichever category
+// the body names, and a service can never be left without one.
 export function ServiceEditModal({
   service,
   onClose,
@@ -17,16 +18,27 @@ export function ServiceEditModal({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const categories = useAdminServiceCategories();
+  const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState(service.name);
+  const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
+  const [imageUrl, setImageUrl] = useState(service.imageUrl ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
+  const trimmedImage = imageUrl.trim();
+  const imageLooksValid = trimmedImage === "" || /^https?:\/\/\S+$/.test(trimmedImage);
   const canSubmit =
-    name.trim().length >= 2 && priceNum > 0 && durationNum > 0 && !busy;
+    name.trim().length >= 2 &&
+    categoryId !== "" &&
+    priceNum > 0 &&
+    durationNum > 0 &&
+    imageLooksValid &&
+    !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -37,11 +49,15 @@ export function ServiceEditModal({
         service.id,
         {
           name: name.trim(),
+          categoryId,
           price: priceNum,
           durationMinutes: durationNum,
+          // Sent even when blank: an empty string is how the API clears a photo.
+          imageUrl: trimmedImage,
         },
         service.version,
       );
+      notifySuccess("Đã cập nhật dịch vụ");
       onSaved();
       onClose();
     } catch (err) {
@@ -69,6 +85,22 @@ export function ServiceEditModal({
                   autoFocus
                 />
               </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">Danh mục</span>
+                <select
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                >
+                  <option value="">— Chọn danh mục —</option>
+                  {categoryItems.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.nameVi ?? category.name}
+                    </option>
+                  ))}
+                </select>
+                {categories.isLoading ? <span className="text-xs text-admin-muted">Đang tải danh mục…</span> : null}
+              </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Giá (¥)</span>
@@ -91,12 +123,24 @@ export function ServiceEditModal({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">Ảnh dịch vụ (không bắt buộc)</span>
+                <input
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  placeholder="https://..."
+                />
+                {trimmedImage && !imageLooksValid ? (
+                  <span role="alert" className="text-xs text-admin-danger">Ảnh phải là địa chỉ http(s) đầy đủ.</span>
+                ) : trimmedImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={trimmedImage} alt="" className="size-20 rounded-lg border border-admin-border object-cover" />
+                ) : null}
+              </label>
               {/*
-                No visibility toggle: the service endpoint never reads an
-                `active` field — grepping the whole controller for `body.active`
-                returns nothing — so the checkbox that used to sit here looked
-                like it hid a service from customers and did nothing at all.
-                Restore it when the backend accepts the flag.
+                No visibility toggle: the field is called `status`, not `active`, and restoring
+                the checkbox is a separate change the salon has not asked for yet.
               */}
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>

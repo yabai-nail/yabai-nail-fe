@@ -3,11 +3,13 @@
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
-import { adminService } from "@/service";
+import { adminService, useAdminServiceCategories } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
-// Service creation is org-level (no branchId in the path). Only the four
-// fields the salon cares about at create time — name, price, duration,
-// visibility. Category, description, media follow on the edit surface.
+// Service creation is org-level (no branchId in the path). The category is required by the
+// API, not merely by this form: the column is NOT NULL, so a service with no category cannot
+// exist. The photo is a plain absolute URL — the media upload endpoint hands out a signed link
+// that expires in 300s and only its uploader may read, so it cannot back a customer-facing menu.
 export function ServiceCreateModal({
   onClose,
   onCreated,
@@ -15,17 +17,29 @@ export function ServiceCreateModal({
   onClose: () => void;
   onCreated: () => void;
 }>) {
+  const categories = useAdminServiceCategories();
+  const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("60");
+  const [imageUrl, setImageUrl] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
+  const trimmedImage = imageUrl.trim();
+  const imageLooksValid = trimmedImage === "" || /^https?:\/\/\S+$/.test(trimmedImage);
   const canSubmit =
-    name.trim().length >= 2 && priceNum > 0 && durationNum > 0 && durationNum % 15 === 0 && !busy;
+    name.trim().length >= 2 &&
+    categoryId !== "" &&
+    priceNum > 0 &&
+    durationNum > 0 &&
+    durationNum % 15 === 0 &&
+    imageLooksValid &&
+    !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -34,10 +48,13 @@ export function ServiceCreateModal({
     try {
       await adminService.createService({
         name: name.trim(),
+        categoryId,
         price: priceNum,
         durationMinutes: durationNum,
+        ...(trimmedImage ? { imageUrl: trimmedImage } : {}),
         status: isVisible ? "ACTIVE" : "INACTIVE",
       });
+      notifySuccess("Đã thêm dịch vụ");
       onCreated();
       onClose();
     } catch (err) {
@@ -66,6 +83,28 @@ export function ServiceCreateModal({
                   autoFocus
                 />
               </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">Danh mục</span>
+                <select
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                >
+                  <option value="">— Chọn danh mục —</option>
+                  {categoryItems.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.nameVi ?? category.name}
+                    </option>
+                  ))}
+                </select>
+                {categories.isLoading ? (
+                  <span className="text-xs text-admin-muted">Đang tải danh mục…</span>
+                ) : categoryItems.length === 0 ? (
+                  <span role="alert" className="text-xs text-admin-danger">
+                    Chưa có danh mục nào. Hãy tạo danh mục ở cột bên phải trước.
+                  </span>
+                ) : null}
+              </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">Giá (¥)</span>
@@ -74,7 +113,7 @@ export function ServiceCreateModal({
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={price}
                     onChange={(event) => setPrice(event.target.value)}
-                    placeholder="850000"
+                    placeholder="6600"
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
@@ -89,6 +128,21 @@ export function ServiceCreateModal({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">Ảnh dịch vụ (không bắt buộc)</span>
+                <input
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  placeholder="https://..."
+                />
+                {trimmedImage && !imageLooksValid ? (
+                  <span role="alert" className="text-xs text-admin-danger">Ảnh phải là địa chỉ http(s) đầy đủ.</span>
+                ) : trimmedImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={trimmedImage} alt="" className="size-20 rounded-lg border border-admin-border object-cover" />
+                ) : null}
+              </label>
               <label className="flex items-center gap-3 text-sm text-admin-ink">
                 <input
                   type="checkbox" className="accent-admin-accent"
