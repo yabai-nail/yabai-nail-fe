@@ -26,6 +26,7 @@ Khi dự án cần thêm tài liệu, có thể mở rộng bằng `architecture
 - [Admin staff](./specs/SPEC-admin-staff.md)
 - [Admin services](./specs/SPEC-admin-services.md)
 - [Admin settings](./specs/SPEC-admin-settings.md)
+- [Admin i18n](./specs/SPEC-admin-i18n.md)
 
 ## Plans
 
