@@ -13,6 +13,8 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 - [x] **L2** Tab **Ngôn ngữ** trong `/admin/settings` (ghi cookie + `router.refresh()`)
 - [ ] **L2b** Ghi cookie từ `AdminSession.locale` một lần sau đăng nhập
 
+- [x] **L2c** Từ điển thuật ngữ (45 từ) + kiểm tra thứ tư trong checker
+
 ## Dùng chung (phải xong trước các màn)
 
 - [ ] **L3** `components/layouts/` — AdminShell, ShellNav, AdminAuthGate
@@ -38,8 +40,9 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 
 ## Dịch và chốt
 
-- [ ] **L20** Sinh `en.json`
-- [ ] **L21** Sinh `ja.json`
+- [x] ~~L20/L21 dịch dồn cuối~~ — thay bằng dịch cả 3 ngôn ngữ ngay trong mỗi lát,
+      bám `i18n-glossary.md`. Dịch dồn cuối cho thuật ngữ nhất quán nhưng buộc phải
+      tắt kiểm tra khóa lệch suốt 16 lát, và dồn 1.164 chuỗi vào một bước cuối.
 - [ ] **L22** Bật `ENFORCE_LEAKS` trong `check-i18n.mjs`, nối vào CI
 
 ## Ghi lại khi làm

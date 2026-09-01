@@ -144,6 +144,9 @@ không tự chế endpoint.
 
 ## 5. Quy ước khóa
 
+Thuật ngữ nghiệp vụ chốt ở [i18n-glossary.md](./i18n-glossary.md) — mỗi lát dịch
+cả ba ngôn ngữ ngay và bám từ điển, thay vì rút tiếng Việt trước rồi dịch dồn.
+
 Theo đúng kiểu mobile đã dùng (`auth.register.heading`), lồng theo màn:
 
 ```
