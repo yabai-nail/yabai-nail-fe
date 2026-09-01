@@ -1,7 +1,8 @@
 "use client";
 
-import { Button, Card } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
@@ -148,23 +149,7 @@ export function AdminAuditLogsComponent() {
           <span>
             Hiển thị {visible.length} trong tổng số {filtered.length} bản ghi
           </span>
-          <div className="flex gap-1">
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={currentPage === value ? "outline" : "ghost"}
-                className={
-                  currentPage === value
-                    ? "min-w-9 rounded-lg border-admin-accent text-admin-accent"
-                    : "min-w-9"
-                }
-                onPress={() => setPage(value)}
-              >
-                {value}
-              </Button>
-            ))}
-          </div>
+          <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 

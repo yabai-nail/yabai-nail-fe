@@ -4,6 +4,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Autocomplete, Button, Card, ListBox, SearchField, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
@@ -185,11 +186,7 @@ export function AdminServicesComponent() {
               </Card.Content>
               <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
                 <span>Hiển thị {visible.length} trong tổng số {filtered.length} dịch vụ</span>
-                <div className="flex gap-1">
-                  {Array.from({ length: pageCount }, (_, offset) => offset + 1).map((value) => (
-                    <Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>
-                  ))}
-                </div>
+                <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
               </Card.Footer>
             </Card>
           </AdminSplitLayout>
