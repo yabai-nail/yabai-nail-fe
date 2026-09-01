@@ -1,0 +1,13 @@
+{
+  "admin": {
+    "settings": {
+      "language": {
+        "tab": "Language",
+        "heading": "Display language",
+        "description": "Changes the console's language on this browser only. It does not affect the customer app.",
+        "legend": "Choose a display language",
+        "pending": "Applying…"
+      }
+    }
+  }
+}
