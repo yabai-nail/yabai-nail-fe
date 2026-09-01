@@ -51,42 +51,75 @@ console này, và đó chính là lý do `next-intl` đã có mặt sẵn trong 
 - `src/components/pages/admin/**`, `src/components/blocks/admin/**`
 - `src/components/layouts/**` (AdminShell, ShellNav, AdminAuthGate)
 - 16 `export const metadata` trong `src/app/(admin)/admin/**`
-- Hạ tầng: `src/app/layout.tsx`, `src/app/providers.tsx`, `src/i18n/`, `messages/`
+- Hạ tầng: `src/app/(admin)/admin/layout.tsx`, `src/i18n/`, `messages/`, `scripts/check-i18n.mjs`
 - Nút đổi ngôn ngữ trong AdminShell
 
 **Ngoài phạm vi**
 
 - `src/app/(site)/**` và component khách hàng — giữ nguyên tiếng Việt cứng
+- `src/app/layout.tsx` và `src/app/providers.tsx` — **không đổi**, xem mục 4
 - Thông báo lỗi từ backend: BE trả tiếng Việt (`"Khong tim thay tai khoan."`).
   FE không dịch lại chúng ở đợt này; xem mục 8.
 - Định dạng tiền/ngày: `formatMoney` và `salon-date` giữ nguyên hành vi hiện tại
 
 ## 4. Kiến trúc
 
-### Nguồn locale, theo thứ tự ưu tiên
+### Nguồn locale
 
-1. Cookie `NEXT_LOCALE` — do nút đổi ghi
-2. `AdminSession.locale` — BE đã trả trong response đăng nhập (`service/auth/types.ts:13`)
-3. Mặc định `vi`
+**Server chỉ đọc được cookie `NEXT_LOCALE`.** Không có cookie hợp lệ thì dùng
+`vi`. Chấm hết — server không có nguồn nào khác.
 
-Cookie đứng trước để server render đúng ngôn ngữ ngay ở HTML đầu tiên, không
-nháy sau hydrate.
+Phiên admin nằm trong `localStorage` chứ không phải cookie
+(`admin-session-store.ts:6-7`: *"localStorage, not an httpOnly cookie. The
+backend hands tokens back in the JSON body and sets no cookie"*), nên
+`AdminSession.locale` **không đọc được từ server**. Nó không phải một bậc trong
+chuỗi ưu tiên khi render.
 
-### Luồng
+Vai trò của nó là **đồng bộ một lần phía client**: ngay sau khi đăng nhập, nếu
+cookie chưa có, client ghi `AdminSession.locale` vào cookie. Từ lần render sau
+trở đi server đọc đúng ngôn ngữ và không còn nháy.
+
+Hệ quả phải chấp nhận: **lần render đầu tiên ngay sau khi đăng nhập trên một
+trình duyệt mới sẽ là tiếng Việt**, kể cả khi tài khoản đặt `ja`. Đăng nhập vốn
+đã là một chuyển trang phía client nên chỗ nháy này nằm trong một lần điều
+hướng, không phải mỗi lần tải trang.
+
+### Luồng — locale đọc ở admin layout, không phải root layout
+
+`cookies()` đẩy route sang dynamic rendering. Đo tại `7a869a8`: **22/23 route
+đang là static**, chỉ `/admin/appointments` là dynamic. Đặt `cookies()` ở root
+layout sẽ lật cả 5 trang công khai (`/`, `/booking`, `/branches`, `/designs`,
+`/services`) sang dynamic — trả giá ở phần khách hàng cho thứ chỉ admin dùng.
+
+Nên locale được đọc ở `src/app/(admin)/admin/layout.tsx`. Root layout và
+`providers.tsx` **không đổi**; `NextIntlClientProvider` ở root hiện phục vụ một
+object rỗng và sẽ tiếp tục như vậy cho `(site)`. Provider của admin lồng bên
+trong và ghi đè cho nhánh của nó.
 
 ```
-src/app/layout.tsx  (async, đọc cookies() từ next/headers)
-   └─ resolveLocale()            src/i18n/locale.ts
-   └─ getMessages(locale)        src/i18n/messages.ts
-        └─ import messages/<locale>.json
-   └─ <AppProviders locale messages>
-        └─ NextIntlClientProvider
-             ├─ client component  →  useTranslations("admin.payments")
-             └─ server component  →  getTranslations() từ next-intl/server
+src/app/layout.tsx                    (giữ nguyên, sync, static)
+  └─ AppProviders  locale="vi" messages={{}}
+       └─ src/app/(admin)/admin/layout.tsx      (async)
+            └─ resolveLocale()   src/i18n/locale.ts
+            └─ getMessages()     src/i18n/messages.ts
+            └─ <AdminIntlProvider locale messages>    ("use client")
+                 ├─ NextIntlClientProvider
+                 └─ I18nProvider (HeroUI, cho định dạng ngày/số)
+                      └─ AdminAuthGate → AdminBranchProvider → AdminShell
 ```
 
-`RootLayout` hiện là hàm đồng bộ; đọc cookie đòi `await cookies()` nên nó phải
-trở thành `async`. Đây là thay đổi duy nhất chạm vào phần dùng chung với `(site)`.
+`AdminIntlProvider` là client component riêng vì `NextIntlClientProvider` và
+`I18nProvider` đều là client component; bọc chúng trong một file có `"use client"`
+tránh phải phụ thuộc vào việc package có khai directive hay không.
+
+Chi phí: 17 route admin chuyển từ static sang dynamic. Chấp nhận được — chúng là
+vỏ `"use client"` nằm sau `AdminAuthGate`, dữ liệu vốn đã fetch phía client, nên
+prerender chỉ tiết kiệm được phần vỏ.
+
+**`<html lang>` giữ nguyên `vi`.** Sửa nó đúng theo locale đòi `cookies()` ở root,
+tức đánh đổi toàn bộ trang static. Thay vào đó `AdminIntlProvider` đặt
+`lang={locale}` trên phần tử bọc của nó — `lang` hợp lệ trên mọi phần tử và trình
+đọc màn hình tôn trọng phạm vi gần nhất.
 
 ### 16 metadata
 
