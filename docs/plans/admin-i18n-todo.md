@@ -17,7 +17,7 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 
 ## Dùng chung (phải xong trước các màn)
 
-- [ ] **L3** `components/layouts/` — AdminShell, ShellNav, AdminAuthGate
+- [x] **L3** `AdminShell` + `AdminAuthGate` — 62 chuỗi, 66 khóa × 3 ngôn ngữ
 
 ## 16 màn
 
@@ -47,5 +47,6 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 
 ## Ghi lại khi làm
 
-- Số dòng còn hardcode sau mỗi lát (chạy `pnpm i18n:check`): **L1 = 1224 dòng / 116 file**
+- Số dòng còn hardcode sau mỗi lát (chạy `pnpm i18n:check`):
+  **L1 = 1224 / 116 file** → **L3 = 1165 / 113 file**
 - Gap BE cần ghi: endpoint lưu locale cho admin (mục 4 của spec)

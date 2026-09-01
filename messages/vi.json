@@ -8,6 +8,107 @@
         "legend": "Chọn ngôn ngữ hiển thị",
         "pending": "Đang áp dụng…"
       }
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Tổng quan",
+        "title": "Tổng quan",
+        "description": "Tình hình cửa hàng hôm nay."
+      },
+      "appointments": {
+        "label": "Lịch hẹn",
+        "title": "Quản lý lịch hẹn",
+        "description": "Xem, quản lý và sắp xếp tất cả lịch hẹn của tiệm."
+      },
+      "customers": {
+        "label": "Khách hàng",
+        "title": "Quản lý khách hàng",
+        "description": "Quản lý thông tin và lịch sử của khách hàng."
+      },
+      "messages": {
+        "label": "Tin nhắn",
+        "title": "Tin nhắn",
+        "description": "Quản lý tin nhắn từ khách hàng."
+      },
+      "payments": {
+        "label": "Thanh toán",
+        "title": "Thanh toán tại quán",
+        "description": "Xác nhận dịch vụ, tính tiền và hoàn tất thanh toán cho khách."
+      },
+      "staff": {
+        "label": "Nhân viên",
+        "title": "Quản lý nhân viên",
+        "description": "Quản lý thông tin và doanh thu của nhân viên."
+      },
+      "services": {
+        "label": "Dịch vụ",
+        "title": "Quản lý dịch vụ",
+        "description": "Thêm, chỉnh sửa và quản lý các dịch vụ của tiệm."
+      },
+      "nail-designs": {
+        "label": "Mẫu nail",
+        "title": "Thư viện mẫu nail",
+        "description": "Quản lý mẫu nail và duyệt đề xuất từ khách/nhân viên."
+      },
+      "reviews": {
+        "label": "Đánh giá",
+        "title": "Đánh giá khách hàng",
+        "description": "Xem, phản hồi và xử lý đánh giá của khách."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "title": "Marketing",
+        "description": "Quản lý khuyến mãi và chiến dịch thông báo."
+      },
+      "reports": {
+        "label": "Báo cáo",
+        "title": "Báo cáo",
+        "description": "Theo dõi hiệu quả hoạt động của tiệm."
+      },
+      "branches": {
+        "label": "Chi nhánh",
+        "title": "Quản lý chi nhánh",
+        "description": "Thêm, chỉnh sửa và quản lý các chi nhánh của tiệm."
+      },
+      "accounts": {
+        "label": "Tài khoản",
+        "title": "Tài khoản & Cấu hình",
+        "description": "Quản lý tài khoản quản trị và cấu hình hệ thống."
+      },
+      "operations": {
+        "label": "Vận hành",
+        "title": "Vận hành",
+        "description": "Hoàn tiền, duyệt nghỉ phép, check-in, thẻ thành viên, tra cứu khách."
+      },
+      "audit-logs": {
+        "label": "Nhật ký",
+        "title": "Nhật ký hệ thống",
+        "description": "Theo dõi nhật ký thao tác quản trị của tiệm."
+      },
+      "settings": {
+        "label": "Cài đặt",
+        "title": "Cài đặt",
+        "description": "Quản lý và thiết lập cho tiệm nail của bạn."
+      }
+    },
+    "shell": {
+      "roles": {
+        "OWNER": "Chủ chuỗi",
+        "MANAGER": "Quản lý cửa hàng",
+        "STAFF": "Nhân viên"
+      },
+      "fallbackName": "Quản trị",
+      "accountMenu": "Tài khoản quản trị",
+      "accountSettings": "Cài đặt tài khoản",
+      "signOut": "Đăng xuất",
+      "openNav": "Mở điều hướng quản trị",
+      "closeNav": "Đóng điều hướng quản trị",
+      "navLabel": "Điều hướng quản trị",
+      "brand": "YABAI Nail Salon — Tổng quan quản trị",
+      "comingSoon": "Tính năng sẽ được phát triển sau"
+    },
+    "auth": {
+      "restoring": "Đang khôi phục phiên đăng nhập…"
     }
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { AdminLogin } from "@/components/pages/admin/AdminLogin";
@@ -12,6 +13,7 @@ import { useAuth } from "@/service";
  */
 export function AdminAuthGate({ children }: Readonly<{ children: ReactNode }>) {
   const { status } = useAuth();
+  const t = useTranslations("admin.auth");
 
   if (status === "restoring") {
     return (
@@ -20,7 +22,7 @@ export function AdminAuthGate({ children }: Readonly<{ children: ReactNode }>) {
         aria-live="polite"
         className="admin-shell grid min-h-screen place-items-center bg-admin-canvas text-sm text-admin-muted"
       >
-        Đang khôi phục phiên đăng nhập…
+        {t("restoring")}
       </div>
     );
   }

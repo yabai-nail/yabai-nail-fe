@@ -49,7 +49,8 @@ console này, và đó chính là lý do `next-intl` đã có mặt sẵn trong 
 **Trong phạm vi**
 
 - `src/components/pages/admin/**`, `src/components/blocks/admin/**`
-- `src/components/layouts/**` (AdminShell, ShellNav, AdminAuthGate)
+- `src/components/layouts/AdminShell/**`, `src/components/layouts/AdminAuthGate/**`
+  (`ShellNav` và `ShellFooter` **không** thuộc phạm vi — chỉ `(site)/layout.tsx` dùng chúng)
 - 16 `export const metadata` trong `src/app/(admin)/admin/**`
 - Hạ tầng: `src/app/(admin)/admin/layout.tsx`, `src/i18n/`, `messages/`, `scripts/check-i18n.mjs`
 - Nút đổi ngôn ngữ: tab **Ngôn ngữ** trong `/admin/settings`

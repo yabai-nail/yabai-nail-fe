@@ -8,6 +8,107 @@
         "legend": "Choose a display language",
         "pending": "Applying…"
       }
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Overview",
+        "title": "Overview",
+        "description": "Today's activity at the salon."
+      },
+      "appointments": {
+        "label": "Appointments",
+        "title": "Manage appointments",
+        "description": "View, manage and arrange every appointment at the salon."
+      },
+      "customers": {
+        "label": "Customers",
+        "title": "Manage customers",
+        "description": "Manage customer details and history."
+      },
+      "messages": {
+        "label": "Messages",
+        "title": "Messages",
+        "description": "Manage messages from customers."
+      },
+      "payments": {
+        "label": "Payments",
+        "title": "Payment at the counter",
+        "description": "Confirm services, total the bill and complete payment."
+      },
+      "staff": {
+        "label": "Staff",
+        "title": "Manage staff",
+        "description": "Manage staff details and revenue."
+      },
+      "services": {
+        "label": "Services",
+        "title": "Manage services",
+        "description": "Add, edit and manage the salon's services."
+      },
+      "nail-designs": {
+        "label": "Nail designs",
+        "title": "Nail design library",
+        "description": "Manage nail designs and approve submissions from customers and staff."
+      },
+      "reviews": {
+        "label": "Reviews",
+        "title": "Customer reviews",
+        "description": "Read, reply to and resolve customer reviews."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "title": "Marketing",
+        "description": "Manage promotions and notification campaigns."
+      },
+      "reports": {
+        "label": "Reports",
+        "title": "Reports",
+        "description": "Track how the salon is performing."
+      },
+      "branches": {
+        "label": "Branches",
+        "title": "Manage branches",
+        "description": "Add, edit and manage the salon's branches."
+      },
+      "accounts": {
+        "label": "Accounts",
+        "title": "Accounts & configuration",
+        "description": "Manage admin accounts and system configuration."
+      },
+      "operations": {
+        "label": "Operations",
+        "title": "Operations",
+        "description": "Refunds, leave approvals, check-in, membership cards and customer lookup."
+      },
+      "audit-logs": {
+        "label": "Audit log",
+        "title": "System audit log",
+        "description": "Review the audit log of admin operations."
+      },
+      "settings": {
+        "label": "Settings",
+        "title": "Settings",
+        "description": "Manage the settings for your nail salon."
+      }
+    },
+    "shell": {
+      "roles": {
+        "OWNER": "Owner",
+        "MANAGER": "Store manager",
+        "STAFF": "Staff"
+      },
+      "fallbackName": "Admin",
+      "accountMenu": "Admin account",
+      "accountSettings": "Account settings",
+      "signOut": "Sign out",
+      "openNav": "Open admin navigation",
+      "closeNav": "Close admin navigation",
+      "navLabel": "Admin navigation",
+      "brand": "YABAI Nail Salon — admin overview",
+      "comingSoon": "This feature is coming later"
+    },
+    "auth": {
+      "restoring": "Restoring your session…"
     }
   }
 }

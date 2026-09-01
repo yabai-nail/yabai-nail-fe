@@ -8,6 +8,107 @@
         "legend": "表示言語を選択",
         "pending": "適用しています…"
       }
+    },
+    "nav": {
+      "dashboard": {
+        "label": "ダッシュボード",
+        "title": "ダッシュボード",
+        "description": "本日の店舗の状況。"
+      },
+      "appointments": {
+        "label": "予約",
+        "title": "予約管理",
+        "description": "店舗のすべての予約を確認・管理・調整します。"
+      },
+      "customers": {
+        "label": "顧客",
+        "title": "顧客管理",
+        "description": "顧客の情報と来店履歴を管理します。"
+      },
+      "messages": {
+        "label": "メッセージ",
+        "title": "メッセージ",
+        "description": "顧客からのメッセージを管理します。"
+      },
+      "payments": {
+        "label": "支払い",
+        "title": "店頭での支払い",
+        "description": "メニューを確認し、金額を計算して、支払いを完了します。"
+      },
+      "staff": {
+        "label": "スタッフ",
+        "title": "スタッフ管理",
+        "description": "スタッフの情報と売上を管理します。"
+      },
+      "services": {
+        "label": "メニュー",
+        "title": "メニュー管理",
+        "description": "店舗のメニューを追加・編集・管理します。"
+      },
+      "nail-designs": {
+        "label": "ネイルデザイン",
+        "title": "ネイルデザイン一覧",
+        "description": "ネイルデザインを管理し、顧客・スタッフからの提案を承認します。"
+      },
+      "reviews": {
+        "label": "レビュー",
+        "title": "顧客レビュー",
+        "description": "レビューを確認し、返信して対応します。"
+      },
+      "marketing": {
+        "label": "マーケティング",
+        "title": "マーケティング",
+        "description": "キャンペーンと通知配信を管理します。"
+      },
+      "reports": {
+        "label": "レポート",
+        "title": "レポート",
+        "description": "店舗の実績を確認します。"
+      },
+      "branches": {
+        "label": "店舗",
+        "title": "店舗管理",
+        "description": "店舗を追加・編集・管理します。"
+      },
+      "accounts": {
+        "label": "アカウント",
+        "title": "アカウントと構成",
+        "description": "管理者アカウントとシステム構成を管理します。"
+      },
+      "operations": {
+        "label": "オペレーション",
+        "title": "オペレーション",
+        "description": "返金、休暇申請の承認、来店受付、会員カード、顧客検索。"
+      },
+      "audit-logs": {
+        "label": "監査ログ",
+        "title": "システム監査ログ",
+        "description": "管理操作の監査ログを確認します。"
+      },
+      "settings": {
+        "label": "設定",
+        "title": "設定",
+        "description": "ネイルサロンの各種設定を行います。"
+      }
+    },
+    "shell": {
+      "roles": {
+        "OWNER": "オーナー",
+        "MANAGER": "店長",
+        "STAFF": "スタッフ"
+      },
+      "fallbackName": "管理者",
+      "accountMenu": "管理者アカウント",
+      "accountSettings": "アカウント設定",
+      "signOut": "ログアウト",
+      "openNav": "管理メニューを開く",
+      "closeNav": "管理メニューを閉じる",
+      "navLabel": "管理メニュー",
+      "brand": "YABAI Nail Salon — 管理ダッシュボード",
+      "comingSoon": "この機能は今後追加されます"
+    },
+    "auth": {
+      "restoring": "ログインセッションを復元しています…"
     }
   }
 }
