@@ -1,6 +1,7 @@
 "use client";
 
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, Card, Switch, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -15,6 +16,7 @@ import {
 } from "@/lib/admin-staff-performance";
 import { useAdminBranch, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
+import { LanguageSettings } from "./LanguageSettings";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
 import type { CommissionPolicy } from "./data";
@@ -54,6 +56,13 @@ function formatOptionalMoney(value: number | null): string {
 export function AdminSettingsComponent() {
   const { branchId } = useAdminBranch();
   const [activeTab, setActiveTab] = useState("commission");
+  // Appended at render because its label is the one string on this screen that is
+  // already translated; the other eight are extracted in their own slice.
+  const tLanguage = useTranslations("admin.settings.language");
+  const tabs = useMemo(
+    () => [...settingsTabs, { id: "language", label: tLanguage("tab") }],
+    [tLanguage]
+  );
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [showRate, setShowRate] = useState(true);
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
@@ -130,7 +139,7 @@ export function AdminSettingsComponent() {
       <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} variant="secondary">
         <Tabs.ListContainer className="overflow-x-auto">
           <Tabs.List aria-label="Nhóm cài đặt">
-            {settingsTabs.map((tab) => (
+            {tabs.map((tab) => (
               <Tabs.Tab key={tab.id} id={tab.id}>
                 <AdminTabLabel>{tab.label}</AdminTabLabel>
                 <Tabs.Indicator />
@@ -139,12 +148,14 @@ export function AdminSettingsComponent() {
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
-      {activeTab === "booking" && branchId ? (
+      {activeTab === "language" ? (
+        <LanguageSettings />
+      ) : activeTab === "booking" && branchId ? (
         <BranchSettingsForm branchId={branchId} />
       ) : activeTab !== "commission" ? (
         <Card className="mt-4 rounded-lg border-admin-border bg-admin-surface shadow-none">
           <Card.Content className="p-12 text-center">
-            <h2 className="font-bold">{settingsTabs.find((tab) => tab.id === activeTab)?.label}</h2>
+            <h2 className="font-bold">{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
             <p className="mt-2 text-sm text-admin-muted">Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.</p>
           </Card.Content>
         </Card>

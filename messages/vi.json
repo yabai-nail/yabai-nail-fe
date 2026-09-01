@@ -1,1 +1,13 @@
-{}
+{
+  "admin": {
+    "settings": {
+      "language": {
+        "tab": "Ngôn ngữ",
+        "heading": "Ngôn ngữ hiển thị",
+        "description": "Chỉ đổi ngôn ngữ của bảng điều khiển, và chỉ trên trình duyệt này. Không ảnh hưởng tới ứng dụng khách hàng.",
+        "legend": "Chọn ngôn ngữ hiển thị",
+        "pending": "Đang áp dụng…"
+      }
+    }
+  }
+}

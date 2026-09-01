@@ -52,7 +52,7 @@ console này, và đó chính là lý do `next-intl` đã có mặt sẵn trong 
 - `src/components/layouts/**` (AdminShell, ShellNav, AdminAuthGate)
 - 16 `export const metadata` trong `src/app/(admin)/admin/**`
 - Hạ tầng: `src/app/(admin)/admin/layout.tsx`, `src/i18n/`, `messages/`, `scripts/check-i18n.mjs`
-- Nút đổi ngôn ngữ trong AdminShell
+- Nút đổi ngôn ngữ: tab **Ngôn ngữ** trong `/admin/settings`
 
 **Ngoài phạm vi**
 
@@ -129,8 +129,13 @@ không đổi hành vi render.
 
 ### Nút đổi ngôn ngữ
 
-Đặt trong `AdminShell`. Ghi cookie `NEXT_LOCALE` rồi gọi `router.refresh()` để
-server dựng lại với catalog mới.
+Tab thứ chín — **Ngôn ngữ** — trong `/admin/settings`, không phải trên header.
+Chủ dự án tìm nó ở màn Cài đặt trước khi có ai chỉ chỗ, nên đó là nơi nó thuộc về.
+
+Ghi cookie `NEXT_LOCALE` rồi gọi `router.refresh()` để server dựng lại admin
+layout với catalog mới. Tên ngôn ngữ dùng endonym (`Tiếng Việt` · `日本語` ·
+`English`) nên không cần dịch, và người đang mắc kẹt ở ngôn ngữ không đọc được
+vẫn tìm được đường ra.
 
 **Giới hạn đã biết:** lựa chọn chỉ sống trong cookie của trình duyệt đó. Đồng bộ
 về tài khoản cần một endpoint BE chưa tồn tại — `PATCH /me/preferences/language`

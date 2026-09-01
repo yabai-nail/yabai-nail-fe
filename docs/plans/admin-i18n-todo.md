@@ -10,7 +10,8 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 - [x] **L0** Spec
 - [x] **L1** `src/i18n/{config,locale,messages}.ts`, `messages/{vi,ja,en}.json`,
       admin layout đọc locale, `scripts/check-i18n.mjs` (chế độ báo cáo)
-- [ ] **L2** Nút đổi ngôn ngữ trong AdminShell + ghi cookie sau đăng nhập
+- [x] **L2** Tab **Ngôn ngữ** trong `/admin/settings` (ghi cookie + `router.refresh()`)
+- [ ] **L2b** Ghi cookie từ `AdminSession.locale` một lần sau đăng nhập
 
 ## Dùng chung (phải xong trước các màn)
 
