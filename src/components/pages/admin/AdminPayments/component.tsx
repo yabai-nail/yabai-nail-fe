@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -18,6 +19,7 @@ import {
   type AdminStaffMember,
 } from "@/service";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
+import type { Translator } from "@/i18n/config";
 import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
 import { calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
@@ -48,6 +50,7 @@ function buildInvoiceFromServer(
     readonly services: Map<string, AdminServiceItem>;
     readonly staff: Map<string, AdminStaffMember>;
   },
+  t: Translator,
 ): CheckoutInvoice {
   const customer = lookups.customers.get(appointment.customerId);
   const staff = lookups.staff.get(appointment.staffId);
@@ -56,14 +59,14 @@ function buildInvoiceFromServer(
   const start = new Date(appointment.startsAt);
   const date = start.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", weekday: "long" });
   const time = start.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-  const customerName = customer?.displayName ?? customer?.name ?? "Khách chưa có tên";
-  const staffName = staff?.displayName ?? "Nhân viên chưa có tên";
+  const customerName = customer?.displayName ?? customer?.name ?? t("fallback.customer");
+  const staffName = staff?.displayName ?? t("fallback.staff");
 
   const asService = (serviceId: string) => {
     const server = lookups.services.get(serviceId);
     return {
       id: serviceId,
-      name: server?.name ?? "Dịch vụ chưa có tên",
+      name: server?.name ?? t("fallback.service"),
       price: server?.price ?? 0,
     };
   };
@@ -88,12 +91,12 @@ function buildInvoiceFromServer(
     },
     bookedService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? "Dịch vụ chưa có tên",
+      name: primaryService?.name ?? t("fallback.service"),
       price: primaryService?.price ?? 0,
     },
     currentService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? "Dịch vụ chưa có tên",
+      name: primaryService?.name ?? t("fallback.service"),
       price: primaryService?.price ?? 0,
     },
     additionalItems: appointment.serviceIds.slice(1).map((serviceId) => ({
@@ -110,6 +113,8 @@ function buildInvoiceFromServer(
 }
 
 export function AdminPaymentsComponent() {
+  const t = useTranslations("admin.payments");
+  const tMethod = useTranslations("admin.paymentMethod");
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId");
   const { branchId } = useAdminBranch();
@@ -140,7 +145,7 @@ export function AdminPaymentsComponent() {
   // handlers hydrate the working state below.
   const seededInvoice = useMemo<CheckoutInvoice | null>(() => {
     if (appointment) {
-      const invoice = buildInvoiceFromServer(appointment, lookups);
+      const invoice = buildInvoiceFromServer(appointment, lookups, t);
       const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
       if (captured) {
         const method = captured.method.toLowerCase();
@@ -154,7 +159,7 @@ export function AdminPaymentsComponent() {
       return invoice;
     }
     return null;
-  }, [appointment, lookups, payments.data]);
+  }, [appointment, lookups, payments.data, t]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
@@ -183,13 +188,11 @@ export function AdminPaymentsComponent() {
       // The validation message used to be dropped on the floor: the dialog
       // closed, no request went out, nothing on screen changed, and the staff
       // member had every reason to believe the money was taken.
-      setConfirmError(result.error);
+      setConfirmError(t(result.error));
       return;
     }
     if (!isServerBacked) {
-      setConfirmError(
-        "Hóa đơn này chưa gắn với lịch hẹn thật nên không ghi được giao dịch.",
-      );
+      setConfirmError(t("error.noAppointment"));
       return;
     }
     setConfirmPending(true);
@@ -213,7 +216,10 @@ export function AdminPaymentsComponent() {
         // comparison silently never ran.
         if (typeof quote.amountDue === "number" && quote.amountDue !== totals.grandTotal) {
           setConfirmError(
-            `Số tiền trên màn hình (${formatMoney(totals.grandTotal)}) khác số máy chủ sẽ thu (${formatMoney(quote.amountDue)}). Hãy tải lại và kiểm tra trước khi thu tiền.`,
+            t("error.amountMismatch", {
+              screen: formatMoney(totals.grandTotal),
+              server: formatMoney(quote.amountDue),
+            }),
           );
           return;
         }
@@ -233,7 +239,7 @@ export function AdminPaymentsComponent() {
         void mutateAppointment();
       } catch (thrown) {
         setConfirmError(
-          thrown instanceof Error ? thrown.message : "Không ghi được giao dịch.",
+          thrown instanceof Error ? thrown.message : t("error.record"),
         );
       } finally {
         setConfirmPending(false);
@@ -245,7 +251,7 @@ export function AdminPaymentsComponent() {
     return (
       <AdminPageLayout>
         <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
-          Mở một lịch hẹn rồi chọn thanh toán để tải hóa đơn thật.
+          {t("empty")}
         </p>
       </AdminPageLayout>
     );
@@ -254,7 +260,7 @@ export function AdminPaymentsComponent() {
     return (
       <AdminPageLayout>
         <p role="alert" className="rounded-lg border border-admin-danger/40 bg-admin-surface px-4 py-8 text-center text-sm text-admin-danger">
-          Không tải được lịch hẹn. Không có giao dịch nào được tạo.
+          {t("loadFailed")}
         </p>
       </AdminPageLayout>
     );
@@ -263,7 +269,7 @@ export function AdminPaymentsComponent() {
     return (
       <AdminPageLayout>
         <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
-          Đang tải hóa đơn từ máy chủ…
+          {t("loading")}
         </p>
       </AdminPageLayout>
     );
@@ -272,15 +278,15 @@ export function AdminPaymentsComponent() {
   return (
     <AdminPageLayout>
       <p className="mb-4 rounded-lg border border-admin-border bg-admin-soft px-4 py-3 text-xs leading-5 text-admin-muted">
-        Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán.
+        {t("serverBackedNote")}
       </p>
       {payments.data?.items.length ? (
         <div className="mb-4 rounded-lg border border-admin-border bg-admin-surface px-4 py-3">
-          <p className="text-xs font-semibold text-admin-ink">Giao dịch đã ghi nhận</p>
+          <p className="text-xs font-semibold text-admin-ink">{t("recorded")}</p>
           <ul className="mt-2 space-y-1 text-xs text-admin-muted">
             {payments.data.items.map((payment) => (
               <li key={payment.id}>
-                {paymentMethodLabel(payment.method)} · {formatMoney(payment.amount)} · {paymentStatusLabel(payment.status)}
+                {paymentMethodLabel(payment.method, tMethod)} · {formatMoney(payment.amount)} · {paymentStatusLabel(payment.status, t)}
               </li>
             ))}
           </ul>
@@ -288,7 +294,7 @@ export function AdminPaymentsComponent() {
       ) : null}
       {confirmPending ? (
         <p className="mb-4 rounded-lg border border-admin-border bg-admin-surface px-4 py-2 text-xs text-admin-muted">
-          Đang gọi quote và ghi giao dịch…
+          {t("submitting")}
         </p>
       ) : null}
       {confirmError ? (
@@ -307,7 +313,7 @@ export function AdminPaymentsComponent() {
           onCancel={() => setIsAppointmentCancelled(true)}
         />
         <ServiceCheckoutPanel invoice={invoice} onChange={setInvoice}>
-          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">Xác nhận & thanh toán</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">Tổng tiền khách thanh toán</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
+          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
       </div>

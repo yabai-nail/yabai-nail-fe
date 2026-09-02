@@ -1432,6 +1432,145 @@
       "regionDetail": "選択中の予約の詳細",
       "emptyTitle": "予約が選択されていません",
       "emptyDescription": "予約を選ぶと詳細が表示されます。"
+    },
+    "payments": {
+      "fallback": {
+        "customer": "名前未登録の顧客",
+        "staff": "名前未登録のスタッフ",
+        "service": "名前未登録のメニュー"
+      },
+      "status": {
+        "SUCCEEDED": "成功",
+        "REQUESTED": "要求中",
+        "PROCESSING": "処理中",
+        "RETRY_SCHEDULED": "再試行待ち",
+        "FAILED": "失敗"
+      },
+      "empty": "予約を開いて会計を選ぶと、実際の伝票が読み込まれます。",
+      "loadFailed": "予約を読み込めませんでした。取引は作成されていません。",
+      "loading": "サーバーから伝票を読み込み中…",
+      "serverBackedNote": "実際の予約に接続しています。会計を記録する前に payment-quote を呼び出します。",
+      "recorded": "記録済みの取引",
+      "submitting": "quote を呼び出して取引を記録中…",
+      "step3": "確認と会計",
+      "grandTotalLabel": "お客様のお支払い合計",
+      "error": {
+        "noAppointment": "この伝票は実際の予約に紐づいていないため、取引を記録できません。",
+        "amountMismatch": "画面の金額（{screen}）とサーバーが請求する金額（{server}）が違います。会計の前に再読み込みして確認してください。",
+        "record": "取引を記録できませんでした。"
+      },
+      "customer": {
+        "heading": "顧客情報",
+        "loyal": "常連のお客様",
+        "phone": "電話番号",
+        "birthday": "生年月日",
+        "visits": "来店回数",
+        "visitsValue": "{count} 回",
+        "totalSpend": "累計利用額"
+      },
+      "appointment": {
+        "heading": "予約情報",
+        "date": "予約日",
+        "time": "予約時刻",
+        "staff": "スタッフ",
+        "changeStaff": "スタッフを変更",
+        "changeDateTime": "日時を変更",
+        "cancel": "予約をキャンセル",
+        "staffTitle": "スタッフを変更",
+        "dateTimeTitle": "日時を変更",
+        "dateField": "日付",
+        "timeField": "時刻",
+        "close": "閉じる",
+        "save": "変更を保存",
+        "cancelTitle": "予約をキャンセルしますか？",
+        "cancelBody": "この画面の操作中は、予約がキャンセル済みとして表示されます。",
+        "cancelKeep": "予約を残す",
+        "cancelConfirm": "キャンセルを確定"
+      },
+      "checkout": {
+        "step": "ステップ {number}",
+        "step1": "メニューの選択と変更",
+        "changeService": "メニューを変更",
+        "bookedService": "予約されたメニュー",
+        "currentService": "現在のメニュー",
+        "changed": "変更済み",
+        "step2": "追加メニュー",
+        "addItem": "メニューを追加",
+        "noNote": "メモなし",
+        "editItem": "{name}を編集",
+        "deleteItem": "{name}を削除"
+      },
+      "selection": {
+        "title": "メインメニューを変更",
+        "subtitle": "お客様が実際に受けたメニューを選んでください。",
+        "current": "選択中",
+        "pick": "選ぶ",
+        "close": "閉じる"
+      },
+      "lineItem": {
+        "editTitle": "追加メニューを編集",
+        "addTitle": "追加メニューを登録",
+        "source": "メニューの取得元",
+        "custom": "自由入力の項目",
+        "name": "メニュー名",
+        "price": "料金（¥）",
+        "note": "メモ",
+        "close": "閉じる",
+        "save": "変更を保存",
+        "add": "メニューを追加"
+      },
+      "summary": {
+        "heading": "お会計",
+        "paid": "支払い済み",
+        "pending": "会計待ち",
+        "subtotal": "メニュー合計",
+        "discount": "割引（¥）",
+        "applyDiscount": "割引を適用",
+        "grandTotal": "お客様のお支払い額",
+        "orderNote": "注文メモ",
+        "orderNotePlaceholder": "必要があればメモを入力...",
+        "confirm": "会計を確定",
+        "preview": "伝票を表示・印刷"
+      },
+      "invoice": {
+        "title": "お会計伝票",
+        "at": "{date} {time}",
+        "customer": "顧客",
+        "services": "メニュー",
+        "subtotal": "小計",
+        "discount": "割引",
+        "total": "合計",
+        "method": "支払い方法: <strong>{method}</strong>",
+        "methodNotChosen": "未選択",
+        "close": "閉じる",
+        "print": "伝票を印刷"
+      },
+      "confirm": {
+        "title": "会計を確定しますか？",
+        "customer": "顧客: <strong>{name}</strong>",
+        "amount": "金額: <strong>{amount}</strong>",
+        "method": "支払い方法: <strong>{method}</strong>",
+        "serverNote": "この操作は実際の取引を記録します。この画面からは取り消せません。",
+        "localNote": "この伝票は実際の予約に紐づいていないため、取引は記録されません。",
+        "recheck": "確認しなおす",
+        "submit": "確定"
+      },
+      "methodPicker": {
+        "label": "支払い方法"
+      },
+      "state": {
+        "paidLocked": "支払い済みの伝票のため、金額は変更できません。",
+        "nameRequired": "メニュー名を入力してください。",
+        "priceInvalid": "料金は 0 以上の整数で入力してください。",
+        "discountInvalid": "割引額が正しくありません。",
+        "duplicateService": "このメニューはすでに伝票にあります。",
+        "itemNotFoundEdit": "編集するメニューが見つかりません。",
+        "itemNotFoundDelete": "削除するメニューが見つかりません。",
+        "discountRange": "割引はメニュー合計以下、0 以上にしてください。",
+        "methodRequired": "支払い方法を選択してください。",
+        "paidAtInvalid": "確定日時が正しくありません。",
+        "serviceRequired": "メニューを選択してください。"
+      }
     }
   }
 }

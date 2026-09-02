@@ -1432,6 +1432,145 @@
       "regionDetail": "Detail of the selected appointment",
       "emptyTitle": "No appointment selected",
       "emptyDescription": "Pick an appointment to see everything about it."
+    },
+    "payments": {
+      "fallback": {
+        "customer": "Customer with no name",
+        "staff": "Staff member with no name",
+        "service": "Service with no name"
+      },
+      "status": {
+        "SUCCEEDED": "Succeeded",
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "RETRY_SCHEDULED": "Retry scheduled",
+        "FAILED": "Failed"
+      },
+      "empty": "Open an appointment and choose payment to load a real invoice.",
+      "loadFailed": "The appointment could not be loaded. No transaction was created.",
+      "loading": "Loading the invoice from the server…",
+      "serverBackedNote": "Connected to a real appointment — payment-quote is called before the payment is recorded.",
+      "recorded": "Recorded transactions",
+      "submitting": "Calling quote and recording the transaction…",
+      "step3": "Confirm and take payment",
+      "grandTotalLabel": "Total the customer pays",
+      "error": {
+        "noAppointment": "This invoice is not tied to a real appointment, so no transaction can be recorded.",
+        "amountMismatch": "The amount on screen ({screen}) differs from what the server will charge ({server}). Reload and check before taking the money.",
+        "record": "The transaction could not be recorded."
+      },
+      "customer": {
+        "heading": "Customer details",
+        "loyal": "Loyal customer",
+        "phone": "Phone",
+        "birthday": "Birthday",
+        "visits": "Visits",
+        "visitsValue": "{count} visits",
+        "totalSpend": "Total spend"
+      },
+      "appointment": {
+        "heading": "Appointment details",
+        "date": "Appointment date",
+        "time": "Appointment time",
+        "staff": "Staff",
+        "changeStaff": "Change staff",
+        "changeDateTime": "Change date and time",
+        "cancel": "Cancel appointment",
+        "staffTitle": "Change staff",
+        "dateTimeTitle": "Change date and time",
+        "dateField": "Date",
+        "timeField": "Time",
+        "close": "Close",
+        "save": "Save changes",
+        "cancelTitle": "Cancel this appointment?",
+        "cancelBody": "The appointment will show as cancelled for the rest of this session.",
+        "cancelKeep": "Keep it",
+        "cancelConfirm": "Confirm cancellation"
+      },
+      "checkout": {
+        "step": "Step {number}",
+        "step1": "Pick and change the service",
+        "changeService": "Change service",
+        "bookedService": "Booked service",
+        "currentService": "Current service",
+        "changed": "Changed",
+        "step2": "Extra services",
+        "addItem": "Add a service",
+        "noNote": "No note",
+        "editItem": "Edit {name}",
+        "deleteItem": "Delete {name}"
+      },
+      "selection": {
+        "title": "Change the main service",
+        "subtitle": "Pick the service the customer actually received.",
+        "current": "Selected",
+        "pick": "Pick",
+        "close": "Close"
+      },
+      "lineItem": {
+        "editTitle": "Edit the extra service",
+        "addTitle": "Add an extra service",
+        "source": "Where the service comes from",
+        "custom": "Custom item",
+        "name": "Service name",
+        "price": "Price (¥)",
+        "note": "Note",
+        "close": "Close",
+        "save": "Save changes",
+        "add": "Add the service"
+      },
+      "summary": {
+        "heading": "Payment total",
+        "paid": "Paid",
+        "pending": "Awaiting payment",
+        "subtotal": "Services total",
+        "discount": "Discount (¥)",
+        "applyDiscount": "Apply the discount",
+        "grandTotal": "The customer owes",
+        "orderNote": "Order note",
+        "orderNotePlaceholder": "Add a note if there is one...",
+        "confirm": "Confirm the payment",
+        "preview": "View and print the invoice"
+      },
+      "invoice": {
+        "title": "Payment invoice",
+        "at": "{date} at {time}",
+        "customer": "Customer",
+        "services": "Services",
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "total": "Total",
+        "method": "Method: <strong>{method}</strong>",
+        "methodNotChosen": "Not chosen",
+        "close": "Close",
+        "print": "Print the invoice"
+      },
+      "confirm": {
+        "title": "Confirm this payment?",
+        "customer": "Customer: <strong>{name}</strong>",
+        "amount": "Amount: <strong>{amount}</strong>",
+        "method": "Method: <strong>{method}</strong>",
+        "serverNote": "This records a real transaction and cannot be undone from this screen.",
+        "localNote": "This invoice is not tied to a real appointment, so no transaction will be recorded.",
+        "recheck": "Check again",
+        "submit": "Confirm"
+      },
+      "methodPicker": {
+        "label": "Payment method"
+      },
+      "state": {
+        "paidLocked": "The invoice is already paid, so the amounts cannot change.",
+        "nameRequired": "The service needs a name.",
+        "priceInvalid": "The price must be a whole number, zero or more.",
+        "discountInvalid": "That discount is not valid.",
+        "duplicateService": "That service is already on the invoice.",
+        "itemNotFoundEdit": "The service to edit could not be found.",
+        "itemNotFoundDelete": "The service to delete could not be found.",
+        "discountRange": "The discount must be between zero and the services total.",
+        "methodRequired": "Pick a payment method.",
+        "paidAtInvalid": "That confirmation time is not valid.",
+        "serviceRequired": "Pick a service."
+      }
     }
   }
 }

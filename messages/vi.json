@@ -1432,6 +1432,145 @@
       "regionDetail": "Chi tiết lịch hẹn đang chọn",
       "emptyTitle": "Chưa chọn lịch hẹn",
       "emptyDescription": "Chọn một lịch hẹn để xem đầy đủ thông tin."
+    },
+    "payments": {
+      "fallback": {
+        "customer": "Khách chưa có tên",
+        "staff": "Nhân viên chưa có tên",
+        "service": "Dịch vụ chưa có tên"
+      },
+      "status": {
+        "SUCCEEDED": "Thành công",
+        "REQUESTED": "Đang yêu cầu",
+        "PROCESSING": "Đang xử lý",
+        "RETRY_SCHEDULED": "Chờ thử lại",
+        "FAILED": "Thất bại"
+      },
+      "empty": "Mở một lịch hẹn rồi chọn thanh toán để tải hóa đơn thật.",
+      "loadFailed": "Không tải được lịch hẹn. Không có giao dịch nào được tạo.",
+      "loading": "Đang tải hóa đơn từ máy chủ…",
+      "serverBackedNote": "Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán.",
+      "recorded": "Giao dịch đã ghi nhận",
+      "submitting": "Đang gọi quote và ghi giao dịch…",
+      "step3": "Xác nhận & thanh toán",
+      "grandTotalLabel": "Tổng tiền khách thanh toán",
+      "error": {
+        "noAppointment": "Hóa đơn này chưa gắn với lịch hẹn thật nên không ghi được giao dịch.",
+        "amountMismatch": "Số tiền trên màn hình ({screen}) khác số máy chủ sẽ thu ({server}). Hãy tải lại và kiểm tra trước khi thu tiền.",
+        "record": "Không ghi được giao dịch."
+      },
+      "customer": {
+        "heading": "Thông tin khách hàng",
+        "loyal": "Khách thân thiết",
+        "phone": "Điện thoại",
+        "birthday": "Ngày sinh",
+        "visits": "Lần đến",
+        "visitsValue": "{count} lần",
+        "totalSpend": "Tổng chi tiêu"
+      },
+      "appointment": {
+        "heading": "Thông tin lịch hẹn",
+        "date": "Ngày hẹn",
+        "time": "Giờ hẹn",
+        "staff": "Nhân viên",
+        "changeStaff": "Đổi nhân viên",
+        "changeDateTime": "Đổi ngày giờ",
+        "cancel": "Hủy lịch hẹn",
+        "staffTitle": "Đổi nhân viên",
+        "dateTimeTitle": "Đổi ngày giờ",
+        "dateField": "Ngày",
+        "timeField": "Giờ",
+        "close": "Đóng",
+        "save": "Lưu thay đổi",
+        "cancelTitle": "Hủy lịch hẹn?",
+        "cancelBody": "Lịch hẹn sẽ chuyển sang trạng thái đã hủy trong phiên hiện tại.",
+        "cancelKeep": "Giữ lịch",
+        "cancelConfirm": "Xác nhận hủy"
+      },
+      "checkout": {
+        "step": "Bước {number}",
+        "step1": "Chọn & đổi dịch vụ",
+        "changeService": "Đổi dịch vụ",
+        "bookedService": "Dịch vụ đã đặt",
+        "currentService": "Dịch vụ hiện tại",
+        "changed": "Đã đổi",
+        "step2": "Dịch vụ phát sinh",
+        "addItem": "Thêm dịch vụ",
+        "noNote": "Không có ghi chú",
+        "editItem": "Sửa {name}",
+        "deleteItem": "Xóa {name}"
+      },
+      "selection": {
+        "title": "Đổi dịch vụ chính",
+        "subtitle": "Chọn dịch vụ thực tế khách đã sử dụng.",
+        "current": "Đang chọn",
+        "pick": "Chọn",
+        "close": "Đóng"
+      },
+      "lineItem": {
+        "editTitle": "Sửa dịch vụ phát sinh",
+        "addTitle": "Thêm dịch vụ phát sinh",
+        "source": "Nguồn dịch vụ",
+        "custom": "Khoản tùy chỉnh",
+        "name": "Tên dịch vụ",
+        "price": "Giá (¥)",
+        "note": "Ghi chú",
+        "close": "Đóng",
+        "save": "Lưu thay đổi",
+        "add": "Thêm dịch vụ"
+      },
+      "summary": {
+        "heading": "Tổng thanh toán",
+        "paid": "Đã thanh toán",
+        "pending": "Chờ thanh toán",
+        "subtotal": "Tổng tiền dịch vụ",
+        "discount": "Giảm giá (¥)",
+        "applyDiscount": "Áp dụng giảm giá",
+        "grandTotal": "Khách cần thanh toán",
+        "orderNote": "Ghi chú đơn hàng",
+        "orderNotePlaceholder": "Nhập ghi chú nếu có...",
+        "confirm": "Xác nhận thanh toán",
+        "preview": "Xem & in hóa đơn"
+      },
+      "invoice": {
+        "title": "Hóa đơn thanh toán",
+        "at": "{date} lúc {time}",
+        "customer": "Khách hàng",
+        "services": "Dịch vụ",
+        "subtotal": "Tạm tính",
+        "discount": "Giảm giá",
+        "total": "Tổng thanh toán",
+        "method": "Phương thức: <strong>{method}</strong>",
+        "methodNotChosen": "Chưa chọn",
+        "close": "Đóng",
+        "print": "In hóa đơn"
+      },
+      "confirm": {
+        "title": "Xác nhận thanh toán?",
+        "customer": "Khách hàng: <strong>{name}</strong>",
+        "amount": "Số tiền: <strong>{amount}</strong>",
+        "method": "Phương thức: <strong>{method}</strong>",
+        "serverNote": "Thao tác này ghi nhận giao dịch thật và không thể hoàn tác từ màn này.",
+        "localNote": "Hóa đơn chưa gắn với lịch hẹn thật nên sẽ không có giao dịch nào được ghi.",
+        "recheck": "Kiểm tra lại",
+        "submit": "Xác nhận"
+      },
+      "methodPicker": {
+        "label": "Phương thức thanh toán"
+      },
+      "state": {
+        "paidLocked": "Hóa đơn đã thanh toán nên không thể thay đổi số tiền.",
+        "nameRequired": "Tên dịch vụ không được để trống.",
+        "priceInvalid": "Giá dịch vụ phải là số nguyên không âm.",
+        "discountInvalid": "Giảm giá không hợp lệ.",
+        "duplicateService": "Dịch vụ này đã có trong hóa đơn.",
+        "itemNotFoundEdit": "Không tìm thấy dịch vụ cần sửa.",
+        "itemNotFoundDelete": "Không tìm thấy dịch vụ cần xóa.",
+        "discountRange": "Giảm giá phải từ 0 đến tổng tiền dịch vụ.",
+        "methodRequired": "Vui lòng chọn phương thức thanh toán.",
+        "paidAtInvalid": "Thời gian xác nhận không hợp lệ.",
+        "serviceRequired": "Vui lòng chọn một dịch vụ."
+      }
     }
   }
 }
