@@ -1,17 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { adminService, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { CategoryEditor } from "./CategoryEditor";
 import { SurchargePanel } from "./SurchargePanel";
-import { categoryLabels, type SalonService, type ServiceCategory } from "./data";
+import { serviceCategories, type SalonService, type ServiceCategory } from "./data";
 
 export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
+  const t = useTranslations("admin.services");
   const categories: ReadonlyArray<{ id: "all" | ServiceCategory; label: string }> = [
-    { id: "all", label: "Tất cả" },
-    ...Object.entries(categoryLabels).map(([id, label]) => ({ id: id as ServiceCategory, label })),
+    { id: "all", label: t("all") },
+    ...serviceCategories.map((id) => ({ id, label: t(`category.${id}`) })),
   ];
   const topServices = [...services].sort((left, right) => right.soldCount - left.soldCount).slice(0, 5);
 
@@ -37,14 +39,14 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
       await adminService.reorderServiceCategories({ orderedCategoryIds });
       void beCategories.mutate();
     } catch (error) {
-      setReorderError(error instanceof Error && error.message ? error.message : "Không đổi được thứ tự.");
+      setReorderError(error instanceof Error && error.message ? error.message : t("sidebar.reorderFailed"));
     }
   };
 
   return (
     <div className="space-y-4">
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="px-4 pt-4"><h2 className="font-bold">Danh mục dịch vụ</h2></Card.Header>
+        <Card.Header className="px-4 pt-4"><h2 className="font-bold">{t("sidebar.categories")}</h2></Card.Header>
         <Card.Content className="p-4">
           <ul className="space-y-1">
             {categories.map((category) => (
@@ -60,11 +62,11 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
               Danh mục lưu trên hệ thống
             </p>
             {beCategories.isLoading ? (
-              <p className="text-xs text-admin-muted">Đang tải…</p>
+              <p className="text-xs text-admin-muted">{t("sidebar.loading")}</p>
             ) : beCategories.error ? (
-              <p role="alert" className="text-xs text-admin-danger">Không tải được danh mục.</p>
+              <p role="alert" className="text-xs text-admin-danger">{t("sidebar.loadFailed")}</p>
             ) : beItems.length === 0 ? (
-              <p className="text-xs text-admin-muted">Chưa có danh mục nào trên hệ thống.</p>
+              <p className="text-xs text-admin-muted">{t("sidebar.noCategories")}</p>
             ) : (
               <ul className="space-y-1">
                 {beItems.map((category, index) => (
@@ -73,17 +75,17 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
                       <strong className="text-admin-ink">{category.nameVi ?? category.name}</strong>
                       <span className="ml-2 text-admin-muted">({category.code})</span>
                     </span>
-                    <Button isIconOnly size="sm" variant="ghost" aria-label={`Đưa ${category.name} lên`} isDisabled={index === 0} onPress={() => void move(index, -1)}>
+                    <Button isIconOnly size="sm" variant="ghost" aria-label={t("sidebar.moveUp", { name: category.name })} isDisabled={index === 0} onPress={() => void move(index, -1)}>
                       <ChevronUpIcon className="size-3.5" />
                     </Button>
-                    <Button isIconOnly size="sm" variant="ghost" aria-label={`Đưa ${category.name} xuống`} isDisabled={index === beItems.length - 1} onPress={() => void move(index, 1)}>
+                    <Button isIconOnly size="sm" variant="ghost" aria-label={t("sidebar.moveDown", { name: category.name })} isDisabled={index === beItems.length - 1} onPress={() => void move(index, 1)}>
                       <ChevronDownIcon className="size-3.5" />
                     </Button>
                     <Button
                       isIconOnly
                       size="sm"
                       variant="ghost"
-                      aria-label={`Đổi tên ${category.name}`}
+                      aria-label={t("sidebar.rename", { name: category.name })}
                       onPress={() => setEditing(category)}
                     >
                       <PencilSquareIcon className="size-3.5" />
@@ -106,7 +108,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
         </Card.Content>
       </Card>
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="px-4 pt-4"><h2 className="font-bold">Top dịch vụ bán chạy</h2></Card.Header>
+        <Card.Header className="px-4 pt-4"><h2 className="font-bold">{t("sidebar.topServices")}</h2></Card.Header>
         <Card.Content className="p-4">
           <ol className="space-y-3">
             {topServices.map((service, index) => (
@@ -121,7 +123,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
       </Card>
       <SurchargePanel />
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="p-4"><h2 className="font-bold">Ghi chú</h2><p className="mt-2 text-xs leading-5 text-admin-muted">Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng.</p></Card.Content>
+        <Card.Content className="p-4"><h2 className="font-bold">{t("sidebar.noteHeading")}</h2><p className="mt-2 text-xs leading-5 text-admin-muted">{t("sidebar.noteBody")}</p></Card.Content>
       </Card>
 
       {(creating || editing) ? (

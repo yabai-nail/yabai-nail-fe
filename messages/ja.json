@@ -586,6 +586,100 @@
         "submit": "パスワードを再設定",
         "failed": "パスワードを再設定できません。"
       }
+    },
+    "services": {
+      "category": {
+        "primary": "メインメニュー",
+        "addon": "追加メニュー",
+        "combo": "セット"
+      },
+      "all": "すべて",
+      "tabsLabel": "メニューの分類",
+      "searchLabel": "メニューを検索",
+      "searchPlaceholder": "メニューを検索…",
+      "loading": "メニュー一覧を読み込み中…",
+      "loadFailed": "メニュー一覧を読み込めません。",
+      "table": {
+        "caption": "メニュー一覧",
+        "service": "メニュー",
+        "type": "種別",
+        "price": "料金",
+        "duration": "所要時間",
+        "status": "ステータス",
+        "actions": "操作",
+        "visible": "表示中",
+        "hidden": "非表示",
+        "editService": "{name} を編集",
+        "empty": "該当するメニューがありません。"
+      },
+      "sidebar": {
+        "categories": "メニューのカテゴリー",
+        "loading": "読み込み中…",
+        "loadFailed": "カテゴリーを読み込めません。",
+        "noCategories": "システムにカテゴリーがまだありません。",
+        "moveUp": "{name} を上へ",
+        "moveDown": "{name} を下へ",
+        "rename": "{name} の名前を変更",
+        "reorderFailed": "並び順を変更できません。",
+        "topServices": "人気メニュー",
+        "noteHeading": "メモ",
+        "noteBody": "予約ページでメニューの表示・非表示を切り替えられます。非表示のメニューはお客様には表示されません。"
+      },
+      "categoryEditor": {
+        "editTitle": "カテゴリー名を変更",
+        "addTitle": "カテゴリーを追加",
+        "code": "コード",
+        "internalName": "名称（内部 / EN）",
+        "displayName": "表示名（VI）",
+        "displayPlaceholder": "ジェルネイル",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "add": "追加",
+        "saveFailed": "カテゴリーを保存できません。"
+      },
+      "create": {
+        "title": "メニューを追加",
+        "name": "メニュー名",
+        "namePlaceholder": "単色ジェルネイル",
+        "price": "料金 (¥)",
+        "duration": "所要時間（分）",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "submit": "メニューを追加",
+        "failed": "メニューを作成できません。"
+      },
+      "edit": {
+        "title": "メニューを編集",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "failed": "メニューを更新できません。"
+      },
+      "surcharge": {
+        "heading": "追加料金",
+        "add": "追加料金を追加",
+        "loading": "追加料金を読み込み中…",
+        "loadFailed": "追加料金を読み込めません。",
+        "empty": "追加料金はまだありません。",
+        "editOne": "{name} を編集",
+        "editTitle": "追加料金を編集",
+        "addTitle": "追加料金を追加",
+        "code": "追加料金コード",
+        "codeLocked": "コードは作成後に変更できません。",
+        "codeHint": "大文字で、追加料金の識別に使います。",
+        "name": "追加料金の名称",
+        "kind": "種別",
+        "kindLabel": "追加料金の種別",
+        "fixed": "固定額",
+        "percent": "割合",
+        "amount": "金額 (¥)",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "addAction": "追加",
+        "saveFailed": "追加料金を保存できません。"
+      }
     }
   }
 }

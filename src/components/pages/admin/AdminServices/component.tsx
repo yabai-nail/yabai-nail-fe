@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -13,7 +14,7 @@ import { ServiceEditModal } from "./ServiceEditModal";
 import { ServiceSidebar } from "./ServiceSidebar";
 import { ServiceTable } from "./ServiceTable";
 import {
-  categoryLabels,
+  serviceCategories,
   filterServices,
   paginateServices,
   type SalonService,
@@ -45,6 +46,7 @@ function toFixtureService(server: ServerService): SalonService {
 }
 
 export function AdminServicesComponent() {
+  const t = useTranslations("admin.services");
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
@@ -75,19 +77,19 @@ export function AdminServicesComponent() {
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 xl:flex-row xl:items-end xl:justify-between">
         <Tabs selectedKey={filter} onSelectionChange={(key) => changeFilter(String(key) as ServiceFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
-            <Tabs.List aria-label="Phân loại dịch vụ">
+            <Tabs.List aria-label={t("tabsLabel")}>
               <Tabs.Tab id="all">
                 <AdminTabLabel count={source.length}>
                   Tất cả dịch vụ
                 </AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
-              {Object.entries(categoryLabels).map(([id, label]) => (
+              {serviceCategories.map((id) => (
                 <Tabs.Tab key={id} id={id}>
                   <AdminTabLabel
                     count={source.filter((service) => service.category === id).length}
                   >
-                    {label}
+                    {t(`category.${id}`)}
                   </AdminTabLabel>
                   <Tabs.Indicator />
                 </Tabs.Tab>
@@ -96,7 +98,7 @@ export function AdminServicesComponent() {
           </Tabs.ListContainer>
         </Tabs>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <AdminSearchField label="Tìm dịch vụ" placeholder="Tìm kiếm dịch vụ..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+          <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
           <Button
             variant="primary"
             className="rounded-lg"
@@ -107,9 +109,9 @@ export function AdminServicesComponent() {
         </div>
       </div>
       {isLoading ? (
-        <p className="mb-3 text-xs text-admin-muted">Đang tải danh sách dịch vụ…</p>
+        <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách dịch vụ.</p>
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
       <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
         <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">

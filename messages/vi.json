@@ -586,6 +586,100 @@
         "submit": "Đặt lại mật khẩu",
         "failed": "Không đặt lại được mật khẩu."
       }
+    },
+    "services": {
+      "category": {
+        "primary": "Dịch vụ chính",
+        "addon": "Dịch vụ thêm",
+        "combo": "Combo"
+      },
+      "all": "Tất cả",
+      "tabsLabel": "Phân loại dịch vụ",
+      "searchLabel": "Tìm dịch vụ",
+      "searchPlaceholder": "Tìm kiếm dịch vụ...",
+      "loading": "Đang tải danh sách dịch vụ…",
+      "loadFailed": "Không tải được danh sách dịch vụ.",
+      "table": {
+        "caption": "Danh sách dịch vụ",
+        "service": "Dịch vụ",
+        "type": "Loại",
+        "price": "Giá",
+        "duration": "Thời gian",
+        "status": "Trạng thái",
+        "actions": "Thao tác",
+        "visible": "Đang hiển thị",
+        "hidden": "Đang ẩn",
+        "editService": "Sửa {name}",
+        "empty": "Không tìm thấy dịch vụ phù hợp."
+      },
+      "sidebar": {
+        "categories": "Danh mục dịch vụ",
+        "loading": "Đang tải…",
+        "loadFailed": "Không tải được danh mục.",
+        "noCategories": "Chưa có danh mục nào trên hệ thống.",
+        "moveUp": "Đưa {name} lên",
+        "moveDown": "Đưa {name} xuống",
+        "rename": "Đổi tên {name}",
+        "reorderFailed": "Không đổi được thứ tự.",
+        "topServices": "Top dịch vụ bán chạy",
+        "noteHeading": "Ghi chú",
+        "noteBody": "Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng."
+      },
+      "categoryEditor": {
+        "editTitle": "Đổi tên danh mục",
+        "addTitle": "Thêm danh mục",
+        "code": "Mã (code)",
+        "internalName": "Tên (nội bộ / EN)",
+        "displayName": "Tên hiển thị (VI)",
+        "displayPlaceholder": "Sơn gel",
+        "cancel": "Huỷ",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "add": "Thêm",
+        "saveFailed": "Không lưu được danh mục."
+      },
+      "create": {
+        "title": "Thêm dịch vụ",
+        "name": "Tên dịch vụ",
+        "namePlaceholder": "Sơn gel đơn sắc",
+        "price": "Giá (¥)",
+        "duration": "Thời lượng (phút)",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "submit": "Thêm dịch vụ",
+        "failed": "Không tạo được dịch vụ."
+      },
+      "edit": {
+        "title": "Chỉnh sửa dịch vụ",
+        "cancel": "Huỷ",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "failed": "Không cập nhật được dịch vụ."
+      },
+      "surcharge": {
+        "heading": "Phụ thu",
+        "add": "Thêm phụ thu",
+        "loading": "Đang tải danh sách phụ thu…",
+        "loadFailed": "Không tải được phụ thu.",
+        "empty": "Chưa có phụ thu nào.",
+        "editOne": "Sửa {name}",
+        "editTitle": "Sửa phụ thu",
+        "addTitle": "Thêm phụ thu",
+        "code": "Mã phụ thu",
+        "codeLocked": "Mã không đổi được sau khi tạo.",
+        "codeHint": "Chữ in hoa, dùng để nhận diện phụ thu.",
+        "name": "Tên phụ thu",
+        "kind": "Kiểu",
+        "kindLabel": "Kiểu phụ thu",
+        "fixed": "Số tiền cố định",
+        "percent": "Phần trăm",
+        "amount": "Số tiền (¥)",
+        "cancel": "Huỷ",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "addAction": "Thêm",
+        "saveFailed": "Không lưu được phụ thu."
+      }
     }
   }
 }

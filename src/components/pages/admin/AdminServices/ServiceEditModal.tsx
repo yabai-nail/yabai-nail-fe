@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService } from "@/service";
@@ -17,6 +18,7 @@ export function ServiceEditModal({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.services");
   const [name, setName] = useState(service.name);
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
@@ -45,7 +47,7 @@ export function ServiceEditModal({
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không cập nhật được dịch vụ.");
+      setError(err instanceof Error && err.message ? err.message : t("edit.failed"));
     } finally {
       setBusy(false);
     }
@@ -57,11 +59,11 @@ export function ServiceEditModal({
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
-              <Modal.Heading className="text-base font-bold text-admin-ink">Chỉnh sửa dịch vụ</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("edit.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Tên dịch vụ</span>
+                <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                   value={name}
@@ -71,7 +73,7 @@ export function ServiceEditModal({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Giá (¥)</span>
+                  <span className="font-semibold text-admin-ink">{t("create.price")}</span>
                   <input
                     inputMode="numeric"
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -80,7 +82,7 @@ export function ServiceEditModal({
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Thời lượng (phút)</span>
+                  <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
                     min={5}
@@ -101,14 +103,14 @@ export function ServiceEditModal({
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Huỷ</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("edit.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 isDisabled={!canSubmit}
                 onPress={() => void submit()}
               >
-                {busy ? "Đang lưu…" : "Lưu"}
+                {busy ? t("edit.saving") : t("edit.save")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -586,6 +586,100 @@
         "submit": "Reset password",
         "failed": "Could not reset the password."
       }
+    },
+    "services": {
+      "category": {
+        "primary": "Main services",
+        "addon": "Add-ons",
+        "combo": "Combo"
+      },
+      "all": "All",
+      "tabsLabel": "Service categories",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "Search services…",
+      "loading": "Loading the services…",
+      "loadFailed": "Could not load the services.",
+      "table": {
+        "caption": "Service list",
+        "service": "Service",
+        "type": "Type",
+        "price": "Price",
+        "duration": "Duration",
+        "status": "Status",
+        "actions": "Actions",
+        "visible": "Visible",
+        "hidden": "Hidden",
+        "editService": "Edit {name}",
+        "empty": "No matching services."
+      },
+      "sidebar": {
+        "categories": "Service categories",
+        "loading": "Loading…",
+        "loadFailed": "Could not load the categories.",
+        "noCategories": "There are no categories in the system yet.",
+        "moveUp": "Move {name} up",
+        "moveDown": "Move {name} down",
+        "rename": "Rename {name}",
+        "reorderFailed": "Could not change the order.",
+        "topServices": "Best-selling services",
+        "noteHeading": "Notes",
+        "noteBody": "You can show or hide a service on the booking page. Hidden services are not shown to customers."
+      },
+      "categoryEditor": {
+        "editTitle": "Rename category",
+        "addTitle": "Add category",
+        "code": "Code",
+        "internalName": "Name (internal / EN)",
+        "displayName": "Display name (VI)",
+        "displayPlaceholder": "Gel polish",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "add": "Add",
+        "saveFailed": "Could not save the category."
+      },
+      "create": {
+        "title": "Add service",
+        "name": "Service name",
+        "namePlaceholder": "Single-colour gel",
+        "price": "Price (¥)",
+        "duration": "Duration (minutes)",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "submit": "Add service",
+        "failed": "Could not create the service."
+      },
+      "edit": {
+        "title": "Edit service",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "failed": "Could not update the service."
+      },
+      "surcharge": {
+        "heading": "Surcharges",
+        "add": "Add surcharge",
+        "loading": "Loading surcharges…",
+        "loadFailed": "Could not load the surcharges.",
+        "empty": "No surcharges yet.",
+        "editOne": "Edit {name}",
+        "editTitle": "Edit surcharge",
+        "addTitle": "Add surcharge",
+        "code": "Surcharge code",
+        "codeLocked": "The code cannot change after creation.",
+        "codeHint": "Uppercase, used to identify the surcharge.",
+        "name": "Surcharge name",
+        "kind": "Type",
+        "kindLabel": "Surcharge type",
+        "fixed": "Fixed amount",
+        "percent": "Percentage",
+        "amount": "Amount (¥)",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "addAction": "Add",
+        "saveFailed": "Could not save the surcharge."
+      }
     }
   }
 }
