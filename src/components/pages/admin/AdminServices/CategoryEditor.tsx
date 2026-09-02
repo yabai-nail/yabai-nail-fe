@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService, useAdminBranchList, type AdminServiceCategory } from "@/service";
@@ -21,6 +22,7 @@ export function CategoryEditor({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.services");
   const isEdit = category !== null;
   const branches = useAdminBranchList();
   const branchItems = branches.data?.items ?? [];
@@ -72,7 +74,7 @@ export function CategoryEditor({
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được danh mục.");
+      setError(thrown instanceof Error ? thrown.message : t("categoryEditor.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -85,21 +87,21 @@ export function CategoryEditor({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-6 py-5">
               <Modal.Heading className="text-lg font-bold text-admin-ink">
-                {isEdit ? "Sửa danh mục" : "Thêm danh mục"}
+                {isEdit ? "Sửa danh mục" : t("categoryEditor.addTitle")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-5 px-6 py-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>Mã (code)</span>
+                  <span className={labelClass}>{t("categoryEditor.code")}</span>
                   <input value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="GEL" className={fieldClass} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>Tên hiển thị (VI)</span>
-                  <input value={nameVi} onChange={(event) => setNameVi(event.target.value)} placeholder="Sơn gel" className={fieldClass} />
+                  <span className={labelClass}>{t("categoryEditor.displayName")}</span>
+                  <input value={nameVi} onChange={(event) => setNameVi(event.target.value)} placeholder={t("categoryEditor.displayPlaceholder")} className={fieldClass} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>Tên (nội bộ / EN)</span>
+                  <span className={labelClass}>{t("categoryEditor.internalName")}</span>
                   <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Gel manicure" className={fieldClass} />
                 </label>
                 <label className="flex flex-col gap-1.5">
@@ -138,7 +140,7 @@ export function CategoryEditor({
               </fieldset>
 
               <fieldset className="rounded-lg border border-admin-border p-4">
-                <legend className={`px-1 ${labelClass}`}>Dịch vụ</legend>
+                <legend className={`px-1 ${labelClass}`}>{t("table.service")}</legend>
                 {isEdit ? (
                   <p className="mb-3 text-xs text-admin-muted">
                     Đang có <strong className="text-admin-ink">{members.length}</strong> dịch vụ:{" "}
@@ -181,14 +183,14 @@ export function CategoryEditor({
               {error ? <p role="alert" className="text-sm text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-6 py-4">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>Huỷ</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("categoryEditor.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 onPress={() => void submit()}
                 isDisabled={!canSubmit}
               >
-                {busy ? "Đang lưu…" : isEdit ? "Lưu" : "Thêm"}
+                {busy ? t("categoryEditor.saving") : isEdit ? t("categoryEditor.save") : t("categoryEditor.add")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

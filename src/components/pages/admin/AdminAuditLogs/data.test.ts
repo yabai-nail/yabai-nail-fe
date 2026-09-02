@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Translator } from "@/i18n/config";
 import {
   adaptAuditLog,
   auditActions,
@@ -8,12 +9,24 @@ import {
   paginate,
 } from "./data";
 
+/** The keys this stub admits; anything else falls through to the raw code, as in production. */
+const KNOWN = new Set(["role.OWNER", "resource.Customer", "resource.Appointment", "resource.AuthSession"]);
+
+/**
+ * Echoes the key it was handed. These tests are about the adapter reaching for the right
+ * key and about the fallbacks when a lookup misses; what a key reads as in three languages
+ * is the catalogue's business, and key parity guards that.
+ */
+const t = Object.assign((key: string) => key, {
+  has: (key: string) => KNOWN.has(key),
+}) as unknown as Translator;
+
 describe("audit log derivation", () => {
   it("filters by action code and normalized query across fields", () => {
-    const byAction = filterAuditEntries(auditEntries, "", "PAYMENT_CAPTURED");
+    const byAction = filterAuditEntries(auditEntries, "", "PAYMENT_CAPTURED", t);
     expect(byAction.map((entry) => entry.id)).toEqual(["al2"]);
 
-    const byQuery = filterAuditEntries(auditEntries, "yuki", "all");
+    const byQuery = filterAuditEntries(auditEntries, "yuki", "all", t);
     expect(byQuery.every((entry) => entry.actor.toLowerCase().includes("yuki"))).toBe(true);
     expect(byQuery.length).toBeGreaterThan(1);
   });
@@ -38,19 +51,23 @@ describe("audit log derivation", () => {
   });
 
   it("adapts a backend log into a display row", () => {
-    const row = adaptAuditLog({
-      id: "x1",
-      action: "CUSTOMER_UPDATED",
-      actorId: "user-9",
-      resourceType: "Customer",
-      resourceId: "CU-1",
-      createdAt: "2026-08-24T00:00:00.000Z",
-    });
+    const row = adaptAuditLog(
+      {
+        id: "x1",
+        action: "CUSTOMER_UPDATED",
+        actorId: "user-9",
+        resourceType: "Customer",
+        resourceId: "CU-1",
+        createdAt: "2026-08-24T00:00:00.000Z",
+      },
+      {},
+      t,
+    );
     expect(row).toMatchObject({
       id: "x1",
       action: "CUSTOMER_UPDATED",
-      actor: "Tài khoản không xác định",
-      target: "Khách hàng",
+      actor: "unknownAccount",
+      target: "resource.Customer",
       branch: undefined,
     });
   });
@@ -72,30 +89,44 @@ describe("audit log derivation", () => {
         accounts: new Map([[actorId, { displayName: "Chu chuoi YABAI", role: "OWNER" }]]),
         branches: new Map([[branchId, { name: "Thảo Điền" }]]),
       },
+      t,
     );
     expect(row).toMatchObject({
-      actor: "Chủ chuỗi · Chu chuoi YABAI",
-      target: "Lịch hẹn",
+      actor: "role.OWNER · Chu chuoi YABAI",
+      target: "resource.Appointment",
       branch: "Thảo Điền",
     });
   });
 
   it("uses semantic labels instead of unresolved uuids", () => {
     const actorId = "a11ceafc-9c7d-4d6e-b712-58ad27b9eb64";
-    const row = adaptAuditLog({
-      id: "x3",
-      action: "REFRESH_TOKEN_REUSE_DETECTED",
-      actorId,
-      resourceType: "AuthSession",
-      resourceId: "fc16bbb8-a5f4-48cc-a0cf-bce574c24b8b",
-      metadata: { tokenFamilyId: "d451e5e9-3a69-4303-bfe3-7c6fde99fea2" },
-      createdAt: "2026-08-25T17:14:33.853Z",
-    });
+    const row = adaptAuditLog(
+      {
+        id: "x3",
+        action: "REFRESH_TOKEN_REUSE_DETECTED",
+        actorId,
+        resourceType: "AuthSession",
+        resourceId: "fc16bbb8-a5f4-48cc-a0cf-bce574c24b8b",
+        metadata: { tokenFamilyId: "d451e5e9-3a69-4303-bfe3-7c6fde99fea2" },
+        createdAt: "2026-08-25T17:14:33.853Z",
+      },
+      {},
+      t,
+    );
     expect(row).toMatchObject({
-      actor: "Tài khoản không xác định",
-      target: "Phiên đăng nhập",
+      actor: "unknownAccount",
+      target: "resource.AuthSession",
       branch: undefined,
     });
+  });
+
+  it("falls back to the resource type when the catalogue has no name for it", () => {
+    const row = adaptAuditLog(
+      { id: "x4", action: "WEBHOOK_RECEIVED", resourceType: "Webhook", createdAt: "2026-08-25T18:00:00.000Z" },
+      {},
+      t,
+    );
+    expect(row).toMatchObject({ actor: "system", target: "Webhook" });
   });
 
   it("returns the raw string when the timestamp is unparseable", () => {

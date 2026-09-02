@@ -2,6 +2,7 @@
 
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { adminMediaService } from "@/service";
 import type { Appointment } from "./data";
@@ -20,6 +21,7 @@ export function AttachPhotoModal({
   submitting?: boolean;
   error?: string | null;
 }>) {
+  const t = useTranslations("admin.appointments");
   const [file, setFile] = useState<File | null>(null);
   const [kind, setKind] = useState<"BEFORE" | "AFTER" | "OTHER">("AFTER");
   const [note, setNote] = useState("");
@@ -33,10 +35,10 @@ export function AttachPhotoModal({
     let mediaId: string | null = null;
     try {
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-        throw new Error("Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.");
+        throw new Error(t("photo.typeError"));
       }
       if (file.size < 1 || file.size > 10_000_000) {
-        throw new Error("Ảnh phải nhỏ hơn 10 MB.");
+        throw new Error(t("photo.sizeError"));
       }
       const upload = await adminMediaService.startUpload({
         fileName: file.name,
@@ -49,12 +51,12 @@ export function AttachPhotoModal({
         headers: upload.requiredHeaders,
         body: file,
       });
-      if (!response.ok) throw new Error("Không tải được ảnh lên kho lưu trữ.");
+      if (!response.ok) throw new Error(t("photo.uploadFailed"));
       await adminMediaService.completeUpload(mediaId);
       onConfirm({ mediaId, kind, note: note.trim() || undefined });
     } catch (thrown) {
       if (mediaId) await adminMediaService.abortUpload(mediaId).catch(() => undefined);
-      setUploadError(thrown instanceof Error ? thrown.message : "Không tải được ảnh.");
+      setUploadError(thrown instanceof Error ? thrown.message : t("photo.genericFailed"));
     } finally {
       setUploading(false);
     }
@@ -67,15 +69,18 @@ export function AttachPhotoModal({
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
             <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4">
               <PhotoIcon className="size-5 text-admin-accent" />
-              <Modal.Heading className="text-base font-bold text-admin-ink">Đính kèm ảnh</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("photo.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="space-y-3 px-5 py-4 text-sm">
               <p className="text-[0.7rem] leading-4 text-admin-muted">
-                Chọn ảnh cần đính kèm vào lịch của <strong className="text-admin-ink">{appointment.customer.name}</strong>.
+                {t.rich("photo.description", {
+                  name: appointment.customer.name,
+                  strong: (chunks) => <strong className="text-admin-ink">{chunks}</strong>,
+                })}
               </p>
 
               <label htmlFor="attach-photo-file" className="block text-xs font-semibold text-admin-ink">
-                Tệp ảnh
+                {t("photo.file")}
                 <input
                   id="attach-photo-file"
                   type="file"
@@ -87,23 +92,23 @@ export function AttachPhotoModal({
               </label>
 
               <div className="block text-xs font-semibold text-admin-ink">
-                Loại ảnh
+                {t("photo.kind")}
                 <AdminSelectField
-                  label="Loại ảnh"
+                  label={t("photo.kind")}
                   fullWidth
                   className="mt-1"
                   value={kind}
                   onChange={(value) => setKind(value as typeof kind)}
                   options={[
-                    { value: "BEFORE", label: "Trước dịch vụ" },
-                    { value: "AFTER", label: "Sau dịch vụ" },
-                    { value: "OTHER", label: "Khác" },
+                    { value: "BEFORE", label: t("photo.before") },
+                    { value: "AFTER", label: t("photo.after") },
+                    { value: "OTHER", label: t("photo.other") },
                   ]}
                 />
               </div>
 
               <label htmlFor="attach-media-note" className="block text-xs font-semibold text-admin-ink">
-                Ghi chú (tuỳ chọn)
+                {t("photo.note")}
                 <textarea
                   id="attach-media-note"
                   value={note}
@@ -117,7 +122,7 @@ export function AttachPhotoModal({
             </Modal.Body>
             <Modal.Footer className="border-t border-admin-border px-5 py-4">
               <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting || uploading}>
-                Đóng
+                {t("photo.close")}
               </Button>
               <Button
                 variant="primary"
@@ -125,7 +130,7 @@ export function AttachPhotoModal({
                 onPress={() => void uploadAndAttach()}
                 isDisabled={submitting || uploading || !file}
               >
-                {submitting || uploading ? "Đang gửi…" : "Đính kèm"}
+                {submitting || uploading ? t("photo.busy") : t("photo.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -1,3 +1,4 @@
+import type { Translator } from "@/i18n/config";
 import type { AdminPromotion } from "@/service";
 import { formatMoney } from "@/lib/admin-format";
 import { matchesSearch } from "@/lib/admin-search";
@@ -14,37 +15,10 @@ export type PromotionRow = {
   readonly version: number;
 };
 
-export const promotionStatusLabels: Record<string, string> = {
-  ACTIVE: "Đang chạy",
-  SCHEDULED: "Lên lịch",
-  EXPIRED: "Hết hạn",
-  DRAFT: "Nháp",
-  DISABLED: "Tắt",
-  // What the API stores when a running promotion is paused; without it the
-  // table printed the raw code.
-  INACTIVE: "Tạm dừng",
-  PUBLISHED: "Đang chạy",
-};
-
-export const promotionKindLabels: Record<string, string> = {
-  PERCENT: "Phần trăm",
-  FIXED: "Số tiền",
-};
-
-const campaignStatusLabels: Record<string, string> = {
-  CANCELLED: "Đã huỷ",
-  COMPLETED: "Hoàn tất",
-  DISPATCHING: "Đang gửi",
-  DRAFT: "Bản nháp",
-  FAILED: "Thất bại",
-  PENDING: "Đang chờ",
-  PROCESSING: "Đang gửi",
-  QUEUED: "Đang chờ gửi",
-  SCHEDULED: "Đã lên lịch",
-};
-
-export function campaignStatusLabel(status: string | undefined): string {
-  return campaignStatusLabels[String(status ?? "PENDING").toUpperCase()] ?? "Không xác định";
+/** The translator is a parameter: this is called from render and from a handler. */
+export function campaignStatusLabel(status: string | undefined, t: Translator): string {
+  const code = String(status ?? "PENDING").toUpperCase();
+  return t.has(`campaignStatus.${code}`) ? t(`campaignStatus.${code}`) : t("campaignStatus.unknown");
 }
 
 export function campaignCanCancel(status: string | undefined): boolean {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
@@ -19,6 +20,7 @@ export function CustomerEditModal({
   submitting?: boolean;
   error?: string | null;
 }>) {
+  const t = useTranslations("admin.customers");
   const [displayName, setDisplayName] = useState(customer.name);
   const [locale, setLocale] = useState<"vi" | "ja">((customer.locale as "vi" | "ja") ?? "vi");
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">(
@@ -32,7 +34,7 @@ export function CustomerEditModal({
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
             <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4">
               <PencilSquareIcon className="size-5 text-admin-accent" />
-              <Modal.Heading className="text-base font-bold text-admin-ink">Chỉnh sửa khách hàng</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("edit.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="space-y-3 px-5 py-4 text-sm">
               <label htmlFor="edit-cust-name" className="block text-xs font-semibold text-admin-ink">
@@ -48,13 +50,13 @@ export function CustomerEditModal({
               <div className="block text-xs font-semibold text-admin-ink">
                 Ngôn ngữ ưu tiên
                 <AdminSelectField
-                  label="Ngôn ngữ ưu tiên"
+                  label={t("edit.localeLabel")}
                   fullWidth
                   className="mt-1"
                   value={locale}
                   onChange={(value) => setLocale(value as typeof locale)}
                   options={[
-                    { value: "vi", label: "Tiếng Việt" },
+                    { value: "vi", label: "Tiếng Việt" }, // i18n-check: allow endonym — a language names itself, identically in every catalogue
                     { value: "ja", label: "日本語" },
                   ]}
                 />
@@ -63,14 +65,14 @@ export function CustomerEditModal({
               <div className="block text-xs font-semibold text-admin-ink">
                 Trạng thái tài khoản
                 <AdminSelectField
-                  label="Trạng thái tài khoản"
+                  label={t("edit.statusLabel")}
                   fullWidth
                   className="mt-1"
                   value={status}
                   onChange={(value) => setStatus(value as typeof status)}
                   options={[
-                    { value: "ACTIVE", label: "Hoạt động" },
-                    { value: "INACTIVE", label: "Tạm ngưng" },
+                    { value: "ACTIVE", label: t("edit.statusActive") },
+                    { value: "INACTIVE", label: t("edit.statusInactive") },
                   ]}
                 />
               </div>
@@ -93,7 +95,7 @@ export function CustomerEditModal({
                 }
                 isDisabled={submitting || displayName.trim().length === 0}
               >
-                {submitting ? "Đang lưu…" : "Lưu"}
+                {submitting ? t("edit.saving") : t("edit.save")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -11,7 +12,6 @@ import { useAdminNailDesigns } from "@/service";
 import { DesignModal } from "./DesignModal";
 import {
   adaptDesign,
-  designStatusLabels,
   designStatuses,
   filterDesigns,
   paginate,
@@ -21,6 +21,9 @@ import {
 const pageSize = 8;
 
 export function AdminNailDesignsComponent() {
+  const t = useTranslations("admin.nailDesigns");
+  const statusLabel = (code: string) =>
+    t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const { data, isLoading, error, mutate } = useAdminNailDesigns();
 
   const source = useMemo<ReadonlyArray<DesignRow>>(
@@ -44,17 +47,17 @@ export function AdminNailDesignsComponent() {
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Trạng thái
           <AdminSelectField
-            label="Lọc theo trạng thái mẫu nail"
+            label={t("filterLabel")}
             value={status}
             onChange={(value) => { setStatus(value); setPage(1); }}
             options={[
-              { value: "all", label: "Tất cả" },
-              ...statuses.map((code) => ({ value: code, label: designStatusLabels[code] ?? code })),
+              { value: "all", label: t("all") },
+              ...statuses.map((code) => ({ value: code, label: statusLabel(code) })),
             ]}
           />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <AdminSearchField label="Tìm mẫu nail" placeholder="Tên mẫu..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+          <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
           <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
             <PlusIcon className="size-4" />Thêm mẫu
           </Button>
@@ -62,9 +65,9 @@ export function AdminNailDesignsComponent() {
       </div>
 
       {isLoading ? (
-        <p className="mb-3 text-xs text-admin-muted">Đang tải mẫu nail…</p>
+        <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách mẫu nail.</p>
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -72,14 +75,14 @@ export function AdminNailDesignsComponent() {
           <table className="w-full min-w-[560px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                <th className="px-4 py-3">Mẫu</th>
-                <th className="px-4 py-3">Trạng thái</th>
-                <th className="px-4 py-3 text-right">Thao tác</th>
+                <th className="px-4 py-3">{t("columns.design")}</th>
+                <th className="px-4 py-3">{t("statusLabel")}</th>
+                <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 ? (
-                <tr><td colSpan={3} className="px-4 py-10 text-center text-sm text-admin-muted">Không có mẫu phù hợp.</td></tr>
+                <tr><td colSpan={3} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
@@ -97,11 +100,11 @@ export function AdminNailDesignsComponent() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                        {designStatusLabels[row.status] ?? row.status}
+                        {statusLabel(row.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
+                      <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
                     </td>
                   </tr>
                 ))

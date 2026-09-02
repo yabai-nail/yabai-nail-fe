@@ -20,6 +20,11 @@ import type { ComponentType, SVGProps } from "react";
 
 type AdminNavigationIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
+/**
+ * Identity and wiring only. The label, page title and description moved to the
+ * message catalogue under `admin.nav.<id>`, keyed by the id below: this module
+ * declares itself pure, and a pure module cannot call useTranslations().
+ */
 export type AdminRoute = {
   readonly id:
     | "dashboard"
@@ -39,9 +44,6 @@ export type AdminRoute = {
     | "audit-logs"
     | "settings";
   readonly href: string;
-  readonly label: string;
-  readonly title: string;
-  readonly description: string;
   readonly icon: AdminNavigationIcon;
   readonly isAvailable: boolean;
 };
@@ -50,144 +52,96 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
   {
     id: "dashboard",
     href: "/admin",
-    label: "Tổng quan",
-    title: "Tổng quan",
-    description: "Tình hình cửa hàng hôm nay.",
     icon: HomeIcon,
     isAvailable: true,
   },
   {
     id: "appointments",
     href: "/admin/appointments",
-    label: "Lịch hẹn",
-    title: "Quản lý lịch hẹn",
-    description: "Xem, quản lý và sắp xếp tất cả lịch hẹn của tiệm.",
     icon: CalendarDaysIcon,
     isAvailable: true,
   },
   {
     id: "customers",
     href: "/admin/customers",
-    label: "Khách hàng",
-    title: "Quản lý khách hàng",
-    description: "Quản lý thông tin và lịch sử của khách hàng.",
     icon: UsersIcon,
     isAvailable: true,
   },
   {
     id: "messages",
     href: "/admin/messages",
-    label: "Tin nhắn",
-    title: "Tin nhắn",
-    description: "Quản lý tin nhắn từ khách hàng.",
     icon: ChatBubbleLeftRightIcon,
     isAvailable: true,
   },
   {
     id: "payments",
     href: "/admin/payments",
-    label: "Thanh toán",
-    title: "Thanh toán tại quán",
-    description: "Xác nhận dịch vụ, tính tiền và hoàn tất thanh toán cho khách.",
     icon: BanknotesIcon,
     isAvailable: true,
   },
   {
     id: "staff",
     href: "/admin/staff",
-    label: "Nhân viên",
-    title: "Quản lý nhân viên",
-    description: "Quản lý thông tin và doanh thu của nhân viên.",
     icon: UserGroupIcon,
     isAvailable: true,
   },
   {
     id: "services",
     href: "/admin/services",
-    label: "Dịch vụ",
-    title: "Quản lý dịch vụ",
-    description: "Thêm, chỉnh sửa và quản lý các dịch vụ của tiệm.",
     icon: PaintBrushIcon,
     isAvailable: true,
   },
   {
     id: "nail-designs",
     href: "/admin/nail-designs",
-    label: "Mẫu nail",
-    title: "Thư viện mẫu nail",
-    description: "Quản lý mẫu nail và duyệt đề xuất từ khách/nhân viên.",
     icon: SwatchIcon,
     isAvailable: true,
   },
   {
     id: "reviews",
     href: "/admin/reviews",
-    label: "Đánh giá",
-    title: "Đánh giá khách hàng",
-    description: "Xem, phản hồi và xử lý đánh giá của khách.",
     icon: StarIcon,
     isAvailable: true,
   },
   {
     id: "marketing",
     href: "/admin/marketing",
-    label: "Marketing",
-    title: "Marketing",
-    description: "Quản lý khuyến mãi và chiến dịch thông báo.",
     icon: MegaphoneIcon,
     isAvailable: true,
   },
   {
     id: "reports",
     href: "/admin/reports",
-    label: "Báo cáo",
-    title: "Báo cáo",
-    description: "Theo dõi hiệu quả hoạt động của tiệm.",
     icon: ChartBarSquareIcon,
     isAvailable: true,
   },
   {
     id: "branches",
     href: "/admin/branches",
-    label: "Chi nhánh",
-    title: "Quản lý chi nhánh",
-    description: "Thêm, chỉnh sửa và quản lý các chi nhánh của tiệm.",
     icon: BuildingStorefrontIcon,
     isAvailable: true,
   },
   {
     id: "accounts",
     href: "/admin/accounts",
-    label: "Tài khoản",
-    title: "Tài khoản & Cấu hình",
-    description: "Quản lý tài khoản quản trị và cấu hình hệ thống.",
     icon: ShieldCheckIcon,
     isAvailable: true,
   },
   {
     id: "operations",
     href: "/admin/operations",
-    label: "Vận hành",
-    title: "Vận hành",
-    description: "Hoàn tiền, duyệt nghỉ phép, check-in, thẻ thành viên, tra cứu khách.",
     icon: WrenchScrewdriverIcon,
     isAvailable: true,
   },
   {
     id: "audit-logs",
     href: "/admin/audit-logs",
-    label: "Nhật ký",
-    title: "Nhật ký hệ thống",
-    description: "Theo dõi nhật ký thao tác quản trị của tiệm.",
     icon: ClipboardDocumentListIcon,
     isAvailable: true,
   },
   {
     id: "settings",
     href: "/admin/settings",
-    label: "Cài đặt",
-    title: "Cài đặt",
-    description: "Quản lý và thiết lập cho tiệm nail của bạn.",
     icon: Cog6ToothIcon,
     isAvailable: true,
   },

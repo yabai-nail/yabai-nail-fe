@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { adminService, useAdminBranchSettings } from "@/service";
@@ -27,6 +28,7 @@ function readNumber(source: Readonly<Record<string, unknown>> | undefined, key: 
 // interval. Everything else stays in the placeholder tabs until a caller
 // asks for it.
 export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>) {
+  const t = useTranslations("admin.settings");
   const query = useAdminBranchSettings(branchId);
   const settings = query.data;
   const remote: BookingConfig = {
@@ -77,7 +79,7 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
       notifySuccess("Đã cập nhật cài đặt đặt lịch");
       void query.mutate();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được cài đặt đặt lịch.");
+      setError(thrown instanceof Error ? thrown.message : t("booking.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -86,17 +88,17 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
   return (
     <Card className="mt-4 rounded-lg border-admin-border bg-admin-surface shadow-none">
       <Card.Header className="border-b border-admin-border px-5 py-3">
-        <h2 className="font-bold text-admin-ink">Cài đặt đặt lịch chi nhánh</h2>
+        <h2 className="font-bold text-admin-ink">{t("booking.heading")}</h2>
       </Card.Header>
       <Card.Content className="grid gap-3 p-5 text-sm">
         {query.isLoading ? (
-          <p className="text-xs text-admin-muted">Đang tải cài đặt…</p>
+          <p className="text-xs text-admin-muted">{t("booking.loading")}</p>
         ) : query.error ? (
-          <p role="alert" className="text-xs text-admin-danger">Không tải được — hiển thị giá trị mặc định.</p>
+          <p role="alert" className="text-xs text-admin-danger">{t("booking.loadFailed")}</p>
         ) : null}
 
         <label className="grid grid-cols-[1fr_8rem] items-center gap-3">
-          <span className="text-admin-ink">Cho phép đặt trước tối đa (ngày)</span>
+          <span className="text-admin-ink">{t("booking.leadDays")}</span>
           <input
             type="number"
             min={1}
@@ -108,7 +110,7 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
         </label>
 
         <label className="grid grid-cols-[1fr_8rem] items-center gap-3">
-          <span className="text-admin-ink">Hạn huỷ trước lịch (giờ)</span>
+          <span className="text-admin-ink">{t("booking.cancelHours")}</span>
           <input
             type="number"
             min={0}
@@ -120,7 +122,7 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
         </label>
 
         <label className="grid grid-cols-[1fr_8rem] items-center gap-3">
-          <span className="text-admin-ink">Bước thời gian slot (phút)</span>
+          <span className="text-admin-ink">{t("booking.slotMinutes")}</span>
           <input
             type="number"
             min={5}
@@ -141,7 +143,7 @@ export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>)
           onPress={() => void save()}
           isDisabled={!dirty || busy}
         >
-          {busy ? "Đang lưu…" : "Lưu cài đặt"}
+          {busy ? t("booking.saving") : t("booking.save")}
         </Button>
       </Card.Footer>
     </Card>

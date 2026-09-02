@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
 import type { Appointment, AppointmentView } from "./data";
@@ -27,6 +28,7 @@ function AppointmentPill({
   // view, compact included — it used to be dropped there, which would now leave
   // the week grid encoding status in colour alone. Green and pink sit ΔE 4.7
   // apart for a deutan reader, so the label is what carries the meaning.
+  const tStatus = useTranslations("admin.appointmentStatus");
   const tone = appointmentStatusTone[appointment.status];
 
   return (
@@ -45,7 +47,7 @@ function AppointmentPill({
         <span className="mt-1 block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
         <span className="mt-1 flex items-center gap-1.5 text-[0.65rem] font-medium text-admin-ink">
           <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
-          {appointmentStatusLabel[appointment.status]}
+          {appointmentStatusLabel(appointment.status, tStatus)}
         </span>
       </span>
     </Button>
@@ -78,6 +80,7 @@ function DayCalendar({ appointments, selectedId, onSelect }: CalendarViewProps) 
 }
 
 function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: CalendarViewProps) {
+  const t = useTranslations("admin.appointments");
   const range = getAppointmentViewRange(selectedDate, "week");
   const dates = getDateKeysInRange(range.start, range.end);
 
@@ -86,7 +89,7 @@ function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: Cale
       {dates.map((date) => (
         <section key={date} className={date === selectedDate ? "bg-admin-soft/40" : undefined}>
           <h3 className={`border-b border-admin-border px-2 py-3 text-center text-xs font-semibold ${date === selectedDate ? "text-admin-accent" : "text-admin-muted"}`}>
-            {formatShortWeekday(date)}
+            {formatShortWeekday(date, t)}
           </h3>
           <div className="min-h-[36rem] space-y-2 p-2">
             {appointments.filter((appointment) => appointment.date === date).map((appointment) => (

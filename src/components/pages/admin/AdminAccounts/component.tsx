@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -20,11 +21,9 @@ import { AccountModal } from "./AccountModal";
 import { ResetPasswordModal } from "./ResetPasswordModal";
 import {
   accountRoles,
-  accountStatusLabels,
   adaptAccount,
   filterAccounts,
   paginate,
-  roleLabels,
   type AccountRow,
 } from "./data";
 
@@ -32,6 +31,11 @@ const pageSize = 8;
 type Tab = "accounts" | "config";
 
 export function AdminAccountsComponent() {
+  const t = useTranslations("admin.accounts");
+  const statusLabel = (code: string) =>
+    t.has(`status.${code}`) ? t(`status.${code}`) : code;
+  const roleLabel = (code: string) =>
+    t.has(`role.${code}`) ? t(`role.${code}`) : code;
   const [tab, setTab] = useState<Tab>("accounts");
   const { data, isLoading, error, mutate } = useAdminAccounts();
 
@@ -63,7 +67,7 @@ export function AdminAccountsComponent() {
               tab === value ? "border-b-2 border-admin-accent text-admin-accent" : "text-admin-muted"
             }`}
           >
-            {value === "accounts" ? "Tài khoản" : "Cấu hình"}
+            {value === "accounts" ? t("tabs.accounts") : t("tabs.config")}
           </button>
         ))}
       </div>
@@ -74,17 +78,17 @@ export function AdminAccountsComponent() {
             <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
               Vai trò
               <AdminSelectField
-                label="Lọc theo vai trò"
+                label={t("filterLabel")}
                 value={role}
                 onChange={(value) => { setRole(value); setPage(1); }}
                 options={[
-                  { value: "all", label: "Tất cả" },
-                  ...roles.map((code) => ({ value: code, label: roleLabels[code] ?? code })),
+                  { value: "all", label: t("all") },
+                  ...roles.map((code) => ({ value: code, label: roleLabel(code) })),
                 ]}
               />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <AdminSearchField label="Tìm tài khoản" placeholder="Tên hoặc SĐT..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+              <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
                 <PlusIcon className="size-4" />Thêm tài khoản
               </Button>
@@ -92,9 +96,9 @@ export function AdminAccountsComponent() {
           </div>
 
           {isLoading ? (
-            <p className="mb-3 text-xs text-admin-muted">Đang tải tài khoản…</p>
+            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
           ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách tài khoản.</p>
+            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
           ) : null}
 
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -102,25 +106,25 @@ export function AdminAccountsComponent() {
               <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                    <th className="px-4 py-3">Tên</th>
-                    <th className="px-4 py-3">SĐT</th>
-                    <th className="px-4 py-3">Vai trò</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3 text-right">Thao tác</th>
+                    <th className="px-4 py-3">{t("columns.name")}</th>
+                    <th className="px-4 py-3">{t("columns.phone")}</th>
+                    <th className="px-4 py-3">{t("columns.role")}</th>
+                    <th className="px-4 py-3">{t("columns.status")}</th>
+                    <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visible.length === 0 ? (
-                    <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">Không có tài khoản phù hợp.</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
                   ) : (
                     visible.map((row) => (
                       <tr key={row.id} className="border-b border-admin-border last:border-0">
                         <td className="px-4 py-3 font-medium text-admin-ink">{row.displayName}</td>
                         <td className="px-4 py-3 font-mono text-admin-muted">{row.phone}</td>
-                        <td className="px-4 py-3 text-admin-ink">{roleLabels[row.role] ?? row.role}</td>
+                        <td className="px-4 py-3 text-admin-ink">{roleLabel(row.role)}</td>
                         <td className="px-4 py-3">
                           <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                            {accountStatusLabels[row.status] ?? row.status}
+                            {statusLabel(row.status)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -130,11 +134,11 @@ export function AdminAccountsComponent() {
                                 answers 404 for a customer. Offering the buttons on a
                                 customer row promised an action that could never run. */}
                             {row.role === "CUSTOMER" ? (
-                              <span className="text-xs text-admin-muted">Tài khoản khách</span>
+                              <span className="text-xs text-admin-muted">{t("customerAccount")}</span>
                             ) : (
                               <>
-                                <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
-                                <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setResetting(row)}>Đặt lại MK</Button>
+                                <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
+                                <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setResetting(row)}>{t("resetPassword")}</Button>
                               </>
                             )}
                           </div>
@@ -163,6 +167,7 @@ export function AdminAccountsComponent() {
 }
 
 function ConfigPanel() {
+  const t = useTranslations("admin.accounts");
   const system = useAdminSystemConfig();
   const loyalty = useAdminLoyaltyConfig();
 
@@ -172,14 +177,14 @@ function ConfigPanel() {
         <SystemFeaturesForm key={system.data.version} config={system.data} onSaved={() => void system.mutate()} />
       ) : (
         <Card className="rounded-lg border-admin-border bg-admin-surface p-5 text-xs text-admin-muted shadow-none">
-          {system.error ? "Không tải được cấu hình hệ thống." : "Đang tải cấu hình hệ thống…"}
+          {system.error ? t("systemLoadFailed") : t("systemLoading")}
         </Card>
       )}
       {loyalty.data ? (
         <LoyaltyConfigForm key={loyalty.data.version} config={loyalty.data} onSaved={() => void loyalty.mutate()} />
       ) : (
         <Card className="rounded-lg border-admin-border bg-admin-surface p-5 text-xs text-admin-muted shadow-none">
-          {loyalty.error ? "Không tải được cấu hình loyalty." : "Đang tải cấu hình loyalty…"}
+          {loyalty.error ? t("loyaltyLoadFailed") : t("loyaltyLoading")}
         </Card>
       )}
     </div>
@@ -190,6 +195,7 @@ function SystemFeaturesForm({
   config,
   onSaved,
 }: Readonly<{ config: AdminSystemConfig; onSaved: () => void }>) {
+  const t = useTranslations("admin.accounts");
   const [features, setFeatures] = useState<Record<string, boolean>>(() => ({ ...(config.features ?? {}) }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -201,7 +207,7 @@ function SystemFeaturesForm({
       notifySuccess("Đã lưu cấu hình hệ thống");
       onSaved();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không lưu được cấu hình hệ thống.");
+      setError(err instanceof Error && err.message ? err.message : t("systemSaveFailed"));
     } finally {
       setBusy(false);
     }
@@ -209,9 +215,9 @@ function SystemFeaturesForm({
 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Tính năng hệ thống</h2>
+      <h2 className="text-sm font-bold text-admin-ink">{t("featuresHeading")}</h2>
       {Object.keys(features).length === 0 ? (
-        <p className="text-xs text-admin-muted">Chưa có tính năng nào để cấu hình.</p>
+        <p className="text-xs text-admin-muted">{t("noFeatures")}</p>
       ) : (
         Object.entries(features).map(([key, value]) => (
           <label key={key} className="flex items-center justify-between gap-3 text-sm text-admin-ink">
@@ -222,7 +228,7 @@ function SystemFeaturesForm({
       )}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
-        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>Lưu tính năng</Button>
+        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveFeatures")}</Button>
       </div>
     </Card>
   );
@@ -232,6 +238,7 @@ function LoyaltyConfigForm({
   config,
   onSaved,
 }: Readonly<{ config: AdminLoyaltyConfig; onSaved: () => void }>) {
+  const t = useTranslations("admin.accounts");
   // Seed the editor with the whole config, minus the fields the server owns.
   // It used to seed { tiers, rules } only — `rules` is not part of the response
   // at all, and dropping pointRate, redemptionCapPercent and redemptionIncrement
@@ -251,7 +258,7 @@ function LoyaltyConfigForm({
     try {
       parsed = JSON.parse(text) as Record<string, unknown>;
     } catch {
-      setError("JSON cấu hình loyalty không hợp lệ.");
+      setError(t("loyaltyInvalidJson"));
       return;
     }
     setBusy(true); setError(null);
@@ -260,7 +267,7 @@ function LoyaltyConfigForm({
       notifySuccess("Đã lưu cấu hình loyalty");
       onSaved();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không lưu được cấu hình loyalty.");
+      setError(err instanceof Error && err.message ? err.message : t("loyaltySaveFailed"));
     } finally {
       setBusy(false);
     }
@@ -268,11 +275,11 @@ function LoyaltyConfigForm({
 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Cấu hình loyalty (JSON)</h2>
+      <h2 className="text-sm font-bold text-admin-ink">{t("loyaltyHeading")}</h2>
       <textarea className="min-h-40 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 font-mono text-xs text-admin-ink" value={text} onChange={(event) => setText(event.target.value)} />
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
-        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>Lưu loyalty</Button>
+        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveLoyalty")}</Button>
       </div>
     </Card>
   );

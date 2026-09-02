@@ -23,6 +23,23 @@ import {
   toInitials,
 } from "./adapters";
 import type { AdminDashboardKpi, RevenueReport } from "@/service";
+import type { Translator } from "@/i18n/config";
+/**
+ * Echoes the key it was handed, with any interpolations appended. These tests are about
+ * the adapters reaching for the right key and passing the right numbers into it; what a
+ * key says in three languages is the catalogue's business, and key parity guards that.
+ */
+const t = Object.assign(
+  (key: string, values?: Record<string, string | number>) =>
+    values
+      ? `${key}(${Object.entries(values).map(([k, v]) => `${k}=${v}`).join(",")})`
+      : key,
+  { has: (key: string) => KNOWN_METHODS.has(key) },
+) as unknown as Translator;
+
+/** Only the payment methods the catalogue actually names. */
+const KNOWN_METHODS = new Set(["cash", "card", "paypay", "bank_transfer", "transfer", "other"]);
+
 
 const fullKpi: AdminDashboardKpi = {
   total: 12,
@@ -52,50 +69,50 @@ function amountOf(rows: ReadonlyArray<{ id: string; value: string }>, id: string
 
 describe("buildDashboardMetrics", () => {
   it("puts every card in a loading state while the request is in flight", () => {
-    const metrics = buildDashboardMetrics(undefined, true, false);
+    const metrics = buildDashboardMetrics(undefined, true, false, t);
     expect(metrics).toHaveLength(4);
     expect(metrics.every((metric) => metric.value === "…")).toBe(true);
-    expect(metrics.every((metric) => metric.detail === "Đang tải…")).toBe(true);
+    expect(metrics.every((metric) => metric.detail === "loadingDetail")).toBe(true);
   });
 
   it("puts every card in an error state when the request fails", () => {
-    const metrics = buildDashboardMetrics(fullKpi, false, true);
+    const metrics = buildDashboardMetrics(fullKpi, false, true, t);
     expect(metrics.every((metric) => metric.value === MISSING)).toBe(true);
-    expect(metrics[0].detail).toContain("Không tải được");
+    expect(metrics[0].detail).toBe("loadFailed");
   });
 
   it("renders the four live KPI cards from the branch dashboard payload", () => {
-    const [appointments, revenue, customers, staff] = buildDashboardMetrics(fullKpi, false, false);
+    const [appointments, revenue, customers, staff] = buildDashboardMetrics(fullKpi, false, false, t);
 
     expect(appointments.value).toBe("12");
-    expect(appointments.detail).toBe("Đã xác nhận: 8 · Đang phục vụ: 1 · Hoàn tất: 1 · Chờ: 2");
+    expect(appointments.detail).toBe("breakdown.line(confirmed=8,inService=1,completed=1,tail=breakdown.pendingTail(count=2))");
     expect(revenue.value).toContain("7.860.000");
-    expect(revenue.detail).toContain("Hôm qua");
+    expect(revenue.detail).toContain("yesterdayRevenue");
     expect(revenue.trend).toBe("18,6%");
     expect(revenue.trendDirection).toBe("up");
     expect(customers.value).toBe("10");
-    expect(customers.detail).toBe("Khách mới: 2");
+    expect(customers.detail).toBe("newCustomers(count=2)");
     expect(staff.value).toBe("3 / 4");
-    expect(staff.detail).toBe("1 người nghỉ");
+    expect(staff.detail).toBe("offStaff(count=1)");
   });
 
   it("flags a revenue drop as a downward trend", () => {
-    const [, revenue] = buildDashboardMetrics({ ...fullKpi, revenueChangePercent: -12.34 }, false, false);
+    const [, revenue] = buildDashboardMetrics({ ...fullKpi, revenueChangePercent: -12.34 }, false, false, t);
     expect(revenue.trend).toBe("12,3%");
     expect(revenue.trendDirection).toBe("down");
   });
 
   it("never invents a number when the payload omits the field", () => {
-    const [appointments, revenue, customers, staff] = buildDashboardMetrics(bareKpi, false, false);
+    const [appointments, revenue, customers, staff] = buildDashboardMetrics(bareKpi, false, false, t);
 
     expect(appointments.value).toBe("4");
-    expect(appointments.detail).toBe("Đã xác nhận: 2 · Đang phục vụ: 1 · Hoàn tất: 1");
+    expect(appointments.detail).toBe("breakdown.line(confirmed=2,inService=1,completed=1,tail=)");
     expect(revenue.value).toBe(MISSING);
     expect(revenue.trend).toBeUndefined();
     expect(customers.value).toBe(MISSING);
-    expect(customers.detail).toBe("Chưa có dữ liệu khách mới");
+    expect(customers.detail).toBe("noNewCustomers");
     expect(staff.value).toBe(MISSING);
-    expect(staff.detail).toBe("Chưa có dữ liệu ca làm");
+    expect(staff.detail).toBe("noShiftData");
   });
 });
 
@@ -107,14 +124,14 @@ describe("pendingAppointmentCount", () => {
 
 describe("revenue rows", () => {
   it("reads today's breakdown from the dashboard KPI", () => {
-    const rows = buildTodayRevenueRows(fullKpi);
+    const rows = buildTodayRevenueRows(fullKpi, t);
     expect(amountOf(rows, "gross")).toContain("7.860.000");
     expect(amountOf(rows, "cost")).toContain("1.230.000");
     expect(amountOf(rows, "commission")).toContain("3.548.000");
   });
 
   it("falls back to a placeholder when the KPI has not arrived", () => {
-    const rows = buildTodayRevenueRows(undefined);
+    const rows = buildTodayRevenueRows(undefined, t);
     expect(rows.map((row) => row.value)).toEqual([MISSING, MISSING, MISSING]);
   });
 
@@ -127,36 +144,38 @@ describe("revenue rows", () => {
       },
     } as unknown as RevenueReport;
 
-    const rows = buildRangeRevenueRows(report);
+    const rows = buildRangeRevenueRows(report, t);
     expect(amountOf(rows, "gross")).toContain("124.560.000");
     expect(amountOf(rows, "orders")).toBe("42");
   });
 
   it("shows a placeholder for a report metric the backend returned as null", () => {
     const report = { metrics: { recognizedRevenue: { value: null } } } as unknown as RevenueReport;
-    expect(amountOf(buildRangeRevenueRows(report), "gross")).toBe(MISSING);
+    expect(amountOf(buildRangeRevenueRows(report, t), "gross")).toBe(MISSING);
   });
 });
 
 describe("buildPaymentMethodRows", () => {
   it("returns nothing when the branch captured no payment today", () => {
-    expect(buildPaymentMethodRows([])).toEqual([]);
-    expect(buildPaymentMethodRows(undefined)).toEqual([]);
+    expect(buildPaymentMethodRows([], t, t)).toEqual([]);
+    expect(buildPaymentMethodRows(undefined, t, t)).toEqual([]);
   });
 
-  it("maps known method codes to Vietnamese labels", () => {
+  it("maps known method codes onto catalogue keys", () => {
     const rows = buildPaymentMethodRows([
       { method: "cash", amount: 4_560_000 },
       { method: "BANK_TRANSFER", total: 2_800_000 },
-    ]);
-    expect(rows[0].label).toBe("Tiền mặt");
+    ], t, t);
+    expect(rows[0].label).toBe("cash");
     expect(rows[0].value).toContain("4.560.000");
-    expect(rows[1].label).toBe("Chuyển khoản");
+    // The API sends this one uppercase; the lookup lowercases before it asks the
+    // catalogue, so BANK_TRANSFER and bank_transfer are one method, not two.
+    expect(rows[1].label).toBe("bank_transfer");
     expect(rows[1].value).toContain("2.800.000");
   });
 
   it("keeps an unknown method visible instead of dropping the money", () => {
-    const rows = buildPaymentMethodRows([{ method: "momo" }]);
+    const rows = buildPaymentMethodRows([{ method: "momo" }], t, t);
     expect(rows[0].label).toBe("momo");
     expect(rows[0].value).toBe(MISSING);
   });
@@ -177,18 +196,18 @@ describe("buildStaffCards", () => {
         revenue: 0,
         commissionAmount: 0,
       },
-    ]);
+    ], t);
 
-    expect(cards[0]).toMatchObject({ id: "97ea397d", name: "Mai Linh", initials: "ML", status: "Đang làm" });
+    expect(cards[0]).toMatchObject({ id: "97ea397d", name: "Mai Linh", initials: "ML", status: "working" });
     expect(cards[0].revenue).toContain("2.680.000");
     expect(cards[0].payout).toContain("1.608.000");
-    expect(cards[1].status).toBe("Nghỉ");
+    expect(cards[1].status).toBe("off");
   });
 
   it("survives a row without a staff object", () => {
-    const cards = buildStaffCards([{ revenue: 10 }]);
+    const cards = buildStaffCards([{ revenue: 10 }], t);
     expect(cards[0].id).toBe("staff-0");
-    expect(cards[0].name).toBe("Chưa rõ tên");
+    expect(cards[0].name).toBe("unknownStaffName");
     expect(cards[0].payout).toBe(MISSING);
   });
 });
@@ -214,13 +233,13 @@ describe("monthly summary", () => {
   } as unknown as RevenueReport;
 
   it("takes commission from the staff-performance KPI, not the revenue report", () => {
-    const rows = buildMonthlyRows(report, 56_822_000);
+    const rows = buildMonthlyRows(report, 56_822_000, t);
     expect(amountOf(rows, "revenue")).toContain("124.560.000");
     expect(amountOf(rows, "commission")).toContain("56.822.000");
   });
 
   it("marks commission as missing when staff performance failed to load", () => {
-    expect(amountOf(buildMonthlyRows(report, null), "commission")).toBe(MISSING);
+    expect(amountOf(buildMonthlyRows(report, null, t), "commission")).toBe(MISSING);
   });
 
   it("derives the remainder only when both sources are present", () => {
@@ -232,7 +251,7 @@ describe("monthly summary", () => {
 
 describe("buildActivityItems", () => {
   it("returns nothing before the dashboard resolves", () => {
-    expect(buildActivityItems(undefined)).toEqual([]);
+    expect(buildActivityItems(undefined, t)).toEqual([]);
   });
 
   it("derives pending-confirmation, alert and yesterday-revenue entries", () => {
@@ -240,20 +259,20 @@ describe("buildActivityItems", () => {
       kpi: fullKpi,
       alerts: [{ id: "a1", startsAt: "2026-08-24T03:00:00.000Z", status: "PENDING" }],
       branchTimeZone: "Asia/Ho_Chi_Minh",
-    });
+    }, t);
 
     expect(items.map((item) => item.id)).toEqual([
       "pending-appointments",
       "alert-a1",
       "previous-revenue",
     ]);
-    expect(items[0].title).toBe("Có 2 lịch hẹn chờ xác nhận");
+    expect(items[0].title).toBe("alert.pendingTitle(count=2)");
     expect(items[1].time).toBe("10:00");
     expect(items[2].detail).toContain("6.630.000");
   });
 
   it("emits an empty feed when nothing needs attention", () => {
-    expect(buildActivityItems({ kpi: bareKpi, alerts: [] })).toEqual([]);
+    expect(buildActivityItems({ kpi: bareKpi, alerts: [] }, t)).toEqual([]);
   });
 });
 

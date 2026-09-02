@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -18,8 +19,6 @@ import {
   filterPromotions,
   formatDiscount,
   paginate,
-  promotionKindLabels,
-  promotionStatusLabels,
   promotionStatuses,
   type PromotionRow,
 } from "./data";
@@ -29,6 +28,11 @@ type Tab = "promotions" | "campaigns";
 type ManagedCampaign = { readonly id: string; readonly name: string };
 
 export function AdminMarketingComponent() {
+  const t = useTranslations("admin.marketing");
+  const statusLabel = (code: string) =>
+    t.has(`promotionStatus.${code}`) ? t(`promotionStatus.${code}`) : code;
+  const kindLabel = (code: string) =>
+    t.has(`promotionKind.${code}`) ? t(`promotionKind.${code}`) : code;
   const [tab, setTab] = useState<Tab>("promotions");
   const { data, isLoading, error, mutate } = useAdminPromotions();
 
@@ -49,7 +53,7 @@ export function AdminMarketingComponent() {
   const campaigns = useAdminNotificationCampaigns();
   const persistedCampaigns = (campaigns.data?.items ?? []).map((campaign) => ({
     id: campaign.campaignId,
-    name: campaign.title ?? "Chiến dịch chưa có tên",
+    name: campaign.title ?? t("unnamedCampaign"),
   }));
   const currentCampaign = managedCampaign ?? persistedCampaigns[0] ?? null;
 
@@ -68,7 +72,7 @@ export function AdminMarketingComponent() {
       notifySuccess(next === "ACTIVE" ? "Đã kích hoạt khuyến mãi" : "Đã tạm ngưng khuyến mãi");
       void mutate();
     } catch (thrown) {
-      setStatusError(thrown instanceof Error ? thrown.message : "Không đổi được trạng thái.");
+      setStatusError(thrown instanceof Error ? thrown.message : t("statusChangeFailed"));
     } finally {
       setStatusPending(null);
     }
@@ -90,7 +94,7 @@ export function AdminMarketingComponent() {
               tab === value ? "border-b-2 border-admin-accent text-admin-accent" : "text-admin-muted"
             }`}
           >
-            {value === "promotions" ? "Khuyến mãi" : "Chiến dịch"}
+            {value === "promotions" ? t("tabs.promotions") : t("tabs.campaigns")}
           </button>
         ))}
       </div>
@@ -101,17 +105,17 @@ export function AdminMarketingComponent() {
             <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
               Trạng thái
               <AdminSelectField
-                label="Lọc theo trạng thái khuyến mãi"
+                label={t("filterLabel")}
                 value={status}
                 onChange={(value) => { setStatus(value); setPage(1); }}
                 options={[
-                  { value: "all", label: "Tất cả" },
-                  ...statuses.map((code) => ({ value: code, label: promotionStatusLabels[code] ?? code })),
+                  { value: "all", label: t("all") },
+                  ...statuses.map((code) => ({ value: code, label: statusLabel(code) })),
                 ]}
               />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <AdminSearchField label="Tìm khuyến mãi" placeholder="Mã hoặc tên..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+              <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
                 <PlusIcon className="size-4" />Thêm khuyến mãi
               </Button>
@@ -123,9 +127,9 @@ export function AdminMarketingComponent() {
           ) : null}
 
           {isLoading ? (
-            <p className="mb-3 text-xs text-admin-muted">Đang tải khuyến mãi…</p>
+            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
           ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách khuyến mãi.</p>
+            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
           ) : null}
 
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -133,36 +137,36 @@ export function AdminMarketingComponent() {
               <table className="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                    <th className="px-4 py-3">Mã</th>
-                    <th className="px-4 py-3">Tên</th>
-                    <th className="px-4 py-3">Loại</th>
-                    <th className="px-4 py-3">Giá trị</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3 text-right">Thao tác</th>
+                    <th className="px-4 py-3">{t("columns.code")}</th>
+                    <th className="px-4 py-3">{t("columns.name")}</th>
+                    <th className="px-4 py-3">{t("columns.type")}</th>
+                    <th className="px-4 py-3">{t("columns.value")}</th>
+                    <th className="px-4 py-3">{t("columns.status")}</th>
+                    <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visible.length === 0 ? (
-                    <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">Không có khuyến mãi phù hợp.</td></tr>
+                    <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
                   ) : (
                     visible.map((row) => (
                       <tr key={row.id} className="border-b border-admin-border last:border-0">
                         <td className="px-4 py-3 font-mono text-admin-ink">{row.code}</td>
                         <td className="px-4 py-3 text-admin-ink">{row.title}</td>
-                        <td className="px-4 py-3 text-admin-muted">{promotionKindLabels[row.type] ?? row.type}</td>
+                        <td className="px-4 py-3 text-admin-muted">{kindLabel(row.type)}</td>
                         <td className="px-4 py-3 font-semibold text-admin-ink">{formatDiscount(row)}</td>
                         <td className="px-4 py-3">
                           <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                            {promotionStatusLabels[row.status] ?? row.status}
+                            {statusLabel(row.status)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>Sửa</Button>
+                            <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
                             <Button size="sm" variant="outline" className="rounded-lg" isDisabled={statusPending === row.id} onPress={() => void toggleStatus(row)}>
-                              {row.status === "ACTIVE" ? "Tạm dừng" : "Kích hoạt"}
+                              {row.status === "ACTIVE" ? t("promotionStatus.INACTIVE") : t("activate")}
                             </Button>
-                            <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>Phát hành</Button>
+                            <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>{t("issue")}</Button>
                           </div>
                         </td>
                       </tr>
@@ -181,7 +185,7 @@ export function AdminMarketingComponent() {
         <div className="space-y-4">
           {persistedCampaigns.length > 0 ? (
             <AdminSelectField
-              label="Chiến dịch cần theo dõi"
+              label={t("campaignPickerLabel")}
               value={currentCampaign?.id ?? ""}
               onChange={(id) => setManagedCampaign(persistedCampaigns.find((campaign) => campaign.id === id) ?? null)}
               options={persistedCampaigns.map((campaign) => ({ value: campaign.id, label: campaign.name }))}
@@ -202,6 +206,7 @@ export function AdminMarketingComponent() {
 }
 
 function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCampaign) => void }>) {
+  const t = useTranslations("admin.marketing");
   const [name, setName] = useState("");
   const [channel, setChannel] = useState("PUSH");
   const [template, setTemplate] = useState("");
@@ -215,7 +220,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
       const result = await adminService.previewAudience({});
       setPreview(result.estimatedRecipients);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không xem trước được audience.");
+      setError(err instanceof Error && err.message ? err.message : t("previewFailed"));
     }
   };
 
@@ -231,11 +236,11 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         message: template.trim(),
       });
       onCreated({ id: campaign.campaignId, name: campaignName });
-      notifySuccess("Đã tạo chiến dịch", `Trạng thái: ${campaignStatusLabel(campaign.status)}.`);
+      notifySuccess("Đã tạo chiến dịch", `Trạng thái: ${campaignStatusLabel(campaign.status, t)}.`);
       setName("");
       setTemplate("");
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không tạo được chiến dịch.");
+      setError(err instanceof Error && err.message ? err.message : t("campaignCreateFailed"));
     } finally {
       setBusy(false);
     }
@@ -245,15 +250,15 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
 
   return (
     <Card className="max-w-xl gap-4 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
-      <h2 className="text-sm font-bold text-admin-ink">Tạo chiến dịch thông báo</h2>
+      <h2 className="text-sm font-bold text-admin-ink">{t("createHeading")}</h2>
       <label className="flex flex-col gap-2 text-sm">
-        <span className="font-semibold text-admin-ink">Tên chiến dịch</span>
-        <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="Nhắc lịch tháng 9" />
+        <span className="font-semibold text-admin-ink">{t("campaignName")}</span>
+        <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("campaignNamePlaceholder")} />
       </label>
       <div className="flex flex-col gap-2 text-sm">
-        <span className="font-semibold text-admin-ink">Kênh</span>
+        <span className="font-semibold text-admin-ink">{t("channel")}</span>
         <AdminSelectField
-          label="Kênh gửi"
+          label={t("channelLabel")}
           fullWidth
           value={channel}
           onChange={setChannel}
@@ -265,17 +270,17 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         />
       </div>
       <label className="flex flex-col gap-2 text-sm">
-        <span className="font-semibold text-admin-ink">Nội dung mẫu</span>
+        <span className="font-semibold text-admin-ink">{t("template")}</span>
         <textarea className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder="Chào {{name}}, ưu đãi tháng 9..." />
       </label>
       <div className="flex items-center gap-3">
-        <Button variant="outline" className="rounded-lg" onPress={() => void runPreview()}>Xem trước audience</Button>
+        <Button variant="outline" className="rounded-lg" onPress={() => void runPreview()}>{t("previewAudience")}</Button>
         {preview !== null ? <span className="text-sm text-admin-muted">{preview.toLocaleString("vi-VN")} khách phù hợp</span> : null}
       </div>
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy || name.trim().length < 2 || template.trim().length < 2} onPress={() => void createCampaign()}>
-          {busy ? "Đang tạo…" : "Tạo chiến dịch"}
+          {busy ? t("creating") : t("createCampaign")}
         </Button>
       </div>
     </Card>
@@ -283,6 +288,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
 }
 
 function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign | null }>) {
+  const t = useTranslations("admin.marketing");
   const metrics = useAdminNotificationCampaignMetrics(campaign?.id ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -296,7 +302,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
       notifySuccess("Đã hủy chiến dịch");
       void metrics.mutate();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không huỷ được chiến dịch.");
+      setError(err instanceof Error && err.message ? err.message : t("campaignCancelFailed"));
     } finally {
       setBusy(false);
     }
@@ -308,20 +314,20 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
       const result = await adminService.notificationCampaignAudiencePreview({});
       setAudience(result.estimatedRecipients);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không xem trước được audience.");
+      setError(err instanceof Error && err.message ? err.message : t("previewFailed"));
     }
   };
 
   const metricLabels: Record<string, string> = {
-    status: "Trạng thái",
-    estimatedRecipients: "Khách dự kiến",
-    targetedCount: "Khách đã chọn",
-    processedRecipientCount: "Đã xử lý",
-    sentCount: "Đã gửi",
-    deliveredCount: "Đã nhận",
-    failedCount: "Gửi lỗi",
-    inboxOnlyCount: "Chỉ gửi hộp thư",
-    suppressedCount: "Đã bỏ qua",
+    status: t("columns.status"),
+    estimatedRecipients: t("metrics.estimatedRecipients"),
+    targetedCount: t("metrics.targetedCount"),
+    processedRecipientCount: t("metrics.processedRecipientCount"),
+    sentCount: t("metrics.sentCount"),
+    deliveredCount: t("metrics.deliveredCount"),
+    failedCount: t("metrics.failedCount"),
+    inboxOnlyCount: t("metrics.inboxOnlyCount"),
+    suppressedCount: t("metrics.suppressedCount"),
   };
   const metricRows = metrics.data
     ? Object.entries(metrics.data).filter(([key, value]) => key in metricLabels && (typeof value === "number" || typeof value === "string"))
@@ -330,32 +336,32 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">
-        {campaign ? `Chiến dịch — ${campaign.name}` : "Theo dõi chiến dịch vừa tạo"}
+        {campaign ? `Chiến dịch — ${campaign.name}` : t("trackerEmptyTitle")}
       </h2>
-      {!campaign ? <p className="text-xs text-admin-muted">Tạo một chiến dịch để xem trạng thái và kết quả gửi tại đây.</p> : null}
+      {!campaign ? <p className="text-xs text-admin-muted">{t("trackerEmptyBody")}</p> : null}
       {campaign ? (
         metrics.isLoading ? (
-          <p className="text-xs text-admin-muted">Đang tải chỉ số…</p>
+          <p className="text-xs text-admin-muted">{t("metricsLoading")}</p>
         ) : metrics.error ? (
-          <p className="text-xs text-admin-danger">Không tải được chỉ số.</p>
+          <p className="text-xs text-admin-danger">{t("metricsFailed")}</p>
         ) : metricRows.length > 0 ? (
           <dl className="grid grid-cols-2 gap-2 text-sm">
             {metricRows.map(([key, value]) => (
               <div key={key} className="flex justify-between gap-2 rounded-lg bg-admin-soft/50 px-3 py-1.5">
                 <dt className="text-admin-muted">{metricLabels[key]}</dt>
-                <dd className="font-semibold text-admin-ink">{key === "status" ? campaignStatusLabel(String(value)) : Number(value).toLocaleString("vi-VN")}</dd>
+                <dd className="font-semibold text-admin-ink">{key === "status" ? campaignStatusLabel(String(value), t) : Number(value).toLocaleString("vi-VN")}</dd>
               </div>
             ))}
           </dl>
         ) : (
-          <p className="text-xs text-admin-muted">Không có chỉ số hiển thị.</p>
+          <p className="text-xs text-admin-muted">{t("metricsEmpty")}</p>
         )
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>Xem trước audience</Button>
+        <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>{t("previewAudience")}</Button>
         {audience !== null ? <span className="text-sm text-admin-muted">{audience.toLocaleString("vi-VN")} khách</span> : null}
         {campaignCanCancel(metrics.data?.status) ? (
-          <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>Huỷ chiến dịch</Button>
+          <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>{t("cancelCampaign")}</Button>
         ) : null}
       </div>
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}

@@ -11,6 +11,20 @@ import {
   validateAppointmentDraft,
 } from "./appointment-state";
 
+import type { Translator } from "@/i18n/config";
+
+/**
+ * Echoes the key with its interpolations appended, so the assertions below name the key and
+ * the values passed into it rather than the Vietnamese the catalogue happens to hold.
+ */
+const t = Object.assign(
+  (key: string, values?: Record<string, string | number>) =>
+    values
+      ? `${key}(${Object.entries(values).map(([k, v]) => `${k}=${v}`).join(",")})`
+      : key,
+  { has: () => true },
+) as unknown as Translator;
+
 const customer = {
   id: "customer-1",
   name: "Nguyễn Thu Hương",
@@ -134,8 +148,9 @@ describe("appointment validation", () => {
     expect(
       validateAppointmentDraft(
         createDraft({ startTime: "14:00", endTime: "14:00" }),
+        t,
       ),
-    ).toEqual({ endTime: "Giờ kết thúc phải sau giờ bắt đầu." });
+    ).toEqual({ endTime: "validation.endAfterStart" });
   });
 
   it("detects overlap for the same active staff member", () => {

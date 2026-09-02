@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
+
+import viMessages from "../../../../../messages/vi.json";
+
+const vi_labels = (): Record<string, string> =>
+  (viMessages as { admin: { accounts: { status: Record<string, string> } } }).admin.accounts.status;
 import {
   accountFixtures,
   accountRoles,
-  accountStatusLabels,
   adaptAccount,
   filterAccounts,
   paginate,
@@ -27,9 +31,13 @@ describe("account list derivation", () => {
     ).toBe("DISABLED");
   });
 
+  // Reads the catalogue itself. The labels left this module, but the thing worth
+  // asserting did not: a status the backend can emit and the console cannot name
+  // renders as a raw enum on an operator's screen.
   it("labels every status the backend can emit", () => {
+    const labels = vi_labels();
     for (const code of ["ACTIVE", "INACTIVE", "DISABLED", "MERGED", "PENDING_DELETION", "DELETED"]) {
-      expect(accountStatusLabels[code]).toBeTruthy();
+      expect(labels[code]).toBeTruthy();
     }
   });
 

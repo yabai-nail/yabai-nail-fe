@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Autocomplete, Button, Card, ListBox, SearchField, Tabs } from "@heroui/react";
@@ -45,6 +46,7 @@ function toScreenService(server: ServerService): SalonService {
 }
 
 export function AdminServicesComponent() {
+  const t = useTranslations("admin.services");
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
@@ -83,7 +85,7 @@ export function AdminServicesComponent() {
         <Tabs.ListContainer className="mb-4 w-fit max-w-full overflow-x-auto">
           <Tabs.List aria-label="Khu vực quản lý">
             <Tabs.Tab id="services">
-              <AdminTabLabel count={source.length}>Dịch vụ</AdminTabLabel>
+              <AdminTabLabel count={source.length}>{t("table.service")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="categories">
@@ -159,7 +161,7 @@ export function AdminServicesComponent() {
               </Autocomplete.Popover>
             </Autocomplete>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <AdminSearchField label="Tìm dịch vụ" placeholder="Tìm kiếm dịch vụ..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+              <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button
                 variant="primary"
                 className="rounded-lg"
@@ -170,9 +172,9 @@ export function AdminServicesComponent() {
             </div>
           </div>
           {isLoading ? (
-            <p className="mb-3 text-xs text-admin-muted">Đang tải danh sách dịch vụ…</p>
+            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
           ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">Không tải được danh sách dịch vụ.</p>
+            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
           ) : null}
           {unfiledCount > 0 ? (
             <p role="status" className="mb-3 text-xs text-admin-danger">

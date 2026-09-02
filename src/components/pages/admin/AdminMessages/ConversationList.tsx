@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Avatar, Button, Tabs } from "@heroui/react";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import type { Conversation, ConversationStatus } from "./data";
@@ -26,6 +27,7 @@ export function ConversationList({
   onQueryChange,
   onSelect,
 }: ConversationListProps) {
+  const t = useTranslations("admin.messages");
   return (
     <section
       aria-labelledby="inbox-heading"
@@ -35,11 +37,11 @@ export function ConversationList({
       className="flex min-h-0 min-w-0 flex-col border-r border-admin-border bg-admin-surface"
     >
       <div className="shrink-0 space-y-3 border-b border-admin-border p-3">
-        <h2 id="inbox-heading" className="font-bold">Hộp thư</h2>
-        <AdminSearchField label="Tìm tin nhắn" placeholder="Tìm kiếm tin nhắn..." value={query} onChange={onQueryChange} />
+        <h2 id="inbox-heading" className="font-bold">{t("inbox")}</h2>
+        <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={onQueryChange} />
         <Tabs selectedKey={filter} onSelectionChange={(key) => onFilterChange(String(key) as InboxFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
-            <Tabs.List aria-label="Lọc hộp thư">
+            <Tabs.List aria-label={t("filterLabel")}>
               <Tabs.Tab id="all" className={inboxTabClassName}>
                 Tất cả
                 <Tabs.Indicator />

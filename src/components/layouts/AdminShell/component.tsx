@@ -6,18 +6,13 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Drawer, Dropdown } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BranchSelector } from "@/components/blocks/admin/BranchSelector";
-import { useAuth, type AdminRole } from "@/service";
+import { useAuth } from "@/service";
 import { getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
-
-const ROLE_LABELS: Record<AdminRole, string> = {
-  OWNER: "Chủ chuỗi",
-  MANAGER: "Quản lý cửa hàng",
-  STAFF: "Nhân viên",
-};
 
 function initialsOf(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
@@ -28,10 +23,15 @@ function initialsOf(displayName: string): string {
 
 function OwnerMenu() {
   const { user, logout } = useAuth();
+  const t = useTranslations("admin.shell");
   // The gate guarantees a user here, but the shell must not crash if a render
   // slips through during sign-out.
-  const displayName = user?.displayName ?? "Quản trị";
-  const roleLabel = user ? ROLE_LABELS[user.role] : "";
+  const displayName = user?.displayName ?? t("fallbackName");
+  // t.has() rather than a plain lookup. AdminRole types the role as one of three, but
+  // the value comes off an API response: the old map answered undefined for anything
+  // else and rendered nothing, while t() on a missing key throws and takes the shell
+  // down with it.
+  const roleLabel = user && t.has(`roles.${user.role}`) ? t(`roles.${user.role}`) : "";
 
   return (
     <Dropdown>
@@ -49,16 +49,16 @@ function OwnerMenu() {
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="admin-shell">
         <Dropdown.Menu
-          aria-label="Tài khoản quản trị"
+          aria-label={t("accountMenu")}
           onAction={(key) => {
             if (key === "logout") logout();
           }}
         >
-          <Dropdown.Item id="settings" textValue="Cài đặt tài khoản">
-            Cài đặt tài khoản
+          <Dropdown.Item id="settings" textValue={t("accountSettings")}>
+            {t("accountSettings")}
           </Dropdown.Item>
-          <Dropdown.Item id="logout" textValue="Đăng xuất">
-            Đăng xuất
+          <Dropdown.Item id="logout" textValue={t("signOut")}>
+            {t("signOut")}
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>
@@ -68,6 +68,8 @@ function OwnerMenu() {
 
 export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
+  const t = useTranslations("admin.shell");
+  const tNav = useTranslations("admin.nav");
   const currentRoute = getAdminRoute(pathname);
 
   return (
@@ -89,7 +91,7 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
           <div className="flex min-h-16 items-center gap-3 px-4 sm:px-6 lg:min-h-20 lg:px-8">
             <Drawer>
               <Drawer.Trigger
-                aria-label="Mở điều hướng quản trị"
+                aria-label={t("openNav")}
                 className="grid size-11 place-items-center rounded-lg text-admin-ink outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent lg:hidden"
               >
                 <Bars3Icon aria-hidden="true" className="size-6" />
@@ -98,10 +100,10 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
                 <Drawer.Content placement="left" className="w-72 max-w-[88vw] lg:hidden">
                   <Drawer.Dialog>
                     <Drawer.Header className="flex flex-row items-center justify-between border-b border-admin-border">
-                      <Drawer.Heading className="sr-only">Điều hướng quản trị</Drawer.Heading>
+                      <Drawer.Heading className="sr-only">{t("navLabel")}</Drawer.Heading>
                       <AdminBrand />
                       <Drawer.CloseTrigger
-                        aria-label="Đóng điều hướng quản trị"
+                        aria-label={t("closeNav")}
                         className="rounded-lg text-admin-muted"
                       >
                         <XMarkIcon aria-hidden="true" className="size-5" />
@@ -117,10 +119,10 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
 
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-base font-bold text-admin-ink sm:text-lg">
-                {currentRoute.title}
+                {tNav(`${currentRoute.id}.title`)}
               </h1>
               <p className="mt-1 hidden text-xs text-admin-muted sm:block">
-                {currentRoute.description}
+                {tNav(`${currentRoute.id}.description`)}
               </p>
             </div>
 

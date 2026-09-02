@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { formatMoney } from "@/lib/admin-format";
@@ -32,6 +33,7 @@ export function StaffDetailPanel({
   period: string;
   onEdit?: () => void;
 }>) {
+  const t = useTranslations("admin.staff");
   const salonShare =
     typeof member.revenue === "number" && typeof member.commissionAmount === "number"
       ? member.revenue - member.commissionAmount
@@ -40,7 +42,7 @@ export function StaffDetailPanel({
   return (
     <section aria-label={`Chi tiết nhân viên ${member.name}`} className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-bold">Chi tiết nhân viên</h2>
+        <h2 className="font-bold">{t("detail.heading")}</h2>
         <Button
           size="sm"
           variant="outline"
@@ -60,18 +62,18 @@ export function StaffDetailPanel({
               <div className="min-w-0">
                 <p className="truncate font-bold">{member.name}</p>
                 <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>
-                  <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
+                  <Chip.Label>{member.status === "working" ? t("tabs.working") : t("tabs.off")}</Chip.Label>
                 </Chip>
               </div>
             </div>
             <dl className="space-y-2 text-sm">
               <div className="flex gap-2">
                 <PhoneIcon className="size-4 text-admin-muted" />
-                <dt className="sr-only">Số điện thoại</dt>
+                <dt className="sr-only">{t("detail.phone")}</dt>
                 <dd>{member.phone || MISSING}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt>Tỷ lệ hoa hồng</dt>
+                <dt>{t("detail.commissionRate")}</dt>
                 <dd className="font-bold">
                   {typeof member.commissionRate === "number" ? `${member.commissionRate}%` : MISSING}
                 </dd>
@@ -80,13 +82,13 @@ export function StaffDetailPanel({
             <div className="border-t border-admin-border pt-4">
               <h3 className="font-bold">Doanh thu kỳ {period}</h3>
               <dl className="mt-3 space-y-2 text-sm">
-                <div className="flex justify-between"><dt className="text-admin-muted">Tổng doanh thu</dt><dd className="font-semibold">{formatOptionalMoney(member.revenue)}</dd></div>
-                <div className="flex justify-between"><dt className="text-admin-muted">Hoa hồng</dt><dd className="font-semibold text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</dd></div>
-                <div className="flex justify-between"><dt className="text-admin-muted">Quán thực nhận</dt><dd className="font-semibold">{formatOptionalMoney(salonShare)}</dd></div>
-                <div className="flex justify-between"><dt className="text-admin-muted">Số đơn hoàn thành</dt><dd className="font-semibold">{member.orders ?? MISSING}</dd></div>
+                <div className="flex justify-between"><dt className="text-admin-muted">{t("detail.totalRevenue")}</dt><dd className="font-semibold">{formatOptionalMoney(member.revenue)}</dd></div>
+                <div className="flex justify-between"><dt className="text-admin-muted">{t("compensation.commission")}</dt><dd className="font-semibold text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</dd></div>
+                <div className="flex justify-between"><dt className="text-admin-muted">{t("metrics.salonShare")}</dt><dd className="font-semibold">{formatOptionalMoney(salonShare)}</dd></div>
+                <div className="flex justify-between"><dt className="text-admin-muted">{t("detail.completedOrders")}</dt><dd className="font-semibold">{member.orders ?? MISSING}</dd></div>
               </dl>
               <div className="mt-4 flex items-center justify-between rounded-lg bg-admin-soft p-3">
-                <span className="font-semibold text-admin-accent">Nhận được</span>
+                <span className="font-semibold text-admin-accent">{t("detail.payout")}</span>
                 <strong className="text-xl text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</strong>
               </div>
             </div>

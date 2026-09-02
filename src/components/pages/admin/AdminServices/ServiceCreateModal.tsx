@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
@@ -17,6 +18,7 @@ export function ServiceCreateModal({
   onClose: () => void;
   onCreated: () => void;
 }>) {
+  const t = useTranslations("admin.services");
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState("");
@@ -58,7 +60,7 @@ export function ServiceCreateModal({
       onCreated();
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không tạo được dịch vụ.");
+      setError(err instanceof Error && err.message ? err.message : t("create.failed"));
     } finally {
       setBusy(false);
     }
@@ -70,16 +72,16 @@ export function ServiceCreateModal({
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
-              <Modal.Heading className="text-base font-bold text-admin-ink">Thêm dịch vụ</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("create.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Tên dịch vụ</span>
+                <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="Sơn gel đơn sắc"
+                  placeholder={t("create.namePlaceholder")}
                   autoFocus
                 />
               </label>
@@ -107,7 +109,7 @@ export function ServiceCreateModal({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Giá (¥)</span>
+                  <span className="font-semibold text-admin-ink">{t("create.price")}</span>
                   <input
                     inputMode="numeric"
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -117,7 +119,7 @@ export function ServiceCreateModal({
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Thời lượng (phút)</span>
+                  <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
                     min={15}
@@ -154,14 +156,14 @@ export function ServiceCreateModal({
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Hủy</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("create.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 isDisabled={!canSubmit}
                 onPress={() => void submit()}
               >
-                {busy ? "Đang lưu…" : "Thêm dịch vụ"}
+                {busy ? t("categoryEditor.saving") : t("create.title")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   ArchiveBoxIcon,
   CalendarDaysIcon,
@@ -68,6 +69,7 @@ export function MessageThread({
   sendPending = false,
   sendError = null,
 }: MessageThreadProps) {
+  const t = useTranslations("admin.messages");
   const router = useRouter();
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -135,12 +137,12 @@ export function MessageThread({
             <CalendarDaysIcon className="size-4" />Tạo lịch hẹn
           </Button>
           {onMarkRead ? (
-            <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label="Đánh dấu đã đọc">
+            <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label={t("markRead")}>
               <CheckCircleIcon className="size-4" />
             </Button>
           ) : null}
           {onArchive ? (
-            <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label="Lưu trữ">
+            <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label={t("tabs.archived")}>
               <ArchiveBoxIcon className="size-4" />
             </Button>
           ) : null}
@@ -199,8 +201,8 @@ export function MessageThread({
       <form onSubmit={submit} className="shrink-0 border-t border-admin-border bg-admin-surface p-3">
         {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
         <InputGroup fullWidth>
-          <InputGroup.Input aria-label="Nhập tin nhắn" maxLength={2000} placeholder={`Nhắn cho ${customer.name}…`} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
-          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? "Đang gửi…" : "Gửi"}</Button></InputGroup.Suffix>
+          <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} placeholder={`Nhắn cho ${customer.name}…`} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? "Đang gửi…" : t("send")}</Button></InputGroup.Suffix>
         </InputGroup>
       </form>
     </section>

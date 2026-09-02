@@ -1,5 +1,7 @@
 "use client";
 
+import type { Translator } from "@/i18n/config";
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
@@ -16,7 +18,7 @@ import {
 // guess, so a COMPLETED appointment read "Chờ xác nhận" directly beneath the
 // header counting it as finished.
 import {
-  appointmentStatusLabel,
+  APPOINTMENT_STATUS_KEY,
   normalizeAppointmentStatus,
 } from "../AdminAppointments/status";
 import { formatClock } from "./adapters";
@@ -30,24 +32,29 @@ import type { Appointment as AppointmentRow } from "./data";
 function toAppointmentRow(
   server: AdminAppointment,
   lookups: { customers: ReadonlyMap<string, string>; services: ReadonlyMap<string, string> },
+  t: Translator,
   timeZone?: string,
 ): AppointmentRow {
   const serviceNames = server.serviceIds.map((id) => lookups.services.get(id)).filter(Boolean);
   return {
     id: server.id,
     time: formatClock(server.startsAt, timeZone),
-    customer: lookups.customers.get(server.customerId) ?? "Khách chưa có tên",
+    customer: lookups.customers.get(server.customerId) ?? t("appointments.unnamedCustomer"),
     service:
       server.serviceIds.length === 0
-        ? "Chưa chọn dịch vụ"
+        ? t("appointments.noService")
         : server.serviceIds.length === 1
-          ? serviceNames[0] ?? "Dịch vụ chưa có tên"
-          : `${server.serviceIds.length} dịch vụ`,
-    status: appointmentStatusLabel[normalizeAppointmentStatus(server.status)],
+          ? serviceNames[0] ?? t("appointments.unnamedService")
+          : t("appointments.serviceCount", { count: server.serviceIds.length }),
+    // The code, not its label. This field was the label, and the list below compared
+    // it against the Vietnamese words -- which no longer exist once the words move.
+    status: normalizeAppointmentStatus(server.status),
   };
 }
 
 export function AppointmentsPanel() {
+  const t = useTranslations("admin.dashboard");
+  const tStatus = useTranslations("admin.appointmentStatus");
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const { data, error, isLoading } = useAdminDashboard(branchId);
@@ -55,19 +62,19 @@ export function AppointmentsPanel() {
   const { data: servicesData } = useAdminServices();
 
   const lookups = useMemo(() => ({
-    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? "Khách chưa có tên"] as const)),
+    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? t("appointments.unnamedCustomer")] as const)),
     services: new Map((servicesData?.items ?? []).map((s) => [s.id, s.name] as const)),
-  }), [customersData, servicesData]);
+  }), [customersData, servicesData, t]);
 
   const rows = useMemo(
-    () => (data?.upcoming ?? []).map((item) => toAppointmentRow(item, lookups, data?.branchTimeZone)),
-    [data, lookups],
+    () => (data?.upcoming ?? []).map((item) => toAppointmentRow(item, lookups, t, data?.branchTimeZone)),
+    [data, lookups, t],
   );
 
   return (
     <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-5">
       <Card.Header className="flex w-full flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
-        <h2 className="text-sm font-bold text-admin-ink">Lịch hẹn hôm nay</h2>
+        <h2 className="text-sm font-bold text-admin-ink">{t("appointments.heading")}</h2>
         <Button size="sm" variant="outline" className="rounded-lg border-admin-border" onPress={() => router.push("/admin/appointments")}>
           Xem lịch
         </Button>
@@ -78,13 +85,13 @@ export function AppointmentsPanel() {
             Không tải được lịch hẹn hôm nay.
           </p>
         ) : !branchId || isLoading ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Đang tải lịch hẹn…</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("appointments.loading")}</p>
         ) : rows.length === 0 ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Hôm nay chưa có lịch hẹn nào.</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("appointments.empty")}</p>
         ) : (
-          <ol aria-label="Danh sách lịch hẹn hôm nay" className="divide-y divide-admin-border">
+          <ol aria-label={t("appointments.listLabel")} className="divide-y divide-admin-border">
             {rows.map((appointment) => {
-              const isConfirmed = appointment.status === "Đã xác nhận";
+              const isConfirmed = appointment.status === "confirmed";
               return (
                 <li key={appointment.id}>
                   <button
@@ -107,7 +114,7 @@ export function AppointmentsPanel() {
                       color={isConfirmed ? "accent" : "warning"}
                       className="col-start-2 w-fit sm:col-start-auto"
                     >
-                      <Chip.Label>{appointment.status}</Chip.Label>
+                      <Chip.Label>{tStatus(APPOINTMENT_STATUS_KEY[appointment.status])}</Chip.Label>
                     </Chip>
                   </button>
                 </li>

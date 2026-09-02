@@ -3,6 +3,7 @@ import { Avatar, Button, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/admin-format";
 import type { CommissionPolicy } from "./data";
+import { useTranslations } from "next-intl";
 
 const MISSING = "—";
 
@@ -10,21 +11,24 @@ function formatOptionalMoney(value: number | null): string {
   return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
-export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray<CommissionPolicy> }>) {
+export function CommissionTable({
+  policies,
+}: Readonly<{ policies: ReadonlyArray<CommissionPolicy> }>) {
+  const t = useTranslations("admin.settings");
   const router = useRouter();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-left text-sm">
-        <caption className="sr-only">Danh sách nhân viên và tỷ lệ hoa hồng</caption>
+        <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
-            <th scope="col" className="px-4 py-3">Nhân viên</th>
-            <th scope="col" className="px-3 py-3">Trạng thái</th>
-            <th scope="col" className="px-3 py-3">Tỷ lệ hoa hồng</th>
-            <th scope="col" className="px-3 py-3">Doanh thu cá nhân</th>
-            <th scope="col" className="px-3 py-3">Tiền nhân viên nhận</th>
-            <th scope="col" className="px-3 py-3">Phần tiệm nhận</th>
-            <th scope="col" className="px-3 py-3">Thao tác</th>
+            <th scope="col" className="px-4 py-3">{t("table.staff")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.status")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.rate")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.personalRevenue")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.staffPayout")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.salonShare")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
@@ -47,7 +51,7 @@ export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray
                 </td>
                 <td className="px-3 py-3">
                   <Chip size="sm" variant="soft" color={policy.status === "working" ? "success" : "default"}>
-                    <Chip.Label>{policy.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
+                    <Chip.Label>{policy.status === "working" ? t("table.working") : t("table.leave")}</Chip.Label>
                   </Chip>
                 </td>
                 <td className="px-3 py-3">
@@ -61,7 +65,7 @@ export function CommissionTable({ policies }: Readonly<{ policies: ReadonlyArray
                 <td className="px-3 py-3">
                   {/* The compensation form lives on the staff screen; this used to be a button
                       with no handler at all. */}
-                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PencilSquareIcon className="size-4" />Sửa</Button>
+                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PencilSquareIcon className="size-4" />{t("table.edit")}</Button>
                 </td>
               </tr>
             );

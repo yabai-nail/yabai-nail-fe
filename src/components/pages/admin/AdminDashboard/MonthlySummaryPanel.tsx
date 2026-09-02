@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@heroui/react";
 import { useMemo } from "react";
 
@@ -13,6 +14,7 @@ import {
 } from "./adapters";
 
 export function MonthlySummaryPanel() {
+  const t = useTranslations("admin.dashboard");
   const { branchId } = useAdminBranch();
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const range = useMemo(() => monthRange(period), [period]);
@@ -27,7 +29,7 @@ export function MonthlySummaryPanel() {
     return typeof value === "number" && Number.isFinite(value) ? value : null;
   }, [performance.data]);
 
-  const rows = useMemo(() => buildMonthlyRows(report.data, commission), [report.data, commission]);
+  const rows = useMemo(() => buildMonthlyRows(report.data, commission, t), [report.data, commission, t]);
   const net = useMemo(() => buildMonthlyNet(report.data, commission), [report.data, commission]);
 
   const hasError = report.error !== undefined && performance.error !== undefined;
@@ -47,7 +49,7 @@ export function MonthlySummaryPanel() {
             Không tải được tổng kết tháng.
           </p>
         ) : isLoading ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Đang tải tổng kết tháng…</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("monthly.loading")}</p>
         ) : (
           <dl className="space-y-4">
             {rows.map((row) => (
@@ -60,7 +62,7 @@ export function MonthlySummaryPanel() {
         )}
         <div className="mt-5 border-t border-admin-border pt-4">
           <div className="flex items-baseline justify-between gap-4">
-            <p className="text-sm font-bold text-admin-ink">Còn lại sau hoa hồng</p>
+            <p className="text-sm font-bold text-admin-ink">{t("monthly.afterCommission")}</p>
             <p className="text-xl font-extrabold text-admin-accent">
               {hasError ? MISSING : isLoading ? "…" : net}
             </p>

@@ -1,5 +1,7 @@
 "use client";
 
+import type { Translator } from "@/i18n/config";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
@@ -85,9 +87,9 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>): AppointmentCustomer {
+function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>, t: Translator): AppointmentCustomer {
   const server = byId.get(customerId);
-  const name = server?.displayName ?? server?.name ?? "Khách chưa có tên";
+  const name = server?.displayName ?? server?.name ?? t("fallback.customer");
   const record = server as unknown as Record<string, unknown> | undefined;
   return {
     id: customerId,
@@ -105,26 +107,27 @@ function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>): 
 function resolveService(
   serviceIds: ReadonlyArray<string>,
   byId: Map<string, AdminServiceItem>,
+  t: Translator,
 ): AppointmentService {
   const first = serviceIds[0] ?? "unknown";
   const server = byId.get(first);
   if (serviceIds.length > 1) {
     return {
       id: first,
-      name: `${serviceIds.length} dịch vụ`,
+      name: t("fallback.multiService", { count: serviceIds.length }),
       durationMinutes: server?.durationMinutes ?? 60,
     };
   }
   return {
     id: first,
-    name: server?.name ?? "Dịch vụ chưa có tên",
+    name: server?.name ?? t("fallback.service"),
     durationMinutes: server?.durationMinutes ?? 60,
   };
 }
 
-function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>): AppointmentStaff {
+function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>, t: Translator): AppointmentStaff {
   const server = byId.get(staffId);
-  const name = server?.displayName ?? "Nhân viên chưa có tên";
+  const name = server?.displayName ?? t("fallback.staff");
   return { id: staffId, name, initials: deriveInitials(name) };
 }
 
@@ -142,15 +145,16 @@ function toFixtureAppointment(
     readonly staff: Map<string, AdminStaffMember>;
     readonly services: Map<string, AdminServiceItem>;
   },
+  t: Translator,
 ): Appointment {
   return {
     id: server.id,
     date: toDatePart(server.startsAt),
     startTime: toTimePart(server.startsAt),
     endTime: toTimePart(server.endsAt),
-    customer: resolveCustomer(server.customerId, lookups.customers),
-    service: resolveService(server.serviceIds, lookups.services),
-    staff: resolveStaff(server.staffId, lookups.staff),
+    customer: resolveCustomer(server.customerId, lookups.customers, t),
+    service: resolveService(server.serviceIds, lookups.services, t),
+    staff: resolveStaff(server.staffId, lookups.staff, t),
     status: normalizeAppointmentStatus(server.status),
     note: server.note ?? "",
     serverStatus: server.status,
@@ -174,6 +178,7 @@ export function AdminAppointmentsComponent({
   /** Deep-link target from dashboard drill-down; overrides the first-row default. */
   initialSelectedId?: string;
 }>) {
+  const t = useTranslations("admin.appointments");
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const [selectedDate, setSelectedDate] = useState(todayAtSalon);
@@ -204,13 +209,13 @@ export function AdminAppointmentsComponent({
   // What the create/edit form may pick from: the branch's real customers,
   // services and staff, adapted into the display shapes the form expects.
   const formOptions = useMemo(() => ({
-    customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers)),
-    services: (servicesData?.items ?? []).map((s) => resolveService([s.id], lookups.services)),
-    staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff)),
-  }), [customersData, servicesData, staffData, lookups]);
+    customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers, t)),
+    services: (servicesData?.items ?? []).map((s) => resolveService([s.id], lookups.services, t)),
+    staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff, t)),
+  }), [customersData, servicesData, staffData, lookups, t]);
   const source = useMemo<ReadonlyArray<Appointment>>(
-    () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups)),
-    [data, lookups],
+    () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups, t)),
+    [data, lookups, t],
   );
   const appointments = source;
   // The calendar opens on the salon's today. It used to open on
@@ -258,7 +263,7 @@ export function AdminAppointmentsComponent({
   const toIso = (date: string, time: string): string => zonedIso(date, time);
 
   async function saveAppointment(draft: AppointmentDraft) {
-    if (!branchId) throw new Error("Hãy chọn chi nhánh trước khi lưu lịch hẹn.");
+    if (!branchId) throw new Error(t("error.branchRequired"));
     if (formMode === "edit" && selectedAppointment?.version !== undefined) {
       await adminService.rescheduleAppointment(
         branchId,
@@ -281,7 +286,7 @@ export function AdminAppointmentsComponent({
       setSelectedId(created.id);
       setSelectedDate(draft.date);
     } else {
-      throw new Error("Lịch hẹn chưa tải xong. Vui lòng thử lại.");
+      throw new Error(t("error.notLoaded"));
     }
     notifySuccess(formMode === "edit" ? "Đã cập nhật lịch hẹn" : "Đã tạo lịch hẹn");
     await mutateAppointments();
@@ -316,7 +321,7 @@ export function AdminAppointmentsComponent({
       void mutateAppointments();
     } catch (thrown) {
       setLifecycleError(
-        thrown instanceof Error ? thrown.message : "Không thực hiện được thao tác.",
+        thrown instanceof Error ? thrown.message : t("error.lifecycle"),
       );
     } finally {
       setLifecyclePending(null);
@@ -344,7 +349,7 @@ export function AdminAppointmentsComponent({
       void mutateAppointments();
     } catch (thrown) {
       setAssignError(
-        thrown instanceof Error ? thrown.message : "Không đổi được nhân viên.",
+        thrown instanceof Error ? thrown.message : t("error.assign"),
       );
     } finally {
       setAssignSubmitting(false);
@@ -373,7 +378,7 @@ export function AdminAppointmentsComponent({
       void mutateAppointments();
     } catch (thrown) {
       setActualError(
-        thrown instanceof Error ? thrown.message : "Không lưu được dịch vụ thực tế.",
+        thrown instanceof Error ? thrown.message : t("error.actualServices"),
       );
     } finally {
       setActualSubmitting(false);
@@ -396,7 +401,7 @@ export function AdminAppointmentsComponent({
       void mutateAppointments();
     } catch (thrown) {
       setPhotoError(
-        thrown instanceof Error ? thrown.message : "Không đính kèm được ảnh.",
+        thrown instanceof Error ? thrown.message : t("error.photo"),
       );
     } finally {
       setPhotoSubmitting(false);
@@ -420,7 +425,7 @@ export function AdminAppointmentsComponent({
       await mutateAppointments();
       setIsCancelOpen(false);
     } catch (thrown) {
-      setCancelError(thrown instanceof Error ? thrown.message : "Không hủy được lịch hẹn.");
+      setCancelError(thrown instanceof Error ? thrown.message : t("error.cancel"));
     } finally {
       setCancelPending(false);
     }
@@ -429,12 +434,12 @@ export function AdminAppointmentsComponent({
   return (
     <AdminPageLayout>
       {isLoading && !data ? (
-        <p className="mb-2 text-xs text-admin-muted">Đang tải lịch hẹn từ chi nhánh…</p>
+        <p className="mb-2 text-xs text-admin-muted">{t("loading")}</p>
       ) : error && !data ? (
-        <p className="mb-2 text-xs text-admin-danger">Không tải được lịch hẹn.</p>
+        <p className="mb-2 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
       <AppointmentToolbar
-        dateLabel={formatAppointmentDateLabel(selectedDate, view)}
+        dateLabel={formatAppointmentDateLabel(selectedDate, view, t)}
         view={view}
         status={status}
         onPrevious={() => moveDate(-1)}
@@ -446,7 +451,7 @@ export function AdminAppointmentsComponent({
       />
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-[19rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)_19rem]">
-        <section className="min-w-0" aria-label="Danh sách và tổng quan lịch hẹn">
+        <section className="min-w-0" aria-label={t("regionList")}>
           <AppointmentList appointments={visibleDayAppointments} selectedId={selectedAppointment?.id ?? null} onSelect={setSelectedId} />
           <AppointmentSummary summary={summary} />
         </section>
@@ -459,7 +464,7 @@ export function AdminAppointmentsComponent({
           onSelect={setSelectedId}
         />
 
-        <aside className="lg:col-span-2 xl:col-span-1" aria-label="Chi tiết lịch hẹn đang chọn">
+        <aside className="lg:col-span-2 xl:col-span-1" aria-label={t("regionDetail")}>
           {selectedAppointment ? (
             <AppointmentDetailPanel
               appointment={selectedAppointment}
@@ -502,7 +507,7 @@ export function AdminAppointmentsComponent({
               }
             />
           ) : (
-            <AdminEmptySelection title="Chưa chọn lịch hẹn" description="Chọn một lịch hẹn để xem đầy đủ thông tin." />
+            <AdminEmptySelection title={t("emptyTitle")} description={t("emptyDescription")} />
           )}
         </aside>
       </div>

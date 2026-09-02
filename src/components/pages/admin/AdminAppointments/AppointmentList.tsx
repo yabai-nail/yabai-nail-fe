@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Avatar, Button, Card } from "@heroui/react";
 import type { Appointment } from "./data";
 import {
@@ -14,10 +15,12 @@ export function AppointmentList({
   selectedId: string | null;
   onSelect: (id: string) => void;
 }>) {
+  const t = useTranslations("admin.appointments");
+  const tStatus = useTranslations("admin.appointmentStatus");
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="border-b border-admin-border px-4 py-3">
-        <h2 className="text-sm font-bold text-admin-ink">Danh sách lịch hẹn</h2>
+        <h2 className="text-sm font-bold text-admin-ink">{t("list.heading")}</h2>
       </Card.Header>
       <Card.Content className="p-0">
         {appointments.length ? (
@@ -31,7 +34,7 @@ export function AppointmentList({
             (10:00 – 11:00) instead of a start on the left and an end floating on
             the right, and the status wears the same dot the calendar pills wear.
           */
-          <ol className="divide-y divide-admin-border" aria-label="Lịch hẹn trong ngày đã chọn">
+          <ol className="divide-y divide-admin-border" aria-label={t("list.ariaLabel")}>
             {appointments.map((appointment) => {
               const tone = appointmentStatusTone[appointment.status];
               return (
@@ -49,7 +52,7 @@ export function AppointmentList({
                         </time>
                         <span className="flex shrink-0 items-center gap-1 text-[0.65rem] text-admin-muted">
                           <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
-                          {appointmentStatusLabel[appointment.status]}
+                          {appointmentStatusLabel(appointment.status, tStatus)}
                         </span>
                       </span>
                       <span className="mt-0.5 block truncate text-xs font-semibold text-admin-ink">{appointment.customer.name}</span>
@@ -61,7 +64,7 @@ export function AppointmentList({
             })}
           </ol>
         ) : (
-          <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">Không có lịch hẹn phù hợp.</p>
+          <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">{t("list.empty")}</p>
         )}
       </Card.Content>
     </Card>

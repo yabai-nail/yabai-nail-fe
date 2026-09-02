@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { formatMoney } from "@/lib/admin-format";
 import { currentMonthPeriod, indexStaffPerformance } from "@/lib/admin-staff-performance";
@@ -15,6 +16,7 @@ export function StaffPerformancePanel({
   branchId,
   staffId,
 }: Readonly<{ branchId: string; staffId: string }>) {
+  const t = useTranslations("admin.staff");
   const [period, setPeriod] = useState(() => currentMonthPeriod(new Date()));
   const query = useAdminStaffPerformance(branchId, { period });
   const row = useMemo(
@@ -25,20 +27,20 @@ export function StaffPerformancePanel({
   return (
     <section aria-labelledby="staff-performance-heading" className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 id="staff-performance-heading" className="text-sm font-bold text-admin-ink">Hiệu suất theo kỳ</h3>
+        <h3 id="staff-performance-heading" className="text-sm font-bold text-admin-ink">{t("performance.heading")}</h3>
         <input
           type="month"
           value={period}
           onChange={(event) => setPeriod(event.target.value)}
-          aria-label="Kỳ thống kê"
+          aria-label={t("performance.periodLabel")}
           className="rounded-lg border border-admin-border bg-admin-surface px-2 py-1 text-xs text-admin-ink"
         />
       </div>
 
       {query.isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải…</p>
+        <p className="text-xs text-admin-muted">{t("performance.loading")}</p>
       ) : query.error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được hiệu suất.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("performance.loadFailed")}</p>
       ) : !row ? (
         <p className="text-xs text-admin-muted">Không có dữ liệu kỳ {period}.</p>
       ) : (
@@ -50,11 +52,11 @@ export function StaffPerformancePanel({
             </dd>
           </div>
           <div>
-            <dt className="text-admin-muted">Số đơn</dt>
+            <dt className="text-admin-muted">{t("performance.orders")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">{row.orderCount ?? MISSING}</dd>
           </div>
           <div>
-            <dt className="text-admin-muted">Hoa hồng</dt>
+            <dt className="text-admin-muted">{t("performance.commission")}</dt>
             <dd className="mt-1 font-bold text-admin-accent">
               {typeof row.commissionAmount === "number" ? formatMoney(row.commissionAmount) : MISSING}
             </dd>

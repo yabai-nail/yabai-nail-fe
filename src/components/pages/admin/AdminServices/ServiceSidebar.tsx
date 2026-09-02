@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@heroui/react";
 import { SurchargePanel } from "./SurchargePanel";
 import type { SalonService } from "./data";
@@ -8,12 +9,13 @@ import type { SalonService } from "./data";
 // ellipsis and there was no room for the branch scope or the on/off switch. They moved to the
 // "Danh mục" view, so this column keeps only what belongs beside the service list.
 export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
+  const t = useTranslations("admin.services");
   const topServices = [...services].sort((left, right) => right.soldCount - left.soldCount).slice(0, 5);
 
   return (
     <div className="space-y-4">
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="px-4 pt-4"><h2 className="font-bold">Top dịch vụ bán chạy</h2></Card.Header>
+        <Card.Header className="px-4 pt-4"><h2 className="font-bold">{t("sidebar.topServices")}</h2></Card.Header>
         <Card.Content className="p-4">
           {topServices.length === 0 ? (
             <p className="text-xs text-admin-muted">Chưa có dịch vụ nào được đặt.</p>
@@ -37,7 +39,7 @@ export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<
       </Card>
       <SurchargePanel />
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="p-4"><h2 className="font-bold">Ghi chú</h2><p className="mt-2 text-xs leading-5 text-admin-muted">Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng.</p></Card.Content>
+        <Card.Content className="p-4"><h2 className="font-bold">{t("sidebar.noteHeading")}</h2><p className="mt-2 text-xs leading-5 text-admin-muted">{t("sidebar.noteBody")}</p></Card.Content>
       </Card>
     </div>
   );

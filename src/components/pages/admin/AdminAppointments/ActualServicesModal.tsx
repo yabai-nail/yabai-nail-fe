@@ -2,6 +2,7 @@
 
 import { WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAdminServices } from "@/service";
 import type { Appointment } from "./data";
@@ -19,6 +20,7 @@ export function ActualServicesModal({
   submitting?: boolean;
   error?: string | null;
 }>) {
+  const t = useTranslations("admin.appointments");
   const { data, isLoading, error: loadError } = useAdminServices();
   const services = data?.items ?? [];
   const [selected, setSelected] = useState<ReadonlySet<string>>(
@@ -41,21 +43,21 @@ export function ActualServicesModal({
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
             <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4">
               <WrenchScrewdriverIcon className="size-5 text-admin-accent" />
-              <Modal.Heading className="text-base font-bold text-admin-ink">Cập nhật dịch vụ thực tế</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("actualServices.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="space-y-3 px-5 py-4 text-sm">
               <p className="text-xs text-admin-muted">
-                Chọn danh sách dịch vụ thực sự đã thực hiện. Danh sách này ghi đè dịch vụ đặt ban đầu.
+                {t("actualServices.description")}
               </p>
 
               {isLoading ? (
-                <p className="text-xs text-admin-muted">Đang tải danh mục dịch vụ…</p>
+                <p className="text-xs text-admin-muted">{t("actualServices.loading")}</p>
               ) : loadError ? (
                 <p role="alert" className="text-xs text-admin-danger">
-                  Không tải được danh mục dịch vụ.
+                  {t("actualServices.loadFailed")}
                 </p>
               ) : services.length === 0 ? (
-                <p className="text-xs text-admin-muted">Chưa có dịch vụ nào.</p>
+                <p className="text-xs text-admin-muted">{t("actualServices.empty")}</p>
               ) : (
                 <ul className="max-h-72 overflow-y-auto rounded-lg border border-admin-border">
                   {services.map((service) => (
@@ -68,7 +70,7 @@ export function ActualServicesModal({
                         />
                         <span className="flex-1 truncate text-sm text-admin-ink">{service.name}</span>
                         {service.durationMinutes ? (
-                          <span className="text-[0.65rem] text-admin-muted">{service.durationMinutes} phút</span>
+                          <span className="text-[0.65rem] text-admin-muted">{t("actualServices.duration", { minutes: service.durationMinutes })}</span>
                         ) : null}
                       </label>
                     </li>
@@ -80,7 +82,7 @@ export function ActualServicesModal({
             </Modal.Body>
             <Modal.Footer className="border-t border-admin-border px-5 py-4">
               <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting}>
-                Đóng
+                {t("actualServices.close")}
               </Button>
               <Button
                 variant="primary"
@@ -88,7 +90,7 @@ export function ActualServicesModal({
                 onPress={() => onConfirm([...selected])}
                 isDisabled={submitting || selected.size === 0}
               >
-                {submitting ? "Đang lưu…" : "Lưu dịch vụ thực tế"}
+                {submitting ? t("actualServices.saving") : t("actualServices.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

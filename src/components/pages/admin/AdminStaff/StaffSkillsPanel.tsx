@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { notifySuccess } from "@/lib/app-toast";
@@ -15,6 +16,7 @@ export function StaffSkillsPanel({
   staffId,
   staffVersion,
 }: Readonly<{ staffId: string; staffVersion?: number }>) {
+  const t = useTranslations("admin.staff");
   const services = useAdminServices();
   const skills = useStaffSkills(staffId);
   const grantedIds = useMemo<Set<string>>(
@@ -55,7 +57,7 @@ export function StaffSkillsPanel({
       setSelected(null);
       void skills.mutate();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được kỹ năng.");
+      setError(thrown instanceof Error ? thrown.message : t("skills.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -63,12 +65,12 @@ export function StaffSkillsPanel({
 
   return (
     <section aria-labelledby="staff-skills-heading" className="space-y-2">
-      <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">Kỹ năng</h3>
+      <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
 
       {services.isLoading || skills.isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải…</p>
+        <p className="text-xs text-admin-muted">{t("compensation.loading")}</p>
       ) : services.error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được danh mục dịch vụ.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("skills.loadFailed")}</p>
       ) : (
         <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
           {(services.data?.items ?? []).map((service) => (
@@ -97,7 +99,7 @@ export function StaffSkillsPanel({
           onPress={() => void submit()}
           isDisabled={!dirty || busy}
         >
-          {busy ? "Đang lưu…" : "Lưu kỹ năng"}
+          {busy ? t("compensation.saving") : t("skills.submit")}
         </Button>
       </div>
       {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}

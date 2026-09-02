@@ -49,7 +49,8 @@ console này, và đó chính là lý do `next-intl` đã có mặt sẵn trong 
 **Trong phạm vi**
 
 - `src/components/pages/admin/**`, `src/components/blocks/admin/**`
-- `src/components/layouts/**` (AdminShell, ShellNav, AdminAuthGate)
+- `src/components/layouts/AdminShell/**`, `src/components/layouts/AdminAuthGate/**`
+  (`ShellNav` và `ShellFooter` **không** thuộc phạm vi — chỉ `(site)/layout.tsx` dùng chúng)
 - 16 `export const metadata` trong `src/app/(admin)/admin/**`
 - Hạ tầng: `src/app/(admin)/admin/layout.tsx`, `src/i18n/`, `messages/`, `scripts/check-i18n.mjs`
 - Nút đổi ngôn ngữ: tab **Ngôn ngữ** trong `/admin/settings`
@@ -143,6 +144,9 @@ là cửa của khách hàng, không phải admin. Ghi vào `docs/backend-api-ga
 không tự chế endpoint.
 
 ## 5. Quy ước khóa
+
+Thuật ngữ nghiệp vụ chốt ở [i18n-glossary.md](./i18n-glossary.md) — mỗi lát dịch
+cả ba ngôn ngữ ngay và bám từ điển, thay vì rút tiếng Việt trước rồi dịch dồn.
 
 Theo đúng kiểu mobile đã dùng (`auth.register.heading`), lồng theo màn:
 

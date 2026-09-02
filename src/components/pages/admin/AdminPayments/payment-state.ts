@@ -13,13 +13,18 @@ export type PaymentTotals = {
 
 export type PaymentTransitionResult =
   | { readonly ok: true; readonly value: CheckoutInvoice }
+  /**
+   * `error` is a catalogue key under `admin.payments`, not a sentence. These transitions run
+   * from event handlers all over the screen; handing back a key keeps this module free of a
+   * translator argument and lets each caller render it with the hook it already has.
+   */
   | { readonly ok: false; readonly error: string };
 
 const success = (value: CheckoutInvoice): PaymentTransitionResult => ({ ok: true, value });
 const failure = (error: string): PaymentTransitionResult => ({ ok: false, error });
 
 function requireDraft(invoice: CheckoutInvoice) {
-  return invoice.status === "draft" ? null : "Hóa đơn đã thanh toán nên không thể thay đổi số tiền.";
+  return invoice.status === "draft" ? null : "state.paidLocked";
 }
 
 function isValidMoney(value: number) {
@@ -27,8 +32,8 @@ function isValidMoney(value: number) {
 }
 
 function validateItem(item: PaymentServiceSnapshot) {
-  if (!item.name.trim()) return "Tên dịch vụ không được để trống.";
-  if (!isValidMoney(item.price)) return "Giá dịch vụ phải là số nguyên không âm.";
+  if (!item.name.trim()) return "state.nameRequired";
+  if (!isValidMoney(item.price)) return "state.priceInvalid";
   return null;
 }
 
@@ -48,7 +53,7 @@ function validateInvoice(invoice: CheckoutInvoice) {
   const serviceError = validateItem(invoice.currentService) ?? invoice.additionalItems.map(validateItem).find(Boolean);
   if (serviceError) return serviceError;
   const subtotal = invoice.currentService.price + invoice.additionalItems.reduce((sum, item) => sum + item.price, 0);
-  if (!isValidMoney(invoice.discount) || invoice.discount > subtotal) return "Giảm giá không hợp lệ.";
+  if (!isValidMoney(invoice.discount) || invoice.discount > subtotal) return "state.discountInvalid";
   return null;
 }
 
@@ -81,7 +86,7 @@ export function addLineItem(invoice: CheckoutInvoice, service: PaymentServiceSna
   const error = validateItem(service);
   if (error) return failure(error);
   if (service.id !== "custom" && invoice.additionalItems.some((item) => item.id === service.id)) {
-    return failure("Dịch vụ này đã có trong hóa đơn.");
+    return failure("state.duplicateService");
   }
 
   const id = service.id === "custom" ? nextCustomId(invoice.additionalItems) : service.id;
@@ -94,7 +99,7 @@ export function updateLineItem(invoice: CheckoutInvoice, itemId: string, patch: 
   if (locked) return failure(locked);
   const error = validateItem({ id: itemId, name: patch.name, price: patch.price });
   if (error) return failure(error);
-  if (!invoice.additionalItems.some((item) => item.id === itemId)) return failure("Không tìm thấy dịch vụ cần sửa.");
+  if (!invoice.additionalItems.some((item) => item.id === itemId)) return failure("state.itemNotFoundEdit");
   return success(keepDiscountWithinSubtotal({
     ...invoice,
     additionalItems: invoice.additionalItems.map((item) => item.id === itemId ? { ...item, ...patch, name: patch.name.trim() } : item),
@@ -104,7 +109,7 @@ export function updateLineItem(invoice: CheckoutInvoice, itemId: string, patch: 
 export function removeLineItem(invoice: CheckoutInvoice, itemId: string): PaymentTransitionResult {
   const locked = requireDraft(invoice);
   if (locked) return failure(locked);
-  if (!invoice.additionalItems.some((item) => item.id === itemId)) return failure("Không tìm thấy dịch vụ cần xóa.");
+  if (!invoice.additionalItems.some((item) => item.id === itemId)) return failure("state.itemNotFoundDelete");
   return success(keepDiscountWithinSubtotal({ ...invoice, additionalItems: invoice.additionalItems.filter((item) => item.id !== itemId) }));
 }
 
@@ -112,7 +117,7 @@ export function updateDiscount(invoice: CheckoutInvoice, discount: number): Paym
   const locked = requireDraft(invoice);
   if (locked) return failure(locked);
   const { subtotal } = calculatePaymentTotals(invoice);
-  if (!isValidMoney(discount) || discount > subtotal) return failure("Giảm giá phải từ 0 đến tổng tiền dịch vụ.");
+  if (!isValidMoney(discount) || discount > subtotal) return failure("state.discountRange");
   return success({ ...invoice, discount });
 }
 
@@ -125,9 +130,9 @@ export function setPaymentMethod(invoice: CheckoutInvoice, paymentMethod: Paymen
 export function confirmPayment(invoice: CheckoutInvoice, paidAt: string): PaymentTransitionResult {
   const locked = requireDraft(invoice);
   if (locked) return failure(locked);
-  if (!invoice.paymentMethod) return failure("Vui lòng chọn phương thức thanh toán.");
+  if (!invoice.paymentMethod) return failure("state.methodRequired");
   const invoiceError = validateInvoice(invoice);
   if (invoiceError) return failure(invoiceError);
-  if (!paidAt || Number.isNaN(Date.parse(paidAt))) return failure("Thời gian xác nhận không hợp lệ.");
+  if (!paidAt || Number.isNaN(Date.parse(paidAt))) return failure("state.paidAtInvalid");
   return success({ ...invoice, status: "paid", paidAt });
 }
