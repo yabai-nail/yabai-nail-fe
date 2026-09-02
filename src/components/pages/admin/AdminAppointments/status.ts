@@ -1,4 +1,4 @@
-import type { AppointmentStatus } from "./data";
+import type { AppointmentLifecycleAction, AppointmentStatus } from "./data";
 
 /**
  * One API status to one display status. The previous mapping used substring
@@ -47,3 +47,21 @@ export const appointmentStatusColor = {
   completed: "success",
   no_show: "default",
 } as const satisfies Record<AppointmentStatus, "accent" | "warning" | "default" | "success">;
+
+/**
+ * "no-show" ends the appointment early; every other transition advances it one
+ * step along a normal visit. The two carry very different consequences, so the
+ * panel gives them different weight instead of two equal buttons side by side.
+ */
+const LIFECYCLE_EXCEPTIONS: ReadonlySet<AppointmentLifecycleAction> = new Set([
+  "no-show",
+]);
+
+export function splitLifecycleActions(
+  actions: ReadonlyArray<AppointmentLifecycleAction>,
+) {
+  return {
+    steps: actions.filter((action) => !LIFECYCLE_EXCEPTIONS.has(action)),
+    exceptions: actions.filter((action) => LIFECYCLE_EXCEPTIONS.has(action)),
+  };
+}

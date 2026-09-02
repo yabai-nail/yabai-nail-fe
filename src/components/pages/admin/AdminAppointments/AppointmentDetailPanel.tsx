@@ -22,6 +22,7 @@ import type { Appointment, AppointmentLifecycleAction } from "./data";
 import {
   appointmentStatusColor,
   appointmentStatusLabel,
+  splitLifecycleActions,
 } from "./status";
 
 const LIFECYCLE_LABEL: Record<AppointmentLifecycleAction, string> = {
@@ -81,6 +82,30 @@ export function AppointmentDetailPanel({
   const canEditActualServices =
     appointment.serverStatus === "IN_SERVICE" ||
     appointment.serverStatus === "AWAITING_PAYMENT";
+  // A step (check-in / start / complete) leads; the "no-show" exception follows
+  // it, quieter. See splitLifecycleActions for why they are not peers.
+  const { steps, exceptions } = splitLifecycleActions(lifecycleActions);
+  const renderLifecycleButton = (
+    action: AppointmentLifecycleAction,
+    variant: "outline" | "ghost",
+    emphasis: string,
+  ) => {
+    const Icon = LIFECYCLE_ICON[action];
+    return (
+      <Button
+        key={action}
+        fullWidth
+        size="sm"
+        variant={variant}
+        className={`rounded-lg ${emphasis}`}
+        isDisabled={lifecyclePending !== null}
+        onPress={() => onLifecycle?.(action)}
+      >
+        <Icon className="size-4" />
+        {lifecyclePending === action ? "Đang xử lý…" : LIFECYCLE_LABEL[action]}
+      </Button>
+    );
+  };
   const details = [
     { icon: ClockIcon, label: "Thời gian", value: `${appointment.startTime} - ${appointment.endTime} (${appointment.service.durationMinutes} phút)` },
     { icon: CalendarDaysIcon, label: "Ngày", value: appointment.date.split("-").reverse().join("/") },
@@ -130,27 +155,25 @@ export function AppointmentDetailPanel({
       </Card.Content>
       <Card.Footer className="flex flex-col gap-2 border-t border-admin-border p-4">
         {lifecycleActions.length > 0 && onLifecycle ? (
-          <div className="flex flex-col gap-2 border-b border-admin-border pb-3">
+          /*
+            `w-full` is load-bearing: HeroUI's card__footer sets
+            align-items:center, so a wrapper with no width of its own shrinks to
+            fit its content. That is what broke this block. The old markup put a
+            `grid grid-cols-2` in here, whose two 1fr columns asked for
+            149+149+8=306px, got squeezed to the 270px on offer, and handed each
+            button a 131px cell — which a button never shrinks into, because it
+            keeps its label on one line. "Bắt đầu dịch vụ" (149px) spilled 10px
+            over the button beside it. Say the width out loud and both the
+            overflow and the shrink go away.
+          */
+          <div className="flex w-full flex-col gap-2 border-b border-admin-border pb-3">
             <span className="text-[0.65rem] uppercase tracking-wide text-admin-muted">Vòng đời</span>
-            <div className="grid grid-cols-2 gap-2">
-              {lifecycleActions.map((action) => {
-                const Icon = LIFECYCLE_ICON[action];
-                const isPending = lifecyclePending === action;
-                return (
-                  <Button
-                    key={action}
-                    size="sm"
-                    variant="outline"
-                    className="rounded-lg border-admin-border"
-                    isDisabled={lifecyclePending !== null}
-                    onPress={() => onLifecycle(action)}
-                  >
-                    <Icon className="size-4" />
-                    {isPending ? "Đang xử lý…" : LIFECYCLE_LABEL[action]}
-                  </Button>
-                );
-              })}
-            </div>
+            {steps.map((action) =>
+              renderLifecycleButton(action, "outline", "border-admin-accent bg-admin-soft text-admin-accent"),
+            )}
+            {exceptions.map((action) =>
+              renderLifecycleButton(action, "ghost", "text-admin-muted"),
+            )}
             {lifecycleError ? (
               <p role="alert" className="text-xs text-admin-danger">
                 {lifecycleError}
