@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
@@ -19,6 +20,7 @@ export function PromotionModal({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.marketing");
   const isEdit = promotion !== null;
   const [code, setCode] = useState(promotion?.code ?? "");
   const [name, setName] = useState(promotion?.title ?? "");
@@ -68,7 +70,7 @@ export function PromotionModal({
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không lưu được khuyến mãi.");
+      setError(err instanceof Error && err.message ? err.message : t("promotionModal.failed"));
     } finally {
       setBusy(false);
     }
@@ -81,12 +83,12 @@ export function PromotionModal({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                {isEdit ? "Sửa khuyến mãi" : "Thêm khuyến mãi"}
+                {isEdit ? t("promotionModal.editTitle") : t("promotionModal.addTitle")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Mã khuyến mãi</span>
+                <span className="font-semibold text-admin-ink">{t("promotionModal.code")}</span>
                 <input
                   className={inputClass}
                   value={code}
@@ -97,52 +99,52 @@ export function PromotionModal({
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Tên</span>
-                <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="Hè rực rỡ 20%" />
+                <span className="font-semibold text-admin-ink">{t("promotionModal.name")}</span>
+                <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("promotionModal.namePlaceholder")} />
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Loại</span>
+                  <span className="font-semibold text-admin-ink">{t("promotionModal.type")}</span>
                   <AdminSelectField
-                    label="Loại khuyến mãi"
+                    label={t("promotionModal.typeLabel")}
                     fullWidth
                     value={kind}
                     onChange={setKind}
                     options={[
-                      { value: "PERCENT", label: "Phần trăm (%)" },
-                      { value: "FIXED", label: "Số tiền (¥)" },
+                      { value: "PERCENT", label: t("promotionModal.percentOption") },
+                      { value: "FIXED", label: t("promotionModal.fixedOption") },
                     ]}
                   />
                 </div>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">
-                    {kind === "PERCENT" ? "Phần trăm" : "Số tiền (¥)"}
+                    {kind === "PERCENT" ? t("promotionModal.percentValue") : t("promotionModal.fixedValue")}
                   </span>
                   <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} />
                 </label>
               </div>
               {!isEdit ? (
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Giới hạn phát hành</span>
+                  <span className="font-semibold text-admin-ink">{t("promotionModal.issueLimit")}</span>
                   <input inputMode="numeric" className={inputClass} value={issuanceLimit} onChange={(event) => setIssuanceLimit(event.target.value)} placeholder="1000" />
                 </label>
               ) : null}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Bắt đầu</span>
+                  <span className="font-semibold text-admin-ink">{t("promotionModal.startAt")}</span>
                   <input type="date" className={inputClass} value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">Kết thúc</span>
+                  <span className="font-semibold text-admin-ink">{t("promotionModal.endAt")}</span>
                   <input type="date" className={inputClass} value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
                 </label>
               </div>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Hủy</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("promotionModal.cancel")}</Button>
               <Button variant="primary" className="rounded-lg" isDisabled={!canSubmit} onPress={() => void submit()}>
-                {busy ? "Đang lưu…" : isEdit ? "Lưu" : "Thêm"}
+                {busy ? t("promotionModal.saving") : isEdit ? t("promotionModal.save") : t("promotionModal.add")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>
