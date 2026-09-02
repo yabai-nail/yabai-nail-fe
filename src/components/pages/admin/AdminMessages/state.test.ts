@@ -4,7 +4,7 @@ import { appendConversationMessage } from "./state";
 describe("appendConversationMessage", () => {
   it("appends a message only to the selected conversation", () => {
     const initial = {
-      cv1: [{ id: "m1", sender: "customer", content: "Xin chào", time: "10:00" }],
+      cv1: [{ id: "m1", sender: "customer", content: "Xin chào", time: "10:00", sentAt: "2026-09-02T10:00:00+07:00" }],
     } as const;
 
     const result = appendConversationMessage(initial, "cv2", {
@@ -12,6 +12,7 @@ describe("appendConversationMessage", () => {
       sender: "salon",
       content: "Chào bạn",
       time: "Bây giờ",
+      sentAt: "2026-09-02T10:01:00+07:00",
     });
 
     expect(result.cv1).toEqual(initial.cv1);

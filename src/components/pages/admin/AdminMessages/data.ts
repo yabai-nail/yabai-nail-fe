@@ -11,7 +11,10 @@ export type ChatMessage = {
   readonly id: string;
   readonly sender: "customer" | "salon";
   readonly content: string;
+  /** Clock time for display, already localised: "08:13". */
   readonly time: string;
+  /** The raw ISO timestamp, kept so the thread can group by day. */
+  readonly sentAt: string;
 };
 
 export type Conversation = {

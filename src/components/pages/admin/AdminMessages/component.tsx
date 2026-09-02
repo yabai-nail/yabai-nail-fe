@@ -14,7 +14,6 @@ import {
   type AdminMessage as ServerMessage,
 } from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
-import { CustomerSummary } from "./CustomerSummary";
 import { MessageThread } from "./MessageThread";
 import { type ChatMessage, type Conversation, type MessageCustomer } from "./data";
 import {
@@ -70,6 +69,7 @@ function toChatMessage(server: ServerMessage): ChatMessage {
     sender,
     content: server.content,
     time: formatTimeLabel(server.createdAt),
+    sentAt: server.createdAt,
   };
 }
 
@@ -129,6 +129,7 @@ export function AdminMessagesComponent() {
         sender: "salon",
         content,
         time: "Bây giờ",
+        sentAt: new Date().toISOString(),
       }),
     );
 
@@ -180,7 +181,13 @@ export function AdminMessagesComponent() {
       {conversationsError ? (
         <p className="mb-3 text-xs text-admin-danger">Không tải được hội thoại.</p>
       ) : null}
-      <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none xl:grid-cols-[17rem_minmax(0,1fr)_19rem]">
+      {/*
+        Two columns. The third was 19rem of customer summary that repeated the
+        name already in the thread header, printed an empty phone row, and held
+        two buttons — which now sit in that header. The conversation takes the
+        width back.
+      */}
+      <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none lg:grid-cols-[19rem_minmax(0,1fr)]">
         <ConversationList
           conversations={visibleConversations}
           selectedId={selected?.id ?? null}
@@ -214,11 +221,6 @@ export function AdminMessagesComponent() {
           />
         ) : (
           <AdminEmptySelection title="Không có hội thoại" description="Thay đổi từ khóa hoặc bộ lọc để tiếp tục nhắn tin." />
-        )}
-        {selected ? (
-          <CustomerSummary customer={selected.customer} />
-        ) : (
-          <AdminEmptySelection title="Chưa có khách hàng" description="Thông tin khách hàng sẽ xuất hiện khi có hội thoại phù hợp." />
         )}
       </Card>
     </AdminPageLayout>
