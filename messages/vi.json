@@ -416,9 +416,27 @@
         "amount": "Số tiền hoàn (¥)",
         "reason": "Lý do hoàn",
         "requested": "Yêu cầu hoàn {amount} · {status}",
-        "recorded": "Đã ghi nhận hoàn tiền.",
+        "recorded": "Đã ghi nhận hoàn tiền",
         "busy": "Đang xử lý…",
-        "submit": "Hoàn tiền"
+        "submit": "Hoàn tiền",
+        "caption": "Lịch hẹn đã thanh toán, có thể hoàn tiền",
+        "columns": {
+          "customer": "Khách hàng",
+          "time": "Thời gian",
+          "total": "Tổng tiền",
+          "status": "Trạng thái"
+        },
+        "loadingAppointments": "Đang tải lịch hẹn…",
+        "noAppointments": "Chưa có lịch hẹn nào đã thanh toán trong chi nhánh này.",
+        "transactionsFor": "Giao dịch của {name}",
+        "transactionColumns": {
+          "amount": "Số tiền",
+          "method": "Phương thức",
+          "status": "Trạng thái",
+          "paidAt": "Đã thu lúc"
+        },
+        "selectAppointment": "Chọn một lịch hẹn ở bảng trên để xem giao dịch của lịch đó.",
+        "result": "Yêu cầu hoàn {amount} · {status}"
       },
       "tierLine": "Hạng {tier} · {points} điểm",
       "checkin": {

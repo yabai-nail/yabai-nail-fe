@@ -416,9 +416,27 @@
         "amount": "Refund amount (¥)",
         "reason": "Refund reason",
         "requested": "Refund requested {amount} · {status}",
-        "recorded": "The refund has been recorded.",
+        "recorded": "The refund was recorded",
         "busy": "Processing…",
-        "submit": "Refund"
+        "submit": "Refund",
+        "caption": "Paid appointments that can be refunded",
+        "columns": {
+          "customer": "Customer",
+          "time": "Time",
+          "total": "Total",
+          "status": "Status"
+        },
+        "loadingAppointments": "Loading appointments…",
+        "noAppointments": "No paid appointments in this branch yet.",
+        "transactionsFor": "Transactions for {name}",
+        "transactionColumns": {
+          "amount": "Amount",
+          "method": "Method",
+          "status": "Status",
+          "paidAt": "Taken at"
+        },
+        "selectAppointment": "Pick an appointment above to see its transactions.",
+        "result": "Refund requested {amount} · {status}"
       },
       "tierLine": "{tier} · {points} points",
       "checkin": {

@@ -1,10 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Button, Card } from "@heroui/react";
+import { Button, Card, Chip } from "@heroui/react";
 import { useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
@@ -55,11 +54,18 @@ export function AdminOperationsComponent() {
 
   return (
     <AdminPageLayout>
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/*
+        The refund panel is the only one that lists anything — the other three take a
+        phone number or a scanned QR and answer with one record — so it takes the full
+        width and the rest share the grid below it.
+      */}
+      <div className="grid gap-4">
         <RefundForm branchId={branchId} />
-        <CheckInForm branchId={branchId} />
-        <MembershipForm branchId={branchId} />
-        <CustomerLookup branchId={branchId} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <CheckInForm branchId={branchId} />
+          <MembershipForm branchId={branchId} />
+          <CustomerLookup branchId={branchId} />
+        </div>
       </div>
     </AdminPageLayout>
   );
@@ -91,8 +97,14 @@ function Feedback({ message, error }: Readonly<{ message: string | null; error: 
   return null;
 }
 
+/** Appointment statuses whose money has already been taken, so a refund has something to undo. */
+const PAID_STATUSES = ["PAID", "COMPLETED"];
+
 function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.operations");
+  const tStatus = useTranslations("admin.appointmentStatus");
+  const tMethod = useTranslations("admin.paymentMethod");
+  const tPayment = useTranslations("admin.payments");
   const appointments = useAdminAppointments(branchId);
   const customers = useAdminCustomers(branchId);
   const [appointmentId, setAppointmentId] = useState("");
@@ -109,54 +121,158 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
     customer.id,
     customer.displayName ?? customer.name ?? t("unnamedCustomer"),
   ] as const));
-  const appointmentOptions = (appointments.data?.items ?? []).map((appointment) => ({
-    value: appointment.id,
-    label: `${customerNames.get(appointment.customerId) ?? t("unnamedCustomer")} · ${new Date(appointment.startsAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`,
-  }));
-  const paymentOptions = (payments.data?.items ?? []).map((payment) => ({
-    value: payment.id,
-    label: `${formatMoney(payment.amount)} · ${{ cash: "Tiền mặt", card: "Thẻ", paypay: "PayPay", bank_transfer: "Chuyển khoản" }[payment.method.toLowerCase()] ?? payment.method}`,
-  }));
+  // The picker used to offer every appointment in the branch under a heading that said
+  // "paid", so most of what it listed had no payment to refund and failed on submit.
+  const paidAppointments = (appointments.data?.items ?? []).filter((appointment) =>
+    PAID_STATUSES.some((status) => appointment.status.toUpperCase().includes(status)),
+  );
+  const selected = paidAppointments.find((appointment) => appointment.id === appointmentId);
+  const transactions = payments.data?.items ?? [];
+  const statusLabel = (status: string) => {
+    const code = status.toUpperCase();
+    return tStatus.has(code) ? tStatus(code) : status;
+  };
+  const paymentStatusLabel = (status: string) => {
+    const key = `status.${status.toUpperCase()}`;
+    return tPayment.has(key) ? tPayment(key) : status;
+  };
+  const methodLabel = (method: string) => {
+    const code = method.toLowerCase();
+    return tMethod.has(code) ? tMethod(code) : method;
+  };
+
+  function pickAppointment(id: string) {
+    setAppointmentId(id);
+    setPaymentId("");
+  }
 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">{t("refund.heading")}</h2>
+
       <div className="grid gap-1">
         <span className={labelClass}>{t("refund.paidAppointment")}</span>
-        <AdminSelectField
-          label={t("refund.pickAppointment")}
-          fullWidth
-          value={appointmentId}
-          onChange={(value) => { setAppointmentId(value); setPaymentId(""); }}
-          options={appointmentOptions}
-        />
-      </div>
-      <div className="grid gap-1">
-        <span className={labelClass}>{t("refund.transaction")}</span>
-        {appointmentId && paymentOptions.length === 0 ? (
-          <p className="text-xs text-admin-muted">{payments.isLoading ? t("refund.loadingTransactions") : t("refund.noTransactions")}</p>
+        {appointments.isLoading ? (
+          <p className="text-xs text-admin-muted">{t("refund.loadingAppointments")}</p>
+        ) : paidAppointments.length === 0 ? (
+          <p className="text-xs text-admin-muted">{t("refund.noAppointments")}</p>
         ) : (
-          <AdminSelectField
-            label={t("refund.pickTransaction")}
-            fullWidth
-            value={paymentId}
-            onChange={setPaymentId}
-            options={paymentOptions}
-          />
+          <div className="overflow-x-auto rounded-lg border border-admin-border">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <caption className="sr-only">{t("refund.caption")}</caption>
+              <thead className="border-b border-admin-border text-xs text-admin-muted">
+                <tr>
+                  <th scope="col" className="px-3 py-2">{t("refund.columns.customer")}</th>
+                  <th scope="col" className="px-3 py-2">{t("refund.columns.time")}</th>
+                  <th scope="col" className="px-3 py-2 text-right">{t("refund.columns.total")}</th>
+                  <th scope="col" className="px-3 py-2">{t("refund.columns.status")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-admin-border">
+                {paidAppointments.map((appointment) => (
+                  <tr
+                    key={appointment.id}
+                    aria-selected={appointment.id === appointmentId}
+                    className={`cursor-pointer transition-colors hover:bg-admin-soft/60 ${
+                      appointment.id === appointmentId ? "bg-admin-soft" : ""
+                    }`}
+                    onClick={() => pickAppointment(appointment.id)}
+                  >
+                    <td className="px-3 py-2">
+                      <Button
+                        variant="ghost"
+                        className="h-auto min-h-10 justify-start rounded-lg px-1 font-semibold"
+                        onPress={() => pickAppointment(appointment.id)}
+                      >
+                        {customerNames.get(appointment.customerId) ?? t("unnamedCustomer")}
+                      </Button>
+                    </td>
+                    <td className="px-3 py-2 text-admin-muted">
+                      {new Date(appointment.startsAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td className="px-3 py-2 text-right font-medium">{formatMoney(appointment.total)}</td>
+                    <td className="px-3 py-2">
+                      <Chip size="sm" variant="soft" color="success">
+                        <Chip.Label>{statusLabel(appointment.status)}</Chip.Label>
+                      </Chip>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
       <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-refund-amount">{t("refund.amount")}</label>
-        <input id="ops-refund-amount" className={inputClass} value={amountText} onChange={(event) => setAmountText(event.target.value)} placeholder={t("refund.amount")} inputMode="numeric" />
+        <span className={labelClass}>{t("refund.transaction")}</span>
+        {!selected ? (
+          <p className="text-xs text-admin-muted">{t("refund.selectAppointment")}</p>
+        ) : payments.isLoading ? (
+          <p className="text-xs text-admin-muted">{t("refund.loadingTransactions")}</p>
+        ) : transactions.length === 0 ? (
+          <p className="text-xs text-admin-muted">{t("refund.noTransactions")}</p>
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-admin-border">
+            <table className="w-full min-w-[480px] text-left text-sm">
+              <caption className="sr-only">
+                {t("refund.transactionsFor", { name: customerNames.get(selected.customerId) ?? t("unnamedCustomer") })}
+              </caption>
+              <thead className="border-b border-admin-border text-xs text-admin-muted">
+                <tr>
+                  <th scope="col" className="px-3 py-2 text-right">{t("refund.transactionColumns.amount")}</th>
+                  <th scope="col" className="px-3 py-2">{t("refund.transactionColumns.method")}</th>
+                  <th scope="col" className="px-3 py-2">{t("refund.transactionColumns.status")}</th>
+                  <th scope="col" className="px-3 py-2">{t("refund.transactionColumns.paidAt")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-admin-border">
+                {transactions.map((payment) => (
+                  <tr
+                    key={payment.id}
+                    aria-selected={payment.id === paymentId}
+                    className={`cursor-pointer transition-colors hover:bg-admin-soft/60 ${
+                      payment.id === paymentId ? "bg-admin-soft" : ""
+                    }`}
+                    onClick={() => setPaymentId(payment.id)}
+                  >
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        variant="ghost"
+                        className="h-auto min-h-10 justify-end rounded-lg px-1 font-semibold"
+                        onPress={() => setPaymentId(payment.id)}
+                      >
+                        {formatMoney(payment.amount)}
+                      </Button>
+                    </td>
+                    <td className="px-3 py-2">{methodLabel(payment.method)}</td>
+                    <td className="px-3 py-2 text-admin-muted">{paymentStatusLabel(payment.status)}</td>
+                    <td className="px-3 py-2 text-admin-muted">
+                      {payment.paidAt ? new Date(payment.paidAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-      <div className="grid gap-1">
-        <label className={labelClass} htmlFor="ops-refund-reason">{t("refund.reason")}</label>
-        <input id="ops-refund-reason" className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={t("refund.reason")} />
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-1">
+          <label className={labelClass} htmlFor="ops-refund-amount">{t("refund.amount")}</label>
+          <input id="ops-refund-amount" className={inputClass} value={amountText} onChange={(event) => setAmountText(event.target.value)} placeholder={t("refund.amount")} inputMode="numeric" />
+        </div>
+        <div className="grid gap-1">
+          <label className={labelClass} htmlFor="ops-refund-reason">{t("refund.reason")}</label>
+          <input id="ops-refund-reason" className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={t("refund.reason")} />
+        </div>
       </div>
+
       <Feedback message={message} error={error} />
       {refund.data ? (
         <p className="text-xs text-admin-muted">
-          Yêu cầu hoàn {formatMoney(refund.data.amount)} · {refund.data.status}
+          {t("refund.result", { amount: formatMoney(refund.data.amount), status: refund.data.status })}
         </p>
       ) : null}
       <div>
@@ -170,7 +286,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
             payment.version,
           );
           setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
-          notifySuccess("Đã ghi nhận hoàn tiền");
+          notifySuccess(t("refund.recorded"));
           return null;
         })}>{busy ? t("refund.busy") : t("refund.heading")}</Button>
       </div>

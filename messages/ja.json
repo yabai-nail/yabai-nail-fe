@@ -416,9 +416,27 @@
         "amount": "返金額 (¥)",
         "reason": "返金の理由",
         "requested": "返金依頼 {amount} · {status}",
-        "recorded": "返金を記録しました。",
+        "recorded": "返金を記録しました",
         "busy": "処理中…",
-        "submit": "返金する"
+        "submit": "返金する",
+        "caption": "支払い済みで返金できる予約",
+        "columns": {
+          "customer": "顧客",
+          "time": "日時",
+          "total": "合計金額",
+          "status": "ステータス"
+        },
+        "loadingAppointments": "予約を読み込み中…",
+        "noAppointments": "この店舗にはまだ支払い済みの予約がありません。",
+        "transactionsFor": "{name}様の取引",
+        "transactionColumns": {
+          "amount": "金額",
+          "method": "支払い方法",
+          "status": "ステータス",
+          "paidAt": "受領日時"
+        },
+        "selectAppointment": "上の表から予約を選ぶと、その取引が表示されます。",
+        "result": "返金申請 {amount} · {status}"
       },
       "tierLine": "{tier} · {points} ポイント",
       "checkin": {
