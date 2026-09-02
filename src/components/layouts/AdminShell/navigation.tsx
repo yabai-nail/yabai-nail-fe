@@ -1,11 +1,11 @@
 import {
   ArrowLeftStartOnRectangleIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { Button, ScrollShadow } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { useAuth } from "@/service";
 import { adminRoutes } from "./config";
 
@@ -18,15 +18,13 @@ export function AdminBrand() {
       aria-label={t("brand")}
       className="flex min-h-16 items-center gap-3 rounded-lg px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-admin-accent/25 bg-admin-soft text-admin-accent">
-        <SparklesIcon aria-hidden="true" className="size-6" />
-      </span>
+      <BrandMark className="size-12" />
       <span className="leading-none">
-        <span className="block text-lg font-extrabold tracking-[0.08em] text-admin-accent">
-          YABAINAIL
+        <span className="font-display block text-lg font-semibold tracking-[0.16em] text-admin-ink">
+          YABAI
         </span>
-        <span className="mt-1 block text-[0.65rem] font-semibold tracking-[0.18em] text-admin-muted">
-          NAIL SALON
+        <span className="mt-1 block text-[0.625rem] font-bold tracking-[0.2em] text-admin-accent">
+          NAIL ATELIER
         </span>
       </span>
     </Link>

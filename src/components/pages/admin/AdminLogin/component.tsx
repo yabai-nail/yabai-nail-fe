@@ -10,6 +10,7 @@ import { Button } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
+import { BrandMark } from "@/components/brand/BrandMark";
 import { ApiClientError, useAuth } from "@/service";
 
 const PHONE_ID = "admin-login-phone";
@@ -65,13 +66,18 @@ export function AdminLogin() {
   return (
     <div className="admin-shell grid min-h-screen place-items-center bg-admin-canvas px-4 py-10 text-admin-ink">
       <main className="w-full max-w-sm rounded-xl border border-admin-border bg-admin-surface p-6 shadow-sm">
-        <span
-          aria-hidden="true"
-          className="font-display grid size-11 place-items-center rounded-lg bg-admin-accent text-lg font-semibold text-white"
-        >
-          Y
-        </span>
-        <h1 className="mt-4 text-xl font-bold text-admin-ink">{t("heading")}</h1>
+        <div className="flex items-center gap-3">
+          <BrandMark className="size-12" />
+          <span className="leading-none">
+            <span className="font-display block text-lg font-semibold tracking-[0.16em] text-admin-ink">
+              YABAI
+            </span>
+            <span className="mt-1 block text-[0.625rem] font-bold tracking-[0.2em] text-admin-accent">
+              NAIL ATELIER
+            </span>
+          </span>
+        </div>
+        <h1 className="mt-5 text-xl font-bold text-admin-ink">{t("heading")}</h1>
         <p className="mt-1 text-sm leading-6 text-admin-muted">
           {t("subheading")}
         </p>

@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 /** One destination shown in the primary navigation. */
 export type ShellNavRoute = {
@@ -84,12 +85,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
         className="flex min-h-11 min-w-0 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`${props.brand} — Trang chủ`}
       >
-        <span
-          aria-hidden="true"
-          className="font-display grid size-10 shrink-0 place-items-center rounded-full bg-accent text-xl font-semibold text-accent-foreground"
-        >
-          Y
-        </span>
+        <BrandMark className="size-11" />
         <span className="min-w-0 leading-none">
           <span className="font-display block truncate text-base font-semibold tracking-[0.18em] text-foreground">
             {props.brand}
