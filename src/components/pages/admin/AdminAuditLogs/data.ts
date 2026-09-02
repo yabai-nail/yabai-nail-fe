@@ -1,3 +1,4 @@
+import type { Translator } from "@/i18n/config";
 import type { AdminAuditLog } from "@/service";
 import { matchesSearch } from "@/lib/admin-search";
 
@@ -18,99 +19,14 @@ export type AuditLookups = {
   readonly services?: ReadonlyMap<string, { readonly name?: string }>;
 };
 
-const actionLabels: Record<string, string> = {
-  ACCOUNT_CREATED: "Tạo tài khoản",
-  ACCOUNT_PASSWORD_RESET: "Đặt lại mật khẩu tài khoản",
-  ACCOUNT_UPDATED: "Cập nhật tài khoản",
-  APPOINTMENT_ACTUAL_SERVICES_UPDATED: "Cập nhật dịch vụ thực tế",
-  APPOINTMENT_ASSIGNED: "Phân công nhân viên",
-  APPOINTMENT_CANCELLED_BY_CUSTOMER: "Khách huỷ lịch hẹn",
-  APPOINTMENT_CANCELLED_BY_SALON: "Salon huỷ lịch hẹn",
-  APPOINTMENT_CHECKED_IN: "Khách đã check-in",
-  APPOINTMENT_COMPLETED: "Hoàn tất lịch hẹn",
-  APPOINTMENT_CONFIRMED: "Xác nhận lịch hẹn",
-  APPOINTMENT_CREATED: "Tạo lịch hẹn",
-  COUNTER_APPOINTMENT_CREATED: "Tạo lịch hẹn tại quầy",
-  APPOINTMENT_AWAITING_PAYMENT: "Chuyển sang chờ thanh toán",
-  APPOINTMENT_SERVICE_STARTED: "Bắt đầu làm dịch vụ",
-  APPOINTMENT_NO_SHOW: "Khách không đến",
-  APPOINTMENT_RESCHEDULED: "Đổi lịch hẹn",
-  BRANCH_CREATED: "Tạo chi nhánh",
-  BRANCH_SETTINGS_UPDATED: "Cập nhật cài đặt chi nhánh",
-  BRANCH_UPDATED: "Cập nhật chi nhánh",
-  CONVERSATION_MESSAGE_SENT: "Gửi tin nhắn",
-  CUSTOMER_CREATED: "Tạo khách hàng",
-  CUSTOMER_NOTE_CREATED: "Thêm ghi chú khách hàng",
-  CUSTOMER_NOTE_UPDATED: "Cập nhật ghi chú khách hàng",
-  CUSTOMER_UPDATED: "Cập nhật khách hàng",
-  LEAVE_REQUEST_APPROVED: "Duyệt nghỉ phép",
-  LEAVE_REQUEST_CREATED: "Tạo yêu cầu nghỉ phép",
-  LEAVE_REQUEST_REJECTED: "Từ chối nghỉ phép",
-  NOTIFICATION_CAMPAIGN_CANCELLED: "Huỷ chiến dịch thông báo",
-  NOTIFICATION_CAMPAIGN_CREATED: "Tạo chiến dịch thông báo",
-  PAYMENT_CAPTURED: "Ghi nhận thanh toán",
-  PAYMENT_REFUNDED: "Hoàn tiền",
-  POINTS_ADJUSTED: "Điều chỉnh điểm",
-  PROMOTION_CREATED: "Tạo khuyến mãi",
-  PROMOTION_ISSUED: "Phát hành khuyến mãi",
-  PROMOTION_ISSUANCE_QUEUED: "Xếp hàng phát khuyến mãi",
-  PROMOTION_ISSUANCE_COMPLETED: "Hoàn tất phát khuyến mãi",
-  PROMOTION_UPDATED: "Cập nhật khuyến mãi",
-  REFRESH_TOKEN_REUSE_DETECTED: "Phát hiện phiên đăng nhập bất thường",
-  REVIEW_HANDLING_UPDATED: "Cập nhật xử lý đánh giá",
-  REVIEW_REPLIED: "Phản hồi đánh giá",
-  SERVICE_CREATED: "Tạo dịch vụ",
-  SERVICE_UPDATED: "Cập nhật dịch vụ",
-  SERVICE_CATEGORY_CREATED: "Tạo danh mục dịch vụ",
-  SERVICE_CATEGORY_UPDATED: "Cập nhật danh mục dịch vụ",
-  SURCHARGE_CREATED: "Tạo phụ thu",
-  SURCHARGE_UPDATED: "Cập nhật phụ thu",
-  NAIL_DESIGN_CREATED: "Tạo mẫu nail",
-  NAIL_DESIGN_UPDATED: "Cập nhật mẫu nail",
-  REPORT_EXPORT_REQUESTED: "Yêu cầu xuất báo cáo",
-  REPORT_EXPORT_READY: "Báo cáo sẵn sàng tải",
-  SHIFT_CREATED: "Tạo ca làm",
-  STAFF_CREATED: "Tạo nhân viên",
-  STAFF_UPDATED: "Cập nhật nhân viên",
-};
-
-const resourceLabels: Record<string, string> = {
-  Appointment: "Lịch hẹn",
-  AuthSession: "Phiên đăng nhập",
-  Branch: "Chi nhánh",
-  BranchSettings: "Cài đặt chi nhánh",
-  Conversation: "Cuộc trò chuyện",
-  ConversationMessage: "Tin nhắn",
-  Customer: "Khách hàng",
-  CustomerCoupon: "Coupon khách hàng",
-  CustomerNote: "Ghi chú khách hàng",
-  LeaveRequest: "Yêu cầu nghỉ phép",
-  NailDesignProposal: "Đề xuất mẫu nail",
-  NailDesign: "Mẫu nail",
-  Notification: "Thông báo",
-  NotificationCampaign: "Chiến dịch thông báo",
-  Payment: "Thanh toán",
-  Promotion: "Khuyến mãi",
-  PromotionIssuanceJob: "Đợt phát khuyến mãi",
-  ReportExport: "Bản xuất báo cáo",
-  Review: "Đánh giá",
-  Service: "Dịch vụ",
-  ServiceCategory: "Danh mục dịch vụ",
-  Surcharge: "Phụ thu",
-  Staff: "Nhân viên",
-  StaffCompensation: "Lương và hoa hồng",
-  StaffShift: "Ca làm",
-  UserAccount: "Tài khoản",
-};
-
-const roleLabels: Record<string, string> = {
-  OWNER: "Chủ chuỗi",
-  MANAGER: "Quản lý",
-  STAFF: "Nhân viên",
-};
-
-export function auditActionLabel(action: string): string {
-  return actionLabels[action] ?? action.toLocaleLowerCase().replaceAll("_", " ").replace(/^./, (char) => char.toLocaleUpperCase());
+/**
+ * The translator is a parameter throughout: these run inside useMemo and from render,
+ * and the action list alone is fifty-three entries the catalogue now owns.
+ */
+export function auditActionLabel(action: string, t: Translator): string {
+  return t.has(`action.${action}`)
+    ? t(`action.${action}`)
+    : action.toLocaleLowerCase().replaceAll("_", " ").replace(/^./, (char) => char.toLocaleUpperCase());
 }
 
 // Shown when the server returns no rows in design-time preview. Actions mirror the audit
@@ -135,15 +51,23 @@ export const auditEntries: ReadonlyArray<AuditEntry> = [
  * `metadata.branchId`. Id được tra sang tên qua `lookups`; không tra được thì
  * dùng nhãn loại bản ghi thay vì đưa mã cơ sở dữ liệu ra giao diện.
  */
-export function adaptAuditLog(log: AdminAuditLog, lookups: AuditLookups = {}): AuditEntry {
+function roleLabel(code: string, t: Translator): string {
+  return t.has(`role.${code}`) ? t(`role.${code}`) : "";
+}
+
+function resourceLabel(code: string, t: Translator): string {
+  return t.has(`resource.${code}`) ? t(`resource.${code}`) : code;
+}
+
+export function adaptAuditLog(log: AdminAuditLog, lookups: AuditLookups, t: Translator): AuditEntry {
   const actorId = typeof log.actorId === "string" ? log.actorId : undefined;
   const account = actorId ? lookups.accounts?.get(actorId) : undefined;
   const accountName = account?.displayName;
   const actor = accountName
-    ? [roleLabels[account?.role?.toUpperCase() ?? ""], accountName].filter(Boolean).join(" · ")
+    ? [roleLabel(account?.role?.toUpperCase() ?? "", t), accountName].filter(Boolean).join(" · ")
     : actorId
-      ? "Tài khoản không xác định"
-      : "Hệ thống";
+      ? t("unknownAccount")
+      : t("system");
 
   const resourceId = typeof log.resourceId === "string" ? log.resourceId : undefined;
   const resourceType = log.resourceType ?? "";
@@ -158,7 +82,7 @@ export function adaptAuditLog(log: AdminAuditLog, lookups: AuditLookups = {}): A
             ? lookups.accounts?.get(resourceId)?.displayName
             : undefined
     : undefined;
-  const target = [resourceLabels[resourceType] ?? resourceType, resourceName].filter(Boolean).join(" · ") || "Bản ghi hệ thống";
+  const target = [resourceLabel(resourceType, t), resourceName].filter(Boolean).join(" · ") || t("systemRecord");
 
   const metadataBranchId = (log.metadata as { branchId?: unknown } | undefined)?.branchId;
   const branchId = typeof metadataBranchId === "string" ? metadataBranchId : undefined;
@@ -169,7 +93,7 @@ export function adaptAuditLog(log: AdminAuditLog, lookups: AuditLookups = {}): A
     action: log.action,
     actor,
     target,
-    branch: branchId ? (branchName ?? "Chi nhánh không xác định") : undefined,
+    branch: branchId ? (branchName ?? t("unknownBranch")) : undefined,
     createdAt: log.createdAt,
   };
 }
@@ -183,11 +107,12 @@ export function filterAuditEntries(
   entries: ReadonlyArray<AuditEntry>,
   query: string,
   action: string,
+  t: Translator,
 ): ReadonlyArray<AuditEntry> {
   return entries.filter(
     (entry) =>
       (action === "all" || entry.action === action) &&
-      matchesSearch(query, [entry.action, auditActionLabel(entry.action), entry.actor, entry.target]),
+      matchesSearch(query, [entry.action, auditActionLabel(entry.action, t), entry.actor, entry.target]),
   );
 }
 

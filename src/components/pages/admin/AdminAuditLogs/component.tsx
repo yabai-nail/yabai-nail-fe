@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -27,6 +28,7 @@ import {
 const pageSize = 10;
 
 export function AdminAuditLogsComponent() {
+  const t = useTranslations("admin.auditLogs");
   const { data, isLoading, error } = useAdminAuditLogs();
   // Parallel joins: the log rows only carry ids, so the account and branch
   // lists resolve `actorId` / `metadata.branchId` into names the same way
@@ -46,8 +48,8 @@ export function AdminAuditLogsComponent() {
   );
 
   const source = useMemo<ReadonlyArray<AuditEntry>>(
-    () => (data?.items ? data.items.map((log) => adaptAuditLog(log, lookups)) : []),
-    [data, lookups],
+    () => (data?.items ? data.items.map((log) => adaptAuditLog(log, lookups, t)) : []),
+    [data, lookups, t],
   );
 
   const [query, setQuery] = useState("");
@@ -58,8 +60,8 @@ export function AdminAuditLogsComponent() {
 
   const actions = useMemo(() => auditActions(source), [source]);
   const filtered = useMemo(
-    () => filterAuditEntries(source, query, action),
-    [source, query, action],
+    () => filterAuditEntries(source, query, action, t),
+    [source, query, action, t],
   );
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
 
@@ -69,18 +71,18 @@ export function AdminAuditLogsComponent() {
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           Hành động
           <AdminSelectField
-            label="Lọc theo hành động"
+            label={t("filterLabel")}
             value={action}
             onChange={(value) => { setAction(value); setPage(1); }}
             options={[
-              { value: "all", label: "Tất cả hành động" },
-              ...actions.map((code) => ({ value: code, label: auditActionLabel(code) })),
+              { value: "all", label: t("allActions") },
+              ...actions.map((code) => ({ value: code, label: auditActionLabel(code, t) })),
             ]}
           />
         </div>
         <AdminSearchField
-          label="Tìm nhật ký"
-          placeholder="Tìm theo hành động, người thực hiện, đối tượng..."
+          label={t("searchLabel")}
+          placeholder={t("searchPlaceholder")}
           value={query}
           onChange={(value) => {
             setQuery(value);
@@ -90,9 +92,9 @@ export function AdminAuditLogsComponent() {
       </div>
 
       {isLoading ? (
-        <p className="mb-3 text-xs text-admin-muted">Đang tải nhật ký hệ thống…</p>
+        <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
       ) : error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được nhật ký hệ thống.</p>
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -100,11 +102,11 @@ export function AdminAuditLogsComponent() {
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                <th className="px-4 py-3">Thời gian</th>
-                <th className="px-4 py-3">Hành động</th>
-                <th className="px-4 py-3">Người thực hiện</th>
-                <th className="px-4 py-3">Đối tượng</th>
-                <th className="px-4 py-3">Chi nhánh</th>
+                <th className="px-4 py-3">{t("columns.time")}</th>
+                <th className="px-4 py-3">{t("columns.action")}</th>
+                <th className="px-4 py-3">{t("columns.actor")}</th>
+                <th className="px-4 py-3">{t("columns.target")}</th>
+                <th className="px-4 py-3">{t("columns.branch")}</th>
               </tr>
             </thead>
             <tbody>
@@ -126,7 +128,7 @@ export function AdminAuditLogsComponent() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                        {auditActionLabel(entry.action)}
+                        {auditActionLabel(entry.action, t)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-admin-ink">
@@ -170,17 +172,17 @@ export function AdminAuditLogsComponent() {
 
       {detailId ? (
         <AdminRecordDetail
-          title="Chi tiết nhật ký"
+          title={t("detailTitle")}
           isLoading={detail.isLoading}
           error={detail.error}
           data={detail.data ? (() => {
-            const entry = adaptAuditLog(detail.data, lookups);
+            const entry = adaptAuditLog(detail.data, lookups, t);
             return {
-              "Hành động": auditActionLabel(entry.action),
-              "Người thực hiện": entry.actor,
-              "Đối tượng": entry.target,
-              "Chi nhánh": entry.branch ?? "Toàn hệ thống",
-              "Thời gian": formatAuditTime(entry.createdAt),
+              [t("columns.action")]: auditActionLabel(entry.action, t),
+              [t("columns.actor")]: entry.actor,
+              [t("columns.target")]: entry.target,
+              [t("columns.branch")]: entry.branch ?? t("allBranches"),
+              [t("columns.time")]: formatAuditTime(entry.createdAt),
             };
           })() : undefined}
           onClose={() => setDetailId(null)}
