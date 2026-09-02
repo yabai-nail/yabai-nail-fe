@@ -1246,6 +1246,192 @@
         "branch": "店舗"
       },
       "detailTitle": "監査ログの詳細"
+    },
+    "appointments": {
+      "toolbar": {
+        "previous": "前の期間",
+        "next": "次の期間",
+        "today": "今日",
+        "filterLabel": "予約ステータスで絞り込み",
+        "allStatuses": "すべてのステータス",
+        "create": "予約を追加",
+        "viewLabel": "カレンダーの表示形式",
+        "day": "日",
+        "week": "週",
+        "month": "月"
+      },
+      "summary": {
+        "heading": "当日サマリー",
+        "total": "予約合計"
+      },
+      "calendar": {
+        "day": "日別カレンダー",
+        "week": "週別カレンダー",
+        "month": "月別カレンダー",
+        "count": "予約 {count} 件",
+        "more": "ほか {count} 件"
+      },
+      "weekday": {
+        "long": {
+          "0": "日曜日",
+          "1": "月曜日",
+          "2": "火曜日",
+          "3": "水曜日",
+          "4": "木曜日",
+          "5": "金曜日",
+          "6": "土曜日"
+        },
+        "short": {
+          "0": "日",
+          "1": "月",
+          "2": "火",
+          "3": "水",
+          "4": "木",
+          "5": "金",
+          "6": "土"
+        }
+      },
+      "dayLabel": "{date}（{weekday}）",
+      "monthLabel": "{year}年{month}月",
+      "shortWeekday": "{month}/{day}（{weekday}）",
+      "list": {
+        "heading": "予約リスト",
+        "ariaLabel": "選択した日の予約",
+        "empty": "条件に合う予約はありません。"
+      },
+      "detail": {
+        "heading": "予約の詳細",
+        "birthday": "生年月日: {date}",
+        "visits": "来店回数",
+        "totalSpend": "累計利用額",
+        "time": "時間",
+        "timeValue": "{start} - {end}（{minutes}分）",
+        "date": "日付",
+        "service": "メニュー",
+        "staff": "スタッフ",
+        "status": "ステータス",
+        "note": "メモ",
+        "lifecycle": "進行状況",
+        "processing": "処理中…",
+        "pay": "会計",
+        "edit": "予約を編集",
+        "assignStaff": "スタッフを変更",
+        "actualServices": "実施メニューを更新",
+        "attachPhoto": "写真を添付",
+        "cancel": "予約をキャンセル",
+        "message": "顧客にメッセージ"
+      },
+      "lifecycle": {
+        "checkIn": "チェックイン",
+        "serviceStart": "施術を開始",
+        "serviceComplete": "施術を完了",
+        "noShow": "無断キャンセル"
+      },
+      "segment": {
+        "loyal": "常連のお客様",
+        "new": "新規のお客様",
+        "regular": "長年のお客様"
+      },
+      "form": {
+        "editTitle": "予約を編集",
+        "addTitle": "予約を追加",
+        "subtitle": "保存する前にスタッフと時間をご確認ください。",
+        "missing": "この店舗にはまだ{items}がありません。予約を作成する前に追加してください。",
+        "missingCustomers": "顧客",
+        "missingServices": "メニュー",
+        "missingStaff": "スタッフ",
+        "conflict": "このスタッフはその時間帯に別の予約が入っています。時間かスタッフを変更してください。",
+        "saveFailed": "予約を保存できませんでした。",
+        "date": "日付",
+        "startTime": "開始時刻",
+        "endTime": "終了時刻",
+        "customer": "顧客",
+        "service": "メニュー",
+        "staff": "スタッフ",
+        "note": "メモ",
+        "notePlaceholder": "お客様のご要望や注意点...",
+        "close": "閉じる",
+        "saving": "保存中…",
+        "save": "変更を保存",
+        "create": "予約を作成"
+      },
+      "validation": {
+        "date": "日付を選択してください。",
+        "startTime": "開始時刻を選択してください。",
+        "endTime": "終了時刻を選択してください。",
+        "customer": "顧客を選択してください。",
+        "service": "メニューを選択してください。",
+        "staff": "スタッフを選択してください。",
+        "endAfterStart": "終了時刻は開始時刻より後にしてください。"
+      },
+      "actualServices": {
+        "title": "実施メニューを更新",
+        "description": "実際に行ったメニューを選んでください。この内容が当初の予約メニューを上書きします。",
+        "loading": "メニュー一覧を読み込み中…",
+        "loadFailed": "メニュー一覧を読み込めませんでした。",
+        "empty": "メニューがまだありません。",
+        "duration": "{minutes}分",
+        "close": "閉じる",
+        "saving": "保存中…",
+        "submit": "実施メニューを保存"
+      },
+      "assign": {
+        "title": "担当スタッフを変更",
+        "subtitle": "<strong>{name}</strong>様の {time} の予約です。",
+        "loading": "対応できるスタッフを読み込み中…",
+        "loadFailed": "スタッフ一覧を読み込めませんでした。現在のスタッフのままにするか、選び直すことはできます。",
+        "empty": "この時間帯に対応できるスタッフがいません。",
+        "legend": "対応できるスタッフ",
+        "note": "社内メモ（任意）",
+        "close": "閉じる",
+        "busy": "割り当て中…",
+        "submit": "確定"
+      },
+      "photo": {
+        "typeError": "JPEG・PNG・WebP の画像のみ利用できます。",
+        "sizeError": "画像は 10 MB 未満にしてください。",
+        "uploadFailed": "画像をストレージにアップロードできませんでした。",
+        "genericFailed": "画像をアップロードできませんでした。",
+        "title": "写真を添付",
+        "description": "<strong>{name}</strong>様の予約に添付する写真を選んでください。",
+        "file": "画像ファイル",
+        "kind": "写真の種類",
+        "before": "施術前",
+        "after": "施術後",
+        "other": "その他",
+        "note": "メモ（任意）",
+        "close": "閉じる",
+        "busy": "送信中…",
+        "submit": "添付する"
+      },
+      "cancel": {
+        "title": "予約をキャンセルしますか？",
+        "body": "{date} {time} の <strong>{name}</strong>様の予約をキャンセル済みにします。",
+        "keep": "予約を残す",
+        "busy": "キャンセル中…",
+        "confirm": "キャンセルを確定"
+      },
+      "fallback": {
+        "customer": "名前未登録の顧客",
+        "service": "名前未登録のメニュー",
+        "staff": "名前未登録のスタッフ",
+        "multiService": "メニュー {count} 件"
+      },
+      "error": {
+        "branchRequired": "予約を保存する前に店舗を選択してください。",
+        "notLoaded": "予約がまだ読み込めていません。もう一度お試しください。",
+        "lifecycle": "操作を実行できませんでした。",
+        "assign": "スタッフを変更できませんでした。",
+        "actualServices": "実施メニューを保存できませんでした。",
+        "photo": "写真を添付できませんでした。",
+        "cancel": "予約をキャンセルできませんでした。"
+      },
+      "loading": "店舗の予約を読み込み中…",
+      "loadFailed": "予約を読み込めませんでした。",
+      "regionList": "予約リストとサマリー",
+      "regionDetail": "選択中の予約の詳細",
+      "emptyTitle": "予約が選択されていません",
+      "emptyDescription": "予約を選ぶと詳細が表示されます。"
     }
   }
 }

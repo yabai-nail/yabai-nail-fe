@@ -1246,6 +1246,192 @@
         "branch": "Chi nhánh"
       },
       "detailTitle": "Chi tiết nhật ký"
+    },
+    "appointments": {
+      "toolbar": {
+        "previous": "Khoảng thời gian trước",
+        "next": "Khoảng thời gian tiếp theo",
+        "today": "Hôm nay",
+        "filterLabel": "Lọc trạng thái lịch hẹn",
+        "allStatuses": "Tất cả trạng thái",
+        "create": "Thêm lịch hẹn",
+        "viewLabel": "Kiểu hiển thị lịch",
+        "day": "Ngày",
+        "week": "Tuần",
+        "month": "Tháng"
+      },
+      "summary": {
+        "heading": "Tổng quan ngày",
+        "total": "Tổng lịch hẹn"
+      },
+      "calendar": {
+        "day": "Lịch ngày",
+        "week": "Lịch tuần",
+        "month": "Lịch tháng",
+        "count": "{count} lịch hẹn",
+        "more": "+{count} lịch khác"
+      },
+      "weekday": {
+        "long": {
+          "0": "Chủ Nhật",
+          "1": "Thứ Hai",
+          "2": "Thứ Ba",
+          "3": "Thứ Tư",
+          "4": "Thứ Năm",
+          "5": "Thứ Sáu",
+          "6": "Thứ Bảy"
+        },
+        "short": {
+          "0": "CN",
+          "1": "T2",
+          "2": "T3",
+          "3": "T4",
+          "4": "T5",
+          "5": "T6",
+          "6": "T7"
+        }
+      },
+      "dayLabel": "{date} ({weekday})",
+      "monthLabel": "Tháng {month}/{year}",
+      "shortWeekday": "{weekday}, {day}/{month}",
+      "list": {
+        "heading": "Danh sách lịch hẹn",
+        "ariaLabel": "Lịch hẹn trong ngày đã chọn",
+        "empty": "Không có lịch hẹn phù hợp."
+      },
+      "detail": {
+        "heading": "Chi tiết lịch hẹn",
+        "birthday": "Ngày sinh: {date}",
+        "visits": "Số lần đến",
+        "totalSpend": "Tổng chi tiêu",
+        "time": "Thời gian",
+        "timeValue": "{start} - {end} ({minutes} phút)",
+        "date": "Ngày",
+        "service": "Dịch vụ",
+        "staff": "Nhân viên",
+        "status": "Trạng thái",
+        "note": "Ghi chú",
+        "lifecycle": "Vòng đời",
+        "processing": "Đang xử lý…",
+        "pay": "Thanh toán",
+        "edit": "Chỉnh sửa lịch hẹn",
+        "assignStaff": "Đổi nhân viên",
+        "actualServices": "Cập nhật dịch vụ thực tế",
+        "attachPhoto": "Đính kèm ảnh",
+        "cancel": "Hủy lịch hẹn",
+        "message": "Nhắn tin cho khách"
+      },
+      "lifecycle": {
+        "checkIn": "Check-in",
+        "serviceStart": "Bắt đầu dịch vụ",
+        "serviceComplete": "Hoàn tất dịch vụ",
+        "noShow": "Không đến"
+      },
+      "segment": {
+        "loyal": "Khách thân thiết",
+        "new": "Khách mới",
+        "regular": "Khách lâu năm"
+      },
+      "form": {
+        "editTitle": "Chỉnh sửa lịch hẹn",
+        "addTitle": "Thêm lịch hẹn",
+        "subtitle": "Kiểm tra nhân viên và thời gian trước khi lưu.",
+        "missing": "Chi nhánh này chưa có {items}. Hãy thêm trước khi tạo lịch hẹn.",
+        "missingCustomers": "khách hàng",
+        "missingServices": "dịch vụ",
+        "missingStaff": "nhân viên",
+        "conflict": "Nhân viên đã có lịch trùng khung giờ này. Vui lòng chọn thời gian hoặc nhân viên khác.",
+        "saveFailed": "Không lưu được lịch hẹn.",
+        "date": "Ngày",
+        "startTime": "Giờ bắt đầu",
+        "endTime": "Giờ kết thúc",
+        "customer": "Khách hàng",
+        "service": "Dịch vụ",
+        "staff": "Nhân viên",
+        "note": "Ghi chú",
+        "notePlaceholder": "Yêu cầu hoặc lưu ý của khách...",
+        "close": "Đóng",
+        "saving": "Đang lưu…",
+        "save": "Lưu thay đổi",
+        "create": "Tạo lịch hẹn"
+      },
+      "validation": {
+        "date": "Vui lòng chọn ngày.",
+        "startTime": "Vui lòng chọn giờ bắt đầu.",
+        "endTime": "Vui lòng chọn giờ kết thúc.",
+        "customer": "Vui lòng chọn khách hàng.",
+        "service": "Vui lòng chọn dịch vụ.",
+        "staff": "Vui lòng chọn nhân viên.",
+        "endAfterStart": "Giờ kết thúc phải sau giờ bắt đầu."
+      },
+      "actualServices": {
+        "title": "Cập nhật dịch vụ thực tế",
+        "description": "Chọn danh sách dịch vụ thực sự đã thực hiện. Danh sách này ghi đè dịch vụ đặt ban đầu.",
+        "loading": "Đang tải danh mục dịch vụ…",
+        "loadFailed": "Không tải được danh mục dịch vụ.",
+        "empty": "Chưa có dịch vụ nào.",
+        "duration": "{minutes} phút",
+        "close": "Đóng",
+        "saving": "Đang lưu…",
+        "submit": "Lưu dịch vụ thực tế"
+      },
+      "assign": {
+        "title": "Đổi nhân viên phụ trách",
+        "subtitle": "Lịch của <strong>{name}</strong> lúc {time}.",
+        "loading": "Đang tải danh sách nhân viên phù hợp…",
+        "loadFailed": "Không tải được danh sách nhân viên. Vẫn có thể giữ nguyên hoặc chọn lại nhân viên hiện tại.",
+        "empty": "Không có nhân viên phù hợp cho khung giờ này.",
+        "legend": "Nhân viên khả dụng",
+        "note": "Ghi chú nội bộ (tuỳ chọn)",
+        "close": "Đóng",
+        "busy": "Đang gán…",
+        "submit": "Xác nhận"
+      },
+      "photo": {
+        "typeError": "Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.",
+        "sizeError": "Ảnh phải nhỏ hơn 10 MB.",
+        "uploadFailed": "Không tải được ảnh lên kho lưu trữ.",
+        "genericFailed": "Không tải được ảnh.",
+        "title": "Đính kèm ảnh",
+        "description": "Chọn ảnh cần đính kèm vào lịch của <strong>{name}</strong>.",
+        "file": "Tệp ảnh",
+        "kind": "Loại ảnh",
+        "before": "Trước dịch vụ",
+        "after": "Sau dịch vụ",
+        "other": "Khác",
+        "note": "Ghi chú (tuỳ chọn)",
+        "close": "Đóng",
+        "busy": "Đang gửi…",
+        "submit": "Đính kèm"
+      },
+      "cancel": {
+        "title": "Hủy lịch hẹn?",
+        "body": "Lịch của <strong>{name}</strong> lúc {time} ngày {date} sẽ chuyển sang trạng thái đã hủy.",
+        "keep": "Giữ lịch hẹn",
+        "busy": "Đang hủy…",
+        "confirm": "Xác nhận hủy"
+      },
+      "fallback": {
+        "customer": "Khách chưa có tên",
+        "service": "Dịch vụ chưa có tên",
+        "staff": "Nhân viên chưa có tên",
+        "multiService": "{count} dịch vụ"
+      },
+      "error": {
+        "branchRequired": "Hãy chọn chi nhánh trước khi lưu lịch hẹn.",
+        "notLoaded": "Lịch hẹn chưa tải xong. Vui lòng thử lại.",
+        "lifecycle": "Không thực hiện được thao tác.",
+        "assign": "Không đổi được nhân viên.",
+        "actualServices": "Không lưu được dịch vụ thực tế.",
+        "photo": "Không đính kèm được ảnh.",
+        "cancel": "Không hủy được lịch hẹn."
+      },
+      "loading": "Đang tải lịch hẹn từ chi nhánh…",
+      "loadFailed": "Không tải được lịch hẹn.",
+      "regionList": "Danh sách và tổng quan lịch hẹn",
+      "regionDetail": "Chi tiết lịch hẹn đang chọn",
+      "emptyTitle": "Chưa chọn lịch hẹn",
+      "emptyDescription": "Chọn một lịch hẹn để xem đầy đủ thông tin."
     }
   }
 }

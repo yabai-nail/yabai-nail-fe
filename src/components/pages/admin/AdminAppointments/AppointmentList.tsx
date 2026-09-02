@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import type { Appointment } from "./data";
 import {
   appointmentStatusColor,
@@ -15,14 +16,17 @@ export function AppointmentList({
   selectedId: string | null;
   onSelect: (id: string) => void;
 }>) {
+  const t = useTranslations("admin.appointments");
+  const tStatus = useTranslations("admin.appointmentStatus");
+
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="border-b border-admin-border px-4 py-3">
-        <h2 className="text-sm font-bold text-admin-ink">Danh sách lịch hẹn</h2>
+        <h2 className="text-sm font-bold text-admin-ink">{t("list.heading")}</h2>
       </Card.Header>
       <Card.Content className="p-0">
         {appointments.length ? (
-          <ol className="divide-y divide-admin-border" aria-label="Lịch hẹn trong ngày đã chọn">
+          <ol className="divide-y divide-admin-border" aria-label={t("list.ariaLabel")}>
             {appointments.map((appointment) => (
               <li key={appointment.id} className={selectedId === appointment.id ? "bg-admin-soft" : undefined}>
                 <Button
@@ -37,11 +41,11 @@ export function AppointmentList({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-admin-ink">{appointment.customer.name}</span>
                     <span className="mt-1 block truncate text-xs text-admin-muted">{appointment.service.name}</span>
-                    <span className="mt-1 block text-[0.65rem] text-admin-accent sm:hidden">{appointmentStatusLabel[appointment.status]}</span>
+                    <span className="mt-1 block text-[0.65rem] text-admin-accent sm:hidden">{appointmentStatusLabel(appointment.status, tStatus)}</span>
                   </span>
                   <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
                     <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]}>
-                      <Chip.Label>{appointmentStatusLabel[appointment.status]}</Chip.Label>
+                      <Chip.Label>{appointmentStatusLabel(appointment.status, tStatus)}</Chip.Label>
                     </Chip>
                     <span className="text-xs text-admin-muted">{appointment.endTime}</span>
                   </span>
@@ -51,7 +55,7 @@ export function AppointmentList({
             ))}
           </ol>
         ) : (
-          <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">Không có lịch hẹn phù hợp.</p>
+          <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">{t("list.empty")}</p>
         )}
       </Card.Content>
     </Card>

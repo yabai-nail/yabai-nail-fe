@@ -1,5 +1,6 @@
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import type { Appointment, AppointmentView } from "./data";
 import {
   formatShortWeekday,
@@ -22,6 +23,8 @@ function AppointmentPill({
   onSelect: (id: string) => void;
   compact?: boolean;
 }>) {
+  const tStatus = useTranslations("admin.appointmentStatus");
+
   return (
     <Button
       variant="ghost"
@@ -39,7 +42,7 @@ function AppointmentPill({
           <span className="truncate text-[0.7rem] text-admin-ink">{appointment.service.name}</span>
           {!compact ? (
             <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]} className="shrink-0">
-              <Chip.Label>{appointmentStatusLabel[appointment.status]}</Chip.Label>
+              <Chip.Label>{appointmentStatusLabel(appointment.status, tStatus)}</Chip.Label>
             </Chip>
           ) : null}
         </span>
@@ -74,6 +77,7 @@ function DayCalendar({ appointments, selectedId, onSelect }: CalendarViewProps) 
 }
 
 function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: CalendarViewProps) {
+  const t = useTranslations("admin.appointments");
   const range = getAppointmentViewRange(selectedDate, "week");
   const dates = getDateKeysInRange(range.start, range.end);
 
@@ -82,7 +86,7 @@ function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: Cale
       {dates.map((date) => (
         <section key={date} className={date === selectedDate ? "bg-admin-soft/40" : undefined}>
           <h3 className={`border-b border-admin-border px-2 py-3 text-center text-xs font-semibold ${date === selectedDate ? "text-admin-accent" : "text-admin-muted"}`}>
-            {formatShortWeekday(date)}
+            {formatShortWeekday(date, t)}
           </h3>
           <div className="min-h-[36rem] space-y-2 p-2">
             {appointments.filter((appointment) => appointment.date === date).map((appointment) => (
@@ -96,6 +100,7 @@ function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: Cale
 }
 
 function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: CalendarViewProps) {
+  const t = useTranslations("admin.appointments");
   const range = getAppointmentViewRange(selectedDate, "month");
   const dates = getDateKeysInRange(range.start, range.end);
   const leadingCells = (new Date(`${range.start}T00:00:00`).getDay() + 6) % 7;
@@ -104,7 +109,8 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
   return (
     <div className="min-w-[48rem]">
       <div className="grid grid-cols-7 border-b border-admin-border text-center text-xs font-semibold text-admin-muted">
-        {["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"].map((label) => <div key={label} className="py-3">{label}</div>)}
+        {/* The grid starts on Monday, so the weekday keys run 1…6 and then Sunday. */}
+        {[1, 2, 3, 4, 5, 6, 0].map((day) => <div key={day} className="py-3">{t(`weekday.short.${day}`)}</div>)}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((date, index) => (
@@ -120,7 +126,7 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
                   ))}
                   {appointments.filter((appointment) => appointment.date === date).length > 3 ? (
                     <p className="px-1 text-[0.65rem] font-semibold text-admin-muted">
-                      +{appointments.filter((appointment) => appointment.date === date).length - 3} lịch khác
+                      {t("calendar.more", { count: appointments.filter((appointment) => appointment.date === date).length - 3 })}
                     </p>
                   ) : null}
                 </div>
@@ -141,14 +147,16 @@ type CalendarViewProps = Readonly<{
 }>;
 
 export function AppointmentCalendar({ view, ...props }: CalendarViewProps & Readonly<{ view: AppointmentView }>) {
+  const t = useTranslations("admin.appointments");
+
   return (
     <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between border-b border-admin-border px-4 py-3">
         <div className="flex items-center gap-2">
           <CalendarDaysIcon className="size-5 text-admin-accent" />
-          <h2 className="text-sm font-bold text-admin-ink">Lịch {view === "day" ? "ngày" : view === "week" ? "tuần" : "tháng"}</h2>
+          <h2 className="text-sm font-bold text-admin-ink">{t(`calendar.${view}`)}</h2>
         </div>
-        <Chip size="sm" variant="soft" color="accent"><Chip.Label>{props.appointments.length} lịch hẹn</Chip.Label></Chip>
+        <Chip size="sm" variant="soft" color="accent"><Chip.Label>{t("calendar.count", { count: props.appointments.length })}</Chip.Label></Chip>
       </Card.Header>
       <Card.Content className="overflow-auto p-0">
         {view === "day" ? <DayCalendar {...props} /> : view === "week" ? <WeekCalendar {...props} /> : <MonthCalendar {...props} />}

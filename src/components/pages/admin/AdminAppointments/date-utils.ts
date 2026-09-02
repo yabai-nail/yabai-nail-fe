@@ -1,14 +1,5 @@
+import type { Translator } from "@/i18n/config";
 import type { AppointmentView } from "./data";
-
-const dayNames = [
-  "Chủ Nhật",
-  "Thứ Hai",
-  "Thứ Ba",
-  "Thứ Tư",
-  "Thứ Năm",
-  "Thứ Sáu",
-  "Thứ Bảy",
-] as const;
 
 function parseDate(value: string) {
   const [year, month, day] = value.split("-").map(Number);
@@ -78,18 +69,28 @@ export function getAppointmentViewRange(
   return { start: toDateKey(start), end: toDateKey(end) };
 }
 
+/**
+ * The weekday names and the month wording come from the catalogue rather than from a local
+ * array, because the three languages disagree about more than the words: Japanese writes
+ * the year first and puts the weekday in full-width brackets.
+ */
 export function formatAppointmentDateLabel(
   value: string,
   view: AppointmentView,
+  t: Translator,
 ) {
   const date = parseDate(value);
 
   if (view === "day") {
-    return `${formatNumericDate(value)} (${dayNames[date.getDay()]})`;
+    return t("dayLabel", {
+      date: formatNumericDate(value),
+      weekday: t(`weekday.long.${date.getDay()}`),
+    });
   }
 
   if (view === "month") {
-    return `Tháng ${date.getMonth() + 1}/${date.getFullYear()}`;
+    // The year goes in as a string: ICU would otherwise number-format it as "2,026".
+    return t("monthLabel", { month: date.getMonth() + 1, year: String(date.getFullYear()) });
   }
 
   const { start, end } = getAppointmentViewRange(value, view);
@@ -109,7 +110,11 @@ export function getDateKeysInRange(start: string, end: string) {
   return keys;
 }
 
-export function formatShortWeekday(value: string) {
+export function formatShortWeekday(value: string, t: Translator) {
   const date = parseDate(value);
-  return `${dayNames[date.getDay()].replace("Thứ ", "T")}, ${date.getDate()}/${date.getMonth() + 1}`;
+  return t("shortWeekday", {
+    weekday: t(`weekday.short.${date.getDay()}`),
+    day: date.getDate(),
+    month: date.getMonth() + 1,
+  });
 }

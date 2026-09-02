@@ -1246,6 +1246,192 @@
         "branch": "Branch"
       },
       "detailTitle": "Audit log entry"
+    },
+    "appointments": {
+      "toolbar": {
+        "previous": "Previous period",
+        "next": "Next period",
+        "today": "Today",
+        "filterLabel": "Filter by appointment status",
+        "allStatuses": "All statuses",
+        "create": "Add appointment",
+        "viewLabel": "Calendar view",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "summary": {
+        "heading": "Day summary",
+        "total": "Total appointments"
+      },
+      "calendar": {
+        "day": "Day calendar",
+        "week": "Week calendar",
+        "month": "Month calendar",
+        "count": "{count} appointments",
+        "more": "+{count} more"
+      },
+      "weekday": {
+        "long": {
+          "0": "Sunday",
+          "1": "Monday",
+          "2": "Tuesday",
+          "3": "Wednesday",
+          "4": "Thursday",
+          "5": "Friday",
+          "6": "Saturday"
+        },
+        "short": {
+          "0": "Sun",
+          "1": "Mon",
+          "2": "Tue",
+          "3": "Wed",
+          "4": "Thu",
+          "5": "Fri",
+          "6": "Sat"
+        }
+      },
+      "dayLabel": "{date} ({weekday})",
+      "monthLabel": "{month}/{year}",
+      "shortWeekday": "{weekday}, {day}/{month}",
+      "list": {
+        "heading": "Appointment list",
+        "ariaLabel": "Appointments on the selected day",
+        "empty": "No appointments match."
+      },
+      "detail": {
+        "heading": "Appointment detail",
+        "birthday": "Birthday: {date}",
+        "visits": "Visits",
+        "totalSpend": "Total spend",
+        "time": "Time",
+        "timeValue": "{start} - {end} ({minutes} min)",
+        "date": "Date",
+        "service": "Service",
+        "staff": "Staff",
+        "status": "Status",
+        "note": "Note",
+        "lifecycle": "Lifecycle",
+        "processing": "Working…",
+        "pay": "Take payment",
+        "edit": "Edit appointment",
+        "assignStaff": "Reassign staff",
+        "actualServices": "Update actual services",
+        "attachPhoto": "Attach photo",
+        "cancel": "Cancel appointment",
+        "message": "Message the customer"
+      },
+      "lifecycle": {
+        "checkIn": "Check in",
+        "serviceStart": "Start service",
+        "serviceComplete": "Complete service",
+        "noShow": "No-show"
+      },
+      "segment": {
+        "loyal": "Loyal customer",
+        "new": "New customer",
+        "regular": "Long-standing customer"
+      },
+      "form": {
+        "editTitle": "Edit appointment",
+        "addTitle": "Add appointment",
+        "subtitle": "Check the staff member and the time before saving.",
+        "missing": "This branch has no {items} yet. Add them before creating an appointment.",
+        "missingCustomers": "customers",
+        "missingServices": "services",
+        "missingStaff": "staff",
+        "conflict": "That staff member already has an appointment in this slot. Pick another time or another staff member.",
+        "saveFailed": "The appointment could not be saved.",
+        "date": "Date",
+        "startTime": "Start time",
+        "endTime": "End time",
+        "customer": "Customer",
+        "service": "Service",
+        "staff": "Staff",
+        "note": "Note",
+        "notePlaceholder": "The customer's requests or things to watch for...",
+        "close": "Close",
+        "saving": "Saving…",
+        "save": "Save changes",
+        "create": "Create appointment"
+      },
+      "validation": {
+        "date": "Pick a date.",
+        "startTime": "Pick a start time.",
+        "endTime": "Pick an end time.",
+        "customer": "Pick a customer.",
+        "service": "Pick a service.",
+        "staff": "Pick a staff member.",
+        "endAfterStart": "The end time must be after the start time."
+      },
+      "actualServices": {
+        "title": "Update actual services",
+        "description": "Pick the services that were actually performed. This list replaces the ones originally booked.",
+        "loading": "Loading the service menu…",
+        "loadFailed": "The service menu could not be loaded.",
+        "empty": "No services yet.",
+        "duration": "{minutes} min",
+        "close": "Close",
+        "saving": "Saving…",
+        "submit": "Save actual services"
+      },
+      "assign": {
+        "title": "Reassign the staff member",
+        "subtitle": "<strong>{name}</strong>'s appointment at {time}.",
+        "loading": "Loading the staff who can take this…",
+        "loadFailed": "The staff list could not be loaded. You can still keep the current staff member or pick them again.",
+        "empty": "No staff member is free for this slot.",
+        "legend": "Available staff",
+        "note": "Internal note (optional)",
+        "close": "Close",
+        "busy": "Assigning…",
+        "submit": "Confirm"
+      },
+      "photo": {
+        "typeError": "Only JPEG, PNG or WebP images are supported.",
+        "sizeError": "The image must be smaller than 10 MB.",
+        "uploadFailed": "The image could not be uploaded to storage.",
+        "genericFailed": "The image could not be uploaded.",
+        "title": "Attach a photo",
+        "description": "Pick the photo to attach to <strong>{name}</strong>'s appointment.",
+        "file": "Image file",
+        "kind": "Photo type",
+        "before": "Before the service",
+        "after": "After the service",
+        "other": "Other",
+        "note": "Note (optional)",
+        "close": "Close",
+        "busy": "Sending…",
+        "submit": "Attach"
+      },
+      "cancel": {
+        "title": "Cancel this appointment?",
+        "body": "<strong>{name}</strong>'s appointment at {time} on {date} will move to cancelled.",
+        "keep": "Keep the appointment",
+        "busy": "Cancelling…",
+        "confirm": "Confirm cancellation"
+      },
+      "fallback": {
+        "customer": "Customer with no name",
+        "service": "Service with no name",
+        "staff": "Staff member with no name",
+        "multiService": "{count} services"
+      },
+      "error": {
+        "branchRequired": "Pick a branch before saving the appointment.",
+        "notLoaded": "The appointment has not finished loading. Try again.",
+        "lifecycle": "The action could not be carried out.",
+        "assign": "The staff member could not be changed.",
+        "actualServices": "The actual services could not be saved.",
+        "photo": "The photo could not be attached.",
+        "cancel": "The appointment could not be cancelled."
+      },
+      "loading": "Loading the branch's appointments…",
+      "loadFailed": "The appointments could not be loaded.",
+      "regionList": "Appointment list and summary",
+      "regionDetail": "Detail of the selected appointment",
+      "emptyTitle": "No appointment selected",
+      "emptyDescription": "Pick an appointment to see everything about it."
     }
   }
 }
