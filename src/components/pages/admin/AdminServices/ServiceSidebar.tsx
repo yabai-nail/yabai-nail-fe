@@ -1,141 +1,46 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { Button, Card } from "@heroui/react";
-import { useState } from "react";
-import { adminService, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
-import { CategoryEditor } from "./CategoryEditor";
+import { Card } from "@heroui/react";
 import { SurchargePanel } from "./SurchargePanel";
-import { serviceCategories, type SalonService, type ServiceCategory } from "./data";
+import type { SalonService } from "./data";
 
+// Categories used to be managed from this 17rem column, where their names truncated to an
+// ellipsis and there was no room for the branch scope or the on/off switch. They moved to the
+// "Danh mục" view, so this column keeps only what belongs beside the service list.
 export function ServiceSidebar({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
   const t = useTranslations("admin.services");
-  const categories: ReadonlyArray<{ id: "all" | ServiceCategory; label: string }> = [
-    { id: "all", label: t("all") },
-    ...serviceCategories.map((id) => ({ id, label: t(`category.${id}`) })),
-  ];
   const topServices = [...services].sort((left, right) => right.soldCount - left.soldCount).slice(0, 5);
-
-  // BE-backed categories live alongside the fixture filter tabs — those
-  // remain the local UI filter (primary/addon/combo), while this section
-  // is the source of truth for what the salon actually manages.
-  const beCategories = useAdminServiceCategories();
-  const beItems = beCategories.data?.items ?? [];
-  const [editing, setEditing] = useState<AdminServiceCategory | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [reorderError, setReorderError] = useState<string | null>(null);
-
-  const move = async (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= beItems.length) return;
-    const orderedCategoryIds = beItems.map((category) => category.id);
-    [orderedCategoryIds[index], orderedCategoryIds[target]] = [
-      orderedCategoryIds[target],
-      orderedCategoryIds[index],
-    ];
-    setReorderError(null);
-    try {
-      await adminService.reorderServiceCategories({ orderedCategoryIds });
-      void beCategories.mutate();
-    } catch (error) {
-      setReorderError(error instanceof Error && error.message ? error.message : t("sidebar.reorderFailed"));
-    }
-  };
 
   return (
     <div className="space-y-4">
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="px-4 pt-4"><h2 className="font-bold">{t("sidebar.categories")}</h2></Card.Header>
-        <Card.Content className="p-4">
-          <ul className="space-y-1">
-            {categories.map((category) => (
-              <li key={category.id} className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${category.id === "all" ? "bg-admin-soft font-semibold text-admin-accent" : ""}`}>
-                <span>{category.label}</span>
-                <strong>{category.id === "all" ? services.length : services.filter((service) => service.category === category.id).length}</strong>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-4 border-t border-admin-border pt-3">
-            <p className="mb-2 text-[0.65rem] uppercase tracking-wide text-admin-muted">
-              Danh mục lưu trên hệ thống
-            </p>
-            {beCategories.isLoading ? (
-              <p className="text-xs text-admin-muted">{t("sidebar.loading")}</p>
-            ) : beCategories.error ? (
-              <p role="alert" className="text-xs text-admin-danger">{t("sidebar.loadFailed")}</p>
-            ) : beItems.length === 0 ? (
-              <p className="text-xs text-admin-muted">{t("sidebar.noCategories")}</p>
-            ) : (
-              <ul className="space-y-1">
-                {beItems.map((category, index) => (
-                  <li key={category.id} className="flex items-center justify-between gap-1 rounded-lg px-2 py-1 text-xs hover:bg-admin-soft">
-                    <span className="min-w-0 flex-1 truncate">
-                      <strong className="text-admin-ink">{category.nameVi ?? category.name}</strong>
-                      <span className="ml-2 text-admin-muted">({category.code})</span>
-                    </span>
-                    <Button isIconOnly size="sm" variant="ghost" aria-label={t("sidebar.moveUp", { name: category.name })} isDisabled={index === 0} onPress={() => void move(index, -1)}>
-                      <ChevronUpIcon className="size-3.5" />
-                    </Button>
-                    <Button isIconOnly size="sm" variant="ghost" aria-label={t("sidebar.moveDown", { name: category.name })} isDisabled={index === beItems.length - 1} onPress={() => void move(index, 1)}>
-                      <ChevronDownIcon className="size-3.5" />
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="ghost"
-                      aria-label={t("sidebar.rename", { name: category.name })}
-                      onPress={() => setEditing(category)}
-                    >
-                      <PencilSquareIcon className="size-3.5" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {reorderError ? <p role="alert" className="mt-1 text-xs text-admin-danger">{reorderError}</p> : null}
-          </div>
-
-          <Button
-            fullWidth
-            variant="outline"
-            className="mt-3 rounded-lg border-admin-accent/30 text-admin-accent"
-            onPress={() => setCreating(true)}
-          >
-            <PlusIcon className="size-4" />Thêm danh mục
-          </Button>
-        </Card.Content>
-      </Card>
-      <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Header className="px-4 pt-4"><h2 className="font-bold">{t("sidebar.topServices")}</h2></Card.Header>
         <Card.Content className="p-4">
-          <ol className="space-y-3">
-            {topServices.map((service, index) => (
-              <li key={service.id} className="grid grid-cols-[1.5rem_2.5rem_1fr] items-center gap-2 text-sm">
-                <span className="font-bold text-admin-accent">{index + 1}</span>
-                <span aria-hidden="true" className="size-10 rounded-lg bg-gradient-to-br from-pink-100 to-amber-50" />
-                <span><strong className="block text-xs">{service.name}</strong><span className="text-xs text-admin-accent">{service.soldCount} lượt</span></span>
-              </li>
-            ))}
-          </ol>
+          {topServices.length === 0 ? (
+            <p className="text-xs text-admin-muted">Chưa có dịch vụ nào được đặt.</p>
+          ) : (
+            <ol className="space-y-3">
+              {topServices.map((service, index) => (
+                <li key={service.id} className="grid grid-cols-[1.5rem_2.5rem_1fr] items-center gap-2 text-sm">
+                  <span className="font-bold text-admin-accent">{index + 1}</span>
+                  {service.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={service.imageUrl} alt="" className="size-10 rounded-lg border border-admin-border object-cover" />
+                  ) : (
+                    <span aria-hidden="true" className="size-10 rounded-lg bg-gradient-to-br from-pink-100 to-amber-50" />
+                  )}
+                  <span><strong className="block text-xs">{service.name}</strong><span className="text-xs text-admin-accent">{service.soldCount} lượt</span></span>
+                </li>
+              ))}
+            </ol>
+          )}
         </Card.Content>
       </Card>
       <SurchargePanel />
       <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Content className="p-4"><h2 className="font-bold">{t("sidebar.noteHeading")}</h2><p className="mt-2 text-xs leading-5 text-admin-muted">{t("sidebar.noteBody")}</p></Card.Content>
       </Card>
-
-      {(creating || editing) ? (
-        <CategoryEditor
-          category={editing}
-          onClose={() => {
-            setCreating(false);
-            setEditing(null);
-          }}
-          onSaved={() => void beCategories.mutate()}
-        />
-      ) : null}
     </div>
   );
 }

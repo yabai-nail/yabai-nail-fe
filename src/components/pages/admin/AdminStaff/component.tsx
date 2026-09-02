@@ -1,12 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
-import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -51,7 +50,6 @@ function formatOptionalMoney(value: number | null): string {
  * carries identity and the active flag. A member with no row for the period
  * keeps `null` money fields so the table can say so.
  */
-// The fallback name is threaded in: this runs inside a useMemo, outside the component.
 function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined, unnamed: string): StaffMember {
   const name = server.displayName || unnamed;
   return {
@@ -108,9 +106,9 @@ export function AdminStaffComponent() {
   const metrics = [
     {
       id: "revenue",
-      label: t("metrics.periodRevenue", { period }),
+      label: `Doanh thu kỳ ${period}`,
       value: formatOptionalMoney(revenue),
-      detail: typeof kpi?.orderCount === "number" ? t("metrics.orderCount", { count: kpi.orderCount }) : t("metrics.noOrders"),
+      detail: typeof kpi?.orderCount === "number" ? `${kpi.orderCount} đơn hàng` : t("metrics.noOrders"),
       icon: BanknotesIcon,
       tone: "text-admin-accent bg-admin-soft",
     },
@@ -118,7 +116,7 @@ export function AdminStaffComponent() {
       id: "commission",
       label: t("metrics.commissionDue"),
       value: formatOptionalMoney(commission),
-      detail: averageRate === null ? t("metrics.noRate") : t("metrics.rateDetail", { rate: averageRate }),
+      detail: averageRate === null ? t("metrics.noRate") : `${averageRate}% / Trung bình`,
       icon: WalletIcon,
       tone: "text-admin-success bg-green-50",
     },
@@ -126,7 +124,7 @@ export function AdminStaffComponent() {
       id: "shop",
       label: t("metrics.salonShare"),
       value: formatOptionalMoney(salonShare),
-      detail: t("metrics.period", { period }),
+      detail: `Kỳ ${period}`,
       icon: BuildingStorefrontIcon,
       tone: "text-admin-info bg-sky-50",
     },
@@ -134,7 +132,7 @@ export function AdminStaffComponent() {
       id: "working",
       label: t("metrics.working"),
       value: source.length === 0 ? MISSING : `${workingCount} / ${source.length}`,
-      detail: t("metrics.offCount", { count: source.length - workingCount }),
+      detail: `${source.length - workingCount} nghỉ phép`,
       icon: UserGroupIcon,
       tone: "text-admin-violet bg-purple-50",
     },
@@ -202,35 +200,31 @@ export function AdminStaffComponent() {
             </Card.Content>
           </Card>
         ) : (
-          <AdminSplitLayout
-            aside={
-              detailedStaff ? (
-                <StaffDetailPanel
-                  member={detailedStaff}
-                  branchId={branchId}
-                  period={period}
-                  onEdit={() => setEditing(detailedStaff)}
-                />
-              ) : (
-                <AdminEmptySelection
-                  title={t("noSelectionTitle")}
-                  description={t("noSelectionDescription")}
-                />
-              )
-            }
-          >
+          <div className="space-y-4">
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
               <Card.Content className="min-w-0 p-0"><StaffTable
                 staff={visibleStaff}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
-                onEdit={(id) => { setSelectedId(id); setEditing(visibleStaff.find((member) => member.id === id) ?? null); }}
               /></Card.Content>
             </Card>
+            {detailedStaff ? (
+              <StaffDetailPanel
+                member={detailedStaff}
+                branchId={branchId}
+                period={period}
+                onEdit={() => setEditing(detailedStaff)}
+              />
+            ) : (
+              <AdminEmptySelection
+                title={t("noSelectionTitle")}
+                description={t("noSelectionDescription")}
+              />
+            )}
             {detailedStaff && branchId ? (
               <RecentOrdersTable branchId={branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
             ) : null}
-          </AdminSplitLayout>
+          </div>
         )}
       </div>
       {isCreateOpen && branchId ? (

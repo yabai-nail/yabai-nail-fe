@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { useTranslations } from "next-intl";
 
@@ -33,6 +34,7 @@ export function ResetPasswordModal({
         reason: reason.trim() || undefined,
         notifyChannel,
       });
+      notifySuccess("Đã đặt lại mật khẩu", `Thông báo đã được gửi cho ${accountName}.`);
       onDone();
       onClose();
     } catch (err) {

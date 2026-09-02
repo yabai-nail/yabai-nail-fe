@@ -1,6 +1,6 @@
+import { useTranslations } from "next-intl";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
-import { useTranslations } from "next-intl";
 import type { Appointment, AppointmentView } from "./data";
 import {
   formatShortWeekday,
@@ -8,8 +8,8 @@ import {
   getDateKeysInRange,
 } from "./date-utils";
 import {
-  appointmentStatusColor,
   appointmentStatusLabel,
+  appointmentStatusTone,
 } from "./status";
 
 function AppointmentPill({
@@ -23,28 +23,31 @@ function AppointmentPill({
   onSelect: (id: string) => void;
   compact?: boolean;
 }>) {
+  // The status dresses the pill: a 4px bar to scan by, the same colour at 10%
+  // behind it, and a dot beside the written label. The label prints in every
+  // view, compact included — it used to be dropped there, which would now leave
+  // the week grid encoding status in colour alone. Green and pink sit ΔE 4.7
+  // apart for a deutan reader, so the label is what carries the meaning.
   const tStatus = useTranslations("admin.appointmentStatus");
+  const tone = appointmentStatusTone[appointment.status];
 
   return (
     <Button
       variant="ghost"
-      className={`h-auto w-full justify-start rounded-lg border-l-4 border-admin-accent px-2 text-left ${
+      className={`h-auto w-full justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${
         compact ? "min-h-12 py-1.5" : "min-h-16 py-2"
-      } ${isSelected ? "bg-admin-soft ring-1 ring-admin-accent/30" : "bg-admin-soft/70"}`}
+      } ${isSelected ? "ring-2 ring-admin-ink/30" : ""}`}
       onPress={() => onSelect(appointment.id)}
     >
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <strong className="truncate text-xs text-admin-accent">{appointment.customer.name}</strong>
+          <strong className="truncate text-xs text-admin-ink">{appointment.customer.name}</strong>
           <time className="shrink-0 text-[0.65rem] text-admin-muted">{appointment.startTime} - {appointment.endTime}</time>
         </span>
-        <span className="mt-1 flex items-center justify-between gap-2">
-          <span className="truncate text-[0.7rem] text-admin-ink">{appointment.service.name}</span>
-          {!compact ? (
-            <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]} className="shrink-0">
-              <Chip.Label>{appointmentStatusLabel(appointment.status, tStatus)}</Chip.Label>
-            </Chip>
-          ) : null}
+        <span className="mt-1 block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
+        <span className="mt-1 flex items-center gap-1.5 text-[0.65rem] font-medium text-admin-ink">
+          <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
+          {appointmentStatusLabel(appointment.status, tStatus)}
         </span>
       </span>
     </Button>
@@ -100,7 +103,6 @@ function WeekCalendar({ appointments, selectedDate, selectedId, onSelect }: Cale
 }
 
 function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: CalendarViewProps) {
-  const t = useTranslations("admin.appointments");
   const range = getAppointmentViewRange(selectedDate, "month");
   const dates = getDateKeysInRange(range.start, range.end);
   const leadingCells = (new Date(`${range.start}T00:00:00`).getDay() + 6) % 7;
@@ -109,8 +111,7 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
   return (
     <div className="min-w-[48rem]">
       <div className="grid grid-cols-7 border-b border-admin-border text-center text-xs font-semibold text-admin-muted">
-        {/* The grid starts on Monday, so the weekday keys run 1…6 and then Sunday. */}
-        {[1, 2, 3, 4, 5, 6, 0].map((day) => <div key={day} className="py-3">{t(`weekday.short.${day}`)}</div>)}
+        {["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"].map((label) => <div key={label} className="py-3">{label}</div>)}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((date, index) => (
@@ -126,7 +127,7 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
                   ))}
                   {appointments.filter((appointment) => appointment.date === date).length > 3 ? (
                     <p className="px-1 text-[0.65rem] font-semibold text-admin-muted">
-                      {t("calendar.more", { count: appointments.filter((appointment) => appointment.date === date).length - 3 })}
+                      +{appointments.filter((appointment) => appointment.date === date).length - 3} lịch khác
                     </p>
                   ) : null}
                 </div>
@@ -147,16 +148,14 @@ type CalendarViewProps = Readonly<{
 }>;
 
 export function AppointmentCalendar({ view, ...props }: CalendarViewProps & Readonly<{ view: AppointmentView }>) {
-  const t = useTranslations("admin.appointments");
-
   return (
     <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between border-b border-admin-border px-4 py-3">
         <div className="flex items-center gap-2">
           <CalendarDaysIcon className="size-5 text-admin-accent" />
-          <h2 className="text-sm font-bold text-admin-ink">{t(`calendar.${view}`)}</h2>
+          <h2 className="text-sm font-bold text-admin-ink">Lịch {view === "day" ? "ngày" : view === "week" ? "tuần" : "tháng"}</h2>
         </div>
-        <Chip size="sm" variant="soft" color="accent"><Chip.Label>{t("calendar.count", { count: props.appointments.length })}</Chip.Label></Chip>
+        <Chip size="sm" variant="soft" color="accent"><Chip.Label>{props.appointments.length} lịch hẹn</Chip.Label></Chip>
       </Card.Header>
       <Card.Content className="overflow-auto p-0">
         {view === "day" ? <DayCalendar {...props} /> : view === "week" ? <WeekCalendar {...props} /> : <MonthCalendar {...props} />}

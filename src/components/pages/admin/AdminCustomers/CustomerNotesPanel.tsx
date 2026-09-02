@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminCustomerNotes,
@@ -34,6 +35,7 @@ export function CustomerNotesPanel({
     setSubmitError(null);
     try {
       await adminService.createCustomerNote(branchId, customerId, { content: trimmed });
+      notifySuccess("Đã thêm ghi chú");
       setDraft("");
       void mutate();
     } catch (thrown) {
@@ -58,6 +60,7 @@ export function CustomerNotesPanel({
         { content: trimmed },
         note.version,
       );
+      notifySuccess("Đã cập nhật ghi chú");
       setEditingId(null);
       setEditingContent("");
       void mutate();

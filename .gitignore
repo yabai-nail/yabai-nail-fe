@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Chi muc cua cong cu codegraph, 7.5MB nhi phan sinh lai duoc.
+.codegraph/

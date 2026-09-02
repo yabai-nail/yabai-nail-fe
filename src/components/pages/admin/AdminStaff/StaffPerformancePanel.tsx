@@ -25,7 +25,7 @@ export function StaffPerformancePanel({
   );
 
   return (
-    <section aria-labelledby="staff-performance-heading" className="space-y-2 border-t border-admin-border pt-4">
+    <section aria-labelledby="staff-performance-heading" className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 id="staff-performance-heading" className="text-sm font-bold text-admin-ink">{t("performance.heading")}</h3>
         <input

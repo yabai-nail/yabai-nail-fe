@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { formatMoney } from "@/lib/admin-format";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAppointment,
@@ -235,6 +236,7 @@ export function AdminPaymentsComponent() {
           // quote's own field is loosely typed, so only trust a number.
           typeof quote.version === "number" ? quote.version : appointment?.version,
         );
+        notifySuccess("Đã ghi nhận thanh toán");
         setInvoice(result.value);
         void mutateAppointment();
       } catch (thrown) {

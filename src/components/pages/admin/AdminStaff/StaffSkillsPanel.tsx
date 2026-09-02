@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminServices,
@@ -52,6 +53,7 @@ export function StaffSkillsPanel({
         // different resource and would fail the optimistic check.
         skills.data?.version ?? staffVersion,
       );
+      notifySuccess("Đã cập nhật kỹ năng nhân viên");
       setSelected(null);
       void skills.mutate();
     } catch (thrown) {
@@ -62,11 +64,11 @@ export function StaffSkillsPanel({
   }
 
   return (
-    <section aria-labelledby="staff-skills-heading" className="space-y-2 border-t border-admin-border pt-4">
+    <section aria-labelledby="staff-skills-heading" className="space-y-2">
       <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
 
       {services.isLoading || skills.isLoading ? (
-        <p className="text-xs text-admin-muted">{t("skills.loading")}</p>
+        <p className="text-xs text-admin-muted">{t("compensation.loading")}</p>
       ) : services.error ? (
         <p role="alert" className="text-xs text-admin-danger">{t("skills.loadFailed")}</p>
       ) : (
@@ -97,7 +99,7 @@ export function StaffSkillsPanel({
           onPress={() => void submit()}
           isDisabled={!dirty || busy}
         >
-          {busy ? t("skills.saving") : t("skills.submit")}
+          {busy ? t("compensation.saving") : t("skills.submit")}
         </Button>
       </div>
       {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}

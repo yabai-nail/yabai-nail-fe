@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { BranchRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -51,6 +52,7 @@ export function BranchModal({
           timezone,
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật chi nhánh" : "Đã thêm chi nhánh");
       onSaved();
       onClose();
     } catch (err) {
@@ -67,22 +69,22 @@ export function BranchModal({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                {isEdit ? t("modal.editTitle") : t("modal.addTitle")}
+                {isEdit ? t("modal.editTitle") : t("add")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.name")}</span>
+                <span className="font-semibold text-admin-ink">{t("detail.name")}</span>
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("modal.namePlaceholder")} autoFocus />
               </label>
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.address")}</span>
+                <span className="font-semibold text-admin-ink">{t("columns.address")}</span>
                 <input className={inputClass} value={address} onChange={(event) => setAddress(event.target.value)} placeholder={t("modal.addressPlaceholder")} />
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {isEdit ? (
                   <div className="flex flex-col gap-2 text-sm">
-                    <span className="font-semibold text-admin-ink">{t("modal.status")}</span>
+                    <span className="font-semibold text-admin-ink">{t("columns.status")}</span>
                     <AdminSelectField
                       label={t("modal.statusLabel")}
                       fullWidth
@@ -93,7 +95,7 @@ export function BranchModal({
                   </div>
                 ) : null}
                 <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">{t("modal.timezone")}</span>
+                  <span className="font-semibold text-admin-ink">{t("detail.timezone")}</span>
                   <input className={inputClass} value={timezone} onChange={(event) => setTimezone(event.target.value)} />
                 </label>
               </div>

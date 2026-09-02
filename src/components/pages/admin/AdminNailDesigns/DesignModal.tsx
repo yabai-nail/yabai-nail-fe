@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -21,8 +22,6 @@ export function DesignModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.nailDesigns");
-  // Status codes come from the API. t.has() keeps an unrecognised one rendering as
-  // its raw code instead of throwing, which is what the old map did with ?? code.
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const isEdit = design !== null;
@@ -58,6 +57,7 @@ export function DesignModal({
           ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật mẫu nail" : "Đã thêm mẫu nail");
       onSaved();
       onClose();
     } catch (err) {
@@ -88,7 +88,7 @@ export function DesignModal({
                 was discarded on save.
               */}
               <div className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.status")}</span>
+                <span className="font-semibold text-admin-ink">{t("statusLabel")}</span>
                 <AdminSelectField
                   label={t("modal.statusLabel")}
                   fullWidth

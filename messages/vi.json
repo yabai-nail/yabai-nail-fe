@@ -2,7 +2,6 @@
   "admin": {
     "settings": {
       "language": {
-        "tab": "Ngôn ngữ",
         "heading": "Ngôn ngữ hiển thị",
         "description": "Chỉ đổi ngôn ngữ của bảng điều khiển, và chỉ trên trình duyệt này. Không ảnh hưởng tới ứng dụng khách hàng.",
         "legend": "Chọn ngôn ngữ hiển thị",
@@ -16,7 +15,8 @@
         "payment": "Thanh toán",
         "automation": "Tin nhắn tự động",
         "notifications": "Thông báo",
-        "backup": "Sao lưu dữ liệu"
+        "backup": "Sao lưu dữ liệu",
+        "language": "Ngôn ngữ"
       },
       "tabsLabel": "Nhóm cài đặt",
       "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",
@@ -416,9 +416,29 @@
         "amount": "Số tiền hoàn (¥)",
         "reason": "Lý do hoàn",
         "requested": "Yêu cầu hoàn {amount} · {status}",
-        "recorded": "Đã ghi nhận hoàn tiền.",
+        "recorded": "Đã ghi nhận hoàn tiền",
         "busy": "Đang xử lý…",
-        "submit": "Hoàn tiền"
+        "submit": "Hoàn tiền",
+        "caption": "Lịch hẹn đã thanh toán, có thể hoàn tiền",
+        "columns": {
+          "customer": "Khách hàng",
+          "time": "Thời gian",
+          "total": "Tổng tiền",
+          "status": "Trạng thái"
+        },
+        "loadingAppointments": "Đang tải lịch hẹn…",
+        "noAppointments": "Chưa có lịch hẹn nào đã thanh toán trong chi nhánh này.",
+        "transactionsFor": "Giao dịch của {name}",
+        "transactionColumns": {
+          "amount": "Số tiền",
+          "method": "Phương thức",
+          "status": "Trạng thái",
+          "paidAt": "Đã thu lúc"
+        },
+        "selectAppointment": "Chọn một lịch hẹn ở bảng trên để xem giao dịch của lịch đó.",
+        "result": "Yêu cầu hoàn {amount} · {status}",
+        "showing": "Hiển thị {shown} trong tổng số {total} lịch hẹn",
+        "pagination": "Phân trang lịch hẹn đã thanh toán"
       },
       "tierLine": "Hạng {tier} · {points} điểm",
       "checkin": {
@@ -864,7 +884,9 @@
       },
       "staff": {
         "loading": "Đang tải danh sách nhân viên…",
-        "expectedPayout": "Dự kiến nhận"
+        "expectedPayout": "Dự kiến nhận",
+        "working": "Đang làm",
+        "off": "Nghỉ"
       },
       "quick": {
         "appointment": "Tạo lịch hẹn",

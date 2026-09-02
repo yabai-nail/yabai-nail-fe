@@ -5,6 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { PromotionRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
@@ -67,6 +68,7 @@ export function PromotionModal({
           issuanceLimit: numericIssuanceLimit,
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật khuyến mãi" : "Đã thêm khuyến mãi");
       onSaved();
       onClose();
     } catch (err) {

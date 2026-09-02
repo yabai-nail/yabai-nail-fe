@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { StaffMember } from "./data";
 
 // Small modal for the base staff row: displayName + active. Skills / shifts /
@@ -35,6 +36,7 @@ export function StaffEditModal({
         { displayName: displayName.trim(), status: active ? "ACTIVE" : "INACTIVE" },
         member.version,
       );
+      notifySuccess("Đã cập nhật nhân viên");
       onSaved();
       onClose();
     } catch (thrown) {

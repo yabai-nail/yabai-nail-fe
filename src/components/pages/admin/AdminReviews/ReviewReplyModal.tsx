@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
 export function ReviewReplyModal({
   branchId,
@@ -34,6 +35,7 @@ export function ReviewReplyModal({
     setError(null);
     try {
       await adminService.replyToBranchReview(branchId, reviewId, { content: content.trim() }, version);
+      notifySuccess("Đã gửi phản hồi đánh giá");
       onReplied();
       onClose();
     } catch (err) {

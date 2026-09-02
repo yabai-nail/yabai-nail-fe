@@ -2,7 +2,6 @@
   "admin": {
     "settings": {
       "language": {
-        "tab": "Language",
         "heading": "Display language",
         "description": "Changes the console's language on this browser only. It does not affect the customer app.",
         "legend": "Choose a display language",
@@ -16,7 +15,8 @@
         "payment": "Payments",
         "automation": "Automated messages",
         "notifications": "Notifications",
-        "backup": "Data backup"
+        "backup": "Data backup",
+        "language": "Language"
       },
       "tabsLabel": "Settings groups",
       "placeholder": "This settings group is coming in a later phase.",
@@ -416,9 +416,29 @@
         "amount": "Refund amount (¥)",
         "reason": "Refund reason",
         "requested": "Refund requested {amount} · {status}",
-        "recorded": "The refund has been recorded.",
+        "recorded": "The refund was recorded",
         "busy": "Processing…",
-        "submit": "Refund"
+        "submit": "Refund",
+        "caption": "Paid appointments that can be refunded",
+        "columns": {
+          "customer": "Customer",
+          "time": "Time",
+          "total": "Total",
+          "status": "Status"
+        },
+        "loadingAppointments": "Loading appointments…",
+        "noAppointments": "No paid appointments in this branch yet.",
+        "transactionsFor": "Transactions for {name}",
+        "transactionColumns": {
+          "amount": "Amount",
+          "method": "Method",
+          "status": "Status",
+          "paidAt": "Taken at"
+        },
+        "selectAppointment": "Pick an appointment above to see its transactions.",
+        "result": "Refund requested {amount} · {status}",
+        "showing": "Showing {shown} of {total} appointments",
+        "pagination": "Paid appointment pages"
       },
       "tierLine": "{tier} · {points} points",
       "checkin": {
@@ -864,7 +884,9 @@
       },
       "staff": {
         "loading": "Loading the staff list…",
-        "expectedPayout": "Expected payout"
+        "expectedPayout": "Expected payout",
+        "working": "Working",
+        "off": "Off"
       },
       "quick": {
         "appointment": "Create appointment",

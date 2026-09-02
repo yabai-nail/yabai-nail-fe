@@ -1,10 +1,11 @@
 "use client";
 
-import { Card } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { notifySuccess } from "@/lib/app-toast";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   adminService,
@@ -14,7 +15,6 @@ import {
   type AdminMessage as ServerMessage,
 } from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
-import { CustomerSummary } from "./CustomerSummary";
 import { MessageThread } from "./MessageThread";
 import { type ChatMessage, type Conversation, type MessageCustomer } from "./data";
 import {
@@ -37,9 +37,6 @@ function formatTimeLabel(iso: string): string {
   }
 }
 
-// The fallback label is threaded in rather than read from a hook: these two adapters
-// are plain functions outside the component, and keeping them that way is what lets
-// them stay in a useMemo without dragging React state through the mapping.
 function toFixtureCustomer(server: ServerConversation, unnamed: string): MessageCustomer {
   const name = server.customer.displayName ?? unnamed;
   return {
@@ -73,6 +70,7 @@ function toChatMessage(server: ServerMessage): ChatMessage {
     sender,
     content: server.content,
     time: formatTimeLabel(server.createdAt),
+    sentAt: server.createdAt,
   };
 }
 
@@ -133,6 +131,7 @@ export function AdminMessagesComponent() {
         sender: "salon",
         content,
         time: t("now"),
+        sentAt: new Date().toISOString(),
       }),
     );
 
@@ -168,6 +167,7 @@ export function AdminMessagesComponent() {
         { status: next },
         selected.version,
       );
+      notifySuccess(next === "ARCHIVED" ? "Đã lưu trữ hội thoại" : "Đã cập nhật trạng thái hội thoại");
       void mutateConversations();
     } catch (thrown) {
       setStatusError(
@@ -183,7 +183,24 @@ export function AdminMessagesComponent() {
       {conversationsError ? (
         <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
-      <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none xl:grid-cols-[17rem_minmax(0,1fr)_19rem]">
+      {/*
+        Two columns. The third was 19rem of customer summary that repeated the
+        name already in the thread header, printed an empty phone row, and held
+        two buttons — which now sit in that header. The conversation takes the
+        width back.
+      */}
+      {/*
+        The pane is as tall as the space it sits in, so the composer stays on
+        the bottom edge and the thread scrolls inside itself. It used to be
+        min-h-[38rem]: a fixed 608px that left 142px of dead space on a tall
+        screen and, on a 650px one, put the message box 232px below the fold —
+        you scrolled the whole page to reach the thing you type into.
+
+        dvh, not vh: on a phone the address bar shrinking must not shove the
+        composer off-screen. min-h keeps it usable if the viewport is tiny, and
+        the page scrolls then, as it should.
+      */}
+      <Card className="grid h-[calc(100dvh-var(--admin-pane-offset))] min-h-[26rem] gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none lg:grid-cols-[19rem_minmax(0,1fr)]">
         <ConversationList
           conversations={visibleConversations}
           selectedId={selected?.id ?? null}
@@ -217,11 +234,6 @@ export function AdminMessagesComponent() {
           />
         ) : (
           <AdminEmptySelection title={t("emptyTitle")} description={t("emptyDescription")} />
-        )}
-        {selected ? (
-          <CustomerSummary customer={selected.customer} />
-        ) : (
-          <AdminEmptySelection title={t("noCustomerTitle")} description={t("noCustomerDescription")} />
         )}
       </Card>
     </AdminPageLayout>

@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
@@ -21,11 +22,9 @@ const pageSize = 8;
 
 export function AdminNailDesignsComponent() {
   const t = useTranslations("admin.nailDesigns");
-  const { data, isLoading, error, mutate } = useAdminNailDesigns();
-  // Status codes come from the API. t.has() keeps an unrecognised one rendering as
-  // its raw code instead of throwing, which is what the old map did with ?? code.
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
+  const { data, isLoading, error, mutate } = useAdminNailDesigns();
 
   const source = useMemo<ReadonlyArray<DesignRow>>(
     () => (data?.items ? data.items.map(adaptDesign) : []),
@@ -46,7 +45,7 @@ export function AdminNailDesignsComponent() {
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          {t("statusLabel")}
+          Trạng thái
           <AdminSelectField
             label={t("filterLabel")}
             value={status}
@@ -60,7 +59,7 @@ export function AdminNailDesignsComponent() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
           <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-            <PlusIcon className="size-4" />{t("add")}
+            <PlusIcon className="size-4" />Thêm mẫu
           </Button>
         </div>
       </div>
@@ -77,7 +76,7 @@ export function AdminNailDesignsComponent() {
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
                 <th className="px-4 py-3">{t("columns.design")}</th>
-                <th className="px-4 py-3">{t("columns.status")}</th>
+                <th className="px-4 py-3">{t("statusLabel")}</th>
                 <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
               </tr>
             </thead>
@@ -114,12 +113,8 @@ export function AdminNailDesignsComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
-          <div className="flex gap-1">
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-              <Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>
-            ))}
-          </div>
+          <span>Hiển thị {visible.length} trong tổng số {filtered.length} mẫu</span>
+          <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 

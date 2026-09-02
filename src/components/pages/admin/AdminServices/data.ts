@@ -1,12 +1,18 @@
 import { matchesSearch } from "@/lib/admin-search";
 
-export type ServiceCategory = "primary" | "addon" | "combo";
-export type ServiceFilter = "all" | ServiceCategory;
+/** The category a service belongs to, named by the admin API rather than by this file. */
+export type ServiceCategoryRef = { readonly id: string; readonly name: string };
+
+/** "all", or the id of a category the salon actually manages. */
+export type ServiceFilter = string;
 
 export type SalonService = {
   readonly id: string;
   readonly name: string;
-  readonly category: ServiceCategory;
+  // Null only for a row written before the backend made the category mandatory. The tabs
+  // leave such a service out rather than filing it somewhere it does not belong.
+  readonly category: ServiceCategoryRef | null;
+  readonly imageUrl: string | null;
   readonly price: number;
   readonly durationMinutes: number;
   readonly isVisible: boolean;
@@ -16,25 +22,27 @@ export type SalonService = {
   readonly version?: number;
 };
 
-export const salonServices: ReadonlyArray<SalonService> = [
-  { id: "sv1", name: "Sơn gel đơn sắc", category: "primary", price: 850000, durationMinutes: 90, isVisible: true, soldCount: 16 },
-  { id: "sv2", name: "Sơn gel nâng cao", category: "primary", price: 950000, durationMinutes: 90, isVisible: true, soldCount: 32 },
-  { id: "sv3", name: "Thiết kế theo mẫu", category: "primary", price: 1050000, durationMinutes: 120, isVisible: true, soldCount: 28 },
-  { id: "sv4", name: "Gradient + Đính đá", category: "primary", price: 1250000, durationMinutes: 120, isVisible: true, soldCount: 14 },
-  { id: "sv5", name: "French Nail", category: "primary", price: 900000, durationMinutes: 90, isVisible: true, soldCount: 12 },
-  { id: "sv6", name: "Đắp bột", category: "primary", price: 1100000, durationMinutes: 120, isVisible: true, soldCount: 18 },
-  { id: "sv7", name: "Sơn gel ombre", category: "primary", price: 1000000, durationMinutes: 120, isVisible: true, soldCount: 11 },
-  { id: "sv8", name: "Sơn gel mắt mèo", category: "primary", price: 1050000, durationMinutes: 120, isVisible: true, soldCount: 9 },
-  { id: "sv9", name: "Đổ khuôn thành giả", category: "addon", price: 100000, durationMinutes: 15, isVisible: true, soldCount: 8 },
-  { id: "sv10", name: "Nối thêm móng (2 móng)", category: "addon", price: 110000, durationMinutes: 20, isVisible: true, soldCount: 7 },
-  { id: "sv11", name: "Gia cố móng (1 móng)", category: "addon", price: 50000, durationMinutes: 10, isVisible: true, soldCount: 5 },
-  { id: "sv12", name: "Thêm charm", category: "addon", price: 30000, durationMinutes: 10, isVisible: true, soldCount: 4 },
-  { id: "sv13", name: "Combo chăm sóc tay", category: "combo", price: 1450000, durationMinutes: 150, isVisible: true, soldCount: 10 },
-  { id: "sv14", name: "Combo gel cao cấp", category: "combo", price: 1750000, durationMinutes: 180, isVisible: false, soldCount: 6 },
-];
+const primary: ServiceCategoryRef = { id: "cat-primary", name: "Dịch vụ chính" };
+const addon: ServiceCategoryRef = { id: "cat-addon", name: "Dịch vụ thêm" };
+const combo: ServiceCategoryRef = { id: "cat-combo", name: "Combo" };
 
-/** Category ids only; their words live at admin.services.category.<id>. */
-export const serviceCategories: ReadonlyArray<ServiceCategory> = ["primary", "addon", "combo"];
+/** Fixture for the derivation tests only; the screen itself renders the live catalogue. */
+export const salonServices: ReadonlyArray<SalonService> = [
+  { id: "sv1", name: "Sơn gel đơn sắc", category: primary, imageUrl: null, price: 850000, durationMinutes: 90, isVisible: true, soldCount: 16 },
+  { id: "sv2", name: "Sơn gel nâng cao", category: primary, imageUrl: null, price: 950000, durationMinutes: 90, isVisible: true, soldCount: 32 },
+  { id: "sv3", name: "Thiết kế theo mẫu", category: primary, imageUrl: null, price: 1050000, durationMinutes: 120, isVisible: true, soldCount: 28 },
+  { id: "sv4", name: "Gradient + Đính đá", category: primary, imageUrl: null, price: 1250000, durationMinutes: 120, isVisible: true, soldCount: 14 },
+  { id: "sv5", name: "French Nail", category: primary, imageUrl: null, price: 900000, durationMinutes: 90, isVisible: true, soldCount: 12 },
+  { id: "sv6", name: "Đắp bột", category: primary, imageUrl: null, price: 1100000, durationMinutes: 120, isVisible: true, soldCount: 18 },
+  { id: "sv7", name: "Sơn gel ombre", category: primary, imageUrl: null, price: 1000000, durationMinutes: 120, isVisible: true, soldCount: 11 },
+  { id: "sv8", name: "Sơn gel mắt mèo", category: primary, imageUrl: null, price: 1050000, durationMinutes: 120, isVisible: true, soldCount: 9 },
+  { id: "sv9", name: "Đổ khuôn thành giả", category: addon, imageUrl: null, price: 100000, durationMinutes: 15, isVisible: true, soldCount: 8 },
+  { id: "sv10", name: "Nối thêm móng (2 móng)", category: addon, imageUrl: null, price: 110000, durationMinutes: 20, isVisible: true, soldCount: 7 },
+  { id: "sv11", name: "Gia cố móng (1 móng)", category: addon, imageUrl: null, price: 50000, durationMinutes: 10, isVisible: true, soldCount: 5 },
+  { id: "sv12", name: "Thêm charm", category: addon, imageUrl: null, price: 30000, durationMinutes: 10, isVisible: true, soldCount: 4 },
+  { id: "sv13", name: "Combo chăm sóc tay", category: combo, imageUrl: null, price: 1450000, durationMinutes: 150, isVisible: true, soldCount: 10 },
+  { id: "sv14", name: "Combo gel cao cấp", category: combo, imageUrl: null, price: 1750000, durationMinutes: 180, isVisible: false, soldCount: 6 },
+];
 
 export function filterServices(
   services: ReadonlyArray<SalonService>,
@@ -43,13 +51,14 @@ export function filterServices(
 ) {
   return services.filter(
     (service) =>
-      (filter === "all" || service.category === filter) &&
+      (filter === "all" || service.category?.id === filter) &&
       matchesSearch(query, [service.name]),
   );
 }
 
-export function paginateServices(
-  services: ReadonlyArray<SalonService>,
+/** Shared by both tables on this screen: services and, in the other view, categories. */
+export function paginate<T>(
+  items: ReadonlyArray<T>,
   requestedPage: number,
   pageSize: number,
 ) {
@@ -57,11 +66,11 @@ export function paginateServices(
     throw new RangeError("Page size must be a positive integer.");
   }
 
-  const pageCount = Math.max(1, Math.ceil(services.length / pageSize));
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const page = Math.min(Math.max(1, requestedPage), pageCount);
 
   return {
-    items: services.slice((page - 1) * pageSize, page * pageSize),
+    items: items.slice((page - 1) * pageSize, page * pageSize),
     page,
     pageCount,
   } as const;

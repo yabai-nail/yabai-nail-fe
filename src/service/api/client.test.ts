@@ -1,5 +1,5 @@
-import type { AxiosAdapter } from "axios";
-import { describe, expect, it } from "vitest";
+import { AxiosError, type AxiosAdapter } from "axios";
+import { describe, expect, it, vi } from "vitest";
 
 import { createApiClient } from "./client";
 
@@ -38,6 +38,31 @@ describe("createApiClient", () => {
     };
 
     await client.get("https://example.com/data", { adapter });
+  });
+
+  it("does not refresh or leak an admin token when an external upload returns 401", async () => {
+    const refreshAdminAccessToken = vi.fn().mockResolvedValue("fresh-admin-token");
+    const client = createApiClient({
+      getAccessToken: () => "admin-token",
+      refreshAdminAccessToken,
+    });
+    const adapter: AxiosAdapter = async (config) => {
+      throw new AxiosError(
+        "Unauthorized",
+        "ERR_BAD_REQUEST",
+        config,
+        undefined,
+        { config, data: {}, headers: {}, status: 401, statusText: "Unauthorized" },
+      );
+    };
+
+    await expect(client.request({
+      url: "https://storage.example/signed-upload",
+      method: "PUT",
+      authScope: "admin",
+      adapter,
+    } as Parameters<typeof client.request>[0] & { authScope: "admin" })).rejects.toBeDefined();
+    expect(refreshAdminAccessToken).not.toHaveBeenCalled();
   });
 
   it("uses an explicit admin token for a shared media route", async () => {

@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 import type { AccountRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { useTranslations } from "next-intl";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const roleOptions = ["STAFF", "MANAGER", "OWNER"];
@@ -22,9 +23,10 @@ export function AccountModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.accounts");
-  const roleLabel = (code: string) => (t.has(`role.${code}`) ? t(`role.${code}`) : code);
-  const statusLabel = (code: string) => (t.has(`status.${code}`) ? t(`status.${code}`) : code);
-
+  const statusLabel = (code: string) =>
+    t.has(`status.${code}`) ? t(`status.${code}`) : code;
+  const roleLabel = (code: string) =>
+    t.has(`role.${code}`) ? t(`role.${code}`) : code;
   const isEdit = account !== null;
   const [phone, setPhone] = useState(account?.phone ?? "");
   const [displayName, setDisplayName] = useState(account?.displayName ?? "");
@@ -54,6 +56,7 @@ export function AccountModal({
           temporaryPassword,
         });
       }
+      notifySuccess(isEdit ? "Đã cập nhật tài khoản" : "Đã thêm tài khoản");
       onSaved();
       onClose();
     } catch (err) {
@@ -84,9 +87,9 @@ export function AccountModal({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">{t("modal.role")}</span>
+                  <span className="font-semibold text-admin-ink">{t("columns.role")}</span>
                   <AdminSelectField
-                    label={t("modal.role")}
+                    label={t("columns.role")}
                     fullWidth
                     value={role}
                     onChange={setRole}
@@ -95,7 +98,7 @@ export function AccountModal({
                 </div>
                 {isEdit ? (
                   <div className="flex flex-col gap-2 text-sm">
-                    <span className="font-semibold text-admin-ink">{t("modal.status")}</span>
+                    <span className="font-semibold text-admin-ink">{t("columns.status")}</span>
                     <AdminSelectField
                       label={t("modal.statusLabel")}
                       fullWidth

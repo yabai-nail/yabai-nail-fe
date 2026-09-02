@@ -72,14 +72,14 @@ export function AppointmentsPanel() {
   );
 
   return (
-    <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-5">
+    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-4">
       <Card.Header className="flex w-full flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">{t("appointments.heading")}</h2>
         <Button size="sm" variant="outline" className="rounded-lg border-admin-border" onPress={() => router.push("/admin/appointments")}>
           Xem lịch
         </Button>
       </Card.Header>
-      <Card.Content className="px-4 pb-4 pt-2 sm:px-5 sm:pb-5">
+      <Card.Content className="flex flex-1 flex-col px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {error ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
             Không tải được lịch hẹn hôm nay.
@@ -123,7 +123,9 @@ export function AppointmentsPanel() {
           </ol>
         )}
 
-        <Button fullWidth variant="primary" className="mt-3 rounded-lg" onPress={() => router.push("/admin/appointments?create=1")}>
+        {/* mt-auto pins the action to the bottom edge, so the three cards in this
+            row end on one line however many appointments the day holds. */}
+        <Button fullWidth variant="primary" className="mt-auto pt-3 rounded-lg" onPress={() => router.push("/admin/appointments?create=1")}>
           <PlusIcon aria-hidden="true" className="size-5" />
           Thêm lịch hẹn
         </Button>

@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
@@ -20,9 +21,9 @@ const pageSize = 8;
 
 export function AdminBranchesComponent() {
   const t = useTranslations("admin.branches");
-  const { data, isLoading, error, mutate } = useAdminBranchList();
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
+  const { data, isLoading, error, mutate } = useAdminBranchList();
 
   const source = useMemo<ReadonlyArray<BranchRow>>(
     () => (data?.items ? data.items.map(adaptBranch) : []),
@@ -36,12 +37,10 @@ export function AdminBranchesComponent() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = useAdminBranchDetail(detailId);
   const detailRecord = detail.data as unknown as Record<string, unknown> | undefined;
-  // The row labels are the object's keys, so the whole record is built from the
-  // catalogue rather than declared as a literal.
   const detailRows = detailRecord ? {
     [t("detail.name")]: String(detailRecord.name ?? t("detail.unnamed")),
-    [t("detail.address")]: String(detailRecord.address ?? "—"),
-    [t("detail.status")]: typeof detailRecord.active === "boolean"
+    [t("columns.address")]: String(detailRecord.address ?? "—"),
+    [t("columns.status")]: typeof detailRecord.active === "boolean"
       ? statusLabel(detailRecord.active ? "ACTIVE" : "INACTIVE")
       : "—",
     [t("detail.timezone")]: String(detailRecord.timezone ?? detailRecord.timeZone ?? "—"),
@@ -58,7 +57,7 @@ export function AdminBranchesComponent() {
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-          <PlusIcon className="size-4" />{t("add")}
+          <PlusIcon className="size-4" />Thêm chi nhánh
         </Button>
       </div>
 
@@ -105,12 +104,8 @@ export function AdminBranchesComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
-          <div className="flex gap-1">
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-              <Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>
-            ))}
-          </div>
+          <span>Hiển thị {visible.length} trong tổng số {filtered.length} chi nhánh</span>
+          <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 

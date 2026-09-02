@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   CalendarDaysIcon,
   CheckCircleIcon,
@@ -5,11 +6,10 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { Card } from "@heroui/react";
-import { useTranslations } from "next-intl";
 import type { getAppointmentSummary } from "./appointment-state";
 
 /**
- * Four of the five tiles count a status, so they take their name from the shared status
+ * Four of the five rows count a status, so they take their name from the shared status
  * catalogue instead of holding a second copy of it; only the total is this screen's own.
  */
 const metrics = [
@@ -23,27 +23,28 @@ const metrics = [
 export function AppointmentSummary({ summary }: Readonly<{ summary: ReturnType<typeof getAppointmentSummary> }>) {
   const t = useTranslations("admin.appointments");
   const tStatus = useTranslations("admin.appointmentStatus");
-  // overflow-hidden on the card because the tile grid paints its own background
-  // to draw the rules: without it those square corners sit outside the card's
-  // radius and the bottom two corners read as broken.
   return (
-    <Card className="mt-4 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+    <Card className="mt-4 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="border-b border-admin-border px-4 py-3">
         <h2 className="text-sm font-bold text-admin-ink">{t("summary.heading")}</h2>
       </Card.Header>
-      {/* Five tiles on one row, and the label wraps rather than the grid.
-          Wrapping the grid was the wrong lever twice over: it left the last row
-          short, so the empty track painted the rule colour as a solid block, and
-          a per-tile border-r only lines up while every tile shares one row.
-          A fixed five columns can never leave a gap, so a 1px gap over a
-          border-coloured background draws every rule correctly; the card is
-          narrow, so the labels take two lines and that is fine. */}
-      <Card.Content className="grid grid-cols-5 gap-px bg-admin-border p-0">
+      {/* One metric per row, not five tiles across. This card is 270px wide, so
+          five columns gave each label 54px to live in and every label longer
+          than that broke over two lines — t("summary.total") needs 78px. Down the
+          page each label has the full width and none of them can wrap, however
+          many metrics get added later.
+
+          Still a grid, single column: card__content is a flex slot that centres
+          its children, so a plain block or flex wrapper here would shrink to fit
+          its text instead of filling the card. Grid items stretch. */}
+      <Card.Content className="grid grid-cols-1 divide-y divide-admin-border p-0">
         {metrics.map(({ key, statusKey, icon: Icon, color }) => (
-          <div key={key} className="bg-admin-surface px-1.5 py-4 text-center">
-            <Icon className={`mx-auto size-5 ${color}`} />
-            <strong className="mt-2 block text-lg text-admin-ink">{summary[key]}</strong>
-            <span className="mt-1 block text-[0.68rem] leading-tight text-admin-muted">{statusKey ? tStatus(statusKey) : t("summary.total")}</span>
+          <div key={key} className="flex items-center gap-3 px-4 py-2.5">
+            <Icon className={`size-5 shrink-0 ${color}`} />
+            <span className="flex-1 text-xs text-admin-muted">{statusKey ? tStatus(statusKey) : t("summary.total")}</span>
+            {/* tabular-nums so the column of figures stays aligned once a
+                two-digit day sits above a one-digit one. */}
+            <strong className="text-lg tabular-nums text-admin-ink">{summary[key]}</strong>
           </div>
         ))}
       </Card.Content>

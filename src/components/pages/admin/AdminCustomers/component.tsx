@@ -4,12 +4,14 @@ import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminBranch, useAdminCustomer, useAdminCustomers, type AdminCustomer } from "@/service";
 import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
@@ -116,7 +118,15 @@ export function AdminCustomersComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 xl:flex-row xl:items-end xl:justify-between">
-        <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as CustomerFilter)} variant="secondary">
+        {/*
+          min-w-0 is what makes the tabs' own overflow-x-auto work. Without it
+          the tab strip is a flex item at min-width:auto, so it claims its full
+          585px and never scrolls; the row then needs 1029px of the 973px it
+          has, and the 56px it is short come off the right-hand end — the
+          "Thêm khách hàng" button, cut in half, with the whole page scrolling
+          sideways behind it.
+        */}
+        <Tabs className="min-w-0" selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as CustomerFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
             <Tabs.List aria-label={t("tabsLabel")}>
               <Tabs.Tab id="all">
@@ -138,7 +148,10 @@ export function AdminCustomersComponent() {
             </Tabs.List>
           </Tabs.ListContainer>
         </Tabs>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        {/* shrink-0: when the row runs short the tabs give way, not the search
+            box and the button. A tab strip that scrolls still works; a button
+            sliced down the middle does not. */}
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
           {/* "Bộ lọc" was a button with no handler. The tabs above already filter by
               segment and the search box filters by name and phone; there was no third
               dimension for it to open, so it only ever looked like a control. */}
@@ -202,9 +215,8 @@ export function AdminCustomersComponent() {
               customers={visibleCustomers}
               selectedId={selectedCustomer?.id ?? null}
               onSelect={setSelectedId}
-              onEdit={branchId ? (id) => { setSelectedId(id); setEditError(null); setIsEditOpen(true); } : undefined}
             /></Card.Content>
-            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị {firstShown} - {firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1} trong tổng số {filteredCustomers.length} khách hàng</span><div className="flex gap-1">{Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (<Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>))}</div></Card.Footer>
+            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị {firstShown} - {firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1} trong tổng số {filteredCustomers.length} khách hàng</span><AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} /></Card.Footer>
           </Card>
         </AdminSplitLayout>
       )}
@@ -231,6 +243,7 @@ export function AdminCustomersComponent() {
                 patch,
                 detailedCustomer.version,
               );
+              notifySuccess("Đã cập nhật khách hàng");
               setIsEditOpen(false);
               void mutateCustomers();
             } catch (thrown) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getApiOperation } from "../api";
-import { adminMediaService, mediaService } from "./service";
+import { adminMediaService, mediaService, toUploadRequestUrl } from "./service";
 
 const MEDIA_OPERATION_IDS = [
   "POST /api/v1/media/uploads",
@@ -26,9 +26,24 @@ describe("mediaService", () => {
         service.abortUpload,
         service.deleteMedia,
         service.accessUrl,
+        service.uploadFile,
       ]) {
         expect(typeof fn).toBe("function");
       }
     }
+  });
+
+  it("uses a relative URL for uploads targeting this API so auth is retained", () => {
+    expect(
+      toUploadRequestUrl(
+        "http://localhost:4000/api/v1/media/uploads/media-1/content",
+        "http://localhost:4000/api/v1",
+      ),
+    ).toBe("/media/uploads/media-1/content");
+  });
+
+  it("leaves third-party signed upload URLs absolute so auth is not leaked", () => {
+    const signed = "https://storage.example/private/media-1?signature=secret";
+    expect(toUploadRequestUrl(signed, "http://localhost:4000/api/v1")).toBe(signed);
   });
 });

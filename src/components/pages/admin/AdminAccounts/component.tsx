@@ -1,11 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAccounts,
@@ -16,7 +19,6 @@ import {
 } from "@/service";
 import { AccountModal } from "./AccountModal";
 import { ResetPasswordModal } from "./ResetPasswordModal";
-import { useTranslations } from "next-intl";
 import {
   accountRoles,
   adaptAccount,
@@ -30,9 +32,10 @@ type Tab = "accounts" | "config";
 
 export function AdminAccountsComponent() {
   const t = useTranslations("admin.accounts");
-  const roleLabel = (code: string) => (t.has(`role.${code}`) ? t(`role.${code}`) : code);
-  const statusLabel = (code: string) => (t.has(`status.${code}`) ? t(`status.${code}`) : code);
-
+  const statusLabel = (code: string) =>
+    t.has(`status.${code}`) ? t(`status.${code}`) : code;
+  const roleLabel = (code: string) =>
+    t.has(`role.${code}`) ? t(`role.${code}`) : code;
   const [tab, setTab] = useState<Tab>("accounts");
   const { data, isLoading, error, mutate } = useAdminAccounts();
 
@@ -148,11 +151,7 @@ export function AdminAccountsComponent() {
             </Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
               <span>Hiển thị {visible.length} trong tổng số {filtered.length} tài khoản</span>
-              <div className="flex gap-1">
-                {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-                  <Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>
-                ))}
-              </div>
+              <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
             </Card.Footer>
           </Card>
         </>
@@ -169,7 +168,6 @@ export function AdminAccountsComponent() {
 
 function ConfigPanel() {
   const t = useTranslations("admin.accounts");
-
   const system = useAdminSystemConfig();
   const loyalty = useAdminLoyaltyConfig();
 
@@ -198,17 +196,15 @@ function SystemFeaturesForm({
   onSaved,
 }: Readonly<{ config: AdminSystemConfig; onSaved: () => void }>) {
   const t = useTranslations("admin.accounts");
-
   const [features, setFeatures] = useState<Record<string, boolean>>(() => ({ ...(config.features ?? {}) }));
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.updateSystemConfig({ features }, config.version);
-      setMessage(t("systemSaved"));
+      notifySuccess("Đã lưu cấu hình hệ thống");
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("systemSaveFailed"));
@@ -230,7 +226,6 @@ function SystemFeaturesForm({
           </label>
         ))
       )}
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveFeatures")}</Button>
@@ -244,7 +239,6 @@ function LoyaltyConfigForm({
   onSaved,
 }: Readonly<{ config: AdminLoyaltyConfig; onSaved: () => void }>) {
   const t = useTranslations("admin.accounts");
-
   // Seed the editor with the whole config, minus the fields the server owns.
   // It used to seed { tiers, rules } only — `rules` is not part of the response
   // at all, and dropping pointRate, redemptionCapPercent and redemptionIncrement
@@ -257,7 +251,6 @@ function LoyaltyConfigForm({
     return JSON.stringify(editable, null, 2);
   });
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
@@ -268,10 +261,10 @@ function LoyaltyConfigForm({
       setError(t("loyaltyInvalidJson"));
       return;
     }
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.updateLoyaltyConfig(parsed, config.version);
-      setMessage(t("loyaltySaved"));
+      notifySuccess("Đã lưu cấu hình loyalty");
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("loyaltySaveFailed"));
@@ -284,7 +277,6 @@ function LoyaltyConfigForm({
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">{t("loyaltyHeading")}</h2>
       <textarea className="min-h-40 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 font-mono text-xs text-admin-ink" value={text} onChange={(event) => setText(event.target.value)} />
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveLoyalty")}</Button>

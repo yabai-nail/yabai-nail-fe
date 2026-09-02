@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { adminService, useAdminBranchSettings } from "@/service";
-import { useTranslations } from "next-intl";
+import { notifySuccess } from "@/lib/app-toast";
 
 type BookingConfig = {
   windowDays: number;
@@ -26,9 +27,7 @@ function readNumber(source: Readonly<Record<string, unknown>> | undefined, key: 
 // fields the platform doc calls out: window, cancellation cutoff, slot
 // interval. Everything else stays in the placeholder tabs until a caller
 // asks for it.
-export function BranchSettingsForm({
-  branchId,
-}: Readonly<{ branchId: string }>) {
+export function BranchSettingsForm({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.settings");
   const query = useAdminBranchSettings(branchId);
   const settings = query.data;
@@ -77,6 +76,7 @@ export function BranchSettingsForm({
         },
         settings?.version,
       );
+      notifySuccess("Đã cập nhật cài đặt đặt lịch");
       void query.mutate();
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : t("booking.saveFailed"));

@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { SWRConfig } from "swr";
 
 import { apiFetcher, AuthProvider } from "@/service";
+import { AppToastProvider } from "@/components/overlays/AppToastProvider";
 
 export interface AppProvidersProps {
   locale: string;
@@ -26,6 +27,7 @@ export function AppProviders({
           <AuthProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               {children}
+              <AppToastProvider />
             </ThemeProvider>
           </AuthProvider>
         </SWRConfig>

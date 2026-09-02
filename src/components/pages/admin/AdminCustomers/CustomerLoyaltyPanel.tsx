@@ -6,6 +6,7 @@ import { Button } from "@heroui/react";
 import { useState } from "react";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { formatMoney, formatNumber } from "@/lib/admin-format";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminCustomerBenefits,
@@ -21,13 +22,11 @@ export function CustomerLoyaltyPanel({
   customerId,
 }: Readonly<{ branchId: string; customerId: string }>) {
   const t = useTranslations("admin.customers");
-  const tTier = useTranslations("admin.tier");
   const benefitsQuery = useAdminCustomerBenefits(branchId, customerId);
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
   const promotionsQuery = useAdminPromotions();
   const benefits = benefitsQuery.data;
-  const tier = benefits?.tier?.toUpperCase();
-  const tierLabel = tier ? (tTier.has(tier) ? tTier(tier) : benefits!.tier!) : "—";
+  const tierLabel = benefits?.tier ? ({ MEMBER: "Thành viên", SILVER: t("rank.silver"), GOLD: t("rank.gold"), PLATINUM: "Bạch kim" }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
   const history = historyQuery.data?.items ?? [];
   const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 
@@ -46,6 +45,7 @@ export function CustomerLoyaltyPanel({
         pointsSigned: delta,
         reasonCode: reason.trim(),
       }, benefits?.version);
+      notifySuccess("Đã cập nhật điểm khách hàng");
       setDeltaText("");
       setReason("");
       await benefitsQuery.mutate();
@@ -70,6 +70,7 @@ export function CustomerLoyaltyPanel({
       await adminService.issueCustomerCoupon(branchId, customerId, {
         couponId: couponId.trim(),
       }, benefits?.version);
+      notifySuccess("Đã phát coupon cho khách hàng");
       setCouponId("");
       await benefitsQuery.mutate();
     } catch (thrown) {
@@ -94,11 +95,11 @@ export function CustomerLoyaltyPanel({
       ) : (
         <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
-            <dt className="text-admin-muted">{t("loyalty.tier")}</dt>
+            <dt className="text-admin-muted">{t("detail.rank")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">{tierLabel}</dd>
           </div>
           <div>
-            <dt className="text-admin-muted">{t("loyalty.points")}</dt>
+            <dt className="text-admin-muted">{t("detail.points")}</dt>
             <dd className="mt-1 font-bold text-admin-accent">
               {typeof benefits?.pointBalance === "number" ? formatNumber(benefits.pointBalance) : "—"}
             </dd>
@@ -117,19 +118,23 @@ export function CustomerLoyaltyPanel({
           <SparklesIcon className="size-4 text-admin-accent" />
           Cộng / trừ điểm
         </p>
+        {/* min-w-0 on both inputs: an input's automatic minimum is its own
+            intrinsic width, 184px here, so the 1fr track could not shrink below
+            that and the pair needed 288px inside a 260px card. The reason field
+            hung 28px out over the border. */}
         <div className="grid grid-cols-[6rem_1fr] gap-2 text-xs">
           <input
             type="number"
             value={deltaText}
             onChange={(event) => setDeltaText(event.target.value)}
             placeholder={t("loyalty.pointsPlaceholder")}
-            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+            className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
           <input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
             placeholder={t("loyalty.reasonPlaceholder")}
-            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+            className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
         </div>
         <div className="flex justify-end">

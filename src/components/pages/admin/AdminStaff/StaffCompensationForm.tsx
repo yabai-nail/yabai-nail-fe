@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { formatMoney } from "@/lib/admin-format";
+import { notifySuccess } from "@/lib/app-toast";
 import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
@@ -52,6 +53,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
         // version 0, which is the correct first-write value.
         compensation?.version ?? 0,
       );
+      notifySuccess("Đã cập nhật lương và hoa hồng");
       setBaseSalary("");
       setRate("");
       void query.mutate();
@@ -63,7 +65,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
   }
 
   return (
-    <section aria-labelledby="staff-compensation-heading" className="space-y-3 border-t border-admin-border pt-4">
+    <section aria-labelledby="staff-compensation-heading" className="space-y-3">
       <h3 id="staff-compensation-heading" className="text-sm font-bold text-admin-ink">
         Cấu hình hoa hồng
       </h3>

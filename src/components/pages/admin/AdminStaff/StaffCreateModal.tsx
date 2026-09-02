@@ -5,6 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService } from "@/service";
+import { notifySuccess } from "@/lib/app-toast";
 
 // Staff creation carries a `branchId` because staff records are branch-
 // scoped even though the admin `staff` list is org-level. Adding a
@@ -35,6 +36,7 @@ export function StaffCreateModal({
         displayName: name.trim(),
         branchId,
       });
+      notifySuccess("Đã thêm nhân viên");
       onCreated();
       onClose();
     } catch (err) {

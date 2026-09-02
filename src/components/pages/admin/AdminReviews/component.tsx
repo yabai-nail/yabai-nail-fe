@@ -1,11 +1,13 @@
 "use client";
 
-import { Button, Card } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminReviews } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
@@ -62,6 +64,7 @@ export function AdminReviewsComponent() {
     const next = row.handlingStatus === "RESOLVED" ? "NEW" : "RESOLVED";
     try {
       await adminService.updateBranchReviewHandling(branchId, row.id, { status: next }, row.version);
+      notifySuccess(next === "RESOLVED" ? "Đã xử lý đánh giá" : "Đã mở lại đánh giá");
       void mutate();
     } catch (err) {
       setActionError(err instanceof Error && err.message ? err.message : t("updateFailed"));
@@ -86,7 +89,7 @@ export function AdminReviewsComponent() {
       </div>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          {t("handlingLabel")}
+          Trạng thái xử lý
           <AdminSelectField
             label={t("filterLabel")}
             value={status}
@@ -129,7 +132,7 @@ export function AdminReviewsComponent() {
               {visible.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">
-                    {t("empty")}
+                    Không có đánh giá phù hợp.
                   </td>
                 </tr>
               ) : (
@@ -137,7 +140,7 @@ export function AdminReviewsComponent() {
                   <tr key={row.id} className="border-b border-admin-border align-top last:border-0">
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.customerName}</td>
                     {/* The API scores service and staff separately; one column showed neither. */}
-                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={t("ratingLabel", { service: row.serviceRating, staff: row.staffRating })}>
+                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={`Dịch vụ ${row.serviceRating} sao, nhân viên ${row.staffRating} sao`}>
                       <span className="block">{ratingStars(row.serviceRating)} <span className="text-xs text-admin-muted">{t("ratingService")}</span></span>
                       <span className="block">{ratingStars(row.staffRating)} <span className="text-xs text-admin-muted">{t("ratingStaff")}</span></span>
                     </td>
@@ -152,7 +155,7 @@ export function AdminReviewsComponent() {
                       {scope === "branch" ? (
                         <div className="flex justify-end gap-2">
                           <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setReplyTo(row)}>
-                            {t("reply")}
+                            Trả lời
                           </Button>
                           <Button
                             size="sm"
@@ -161,7 +164,7 @@ export function AdminReviewsComponent() {
                             isDisabled={!branchId}
                             onPress={() => void toggleResolved(row)}
                           >
-                            {row.handlingStatus === "RESOLVED" ? t("reopen") : t("markResolved")}
+                            {row.handlingStatus === "RESOLVED" ? t("reopen") : t("status.RESOLVED")}
                           </Button>
                         </div>
                       ) : (
@@ -175,20 +178,8 @@ export function AdminReviewsComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
-          <div className="flex gap-1">
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={currentPage === value ? "outline" : "ghost"}
-                className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"}
-                onPress={() => setPage(value)}
-              >
-                {value}
-              </Button>
-            ))}
-          </div>
+          <span>Hiển thị {visible.length} trong tổng số {filtered.length} đánh giá</span>
+          <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 

@@ -4,9 +4,11 @@ import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
@@ -29,6 +31,8 @@ export function AdminMarketingComponent() {
   const t = useTranslations("admin.marketing");
   const statusLabel = (code: string) =>
     t.has(`promotionStatus.${code}`) ? t(`promotionStatus.${code}`) : code;
+  const kindLabel = (code: string) =>
+    t.has(`promotionKind.${code}`) ? t(`promotionKind.${code}`) : code;
   const [tab, setTab] = useState<Tab>("promotions");
   const { data, isLoading, error, mutate } = useAdminPromotions();
 
@@ -65,6 +69,7 @@ export function AdminMarketingComponent() {
     setStatusError(null);
     try {
       await adminService.updatePromotion(row.id, { status: next }, row.version);
+      notifySuccess(next === "ACTIVE" ? "Đã kích hoạt khuyến mãi" : "Đã tạm ngưng khuyến mãi");
       void mutate();
     } catch (thrown) {
       setStatusError(thrown instanceof Error ? thrown.message : t("statusChangeFailed"));
@@ -148,7 +153,7 @@ export function AdminMarketingComponent() {
                       <tr key={row.id} className="border-b border-admin-border last:border-0">
                         <td className="px-4 py-3 font-mono text-admin-ink">{row.code}</td>
                         <td className="px-4 py-3 text-admin-ink">{row.title}</td>
-                        <td className="px-4 py-3 text-admin-muted">{t.has(`promotionKind.${row.type}`) ? t(`promotionKind.${row.type}`) : row.type}</td>
+                        <td className="px-4 py-3 text-admin-muted">{kindLabel(row.type)}</td>
                         <td className="px-4 py-3 font-semibold text-admin-ink">{formatDiscount(row)}</td>
                         <td className="px-4 py-3">
                           <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
@@ -159,7 +164,7 @@ export function AdminMarketingComponent() {
                           <div className="flex justify-end gap-2">
                             <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
                             <Button size="sm" variant="outline" className="rounded-lg" isDisabled={statusPending === row.id} onPress={() => void toggleStatus(row)}>
-                              {row.status === "ACTIVE" ? t("pause") : t("activate")}
+                              {row.status === "ACTIVE" ? t("promotionStatus.INACTIVE") : t("activate")}
                             </Button>
                             <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>{t("issue")}</Button>
                           </div>
@@ -172,11 +177,7 @@ export function AdminMarketingComponent() {
             </Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
               <span>Hiển thị {visible.length} trong tổng số {filtered.length} khuyến mãi</span>
-              <div className="flex gap-1">
-                {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-                  <Button key={value} size="sm" variant={currentPage === value ? "outline" : "ghost"} className={currentPage === value ? "min-w-9 rounded-lg border-admin-accent text-admin-accent" : "min-w-9"} onPress={() => setPage(value)}>{value}</Button>
-                ))}
-              </div>
+              <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
             </Card.Footer>
           </Card>
         </>
@@ -210,7 +211,6 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
   const [channel, setChannel] = useState("PUSH");
   const [template, setTemplate] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
 
@@ -228,7 +228,6 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
     if (name.trim().length < 2 || template.trim().length < 2) return;
     setBusy(true);
     setError(null);
-    setMessage(null);
     try {
       const campaignName = name.trim();
       const campaign = await adminService.createNotificationCampaign({
@@ -237,7 +236,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         message: template.trim(),
       });
       onCreated({ id: campaign.campaignId, name: campaignName });
-      setMessage(t("campaignCreated", { status: campaignStatusLabel(campaign.status, t) }));
+      notifySuccess("Đã tạo chiến dịch", `Trạng thái: ${campaignStatusLabel(campaign.status, t)}.`);
       setName("");
       setTemplate("");
     } catch (err) {
@@ -272,13 +271,12 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
       </div>
       <label className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">{t("template")}</span>
-        <textarea className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder={t("templatePlaceholder")} />
+        <textarea className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder="Chào {{name}}, ưu đãi tháng 9..." />
       </label>
       <div className="flex items-center gap-3">
         <Button variant="outline" className="rounded-lg" onPress={() => void runPreview()}>{t("previewAudience")}</Button>
         {preview !== null ? <span className="text-sm text-admin-muted">{preview.toLocaleString("vi-VN")} khách phù hợp</span> : null}
       </div>
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
         <Button variant="primary" className="rounded-lg" isDisabled={busy || name.trim().length < 2 || template.trim().length < 2} onPress={() => void createCampaign()}>
@@ -293,16 +291,15 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
   const t = useTranslations("admin.marketing");
   const metrics = useAdminNotificationCampaignMetrics(campaign?.id ?? null);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audience, setAudience] = useState<number | null>(null);
 
   const cancel = async () => {
     if (!campaign) return;
-    setBusy(true); setError(null); setMessage(null);
+    setBusy(true); setError(null);
     try {
       await adminService.cancelNotificationCampaign(campaign.id, undefined, metrics.data?.version);
-      setMessage(t("campaignCancelled"));
+      notifySuccess("Đã hủy chiến dịch");
       void metrics.mutate();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("campaignCancelFailed"));
@@ -322,7 +319,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
   };
 
   const metricLabels: Record<string, string> = {
-    status: t("metrics.status"),
+    status: t("columns.status"),
     estimatedRecipients: t("metrics.estimatedRecipients"),
     targetedCount: t("metrics.targetedCount"),
     processedRecipientCount: t("metrics.processedRecipientCount"),
@@ -339,7 +336,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">
-        {campaign ? t("trackerTitle", { name: campaign.name }) : t("trackerEmptyTitle")}
+        {campaign ? `Chiến dịch — ${campaign.name}` : t("trackerEmptyTitle")}
       </h2>
       {!campaign ? <p className="text-xs text-admin-muted">{t("trackerEmptyBody")}</p> : null}
       {campaign ? (
@@ -367,7 +364,6 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
           <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>{t("cancelCampaign")}</Button>
         ) : null}
       </div>
-      {message ? <p className="text-sm text-admin-accent">{message}</p> : null}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
     </Card>
   );

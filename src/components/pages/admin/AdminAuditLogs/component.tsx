@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Button, Card } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
@@ -106,7 +107,7 @@ export function AdminAuditLogsComponent() {
                 <th className="px-4 py-3">{t("columns.action")}</th>
                 <th className="px-4 py-3">{t("columns.actor")}</th>
                 <th className="px-4 py-3">{t("columns.target")}</th>
-                <th className="px-4 py-3">{t("columns.branch")}</th>
+                <th className="px-4 py-3">{t("resource.Branch")}</th>
               </tr>
             </thead>
             <tbody>
@@ -150,23 +151,7 @@ export function AdminAuditLogsComponent() {
           <span>
             Hiển thị {visible.length} trong tổng số {filtered.length} bản ghi
           </span>
-          <div className="flex gap-1">
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((value) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={currentPage === value ? "outline" : "ghost"}
-                className={
-                  currentPage === value
-                    ? "min-w-9 rounded-lg border-admin-accent text-admin-accent"
-                    : "min-w-9"
-                }
-                onPress={() => setPage(value)}
-              >
-                {value}
-              </Button>
-            ))}
-          </div>
+          <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 
@@ -181,7 +166,7 @@ export function AdminAuditLogsComponent() {
               [t("columns.action")]: auditActionLabel(entry.action, t),
               [t("columns.actor")]: entry.actor,
               [t("columns.target")]: entry.target,
-              [t("columns.branch")]: entry.branch ?? t("allBranches"),
+              [t("resource.Branch")]: entry.branch ?? t("allBranches"),
               [t("columns.time")]: formatAuditTime(entry.createdAt),
             };
           })() : undefined}

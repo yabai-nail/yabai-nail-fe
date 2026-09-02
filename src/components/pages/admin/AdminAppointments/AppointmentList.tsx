@@ -1,10 +1,9 @@
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { Avatar, Button, Card } from "@heroui/react";
 import type { Appointment } from "./data";
 import {
-  appointmentStatusColor,
   appointmentStatusLabel,
+  appointmentStatusTone,
 } from "./status";
 
 export function AppointmentList({
@@ -18,7 +17,6 @@ export function AppointmentList({
 }>) {
   const t = useTranslations("admin.appointments");
   const tStatus = useTranslations("admin.appointmentStatus");
-
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="border-b border-admin-border px-4 py-3">
@@ -26,33 +24,44 @@ export function AppointmentList({
       </Card.Header>
       <Card.Content className="p-0">
         {appointments.length ? (
+          /*
+            Three tiers, not one row. This column is 19rem wide, so the row had
+            270px to seat six fields; five of them were shrink-0 and the two that
+            actually vary in length — the customer's name and the service — split
+            the 71px left over. "Sơn móng tay 1" wanted 87px of it. Down the
+            tiers each of them gets the full width, and a Vietnamese name at its
+            usual length fits without cutting. The clock is one range now
+            (10:00 – 11:00) instead of a start on the left and an end floating on
+            the right, and the status wears the same dot the calendar pills wear.
+          */
           <ol className="divide-y divide-admin-border" aria-label={t("list.ariaLabel")}>
-            {appointments.map((appointment) => (
-              <li key={appointment.id} className={selectedId === appointment.id ? "bg-admin-soft" : undefined}>
-                <Button
-                  variant="ghost"
-                  className="h-auto min-h-20 w-full justify-start rounded-none px-3 py-3 text-left"
-                  onPress={() => onSelect(appointment.id)}
-                >
-                  <time dateTime={`${appointment.date}T${appointment.startTime}`} className="w-12 shrink-0 self-start pt-1 text-sm font-bold text-admin-accent">
-                    {appointment.startTime}
-                  </time>
-                  <Avatar size="sm" color="accent"><Avatar.Fallback>{appointment.customer.initials}</Avatar.Fallback></Avatar>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold text-admin-ink">{appointment.customer.name}</span>
-                    <span className="mt-1 block truncate text-xs text-admin-muted">{appointment.service.name}</span>
-                    <span className="mt-1 block text-[0.65rem] text-admin-accent sm:hidden">{appointmentStatusLabel(appointment.status, tStatus)}</span>
-                  </span>
-                  <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
-                    <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]}>
-                      <Chip.Label>{appointmentStatusLabel(appointment.status, tStatus)}</Chip.Label>
-                    </Chip>
-                    <span className="text-xs text-admin-muted">{appointment.endTime}</span>
-                  </span>
-                  <ChevronRightIcon className="size-4 shrink-0 text-admin-muted" />
-                </Button>
-              </li>
-            ))}
+            {appointments.map((appointment) => {
+              const tone = appointmentStatusTone[appointment.status];
+              return (
+                <li key={appointment.id} className={selectedId === appointment.id ? "bg-admin-soft" : undefined}>
+                  <Button
+                    variant="ghost"
+                    className={`h-auto w-full justify-start rounded-none border-l-4 px-3 py-2.5 text-left ${tone.bar}`}
+                    onPress={() => onSelect(appointment.id)}
+                  >
+                    <Avatar size="sm" color="accent" className="shrink-0"><Avatar.Fallback>{appointment.customer.initials}</Avatar.Fallback></Avatar>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-2">
+                        <time dateTime={`${appointment.date}T${appointment.startTime}`} className="shrink-0 text-[0.7rem] font-bold text-admin-ink">
+                          {appointment.startTime} – {appointment.endTime}
+                        </time>
+                        <span className="flex shrink-0 items-center gap-1 text-[0.65rem] text-admin-muted">
+                          <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
+                          {appointmentStatusLabel(appointment.status, tStatus)}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs font-semibold text-admin-ink">{appointment.customer.name}</span>
+                      <span className="block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
+                    </span>
+                  </Button>
+                </li>
+              );
+            })}
           </ol>
         ) : (
           <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">{t("list.empty")}</p>

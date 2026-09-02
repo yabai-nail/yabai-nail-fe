@@ -20,7 +20,7 @@ export function ServiceTable({
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
             <th scope="col" className="px-4 py-3">{t("table.service")}</th>
-            <th scope="col" className="px-3 py-3">{t("table.type")}</th>
+            <th scope="col" className="px-3 py-3">Danh mục</th>
             <th scope="col" className="px-3 py-3">{t("table.price")}</th>
             <th scope="col" className="px-3 py-3">{t("table.duration")}</th>
             <th scope="col" className="px-3 py-3">{t("table.status")}</th>
@@ -32,13 +32,22 @@ export function ServiceTable({
             <tr key={service.id}>
               <td className="px-4 py-2">
                 <div className="flex items-center gap-3">
-                  <span aria-hidden="true" className={`size-11 shrink-0 rounded-lg border border-admin-border ${index % 2 ? "bg-gradient-to-br from-rose-100 to-amber-50" : "bg-gradient-to-br from-pink-100 to-fuchsia-50"}`} />
+                  {service.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={service.imageUrl}
+                      alt=""
+                      className="size-11 shrink-0 rounded-lg border border-admin-border object-cover"
+                    />
+                  ) : (
+                    <span aria-hidden="true" className={`size-11 shrink-0 rounded-lg border border-admin-border ${index % 2 ? "bg-gradient-to-br from-rose-100 to-amber-50" : "bg-gradient-to-br from-pink-100 to-fuchsia-50"}`} />
+                  )}
                   <strong>{service.name}</strong>
                 </div>
               </td>
               <td className="px-3 py-2">
-                <Chip size="sm" variant="soft" color={service.category === "primary" ? "accent" : service.category === "addon" ? "warning" : "default"}>
-                  <Chip.Label>{t(`category.${service.category}`)}</Chip.Label>
+                <Chip size="sm" variant="soft" color={service.category ? "accent" : "warning"}>
+                  <Chip.Label>{service.category?.name || "Chưa phân loại"}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
@@ -54,7 +63,7 @@ export function ServiceTable({
                     isIconOnly
                     size="sm"
                     variant="ghost"
-                    aria-label={t("table.editService", { name: service.name })}
+                    aria-label={`Sửa ${service.name}`}
                     isDisabled={!onEdit || service.version === undefined}
                     onPress={onEdit ? () => onEdit(service) : undefined}
                   >
