@@ -115,7 +115,15 @@ export function AdminCustomersComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 xl:flex-row xl:items-end xl:justify-between">
-        <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as CustomerFilter)} variant="secondary">
+        {/*
+          min-w-0 is what makes the tabs' own overflow-x-auto work. Without it
+          the tab strip is a flex item at min-width:auto, so it claims its full
+          585px and never scrolls; the row then needs 1029px of the 973px it
+          has, and the 56px it is short come off the right-hand end — the
+          "Thêm khách hàng" button, cut in half, with the whole page scrolling
+          sideways behind it.
+        */}
+        <Tabs className="min-w-0" selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as CustomerFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
             <Tabs.List aria-label="Phân nhóm khách hàng">
               <Tabs.Tab id="all">
@@ -137,7 +145,10 @@ export function AdminCustomersComponent() {
             </Tabs.List>
           </Tabs.ListContainer>
         </Tabs>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        {/* shrink-0: when the row runs short the tabs give way, not the search
+            box and the button. A tab strip that scrolls still works; a button
+            sliced down the middle does not. */}
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
           {/* "Bộ lọc" was a button with no handler. The tabs above already filter by
               segment and the search box filters by name and phone; there was no third
               dimension for it to open, so it only ever looked like a control. */}

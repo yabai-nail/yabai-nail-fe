@@ -116,19 +116,23 @@ export function CustomerLoyaltyPanel({
           <SparklesIcon className="size-4 text-admin-accent" />
           Cộng / trừ điểm
         </p>
+        {/* min-w-0 on both inputs: an input's automatic minimum is its own
+            intrinsic width, 184px here, so the 1fr track could not shrink below
+            that and the pair needed 288px inside a 260px card. The reason field
+            hung 28px out over the border. */}
         <div className="grid grid-cols-[6rem_1fr] gap-2 text-xs">
           <input
             type="number"
             value={deltaText}
             onChange={(event) => setDeltaText(event.target.value)}
             placeholder="±điểm"
-            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+            className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
           <input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
             placeholder="Lý do (bắt buộc)"
-            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+            className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
         </div>
         <div className="flex justify-end">
