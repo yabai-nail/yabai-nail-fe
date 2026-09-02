@@ -212,7 +212,6 @@ export function AdminCustomersComponent() {
               customers={visibleCustomers}
               selectedId={selectedCustomer?.id ?? null}
               onSelect={setSelectedId}
-              onEdit={branchId ? (id) => { setSelectedId(id); setEditError(null); setIsEditOpen(true); } : undefined}
             /></Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị {firstShown} - {firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1} trong tổng số {filteredCustomers.length} khách hàng</span><AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} /></Card.Footer>
           </Card>
