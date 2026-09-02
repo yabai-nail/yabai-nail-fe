@@ -436,7 +436,9 @@
           "paidAt": "受領日時"
         },
         "selectAppointment": "上の表から予約を選ぶと、その取引が表示されます。",
-        "result": "返金申請 {amount} · {status}"
+        "result": "返金申請 {amount} · {status}",
+        "showing": "全 {total} 件中 {shown} 件を表示",
+        "pagination": "支払い済み予約のページ送り"
       },
       "tierLine": "{tier} · {points} ポイント",
       "checkin": {

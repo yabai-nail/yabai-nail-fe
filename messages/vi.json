@@ -436,7 +436,9 @@
           "paidAt": "Đã thu lúc"
         },
         "selectAppointment": "Chọn một lịch hẹn ở bảng trên để xem giao dịch của lịch đó.",
-        "result": "Yêu cầu hoàn {amount} · {status}"
+        "result": "Yêu cầu hoàn {amount} · {status}",
+        "showing": "Hiển thị {shown} trong tổng số {total} lịch hẹn",
+        "pagination": "Phân trang lịch hẹn đã thanh toán"
       },
       "tierLine": "Hạng {tier} · {points} điểm",
       "checkin": {

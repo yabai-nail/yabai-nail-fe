@@ -436,7 +436,9 @@
           "paidAt": "Taken at"
         },
         "selectAppointment": "Pick an appointment above to see its transactions.",
-        "result": "Refund requested {amount} · {status}"
+        "result": "Refund requested {amount} · {status}",
+        "showing": "Showing {shown} of {total} appointments",
+        "pagination": "Paid appointment pages"
       },
       "tierLine": "{tier} · {points} points",
       "checkin": {

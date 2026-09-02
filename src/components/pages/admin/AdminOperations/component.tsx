@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Button, Card, Chip } from "@heroui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
 import {
@@ -100,6 +101,9 @@ function Feedback({ message, error }: Readonly<{ message: string | null; error: 
 /** Appointment statuses whose money has already been taken, so a refund has something to undo. */
 const PAID_STATUSES = ["PAID", "COMPLETED"];
 
+/** Rows per page. Eight keeps the table shorter than the form beneath it. */
+const REFUND_PAGE_SIZE = 8;
+
 function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.operations");
   const tStatus = useTranslations("admin.appointmentStatus");
@@ -113,6 +117,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const [amountText, setAmountText] = useState("");
   const [reason, setReason] = useState("");
   const [refundTarget, setRefundTarget] = useState<{ paymentId: string; refundId: string } | null>(null);
+  const [page, setPage] = useState(1);
   const { busy, message, error, run } = useAction();
   const refund = useAdminPaymentRefund(branchId, refundTarget?.paymentId ?? null, refundTarget?.refundId ?? null);
   const amount = parseMoney(amountText);
@@ -123,8 +128,21 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   ] as const));
   // The picker used to offer every appointment in the branch under a heading that said
   // "paid", so most of what it listed had no payment to refund and failed on submit.
-  const paidAppointments = (appointments.data?.items ?? []).filter((appointment) =>
-    PAID_STATUSES.some((status) => appointment.status.toUpperCase().includes(status)),
+  const paidAppointments = useMemo(
+    () =>
+      (appointments.data?.items ?? []).filter((appointment) =>
+        PAID_STATUSES.some((status) => appointment.status.toUpperCase().includes(status)),
+      ),
+    [appointments.data],
+  );
+  // The page number is clamped rather than reset: a branch whose list shrinks under the
+  // reader — a refund landing, a poll returning fewer rows — should not leave them
+  // staring at an empty page they cannot page back from.
+  const pageCount = Math.max(1, Math.ceil(paidAppointments.length / REFUND_PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const visibleAppointments = paidAppointments.slice(
+    (currentPage - 1) * REFUND_PAGE_SIZE,
+    currentPage * REFUND_PAGE_SIZE,
   );
   const selected = paidAppointments.find((appointment) => appointment.id === appointmentId);
   const transactions = payments.data?.items ?? [];
@@ -169,7 +187,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">
-                {paidAppointments.map((appointment) => (
+                {visibleAppointments.map((appointment) => (
                   <tr
                     key={appointment.id}
                     aria-selected={appointment.id === appointmentId}
@@ -200,6 +218,15 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                 ))}
               </tbody>
             </table>
+            <div className="flex items-center justify-between gap-3 border-t border-admin-border px-3 py-2 text-xs text-admin-muted">
+              <span>{t("refund.showing", { shown: visibleAppointments.length, total: paidAppointments.length })}</span>
+              <AdminPagination
+                page={currentPage}
+                pageCount={pageCount}
+                onPageChange={setPage}
+                label={t("refund.pagination")}
+              />
+            </div>
           </div>
         )}
       </div>
