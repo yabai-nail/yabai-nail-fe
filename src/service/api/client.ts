@@ -28,6 +28,10 @@ interface CreateApiClientOptions {
 // shared `apiClient` below is built once, before any React tree exists.
 let adminTokenRefresher: (() => Promise<string | null>) | null = null;
 
+function isRelativeBackendUrl(url: string): boolean {
+  return !/^[a-z][a-z\d+.-]*:\/\//i.test(url);
+}
+
 export function setAdminTokenRefresher(
   refresher: (() => Promise<string | null>) | null,
 ): void {
@@ -47,11 +51,11 @@ export function createApiClient({
 
   client.interceptors.request.use((config) => {
     const url = config.url ?? "";
-    const isRelativeBackendUrl = !/^[a-z][a-z\d+.-]*:\/\//i.test(url);
-    const token = isRelativeBackendUrl
+    const targetsBackend = isRelativeBackendUrl(url);
+    const token = targetsBackend
       ? resolveAccessToken(url, (config as RetryableConfig).authScope)
       : null;
-    if (token && isRelativeBackendUrl) {
+    if (token && targetsBackend) {
       config.headers.set("Authorization", `Bearer ${token}`);
     }
     return config;
@@ -66,7 +70,8 @@ export function createApiClient({
         ? (error.config as (RetryableConfig & { url?: string }) | undefined)
         : undefined;
       const isAdminRequest =
-        config?.authScope === "admin" || (config?.url ?? "").includes("/admin/");
+        isRelativeBackendUrl(config?.url ?? "") &&
+        (config?.authScope === "admin" || (config?.url ?? "").includes("/admin/"));
       if (error && typeof error === "object" && "response" in error) {
         const status = (error as { response?: { status?: number } }).response?.status;
         if (status === 401 && config && !config.__retried && isAdminRequest) {

@@ -526,6 +526,8 @@ export interface AdminServiceItemDraft {
   readonly description?: string;
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
+  readonly imageUrl?: string | null;
+  readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
@@ -537,6 +539,8 @@ export interface AdminServiceItemPatch {
   readonly description?: string;
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
+  readonly imageUrl?: string | null;
+  readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
