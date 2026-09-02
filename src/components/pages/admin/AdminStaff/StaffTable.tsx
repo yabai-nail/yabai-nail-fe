@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { formatMoney } from "@/lib/admin-format";
@@ -18,19 +19,20 @@ function formatOptionalMoney(value: number | null): string {
 }
 
 export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTableProps) {
+  const t = useTranslations("admin.staff");
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] text-left text-sm">
-        <caption className="sr-only">Danh sách nhân viên và doanh thu</caption>
+        <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
-            <th scope="col" className="px-4 py-3">Nhân viên</th>
-            <th scope="col" className="px-3 py-3">Trạng thái</th>
+            <th scope="col" className="px-4 py-3">{t("table.staff")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.status")}</th>
             <th scope="col" className="px-3 py-3">Doanh thu</th>
-            <th scope="col" className="px-3 py-3">Hoa hồng</th>
-            <th scope="col" className="px-3 py-3">Nhận được</th>
-            <th scope="col" className="px-3 py-3">Số đơn</th>
-            <th scope="col"><span className="sr-only">Thao tác</span></th>
+            <th scope="col" className="px-3 py-3">{t("table.commission")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.payout")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.orders")}</th>
+            <th scope="col"><span className="sr-only">{t("table.actions")}</span></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
@@ -44,7 +46,7 @@ export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTablePr
               </td>
               <td className="px-3 py-2">
                 <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>
-                  <Chip.Label>{member.status === "working" ? "Đang làm" : "Nghỉ phép"}</Chip.Label>
+                  <Chip.Label>{member.status === "working" ? t("statusWorking") : t("statusOff")}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2 font-medium">{formatOptionalMoney(member.revenue)}</td>
@@ -57,7 +59,7 @@ export function StaffTable({ staff, selectedId, onSelect, onEdit }: StaffTablePr
                 {/* Was a "..." with no handler and no prop to call. One action, so it
                     names that action instead of promising a menu. */}
                 {onEdit ? (
-                  <Button isIconOnly size="sm" variant="ghost" aria-label={`Sửa thông tin ${member.name}`} onPress={() => onEdit(member.id)}>
+                  <Button isIconOnly size="sm" variant="ghost" aria-label={t("table.edit", { name: member.name })} onPress={() => onEdit(member.id)}>
                     <PencilSquareIcon className="size-4" />
                   </Button>
                 ) : null}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   BanknotesIcon,
   BellAlertIcon,
@@ -16,10 +17,10 @@ import { useAdminBranch, useAdminDashboard } from "@/service";
 import { buildActivityItems } from "./adapters";
 
 const quickActions = [
-  { id: "appointment", label: "Tạo lịch hẹn", icon: CalendarDaysIcon, href: "/admin/appointments?create=1" },
-  { id: "payment", label: "Thanh toán", icon: BanknotesIcon, href: "/admin/payments" },
-  { id: "customer", label: "Thêm khách", icon: UserPlusIcon, href: "/admin/customers" },
-  { id: "message", label: "Gửi tin nhắn", icon: ChatBubbleLeftEllipsisIcon, href: "/admin/messages" },
+  { id: "appointment", labelKey: "quick.appointment", icon: CalendarDaysIcon, href: "/admin/appointments?create=1" },
+  { id: "payment", labelKey: "quick.payment", icon: BanknotesIcon, href: "/admin/payments" },
+  { id: "customer", labelKey: "quick.customer", icon: UserPlusIcon, href: "/admin/customers" },
+  { id: "message", labelKey: "quick.message", icon: ChatBubbleLeftEllipsisIcon, href: "/admin/messages" },
 ] as const;
 
 const notificationIcons = {
@@ -29,32 +30,36 @@ const notificationIcons = {
 } as const;
 
 export function UtilityPanel() {
+  const t = useTranslations("admin.dashboard");
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const { data, error, isLoading } = useAdminDashboard(branchId);
 
-  const notifications = useMemo(() => buildActivityItems(data), [data]);
+  const notifications = useMemo(() => buildActivityItems(data, t), [data, t]);
 
   return (
     <div className="space-y-4 xl:col-span-3">
       <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Header className="px-4 pt-4">
-          <h2 className="text-sm font-bold text-admin-ink">Thao tác nhanh</h2>
+          <h2 className="text-sm font-bold text-admin-ink">{t("quick.heading")}</h2>
         </Card.Header>
         <Card.Content className="grid grid-cols-2 gap-2 px-4 pb-4 pt-3">
-          {quickActions.map(({ id, label, icon: Icon, ...action }) => (
+          {quickActions.map(({ id, labelKey, icon: Icon, ...action }) => {
+            const label = t(labelKey);
+            return (
             <Button
               key={id}
               variant="outline"
               className="h-auto min-h-16 flex-col gap-1 rounded-lg border-admin-border px-2 py-2 text-xs text-admin-ink"
-              aria-label={"href" in action ? label : `${label}, chức năng chưa khả dụng`}
+              aria-label={"href" in action ? label : t("quick.unavailable", { label })}
               isDisabled={!("href" in action)}
               onPress={() => { if ("href" in action) router.push(action.href); }}
             >
               <Icon aria-hidden="true" className="size-6 text-admin-accent" />
               {label}
             </Button>
-          ))}
+            );
+          })}
         </Card.Content>
       </Card>
 
@@ -62,7 +67,7 @@ export function UtilityPanel() {
         <Card.Header className="flex flex-row items-center justify-between gap-2 px-4 pt-4">
           {/* No notifications screen exists to open, so the header carries no
               "Xem tất cả" — the card already lists everything there is. */}
-          <h2 className="text-sm font-bold text-admin-ink">Thông báo</h2>
+          <h2 className="text-sm font-bold text-admin-ink">{t("notifications.heading")}</h2>
         </Card.Header>
         <Card.Content className="px-4 pb-4 pt-2">
           {error ? (
@@ -70,11 +75,11 @@ export function UtilityPanel() {
               Không tải được thông báo.
             </p>
           ) : !branchId || isLoading ? (
-            <p className="py-3 text-center text-xs text-admin-muted">Đang tải thông báo…</p>
+            <p className="py-3 text-center text-xs text-admin-muted">{t("notifications.loading")}</p>
           ) : notifications.length === 0 ? (
-            <p className="py-3 text-center text-xs text-admin-muted">Chưa có thông báo mới.</p>
+            <p className="py-3 text-center text-xs text-admin-muted">{t("notifications.empty")}</p>
           ) : (
-          <ul aria-label="Thông báo mới" className="divide-y divide-admin-border">
+          <ul aria-label={t("notifications.listLabel")} className="divide-y divide-admin-border">
             {notifications.map((notification) => {
               const Icon = notificationIcons[notification.kind];
 

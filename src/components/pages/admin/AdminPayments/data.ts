@@ -1,3 +1,5 @@
+import type { Translator } from "@/i18n/config";
+
 export type PaymentMethod = "cash" | "card" | "paypay" | "bank_transfer" | "other";
 export type InvoiceStatus = "draft" | "paid";
 
@@ -88,19 +90,19 @@ export const initialCheckoutInvoice: CheckoutInvoice = {
   paidAt: null,
 };
 
-export const paymentMethodLabels: Record<PaymentMethod, string> = {
-  cash: "Tiền mặt",
-  card: "Thẻ",
-  paypay: "PayPay",
-  bank_transfer: "Chuyển khoản",
-  other: "Khác",
-};
-
-export function paymentMethodLabel(method: string): string {
-  return paymentMethodLabels[method.toLowerCase() as PaymentMethod] ?? method;
+/**
+ * Both read a catalogue the API's own enum is keyed by, and both fall back to the raw code:
+ * a method or a provider status this build has never seen renders as itself rather than as
+ * a blank. `paymentMethodLabel` takes the shared `admin.paymentMethod` translator, which the
+ * dashboard and operations screens read too; `paymentStatusLabel` takes this screen's own.
+ */
+export function paymentMethodLabel(method: string, t: Translator): string {
+  const key = method.toLowerCase();
+  return t.has(key) ? t(key) : method;
 }
 
-export function paymentStatusLabel(status: string): string {
-  return { SUCCEEDED: "Thành công", REQUESTED: "Đang yêu cầu", PROCESSING: "Đang xử lý", RETRY_SCHEDULED: "Chờ thử lại", FAILED: "Thất bại" }[status.toUpperCase()] ?? status;
+export function paymentStatusLabel(status: string, t: Translator): string {
+  const key = `status.${status.toUpperCase()}`;
+  return t.has(key) ? t(key) : status;
 }
 

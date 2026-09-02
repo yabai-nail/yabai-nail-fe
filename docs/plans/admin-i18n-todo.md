@@ -13,9 +13,11 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 - [x] **L2** Tab **Ngôn ngữ** trong `/admin/settings` (ghi cookie + `router.refresh()`)
 - [ ] **L2b** Ghi cookie từ `AdminSession.locale` một lần sau đăng nhập
 
+- [x] **L2c** Từ điển thuật ngữ (45 từ) + kiểm tra thứ tư trong checker
+
 ## Dùng chung (phải xong trước các màn)
 
-- [ ] **L3** `components/layouts/` — AdminShell, ShellNav, AdminAuthGate
+- [x] **L3** `AdminShell` + `AdminAuthGate` — 62 chuỗi, 66 khóa × 3 ngôn ngữ
 
 ## 16 màn
 
@@ -38,11 +40,13 @@ rồi commit. Dừng ở bất kỳ lát nào console vẫn chạy — màn chư
 
 ## Dịch và chốt
 
-- [ ] **L20** Sinh `en.json`
-- [ ] **L21** Sinh `ja.json`
+- [x] ~~L20/L21 dịch dồn cuối~~ — thay bằng dịch cả 3 ngôn ngữ ngay trong mỗi lát,
+      bám `i18n-glossary.md`. Dịch dồn cuối cho thuật ngữ nhất quán nhưng buộc phải
+      tắt kiểm tra khóa lệch suốt 16 lát, và dồn 1.164 chuỗi vào một bước cuối.
 - [ ] **L22** Bật `ENFORCE_LEAKS` trong `check-i18n.mjs`, nối vào CI
 
 ## Ghi lại khi làm
 
-- Số dòng còn hardcode sau mỗi lát (chạy `pnpm i18n:check`): **L1 = 1224 dòng / 116 file**
+- Số dòng còn hardcode sau mỗi lát (chạy `pnpm i18n:check`):
+  **L1 = 1224 / 116 file** → **L3 = 1165 / 113 file**
 - Gap BE cần ghi: endpoint lưu locale cho admin (mục 4 của spec)

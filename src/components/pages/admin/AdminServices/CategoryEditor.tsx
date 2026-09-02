@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService, type AdminServiceCategory } from "@/service";
@@ -15,6 +16,7 @@ export function CategoryEditor({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.services");
   const isEdit = category !== null;
   const [code, setCode] = useState(category?.code ?? "");
   const [name, setName] = useState(category?.name ?? "");
@@ -45,7 +47,7 @@ export function CategoryEditor({
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được danh mục.");
+      setError(thrown instanceof Error ? thrown.message : t("categoryEditor.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -58,12 +60,12 @@ export function CategoryEditor({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                {isEdit ? "Đổi tên danh mục" : "Thêm danh mục"}
+                {isEdit ? t("categoryEditor.editTitle") : t("categoryEditor.addTitle")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-3 px-5 py-4 text-sm">
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">Mã (code)</span>
+                <span className="text-xs font-semibold text-admin-ink">{t("categoryEditor.code")}</span>
                 <input
                   value={code}
                   onChange={(event) => setCode(event.target.value.toUpperCase())}
@@ -72,7 +74,7 @@ export function CategoryEditor({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">Tên (nội bộ / EN)</span>
+                <span className="text-xs font-semibold text-admin-ink">{t("categoryEditor.internalName")}</span>
                 <input
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -81,25 +83,25 @@ export function CategoryEditor({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">Tên hiển thị (VI)</span>
+                <span className="text-xs font-semibold text-admin-ink">{t("categoryEditor.displayName")}</span>
                 <input
                   value={nameVi}
                   onChange={(event) => setNameVi(event.target.value)}
-                  placeholder="Sơn gel"
+                  placeholder={t("categoryEditor.displayPlaceholder")}
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                 />
               </label>
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>Huỷ</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("categoryEditor.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 onPress={() => void submit()}
                 isDisabled={!canSubmit}
               >
-                {busy ? "Đang lưu…" : isEdit ? "Lưu" : "Thêm"}
+                {busy ? t("categoryEditor.saving") : isEdit ? t("categoryEditor.save") : t("categoryEditor.add")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

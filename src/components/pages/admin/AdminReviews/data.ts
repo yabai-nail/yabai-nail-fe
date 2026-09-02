@@ -17,12 +17,6 @@ export type ReviewRow = {
 
 // The API accepts exactly NEW, IN_PROGRESS and RESOLVED. The old map named
 // PENDING and ESCALATED, which it rejects with 422.
-export const handlingStatusLabels: Record<string, string> = {
-  NEW: "Chờ xử lý",
-  IN_PROGRESS: "Đang xử lý",
-  RESOLVED: "Đã xử lý",
-};
-
 export const reviewFixtures: ReadonlyArray<ReviewRow> = [
   { id: "rv1", customerId: "cust-", customerName: "Nguyễn An", serviceRating: 5, staffRating: 5, content: "Nhân viên làm rất tỉ mỉ, sẽ quay lại!", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị đã ủng hộ ạ!", createdAt: "2026-08-23T10:00:00.000Z", version: 2 },
   { id: "rv2", customerId: "cust-", customerName: "Trần Bích", serviceRating: 4, staffRating: 4, content: "Móng đẹp nhưng chờ hơi lâu.", handlingStatus: "NEW", createdAt: "2026-08-22T09:30:00.000Z", version: 1 },
@@ -31,14 +25,16 @@ export const reviewFixtures: ReadonlyArray<ReviewRow> = [
   { id: "rv5", customerId: "cust-", customerName: "Vũ Hà", serviceRating: 3, staffRating: 3, content: "Ổn, giá hơi cao so với kỳ vọng.", handlingStatus: "NEW", createdAt: "2026-08-19T11:20:00.000Z", version: 1 },
 ];
 
+// The fallback name is a parameter: this runs inside a useMemo, outside the component.
 export function adaptReview(
   review: AdminReview,
-  customerNames?: ReadonlyMap<string, string>,
+  customerNames: ReadonlyMap<string, string> | undefined,
+  unnamed: string,
 ): ReviewRow {
   return {
     id: review.id,
     customerId: review.customerId,
-    customerName: customerNames?.get(review.customerId) ?? "Khách chưa có tên",
+    customerName: customerNames?.get(review.customerId) ?? unnamed,
     serviceRating: review.serviceRating,
     staffRating: review.staffRating,
     content: review.comment ?? "",

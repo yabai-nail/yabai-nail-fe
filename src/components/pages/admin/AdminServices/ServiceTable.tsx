@@ -1,7 +1,8 @@
+import { useTranslations } from "next-intl";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Button, Chip } from "@heroui/react";
 import { formatMoney } from "@/lib/admin-format";
-import { categoryLabels, type SalonService } from "./data";
+import type { SalonService } from "./data";
 
 export function ServiceTable({
   services,
@@ -11,18 +12,19 @@ export function ServiceTable({
   /** Optional edit callback. When omitted the pencil button is hidden. */
   onEdit?: (service: SalonService) => void;
 }>) {
+  const t = useTranslations("admin.services");
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[700px] text-left text-sm">
-        <caption className="sr-only">Danh sách dịch vụ</caption>
+        <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
-            <th scope="col" className="px-4 py-3">Dịch vụ</th>
-            <th scope="col" className="px-3 py-3">Loại</th>
-            <th scope="col" className="px-3 py-3">Giá</th>
-            <th scope="col" className="px-3 py-3">Thời gian</th>
-            <th scope="col" className="px-3 py-3">Trạng thái</th>
-            <th scope="col" className="px-3 py-3">Thao tác</th>
+            <th scope="col" className="px-4 py-3">{t("table.service")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.type")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.price")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.duration")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.status")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
@@ -36,14 +38,14 @@ export function ServiceTable({
               </td>
               <td className="px-3 py-2">
                 <Chip size="sm" variant="soft" color={service.category === "primary" ? "accent" : service.category === "addon" ? "warning" : "default"}>
-                  <Chip.Label>{categoryLabels[service.category]}</Chip.Label>
+                  <Chip.Label>{t(`category.${service.category}`)}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
               <td className="px-3 py-2">{service.durationMinutes} phút</td>
               <td className="px-3 py-2">
                 <Chip size="sm" variant="soft" color={service.isVisible ? "success" : "default"}>
-                  <Chip.Label>{service.isVisible ? "Đang hiển thị" : "Đang ẩn"}</Chip.Label>
+                  <Chip.Label>{service.isVisible ? t("table.visible") : t("table.hidden")}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2">
@@ -52,7 +54,7 @@ export function ServiceTable({
                     isIconOnly
                     size="sm"
                     variant="ghost"
-                    aria-label={`Sửa ${service.name}`}
+                    aria-label={t("table.editService", { name: service.name })}
                     isDisabled={!onEdit || service.version === undefined}
                     onPress={onEdit ? () => onEdit(service) : undefined}
                   >
@@ -67,7 +69,7 @@ export function ServiceTable({
           ))}
         </tbody>
       </table>
-      {services.length === 0 ? <p role="status" className="p-12 text-center text-sm text-admin-muted">Không tìm thấy dịch vụ phù hợp.</p> : null}
+      {services.length === 0 ? <p role="status" className="p-12 text-center text-sm text-admin-muted">{t("table.empty")}</p> : null}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, InputGroup } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 
@@ -36,6 +37,7 @@ export function MessageThread({
   sendPending = false,
   sendError = null,
 }: MessageThreadProps) {
+  const t = useTranslations("admin.messages");
   const submit = (event: FormEvent) => {
     event.preventDefault();
     onSend();
@@ -54,12 +56,12 @@ export function MessageThread({
           <p className="truncate text-xs text-admin-muted">{customer.phone}</p>
         </div>
         {onMarkRead ? (
-          <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label="Đánh dấu đã đọc">
+          <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label={t("markRead")}>
             <CheckCircleIcon className="size-4" />
           </Button>
         ) : null}
         {onArchive ? (
-          <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label="Lưu trữ">
+          <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label={t("archive")}>
             <ArchiveBoxIcon className="size-4" />
           </Button>
         ) : null}
@@ -69,7 +71,7 @@ export function MessageThread({
           {statusError}
         </p>
       ) : null}
-      <ol aria-label={`Tin nhắn với ${customer.name}`} className="flex-1 space-y-4 overflow-y-auto p-4">
+      <ol aria-label={t("threadLabel", { name: customer.name })} className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.map((message) => (
           <li key={message.id} className={`flex ${message.sender === "salon" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[82%] rounded-lg border px-3 py-2 text-sm leading-6 ${message.sender === "salon" ? "border-admin-accent/10 bg-admin-soft" : "border-admin-border bg-admin-surface"}`}>
@@ -82,8 +84,8 @@ export function MessageThread({
       <form onSubmit={submit} className="border-t border-admin-border p-3">
         {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
         <InputGroup fullWidth>
-          <InputGroup.Input aria-label="Nhập tin nhắn" maxLength={2000} placeholder="Nhập tin nhắn..." value={draft} onChange={(event) => onDraftChange(event.target.value)} />
-          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />Gửi</Button></InputGroup.Suffix>
+          <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} placeholder={t("composePlaceholder")} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{t("send")}</Button></InputGroup.Suffix>
         </InputGroup>
       </form>
     </section>

@@ -30,3 +30,14 @@ export function isLocale(value: string | undefined | null): value is Locale {
 export function pickLocale(cookieValue: string | undefined | null): Locale {
   return isLocale(cookieValue) ? cookieValue : DEFAULT_LOCALE;
 }
+
+/**
+ * What a pure module accepts instead of calling useTranslations().
+ *
+ * Several modules under components/pages/admin declare `world: "pure"` and are called
+ * from render and from useMemo alike; a hook rules out one of those. They take this
+ * instead, which is the shape next-intl's own `useTranslations(namespace)` returns.
+ */
+export type Translator = ((key: string, values?: Record<string, string | number>) => string) & {
+  has: (key: string) => boolean;
+};

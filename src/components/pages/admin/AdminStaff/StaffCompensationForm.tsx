@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { formatMoney } from "@/lib/admin-format";
@@ -11,6 +12,7 @@ import {
 } from "@/service";
 
 export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>) {
+  const t = useTranslations("admin.staff");
   const query = useStaffCompensation(staffId);
   const compensation = query.data as StaffCompensation | undefined;
 
@@ -54,7 +56,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       setRate("");
       void query.mutate();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được hoa hồng.");
+      setError(thrown instanceof Error ? thrown.message : t("compensation.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -67,17 +69,17 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       </h3>
 
       {query.isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải…</p>
+        <p className="text-xs text-admin-muted">{t("compensation.loading")}</p>
       ) : query.error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được cấu hình.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("compensation.loadFailed")}</p>
       ) : (
         <dl className="grid grid-cols-2 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
-            <dt className="text-admin-muted">Lương cứng</dt>
+            <dt className="text-admin-muted">{t("compensation.baseSalary")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">{formatMoney(initialBase)}</dd>
           </div>
           <div>
-            <dt className="text-admin-muted">Hoa hồng</dt>
+            <dt className="text-admin-muted">{t("compensation.commission")}</dt>
             <dd className="mt-1 font-bold text-admin-accent">{initialRate}%</dd>
           </div>
         </dl>
@@ -85,7 +87,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
 
       <div className="grid grid-cols-[1fr_5rem] gap-2 text-xs">
         <label htmlFor={`${staffId}-base-salary`} className="flex flex-col gap-1">
-          <span className="font-semibold text-admin-ink">Lương cứng mới (¥)</span>
+          <span className="font-semibold text-admin-ink">{t("compensation.newBaseSalary")}</span>
           <input
             id={`${staffId}-base-salary`}
             inputMode="numeric"
@@ -96,7 +98,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           />
         </label>
         <label htmlFor={`${staffId}-commission-rate`} className="flex flex-col gap-1">
-          <span className="font-semibold text-admin-ink">Hoa hồng (%)</span>
+          <span className="font-semibold text-admin-ink">{t("compensation.commissionPercent")}</span>
           <input
             id={`${staffId}-commission-rate`}
             type="number"
@@ -110,7 +112,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
         </label>
       </div>
       <label htmlFor={`${staffId}-effective-from`} className="flex flex-col gap-1 text-xs">
-        <span className="font-semibold text-admin-ink">Áp dụng từ ngày</span>
+        <span className="font-semibold text-admin-ink">{t("compensation.effectiveFrom")}</span>
         <input
           id={`${staffId}-effective-from`}
           type="date"
@@ -130,7 +132,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           onPress={() => void submit()}
           isDisabled={!canSubmit}
         >
-          {busy ? "Đang lưu…" : "Cập nhật hoa hồng"}
+          {busy ? t("compensation.saving") : t("compensation.submit")}
         </Button>
       </div>
       {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}

@@ -2,6 +2,7 @@
 
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAdminAppointmentAllocationCandidates } from "@/service";
 import type { Appointment } from "./data";
@@ -21,6 +22,7 @@ export function AssignStaffModal({
   submitting?: boolean;
   error?: string | null;
 }>) {
+  const t = useTranslations("admin.appointments");
   const { data, isLoading, error: loadError } = useAdminAppointmentAllocationCandidates(
     branchId,
     appointment.id,
@@ -36,24 +38,28 @@ export function AssignStaffModal({
           <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
             <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4">
               <UserGroupIcon className="size-5 text-admin-accent" />
-              <Modal.Heading className="text-base font-bold text-admin-ink">Đổi nhân viên phụ trách</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("assign.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="space-y-4 px-5 py-4 text-sm">
               <p className="text-xs text-admin-muted">
-                Lịch của <strong className="text-admin-ink">{appointment.customer.name}</strong> lúc {appointment.startTime}.
+                {t.rich("assign.subtitle", {
+                  name: appointment.customer.name,
+                  time: appointment.startTime,
+                  strong: (chunks) => <strong className="text-admin-ink">{chunks}</strong>,
+                })}
               </p>
 
               {isLoading ? (
-                <p className="text-xs text-admin-muted">Đang tải danh sách nhân viên phù hợp…</p>
+                <p className="text-xs text-admin-muted">{t("assign.loading")}</p>
               ) : loadError ? (
                 <p role="alert" className="text-xs text-admin-danger">
-                  Không tải được danh sách nhân viên. Vẫn có thể giữ nguyên hoặc chọn lại nhân viên hiện tại.
+                  {t("assign.loadFailed")}
                 </p>
               ) : candidates.length === 0 ? (
-                <p className="text-xs text-admin-muted">Không có nhân viên phù hợp cho khung giờ này.</p>
+                <p className="text-xs text-admin-muted">{t("assign.empty")}</p>
               ) : (
                 <fieldset className="space-y-2">
-                  <legend className="text-xs font-semibold text-admin-ink">Nhân viên khả dụng</legend>
+                  <legend className="text-xs font-semibold text-admin-ink">{t("assign.legend")}</legend>
                   {candidates.map((candidate) => (
                     <label
                       key={candidate.id}
@@ -81,7 +87,7 @@ export function AssignStaffModal({
               )}
 
               <label htmlFor="assign-staff-note" className="block text-xs font-semibold text-admin-ink">
-                Ghi chú nội bộ (tuỳ chọn)
+                {t("assign.note")}
                 <textarea
                   id="assign-staff-note"
                   value={note}
@@ -95,7 +101,7 @@ export function AssignStaffModal({
             </Modal.Body>
             <Modal.Footer className="border-t border-admin-border px-5 py-4">
               <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting}>
-                Đóng
+                {t("assign.close")}
               </Button>
               <Button
                 variant="primary"
@@ -103,7 +109,7 @@ export function AssignStaffModal({
                 onPress={() => onConfirm(staffId, note.trim())}
                 isDisabled={submitting || !staffId}
               >
-                {submitting ? "Đang gán…" : "Xác nhận"}
+                {submitting ? t("assign.busy") : t("assign.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

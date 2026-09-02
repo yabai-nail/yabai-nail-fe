@@ -33,7 +33,8 @@ export const salonServices: ReadonlyArray<SalonService> = [
   { id: "sv14", name: "Combo gel cao cấp", category: "combo", price: 1750000, durationMinutes: 180, isVisible: false, soldCount: 6 },
 ];
 
-export const categoryLabels: Record<ServiceCategory, string> = { primary: "Dịch vụ chính", addon: "Dịch vụ thêm", combo: "Combo" };
+/** Category ids only; their words live at admin.services.category.<id>. */
+export const serviceCategories: ReadonlyArray<ServiceCategory> = ["primary", "addon", "combo"];
 
 export function filterServices(
   services: ReadonlyArray<SalonService>,

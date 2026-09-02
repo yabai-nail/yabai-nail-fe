@@ -11,23 +11,6 @@ export type AccountRow = {
   readonly version: number;
 };
 
-export const roleLabels: Record<string, string> = {
-  OWNER: "Chủ tiệm",
-  MANAGER: "Quản lý",
-  STAFF: "Nhân viên",
-  CUSTOMER: "Khách hàng",
-};
-
-export const accountStatusLabels: Record<string, string> = {
-  ACTIVE: "Hoạt động",
-  INACTIVE: "Ngưng hoạt động",
-  SUSPENDED: "Tạm khoá",
-  DISABLED: "Vô hiệu",
-  MERGED: "Đã gộp",
-  PENDING_DELETION: "Chờ xoá",
-  DELETED: "Đã xoá",
-};
-
 export function adaptAccount(account: AdminAccount): AccountRow {
   return {
     id: account.id,

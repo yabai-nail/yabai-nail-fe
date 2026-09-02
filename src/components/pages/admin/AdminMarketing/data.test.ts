@@ -9,19 +9,25 @@ import {
   promotionFixtures,
   promotionStatuses,
 } from "./data";
+import type { Translator } from "@/i18n/config";
+
+/** Echoes the key it was handed; only the codes the catalogue names answer has(). */
+const KNOWN = new Set(["SCHEDULED", "DISPATCHING", "COMPLETED", "CANCELLED"].map((c) => `campaignStatus.${c}`));
+const t = Object.assign((key: string) => key, { has: (key: string) => KNOWN.has(key) }) as unknown as Translator;
 
 describe("campaignStatusLabel", () => {
   it.each([
-    ["SCHEDULED", "Đã lên lịch"],
-    ["DISPATCHING", "Đang gửi"],
-    ["COMPLETED", "Hoàn tất"],
-    ["CANCELLED", "Đã huỷ"],
-  ])("localizes %s", (status, expected) => {
-    expect(campaignStatusLabel(status)).toBe(expected);
+    ["SCHEDULED", "campaignStatus.SCHEDULED"],
+    ["DISPATCHING", "campaignStatus.DISPATCHING"],
+    ["COMPLETED", "campaignStatus.COMPLETED"],
+    ["CANCELLED", "campaignStatus.CANCELLED"],
+  // The adapter reaches for a key; what the key says is the catalogue's business.
+  ])("looks up %s", (status, expected) => {
+    expect(campaignStatusLabel(status, t)).toBe(expected);
   });
 
   it("does not expose an unknown backend code", () => {
-    expect(campaignStatusLabel("NEW_SERVER_STATE")).toBe("Không xác định");
+    expect(campaignStatusLabel("NEW_SERVER_STATE", t)).toBe("campaignStatus.unknown");
   });
 
   it("offers cancellation only before dispatch starts", () => {

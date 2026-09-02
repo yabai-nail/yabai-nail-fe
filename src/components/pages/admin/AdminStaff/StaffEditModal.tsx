@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService } from "@/service";
@@ -16,6 +17,7 @@ export function StaffEditModal({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.staff");
   const [displayName, setDisplayName] = useState(member.name);
   const [active, setActive] = useState(member.status === "working");
   const [busy, setBusy] = useState(false);
@@ -36,7 +38,7 @@ export function StaffEditModal({
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được nhân viên.");
+      setError(thrown instanceof Error ? thrown.message : t("edit.failed"));
     } finally {
       setBusy(false);
     }
@@ -48,11 +50,11 @@ export function StaffEditModal({
         <Modal.Container size="sm" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
-              <Modal.Heading className="text-base font-bold text-admin-ink">Chỉnh sửa nhân viên</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("edit.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-3 px-5 py-4 text-sm">
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">Họ tên</span>
+                <span className="text-xs font-semibold text-admin-ink">{t("edit.name")}</span>
                 <input
                   value={displayName}
                   onChange={(event) => setDisplayName(event.target.value)}
@@ -70,14 +72,14 @@ export function StaffEditModal({
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>Huỷ</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("edit.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 onPress={() => void submit()}
                 isDisabled={!canSubmit}
               >
-                {busy ? "Đang lưu…" : "Lưu"}
+                {busy ? t("edit.saving") : t("edit.save")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -12,6 +12,9 @@
  *   3. a translated string about money or a destructive action that nobody who
  *      reads the language has checked. This one cannot be detected, only listed,
  *      which is the whole point of listing it.
+ *   4. one Vietnamese term rendered two different ways across screens -- "Hoàn
+ *      tiền" as 返金 on one and 払い戻し on the next. Each reads fine alone; a
+ *      staff member reading both concludes they are different operations.
  *
  *   node ./scripts/check-i18n.mjs
  *
@@ -70,8 +73,18 @@ function findLeaks() {
   for (const directory of SCOPE) {
     for (const path of walk(directory)) {
       const lines = readFileSync(path, "utf8").split(/\r?\n/);
+      // A `{/* ... */}` comment can span lines, and its middle lines look like prose.
+      let inJsxComment = false;
       lines.forEach((line, index) => {
         const trimmed = line.trim();
+        if (inJsxComment) {
+          if (line.includes("*/}")) inJsxComment = false;
+          return;
+        }
+        if (trimmed.startsWith("{/*")) {
+          if (!line.includes("*/}")) inJsxComment = true;
+          return;
+        }
         if (trimmed.startsWith("//") || trimmed.startsWith("*")) return;
         if (line.includes("i18n-check: allow")) return;
         if (!VIETNAMESE.test(line)) return;
@@ -130,6 +143,70 @@ if (sensitive.length) {
   notes.push(`${sensitive.length} key(s) about money or a destructive action — have a native reader check these translations first:`);
   for (const [key] of sensitive.slice(0, 40)) notes.push(`    ${key}`);
   if (sensitive.length > 40) notes.push(`    …and ${sensitive.length - 40} more`);
+}
+
+// -- 4. glossary consistency ------------------------------------------------------
+/**
+ * The markdown table is the source, not a copy of it. A constant here would drift
+ * from the document the moment someone edited one and not the other, and the
+ * document is the artefact a Japanese reader is asked to review.
+ */
+function readGlossary() {
+  const rows = [];
+  const text = readFileSync(join("docs", "specs", "i18n-glossary.md"), "utf8");
+  for (const line of text.split(/\r?\n/)) {
+    const cells = line.split("|").map((cell) => cell.trim());
+    // A data row is `| vi | ja | en | note |`: six pieces once the empty ends count.
+    if (cells.length < 5 || !cells[1] || cells[1] === "VI" || cells[1].startsWith("---")) continue;
+    if (!VIETNAMESE.test(cells[1])) continue;
+    rows.push({ vi: cells[1], ja: cells[2], en: cells[3] });
+  }
+  return rows;
+}
+
+const glossary = readGlossary();
+const drift = [];
+for (const [key, viValue] of base.entries()) {
+  const lowerVi = viValue.toLowerCase();
+  const matched = glossary.filter((term) => lowerVi.includes(term.vi.toLowerCase()));
+  // Longest match wins. "Lưu trữ" contains "Lưu", so without this every アーカイブ is
+  // reported against the row for 保存 and the real signal drowns in it.
+  const terms = matched.filter((term) =>
+    !matched.some((other) => other !== term && other.vi.toLowerCase().includes(term.vi.toLowerCase()))
+  );
+  for (const term of terms) {
+    for (const [locale, expected] of [["ja", term.ja], ["en", term.en]]) {
+      const translated = readCatalogue(locale).get(key);
+      if (translated === undefined) continue;
+      if (!translated.toLowerCase().includes(expected.toLowerCase())) {
+        drift.push(`${key} (${locale}): vi says "${term.vi}", glossary says "${expected}", catalogue says "${translated}"`);
+      }
+    }
+  }
+}
+if (!glossary.length) failures.push("glossary table parsed as empty — docs/specs/i18n-glossary.md has changed shape");
+if (drift.length) {
+  notes.push(`${drift.length} translation(s) do not use the glossary term — substring matching, so expect false alarms on rephrasing:`);
+  for (const entry of drift.slice(0, 20)) notes.push(`    ${entry}`);
+  if (drift.length > 20) notes.push(`    …and ${drift.length - 20} more`);
+}
+
+// -- 5. stray scripts -------------------------------------------------------------
+/**
+ * Vietnamese, Japanese and English between them use Latin, kana, kanji and CJK
+ * punctuation. A Cyrillic, Greek, Hangul, Thai, Devanagari or Arabic character in a
+ * value is a machine-translation slip, not a choice -- one landed in a Japanese
+ * dashboard label as `総費用（материалほか）` and reads as plausible until someone who
+ * knows the language looks. This one fails rather than warns: there is no case where
+ * it is correct.
+ */
+const STRAY_SCRIPT = /[Ѐ-ӿͰ-Ͽ가-힯฀-๿ऀ-ॿ؀-ۿ]/;
+for (const locale of CATALOGUES) {
+  for (const [key, value] of readCatalogue(locale)) {
+    if (STRAY_SCRIPT.test(value)) {
+      failures.push(`${locale}.json ${key} contains a character from a script none of these languages use: ${JSON.stringify(value)}`);
+    }
+  }
 }
 
 // -- report ----------------------------------------------------------------------

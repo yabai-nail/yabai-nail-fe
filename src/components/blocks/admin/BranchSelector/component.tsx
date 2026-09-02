@@ -2,6 +2,7 @@
 
 import { BuildingStorefrontIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Dropdown } from "@heroui/react";
+import { useTranslations } from "next-intl";
 
 import { useAdminBranch, useAdminBranchList } from "@/service";
 
@@ -9,10 +10,11 @@ import { useAdminBranch, useAdminBranchList } from "@/service";
 // switch (unauthenticated admin, or admin with a single branch) so the
 // header does not carry a dead control.
 export function BranchSelector() {
+  const t = useTranslations("admin.branchSelector");
   const { branchId, branchIds, setBranchId } = useAdminBranch();
   const { data } = useAdminBranchList();
   const branchNames = new Map((data?.items ?? []).map((branch) => [branch.id, branch.name] as const));
-  const label = branchNames.get(branchId ?? "") ?? "Chi nhánh chưa có tên";
+  const label = branchNames.get(branchId ?? "") ?? t("unnamed");
 
   if (branchIds.length <= 1) return null;
   if (branchId === null) return null;
@@ -20,19 +22,19 @@ export function BranchSelector() {
   return (
     <Dropdown>
       <Dropdown.Trigger
-        aria-label={`Chi nhánh đang xem: ${label}. Bấm để đổi.`}
+        aria-label={t("viewing", { branch: label })}
         className="hidden min-h-11 items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-left outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent sm:flex"
       >
         <BuildingStorefrontIcon aria-hidden="true" className="size-4 text-admin-muted" />
         <span className="flex flex-col leading-tight">
-          <span className="text-[10px] uppercase tracking-wide text-admin-muted">Chi nhánh</span>
+          <span className="text-[10px] uppercase tracking-wide text-admin-muted">{t("label")}</span>
           <span className="text-sm font-semibold text-admin-ink">{label}</span>
         </span>
         <ChevronDownIcon aria-hidden="true" className="size-4 text-admin-muted" />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="admin-shell">
         <Dropdown.Menu
-          aria-label="Danh sách chi nhánh"
+          aria-label={t("listLabel")}
           selectionMode="single"
           selectedKeys={new Set([branchId])}
           onSelectionChange={(keys) => {
@@ -41,7 +43,7 @@ export function BranchSelector() {
           }}
         >
           {branchIds.map((id) => {
-            const name = branchNames.get(id) ?? "Chi nhánh chưa có tên";
+            const name = branchNames.get(id) ?? t("unnamed");
             return (
               <Dropdown.Item key={id} id={id} textValue={name}>
                 {name}

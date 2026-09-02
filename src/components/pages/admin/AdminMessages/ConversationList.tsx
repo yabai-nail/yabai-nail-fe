@@ -1,4 +1,5 @@
 import { Avatar, Button, Tabs } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import type { Conversation, ConversationStatus } from "./data";
 
@@ -26,31 +27,33 @@ export function ConversationList({
   onQueryChange,
   onSelect,
 }: ConversationListProps) {
+  const t = useTranslations("admin.messages");
+
   return (
     <section
       aria-labelledby="inbox-heading"
       className="min-w-0 border-r border-admin-border bg-admin-surface"
     >
       <div className="space-y-3 p-3">
-        <h2 id="inbox-heading" className="font-bold">Hộp thư</h2>
-        <AdminSearchField label="Tìm tin nhắn" placeholder="Tìm kiếm tin nhắn..." value={query} onChange={onQueryChange} />
+        <h2 id="inbox-heading" className="font-bold">{t("inbox")}</h2>
+        <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={onQueryChange} />
         <Tabs selectedKey={filter} onSelectionChange={(key) => onFilterChange(String(key) as InboxFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
-            <Tabs.List aria-label="Lọc hộp thư">
+            <Tabs.List aria-label={t("filterLabel")}>
               <Tabs.Tab id="all" className={inboxTabClassName}>
-                Tất cả
+                {t("tabs.all")}
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="unread" className={inboxTabClassName}>
-                Chưa đọc
+                {t("tabs.unread")}
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="read" className={inboxTabClassName}>
-                Đã đọc
+                {t("tabs.read")}
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="archived" className={inboxTabClassName}>
-                Lưu trữ
+                {t("tabs.archived")}
                 <Tabs.Indicator />
               </Tabs.Tab>
             </Tabs.List>
@@ -85,7 +88,7 @@ export function ConversationList({
                   </span>
                   {conversation.unreadCount ? (
                     <span
-                      aria-label={`${conversation.unreadCount} tin chưa đọc`}
+                      aria-label={t("unreadCount", { count: conversation.unreadCount })}
                       className="grid size-5 shrink-0 place-items-center rounded-full bg-admin-accent text-[0.65rem] font-bold text-white"
                     >
                       {conversation.unreadCount}
@@ -99,7 +102,7 @@ export function ConversationList({
       </ul>
       {conversations.length === 0 ? (
         <p role="status" className="p-8 text-center text-sm text-admin-muted">
-          Không tìm thấy cuộc hội thoại.
+          {t("noConversations")}
         </p>
       ) : null}
     </section>

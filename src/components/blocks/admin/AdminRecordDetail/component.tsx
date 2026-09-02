@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Modal } from "@heroui/react";
+import { useTranslations } from "next-intl";
 
 export type DetailRow = { readonly key: string; readonly value: string };
 
@@ -38,6 +39,7 @@ export function AdminRecordDetail({
   data: Record<string, unknown> | undefined;
   onClose: () => void;
 }>) {
+  const t = useTranslations("admin.recordDetail");
   const rows = toDetailRows(data);
 
   return (
@@ -50,11 +52,11 @@ export function AdminRecordDetail({
             </Modal.Header>
             <Modal.Body className="px-5 py-5">
               {isLoading ? (
-                <p className="text-sm text-admin-muted">Đang tải…</p>
+                <p className="text-sm text-admin-muted">{t("loading")}</p>
               ) : error ? (
-                <p className="text-sm text-admin-danger" role="alert">Không tải được chi tiết.</p>
+                <p className="text-sm text-admin-danger" role="alert">{t("error")}</p>
               ) : rows.length === 0 ? (
-                <p className="text-sm text-admin-muted">Không có dữ liệu.</p>
+                <p className="text-sm text-admin-muted">{t("empty")}</p>
               ) : (
                 <dl className="grid gap-2">
                   {rows.map((row) => (
@@ -67,7 +69,7 @@ export function AdminRecordDetail({
               )}
             </Modal.Body>
             <Modal.Footer className="flex justify-end border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Đóng</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("close")}</Button>
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>

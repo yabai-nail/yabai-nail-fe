@@ -58,25 +58,13 @@ export type MembershipResolutionView = {
   readonly resolvedAt: string;
 };
 
-const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
-  PENDING: "Chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  CHECKED_IN: "Đã đến",
-  IN_SERVICE: "Đang làm",
-  AWAITING_PAYMENT: "Chờ thanh toán",
-  COMPLETED: "Hoàn tất",
-  CANCELLED: "Đã huỷ",
-  CANCELLED_BY_CUSTOMER: "Khách đã huỷ",
-  CANCELLED_BY_SALON: "Salon đã huỷ",
-  NO_SHOW: "Không đến",
-};
-
-export function appointmentStatusLabel(status: string): string {
-  return APPOINTMENT_STATUS_LABELS[status.toUpperCase()] ?? status;
-}
-
-export function membershipTierLabel(tier: string): string {
-  return { MEMBER: "Thành viên", SILVER: "Bạc", GOLD: "Vàng", PLATINUM: "Bạch kim" }[tier.toUpperCase()] ?? tier;
+/** The translator is a parameter: this is called from render, not from a hook. */
+export function membershipTierLabel(
+  tier: string,
+  t: ((key: string) => string) & { has: (key: string) => boolean },
+): string {
+  const code = tier.toUpperCase();
+  return t.has(`tier.${code}`) ? t(`tier.${code}`) : tier;
 }
 
 /**
@@ -104,14 +92,21 @@ export function summarizeResolvedCustomer(customer: AdminResolvedCustomer): Reso
   };
 }
 
-export function summarizeCheckIn(resolution: AdminCheckInResolution): CheckInResolutionView {
+/**
+ * The status label comes from the shared appointment-status catalogue, so the check-in
+ * panel and the appointments screen name the same state the same way.
+ */
+export function summarizeCheckIn(
+  resolution: AdminCheckInResolution,
+  statusLabel: (status: string) => string,
+): CheckInResolutionView {
   return {
     customer: summarizeResolvedCustomer(resolution.customer),
     localDate: resolution.localDate,
     appointments: (resolution.todaysAppointments ?? []).map((appointment) => ({
       id: appointment.id,
       time: formatSalonClock(appointment.startsAt),
-      status: appointmentStatusLabel(appointment.status),
+      status: statusLabel(appointment.status),
       total: appointment.total,
     })),
   };

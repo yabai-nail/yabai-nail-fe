@@ -8,6 +8,9 @@ import {
   summarizeMembership,
 } from "./data";
 
+/** Echoes the code back; what a status is called is the catalogue's business. */
+const statusLabel = (status: string) => status;
+
 describe("operations helpers", () => {
   it("parses grouped money strings to an integer", () => {
     expect(parseMoney("1.000.000")).toBe(1000000);
@@ -40,7 +43,7 @@ describe("check-in resolution view", () => {
   } as const;
 
   it("keeps the customer identity the receptionist needs", () => {
-    expect(summarizeCheckIn(resolution).customer).toEqual({
+    expect(summarizeCheckIn(resolution, statusLabel).customer).toEqual({
       id: "c1",
       name: "Test Khach A",
       phone: "0911000001",
@@ -49,23 +52,25 @@ describe("check-in resolution view", () => {
     });
   });
 
-  it("renders each appointment in salon time with a Vietnamese status", () => {
-    expect(summarizeCheckIn(resolution).appointments).toEqual([
-      { id: "a1", time: "10:00", status: "Hoàn tất", total: 250000 },
+  // The view renders salon time, and labels the status through whatever the screen
+  // hands it -- naming COMPLETED is the catalogue's job, not this function's.
+  it("renders each appointment in salon time with a labelled status", () => {
+    expect(summarizeCheckIn(resolution, statusLabel).appointments).toEqual([
+      { id: "a1", time: "10:00", status: "COMPLETED", total: 250000 },
     ]);
   });
 
   it("keeps the day the API resolved, not the browser's", () => {
-    expect(summarizeCheckIn(resolution).localDate).toBe("2026-08-26");
+    expect(summarizeCheckIn(resolution, statusLabel).localDate).toBe("2026-08-26");
   });
 
   it("survives a day with no appointments", () => {
-    const empty = summarizeCheckIn({ ...resolution, todaysAppointments: [] });
+    const empty = summarizeCheckIn({ ...resolution, todaysAppointments: [] }, statusLabel);
     expect(empty.appointments).toEqual([]);
   });
 
   it("falls back to dashes when the customer card is sparse", () => {
-    const view = summarizeCheckIn({ ...resolution, customer: { id: "c9" } });
+    const view = summarizeCheckIn({ ...resolution, customer: { id: "c9" } }, statusLabel);
     expect(view.customer).toEqual({ id: "c9", name: "—", phone: "—", tier: "—", points: 0 });
   });
 });

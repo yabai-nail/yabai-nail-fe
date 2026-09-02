@@ -1,3 +1,4 @@
+import type { Translator } from "@/i18n/config";
 import type {
   Appointment,
   AppointmentDraft,
@@ -66,22 +67,22 @@ export function getAppointmentSummary(appointments: ReadonlyArray<Appointment>) 
   );
 }
 
-export function validateAppointmentDraft(draft: AppointmentDraft) {
+export function validateAppointmentDraft(draft: AppointmentDraft, t: Translator) {
   const errors: AppointmentDraftErrors = {};
 
-  if (!draft.date) errors.date = "Vui lòng chọn ngày.";
-  if (!draft.startTime) errors.startTime = "Vui lòng chọn giờ bắt đầu.";
-  if (!draft.endTime) errors.endTime = "Vui lòng chọn giờ kết thúc.";
-  if (!draft.customer.id) errors.customer = "Vui lòng chọn khách hàng.";
-  if (!draft.service.id) errors.service = "Vui lòng chọn dịch vụ.";
-  if (!draft.staff.id) errors.staff = "Vui lòng chọn nhân viên.";
+  if (!draft.date) errors.date = t("validation.date");
+  if (!draft.startTime) errors.startTime = t("validation.startTime");
+  if (!draft.endTime) errors.endTime = t("validation.endTime");
+  if (!draft.customer.id) errors.customer = t("validation.customer");
+  if (!draft.service.id) errors.service = t("validation.service");
+  if (!draft.staff.id) errors.staff = t("validation.staff");
 
   if (
     draft.startTime &&
     draft.endTime &&
     timeToMinutes(draft.endTime) <= timeToMinutes(draft.startTime)
   ) {
-    errors.endTime = "Giờ kết thúc phải sau giờ bắt đầu.";
+    errors.endTime = t("validation.endAfterStart");
   }
 
   return errors;
