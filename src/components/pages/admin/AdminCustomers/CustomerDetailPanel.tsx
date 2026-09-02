@@ -61,11 +61,14 @@ export function CustomerDetailPanel({
             <CustomerLoyaltyPanel branchId={branchId} customerId={customer.id} />
           </>
         ) : null}
+        {/* fullWidth on both: each already owns a row of this grid, but a HeroUI
+            button sizes itself to its label, so they came out 182px inside a
+            286px cell and sat short of the edge with nothing beside them. */}
         <div className="grid gap-2">
-          <Button variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
+          <Button fullWidth variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
             <PencilSquareIcon className="size-4" />Chỉnh sửa thông tin
           </Button>
-          <Button variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/messages")}>
+          <Button fullWidth variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/messages")}>
             <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
           </Button>
         </div>
