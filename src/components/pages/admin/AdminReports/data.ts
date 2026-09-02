@@ -3,13 +3,6 @@ import type { RevenueReport } from "@/service";
 
 export type ReportKind = "revenue" | "branches" | "customers" | "staff";
 
-export const reportKindLabels: Record<ReportKind, string> = {
-  revenue: "Doanh thu",
-  branches: "Chi nhánh",
-  customers: "Khách hàng",
-  staff: "Nhân viên",
-};
-
 /** Backend reportType enum for POST /admin/report-exports. */
 export const exportKindOf = {
   revenue: "REVENUE_SUMMARY",
@@ -18,47 +11,17 @@ export const exportKindOf = {
   staff: "STAFF_PERFORMANCE",
 } as const;
 
-const exportStatusLabels: Record<string, string> = {
-  CANCELLED: "Đã huỷ",
-  COMPLETED: "Đã hoàn tất",
-  FAILED: "Thất bại",
-  PROCESSING: "Đang tạo",
-  QUEUED: "Đang chờ tạo",
-  READY: "Sẵn sàng tải",
-};
+/**
+ * The translator is a parameter throughout this module: these are plain functions the
+ * screen calls from render and from useMemo, and giving them a hook would make them
+ * unusable in both places.
+ */
+export type Translator = ((key: string) => string) & { has: (key: string) => boolean };
 
-export function exportStatusLabel(status: string | undefined): string {
-  return exportStatusLabels[String(status ?? "QUEUED").toUpperCase()] ?? "Không xác định";
+export function exportStatusLabel(status: string | undefined, t: Translator): string {
+  const code = String(status ?? "QUEUED").toUpperCase();
+  return t.has(`exportStatus.${code}`) ? t(`exportStatus.${code}`) : t("exportStatus.unknown");
 }
-
-const metricLabels: Record<string, string> = {
-  branchName: "Chi nhánh",
-  customerName: "Khách hàng",
-  grossRevenue: "Doanh thu gộp",
-  recognizedRevenue: "Doanh thu ghi nhận",
-  refundTotal: "Tổng hoàn tiền",
-  netRevenue: "Doanh thu thuần",
-  revenue: "Doanh thu",
-  appointments: "Lượt hẹn",
-  completedAppointments: "Hoàn tất",
-  completedAppointmentCount: "Lịch hẹn hoàn tất",
-  staffCompletedAppointmentCount: "Lịch hẹn hoàn tất",
-  scheduledAppointmentCount: "Lịch hẹn đã đặt",
-  cancelledAppointmentCount: "Lịch hẹn đã huỷ",
-  uniqueCompletedCustomerCount: "Khách đã hoàn tất",
-  cancelledAppointments: "Đã huỷ",
-  newCustomers: "Khách mới",
-  returningCustomers: "Khách quay lại",
-  averageTicket: "Trung bình/hoá đơn",
-  commission: "Hoa hồng",
-  serviceName: "Dịch vụ",
-  staffName: "Nhân viên",
-  displayName: "Nhân viên",
-  orderCount: "Số đơn",
-  commissionAmount: "Hoa hồng",
-  staffRecognizedRevenue: "Doanh thu ghi nhận",
-  workingStatus: "Trạng thái làm việc",
-};
 
 export type ReportLookups = {
   readonly branches?: ReadonlyMap<string, string>;
@@ -71,12 +34,13 @@ export type ReportLookups = {
 export function resolveReportIdentifiers(
   rows: ReadonlyArray<Record<string, unknown>>,
   lookups: ReportLookups,
+  t: Translator,
 ): ReadonlyArray<Record<string, unknown>> {
   const identifierColumns: Record<string, readonly [string, ReadonlyMap<string, string> | undefined, string]> = {
-    branchId: ["branchName", lookups.branches, "Chi nhánh chưa có tên"],
-    customerId: ["customerName", lookups.customers, "Khách chưa có tên"],
-    serviceId: ["serviceName", lookups.services, "Dịch vụ chưa có tên"],
-    staffId: ["staffName", lookups.staff, "Nhân viên chưa có tên"],
+    branchId: ["branchName", lookups.branches, t("unnamedBranch")],
+    customerId: ["customerName", lookups.customers, t("unnamedCustomer")],
+    serviceId: ["serviceName", lookups.services, t("unnamedService")],
+    staffId: ["staffName", lookups.staff, t("unnamedStaff")],
   };
 
   return rows.map((row) => Object.fromEntries(Object.entries(row).flatMap(([key, value]) => {
@@ -97,8 +61,9 @@ export function humanizeKey(key: string): string {
     .replace(/^\w/, (char) => char.toUpperCase());
 }
 
-export function labelForKey(key: string): string {
-  return metricLabels[key] ?? humanizeKey(key);
+/** A column the catalogue does not name falls back to a humanised form of its key. */
+export function labelForKey(key: string, t: Translator): string {
+  return t.has(`columns.${key}`) ? t(`columns.${key}`) : humanizeKey(key);
 }
 
 export function formatReportValue(key: string, value: unknown): string {
@@ -113,11 +78,11 @@ export function formatReportValue(key: string, value: unknown): string {
 
 export type MetricCard = { readonly key: string; readonly label: string; readonly display: string };
 
-export function metricCards(report: RevenueReport | undefined): ReadonlyArray<MetricCard> {
+export function metricCards(report: RevenueReport | undefined, t: Translator): ReadonlyArray<MetricCard> {
   if (!report) return [];
   return Object.entries(report.metrics).map(([key, metric]) => ({
     key,
-    label: labelForKey(key),
+    label: labelForKey(key, t),
     display: formatReportValue(key, metric.value),
   }));
 }

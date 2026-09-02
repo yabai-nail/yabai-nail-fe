@@ -302,6 +302,132 @@
         "send": "Send reply",
         "sendFailed": "Could not send the reply."
       }
+    },
+    "appointmentStatus": {
+      "PENDING": "Pending confirmation",
+      "CONFIRMED": "Confirmed",
+      "CHECKED_IN": "Checked in",
+      "IN_SERVICE": "In service",
+      "AWAITING_PAYMENT": "Awaiting payment",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "CANCELLED_BY_CUSTOMER": "Cancelled by customer",
+      "CANCELLED_BY_SALON": "Cancelled by salon",
+      "NO_SHOW": "No-show"
+    },
+    "tier": {
+      "MEMBER": "Member",
+      "SILVER": "Silver",
+      "GOLD": "Gold",
+      "PLATINUM": "Platinum"
+    },
+    "operations": {
+      "pickBranch": "Choose a branch to run operations.",
+      "actionFailed": "The operation failed.",
+      "unnamedCustomer": "Unnamed customer",
+      "refund": {
+        "heading": "Refund",
+        "paidAppointment": "Paid appointment",
+        "pickAppointment": "Choose an appointment",
+        "transaction": "Transaction",
+        "loadingTransactions": "Loading transactions…",
+        "noTransactions": "This appointment has no transactions yet.",
+        "pickTransaction": "Choose a transaction",
+        "amount": "Refund amount (¥)",
+        "reason": "Refund reason",
+        "requested": "Refund requested {amount} · {status}",
+        "recorded": "The refund has been recorded.",
+        "busy": "Processing…",
+        "submit": "Refund"
+      },
+      "tierLine": "{tier} · {points} points",
+      "checkin": {
+        "heading": "Check-in lookup",
+        "codeLabel": "Member QR code or phone number",
+        "dayHeading": "Appointments on {date}",
+        "none": "No appointments that day.",
+        "done": "Looked up {name}. No appointment status changed — use the appointments screen to check in."
+      },
+      "lookupBusy": "Looking up…",
+      "lookupSubmit": "Look up",
+      "membership": {
+        "heading": "Membership card lookup",
+        "codeLabel": "Card QR code or phone number",
+        "done": "Looked up the card for {name}."
+      },
+      "customerLookup": {
+        "heading": "Customer lookup",
+        "queryLabel": "Name or phone number",
+        "found": "Found {count} customers.",
+        "busy": "Searching…"
+      }
+    },
+    "reports": {
+      "kind": {
+        "branches": "Branches",
+        "customers": "Customers",
+        "staff": "Staff",
+        "revenue": "Revenue"
+      },
+      "exportStatus": {
+        "CANCELLED": "Cancelled",
+        "COMPLETED": "Completed",
+        "FAILED": "Failed",
+        "PROCESSING": "Building",
+        "QUEUED": "Queued",
+        "READY": "Ready to download",
+        "unknown": "Unknown"
+      },
+      "unnamedCustomer": "Unnamed customer",
+      "unnamedStaff": "Unnamed staff member",
+      "unnamedBranch": "Unnamed branch",
+      "unnamedService": "Unnamed service",
+      "exportLine": "Export: {status}",
+      "refresh": "refresh",
+      "download": "Download file",
+      "getLink": "Get download link",
+      "creating": "Building…",
+      "createExport": "Create export",
+      "createFailed": "Could not create the export.",
+      "linkFailed": "Could not get the download link.",
+      "loadFailed": "Could not load the report.",
+      "loading": "Loading the report…",
+      "empty": "No report data.",
+      "columns": {
+        "branchName": "Branch",
+        "customerName": "Customer",
+        "grossRevenue": "Gross revenue",
+        "recognizedRevenue": "Recognized revenue",
+        "refundTotal": "Total refunds",
+        "netRevenue": "Net revenue",
+        "appointments": "Appointments",
+        "completedAppointments": "Completed",
+        "completedAppointmentCount": "Completed appointments",
+        "staffCompletedAppointmentCount": "Completed appointments",
+        "scheduledAppointmentCount": "Scheduled appointments",
+        "cancelledAppointmentCount": "Cancelled appointments",
+        "uniqueCompletedCustomerCount": "Customers served",
+        "cancelledAppointments": "Cancelled",
+        "newCustomers": "New customers",
+        "returningCustomers": "Returning customers",
+        "averageTicket": "Average ticket",
+        "commission": "Commission",
+        "serviceName": "Service",
+        "staffName": "Staff",
+        "displayName": "Staff",
+        "orderCount": "Orders",
+        "commissionAmount": "Commission",
+        "staffRecognizedRevenue": "Recognized revenue",
+        "workingStatus": "Working status",
+        "revenue": "Revenue"
+      }
+    },
+    "paymentMethod": {
+      "cash": "Cash",
+      "card": "Card",
+      "paypay": "PayPay",
+      "bank_transfer": "Bank transfer",
+      "other": "Other"
     }
   }
 }

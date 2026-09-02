@@ -302,6 +302,132 @@
         "send": "Gửi phản hồi",
         "sendFailed": "Không gửi được phản hồi."
       }
+    },
+    "appointmentStatus": {
+      "PENDING": "Chờ xác nhận",
+      "CONFIRMED": "Đã xác nhận",
+      "CHECKED_IN": "Đã đến",
+      "IN_SERVICE": "Đang làm",
+      "AWAITING_PAYMENT": "Chờ thanh toán",
+      "COMPLETED": "Hoàn tất",
+      "CANCELLED": "Đã huỷ",
+      "CANCELLED_BY_CUSTOMER": "Khách đã huỷ",
+      "CANCELLED_BY_SALON": "Salon đã huỷ",
+      "NO_SHOW": "Không đến"
+    },
+    "tier": {
+      "MEMBER": "Thành viên",
+      "SILVER": "Bạc",
+      "GOLD": "Vàng",
+      "PLATINUM": "Bạch kim"
+    },
+    "operations": {
+      "pickBranch": "Hãy chọn chi nhánh để thực hiện thao tác vận hành.",
+      "actionFailed": "Thao tác thất bại.",
+      "unnamedCustomer": "Khách chưa có tên",
+      "refund": {
+        "heading": "Hoàn tiền",
+        "paidAppointment": "Lịch hẹn đã thanh toán",
+        "pickAppointment": "Chọn lịch hẹn",
+        "transaction": "Giao dịch",
+        "loadingTransactions": "Đang tải giao dịch…",
+        "noTransactions": "Lịch hẹn này chưa có giao dịch.",
+        "pickTransaction": "Chọn giao dịch",
+        "amount": "Số tiền hoàn (¥)",
+        "reason": "Lý do hoàn",
+        "requested": "Yêu cầu hoàn {amount} · {status}",
+        "recorded": "Đã ghi nhận hoàn tiền.",
+        "busy": "Đang xử lý…",
+        "submit": "Hoàn tiền"
+      },
+      "tierLine": "Hạng {tier} · {points} điểm",
+      "checkin": {
+        "heading": "Tra cứu khách check-in",
+        "codeLabel": "Mã QR thành viên hoặc SĐT",
+        "dayHeading": "Lịch hẹn ngày {date}",
+        "none": "Không có lịch hẹn nào trong ngày.",
+        "done": "Đã tra cứu {name}. Lịch hẹn chưa đổi trạng thái — mở màn Lịch hẹn để check-in."
+      },
+      "lookupBusy": "Đang tra cứu…",
+      "lookupSubmit": "Tra cứu",
+      "membership": {
+        "heading": "Tra cứu thẻ thành viên",
+        "codeLabel": "Mã QR thẻ hoặc SĐT",
+        "done": "Đã tra cứu thẻ của {name}."
+      },
+      "customerLookup": {
+        "heading": "Tra cứu khách hàng",
+        "queryLabel": "Tên hoặc số điện thoại",
+        "found": "Tìm thấy {count} khách.",
+        "busy": "Đang tìm…"
+      }
+    },
+    "reports": {
+      "kind": {
+        "branches": "Chi nhánh",
+        "customers": "Khách hàng",
+        "staff": "Nhân viên",
+        "revenue": "Doanh thu"
+      },
+      "exportStatus": {
+        "CANCELLED": "Đã huỷ",
+        "COMPLETED": "Đã hoàn tất",
+        "FAILED": "Thất bại",
+        "PROCESSING": "Đang tạo",
+        "QUEUED": "Đang chờ tạo",
+        "READY": "Sẵn sàng tải",
+        "unknown": "Không xác định"
+      },
+      "unnamedCustomer": "Khách chưa có tên",
+      "unnamedStaff": "Nhân viên chưa có tên",
+      "unnamedBranch": "Chi nhánh chưa có tên",
+      "unnamedService": "Dịch vụ chưa có tên",
+      "exportLine": "Xuất: {status}",
+      "refresh": "làm mới",
+      "download": "Tải file",
+      "getLink": "Lấy link tải",
+      "creating": "Đang tạo…",
+      "createExport": "Tạo file xuất",
+      "createFailed": "Không tạo được file xuất.",
+      "linkFailed": "Chưa lấy được link tải.",
+      "loadFailed": "Không tải được báo cáo.",
+      "loading": "Đang tải báo cáo…",
+      "empty": "Không có dữ liệu báo cáo.",
+      "columns": {
+        "branchName": "Chi nhánh",
+        "customerName": "Khách hàng",
+        "grossRevenue": "Doanh thu gộp",
+        "recognizedRevenue": "Doanh thu ghi nhận",
+        "refundTotal": "Tổng hoàn tiền",
+        "netRevenue": "Doanh thu thuần",
+        "appointments": "Lượt hẹn",
+        "completedAppointments": "Hoàn tất",
+        "completedAppointmentCount": "Lịch hẹn hoàn tất",
+        "staffCompletedAppointmentCount": "Lịch hẹn hoàn tất",
+        "scheduledAppointmentCount": "Lịch hẹn đã đặt",
+        "cancelledAppointmentCount": "Lịch hẹn đã huỷ",
+        "uniqueCompletedCustomerCount": "Khách đã hoàn tất",
+        "cancelledAppointments": "Đã huỷ",
+        "newCustomers": "Khách mới",
+        "returningCustomers": "Khách quay lại",
+        "averageTicket": "Trung bình/hoá đơn",
+        "commission": "Hoa hồng",
+        "serviceName": "Dịch vụ",
+        "staffName": "Nhân viên",
+        "displayName": "Nhân viên",
+        "orderCount": "Số đơn",
+        "commissionAmount": "Hoa hồng",
+        "staffRecognizedRevenue": "Doanh thu ghi nhận",
+        "workingStatus": "Trạng thái làm việc",
+        "revenue": "Doanh thu"
+      }
+    },
+    "paymentMethod": {
+      "cash": "Tiền mặt",
+      "card": "Thẻ",
+      "paypay": "PayPay",
+      "bank_transfer": "Chuyển khoản",
+      "other": "Khác"
     }
   }
 }

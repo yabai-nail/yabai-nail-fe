@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import {
@@ -22,7 +23,6 @@ import {
   formatReportValue,
   labelForKey,
   metricCards,
-  reportKindLabels,
   resolveReportIdentifiers,
   tableColumns,
   type ReportKind,
@@ -31,6 +31,7 @@ import {
 const kinds: ReadonlyArray<ReportKind> = ["revenue", "branches", "customers", "staff"];
 
 export function AdminReportsComponent() {
+  const t = useTranslations("admin.reports");
   const revenue = useRevenueReport();
   const branches = useAdminBranchesReport();
   const customers = useAdminCustomersReport();
@@ -52,7 +53,7 @@ export function AdminReportsComponent() {
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
 
-  const cards = useMemo(() => metricCards(revenue.data), [revenue.data]);
+  const cards = useMemo(() => metricCards(revenue.data, t), [revenue.data, t]);
 
   const rawRows = useMemo<ReadonlyArray<Record<string, unknown>>>(() => {
     if (kind === "revenue") {
@@ -63,10 +64,10 @@ export function AdminReportsComponent() {
 
   const rows = useMemo(() => resolveReportIdentifiers(rawRows, {
     branches: new Map((branchesList.data?.items ?? []).map((item) => [item.id, item.name] as const)),
-    customers: new Map((accountsList.data?.items ?? []).map((item) => [item.id, item.displayName ?? "Khách chưa có tên"] as const)),
+    customers: new Map((accountsList.data?.items ?? []).map((item) => [item.id, item.displayName ?? t("unnamedCustomer")] as const)),
     services: new Map((servicesList.data?.items ?? []).map((item) => [item.id, item.name] as const)),
-    staff: new Map((staffList.data?.items ?? []).map((item) => [item.id, item.displayName ?? "Nhân viên chưa có tên"] as const)),
-  }), [rawRows, branchesList.data, accountsList.data, servicesList.data, staffList.data]);
+    staff: new Map((staffList.data?.items ?? []).map((item) => [item.id, item.displayName ?? t("unnamedStaff")] as const)),
+  }, t), [rawRows, branchesList.data, accountsList.data, servicesList.data, staffList.data, t]);
 
   const columns = useMemo(() => tableColumns(rows), [rows]);
 
@@ -85,7 +86,7 @@ export function AdminReportsComponent() {
       const info = await adminService.createReportExport({ reportType: exportKindOf[kind] });
       setExportInfo(info);
     } catch (err) {
-      setExportError(err instanceof Error && err.message ? err.message : "Không tạo được file xuất.");
+      setExportError(err instanceof Error && err.message ? err.message : t("createFailed"));
     } finally {
       setExportBusy(false);
     }
@@ -98,7 +99,7 @@ export function AdminReportsComponent() {
       const res = await adminService.reportExportDownloadUrl(exportInfo.exportId);
       setDownloadUrl(res.signedUrl);
     } catch (err) {
-      setExportError(err instanceof Error && err.message ? err.message : "Chưa lấy được link tải.");
+      setExportError(err instanceof Error && err.message ? err.message : t("linkFailed"));
     }
   };
 
@@ -114,15 +115,15 @@ export function AdminReportsComponent() {
               className={kind === value ? "rounded-lg border-admin-accent text-admin-accent" : "rounded-lg"}
               onPress={() => changeKind(value)}
             >
-              {reportKindLabels[value]}
+              {t(`kind.${value}`)}
             </Button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {exportInfo ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-              Xuất: {exportStatusLabel((exportStatus.data?.status as string | undefined) ?? exportInfo.status)}
-              <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>làm mới</button>
+              {t("exportLine", { status: exportStatusLabel((exportStatus.data?.status as string | undefined) ?? exportInfo.status, t) })}
+              <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>{t("refresh")}</button>
             </span>
           ) : null}
           {downloadUrl ? (
@@ -132,11 +133,11 @@ export function AdminReportsComponent() {
               rel="noreferrer"
               className="min-h-9 rounded-lg border border-admin-accent px-3 py-1.5 text-xs font-semibold text-admin-accent"
             >
-              Tải file
+              {t("download")}
             </a>
           ) : exportInfo && !downloadUrl ? (
             <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => void fetchDownloadUrl()}>
-              Lấy link tải
+              {t("getLink")}
             </Button>
           ) : null}
           <Button
@@ -146,16 +147,16 @@ export function AdminReportsComponent() {
             isDisabled={exportBusy}
             onPress={() => void createExport()}
           >
-            {exportBusy ? "Đang tạo…" : "Tạo file xuất"}
+            {exportBusy ? t("creating") : t("createExport")}
           </Button>
         </div>
       </div>
 
       {exportError ? <p className="mb-3 text-xs text-admin-danger" role="alert">{exportError}</p> : null}
       {active.error ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được báo cáo.</p>
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : active.isLoading ? (
-        <p className="mb-3 text-xs text-admin-muted">Đang tải báo cáo…</p>
+        <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
       ) : null}
 
       {kind === "revenue" && cards.length > 0 ? (
@@ -175,7 +176,7 @@ export function AdminReportsComponent() {
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
                 {columns.map((column) => (
-                  <th key={column} className="px-4 py-3">{labelForKey(column)}</th>
+                  <th key={column} className="px-4 py-3">{labelForKey(column, t)}</th>
                 ))}
               </tr>
             </thead>
@@ -183,7 +184,7 @@ export function AdminReportsComponent() {
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={Math.max(1, columns.length)} className="px-4 py-10 text-center text-sm text-admin-muted">
-                    Không có dữ liệu báo cáo.
+                    {t("empty")}
                   </td>
                 </tr>
               ) : (

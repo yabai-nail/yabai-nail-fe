@@ -302,6 +302,132 @@
         "send": "返信を送信",
         "sendFailed": "返信を送信できません。"
       }
+    },
+    "appointmentStatus": {
+      "PENDING": "確認待ち",
+      "CONFIRMED": "確認済み",
+      "CHECKED_IN": "来店済み",
+      "IN_SERVICE": "施術中",
+      "AWAITING_PAYMENT": "会計待ち",
+      "COMPLETED": "完了",
+      "CANCELLED": "キャンセル済み",
+      "CANCELLED_BY_CUSTOMER": "顧客都合のキャンセル",
+      "CANCELLED_BY_SALON": "店舗都合のキャンセル",
+      "NO_SHOW": "無断キャンセル"
+    },
+    "tier": {
+      "MEMBER": "メンバー",
+      "SILVER": "シルバー",
+      "GOLD": "ゴールド",
+      "PLATINUM": "プラチナ"
+    },
+    "operations": {
+      "pickBranch": "オペレーションを行う店舗を選択してください。",
+      "actionFailed": "操作に失敗しました。",
+      "unnamedCustomer": "名称未設定の顧客",
+      "refund": {
+        "heading": "返金",
+        "paidAppointment": "支払い済みの予約",
+        "pickAppointment": "予約を選択",
+        "transaction": "取引",
+        "loadingTransactions": "取引を読み込み中…",
+        "noTransactions": "この予約にはまだ取引がありません。",
+        "pickTransaction": "取引を選択",
+        "amount": "返金額 (¥)",
+        "reason": "返金の理由",
+        "requested": "返金依頼 {amount} · {status}",
+        "recorded": "返金を記録しました。",
+        "busy": "処理中…",
+        "submit": "返金する"
+      },
+      "tierLine": "{tier} · {points} ポイント",
+      "checkin": {
+        "heading": "来店受付の顧客照会",
+        "codeLabel": "会員QRコードまたは電話番号",
+        "dayHeading": "{date} の予約",
+        "none": "その日の予約はありません。",
+        "done": "{name} を照会しました。予約のステータスは変わっていません — 来店受付は予約画面で行ってください。"
+      },
+      "lookupBusy": "照会しています…",
+      "lookupSubmit": "照会",
+      "membership": {
+        "heading": "会員カードの照会",
+        "codeLabel": "カードQRコードまたは電話番号",
+        "done": "{name} のカードを照会しました。"
+      },
+      "customerLookup": {
+        "heading": "顧客の照会",
+        "queryLabel": "氏名または電話番号",
+        "found": "{count} 件の顧客が見つかりました。",
+        "busy": "検索しています…"
+      }
+    },
+    "reports": {
+      "kind": {
+        "branches": "店舗",
+        "customers": "顧客",
+        "staff": "スタッフ",
+        "revenue": "売上"
+      },
+      "exportStatus": {
+        "CANCELLED": "キャンセル済み",
+        "COMPLETED": "完了",
+        "FAILED": "失敗",
+        "PROCESSING": "作成中",
+        "QUEUED": "作成待ち",
+        "READY": "ダウンロード可能",
+        "unknown": "不明"
+      },
+      "unnamedCustomer": "名称未設定の顧客",
+      "unnamedStaff": "名称未設定のスタッフ",
+      "unnamedBranch": "名称未設定の店舗",
+      "unnamedService": "名称未設定のメニュー",
+      "exportLine": "エクスポート: {status}",
+      "refresh": "更新",
+      "download": "ファイルをダウンロード",
+      "getLink": "ダウンロードリンクを取得",
+      "creating": "作成しています…",
+      "createExport": "エクスポートを作成",
+      "createFailed": "エクスポートを作成できません。",
+      "linkFailed": "ダウンロードリンクを取得できません。",
+      "loadFailed": "レポートを読み込めません。",
+      "loading": "レポートを読み込み中…",
+      "empty": "レポートのデータがありません。",
+      "columns": {
+        "branchName": "店舗",
+        "customerName": "顧客",
+        "grossRevenue": "総売上",
+        "recognizedRevenue": "計上売上",
+        "refundTotal": "返金の合計",
+        "netRevenue": "純売上",
+        "appointments": "予約数",
+        "completedAppointments": "完了",
+        "completedAppointmentCount": "完了した予約",
+        "staffCompletedAppointmentCount": "完了した予約",
+        "scheduledAppointmentCount": "予約済みの件数",
+        "cancelledAppointmentCount": "キャンセルされた予約",
+        "uniqueCompletedCustomerCount": "完了した顧客数",
+        "cancelledAppointments": "キャンセル済み",
+        "newCustomers": "新規顧客",
+        "returningCustomers": "再来店の顧客",
+        "averageTicket": "客単価",
+        "commission": "歩合",
+        "serviceName": "メニュー",
+        "staffName": "スタッフ",
+        "displayName": "スタッフ",
+        "orderCount": "件数",
+        "commissionAmount": "歩合",
+        "staffRecognizedRevenue": "計上売上",
+        "workingStatus": "勤務ステータス",
+        "revenue": "売上"
+      }
+    },
+    "paymentMethod": {
+      "cash": "現金",
+      "card": "カード",
+      "paypay": "PayPay",
+      "bank_transfer": "銀行振込",
+      "other": "その他"
     }
   }
 }
