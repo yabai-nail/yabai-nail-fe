@@ -7,8 +7,8 @@ import {
   getDateKeysInRange,
 } from "./date-utils";
 import {
-  appointmentStatusColor,
   appointmentStatusLabel,
+  appointmentStatusTone,
 } from "./status";
 
 function AppointmentPill({
@@ -22,26 +22,30 @@ function AppointmentPill({
   onSelect: (id: string) => void;
   compact?: boolean;
 }>) {
+  // The status dresses the pill: a 4px bar to scan by, the same colour at 10%
+  // behind it, and a dot beside the written label. The label prints in every
+  // view, compact included — it used to be dropped there, which would now leave
+  // the week grid encoding status in colour alone. Green and pink sit ΔE 4.7
+  // apart for a deutan reader, so the label is what carries the meaning.
+  const tone = appointmentStatusTone[appointment.status];
+
   return (
     <Button
       variant="ghost"
-      className={`h-auto w-full justify-start rounded-lg border-l-4 border-admin-accent px-2 text-left ${
+      className={`h-auto w-full justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${
         compact ? "min-h-12 py-1.5" : "min-h-16 py-2"
-      } ${isSelected ? "bg-admin-soft ring-1 ring-admin-accent/30" : "bg-admin-soft/70"}`}
+      } ${isSelected ? "ring-2 ring-admin-ink/30" : ""}`}
       onPress={() => onSelect(appointment.id)}
     >
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <strong className="truncate text-xs text-admin-accent">{appointment.customer.name}</strong>
+          <strong className="truncate text-xs text-admin-ink">{appointment.customer.name}</strong>
           <time className="shrink-0 text-[0.65rem] text-admin-muted">{appointment.startTime} - {appointment.endTime}</time>
         </span>
-        <span className="mt-1 flex items-center justify-between gap-2">
-          <span className="truncate text-[0.7rem] text-admin-ink">{appointment.service.name}</span>
-          {!compact ? (
-            <Chip size="sm" variant="soft" color={appointmentStatusColor[appointment.status]} className="shrink-0">
-              <Chip.Label>{appointmentStatusLabel[appointment.status]}</Chip.Label>
-            </Chip>
-          ) : null}
+        <span className="mt-1 block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
+        <span className="mt-1 flex items-center gap-1.5 text-[0.65rem] font-medium text-admin-ink">
+          <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
+          {appointmentStatusLabel[appointment.status]}
         </span>
       </span>
     </Button>
