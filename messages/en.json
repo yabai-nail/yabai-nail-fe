@@ -999,6 +999,144 @@
         "save": "Save",
         "add": "Add"
       }
+    },
+    "staff": {
+      "unnamed": "Unnamed staff member",
+      "metrics": {
+        "periodRevenue": "Revenue for {period}",
+        "orderCount": "{count} orders",
+        "noOrders": "No order count",
+        "commissionDue": "Commission payable",
+        "noRate": "No rate yet",
+        "rateDetail": "{rate}% / average",
+        "salonShare": "Salon takes home",
+        "period": "Period {period}",
+        "working": "Staff working",
+        "offCount": "{count} on leave"
+      },
+      "overviewRegion": "Staff overview",
+      "tabsLabel": "Filter staff",
+      "tabs": {
+        "all": "All staff",
+        "working": "Working",
+        "off": "On leave"
+      },
+      "loading": "Loading the staff list…",
+      "emptyHeading": "No staff yet",
+      "retry": "Try reloading the page.",
+      "firstStaff": "Add your first staff member to start tracking revenue and commission.",
+      "noSelectionTitle": "No staff member selected",
+      "noSelectionDescription": "Change the filter to see staff details.",
+      "statusWorking": "Working",
+      "statusOff": "On leave",
+      "orders": {
+        "multipleServices": "{count} services",
+        "unnamedService": "Unnamed service",
+        "unnamedCustomer": "Unnamed customer",
+        "loading": "Loading appointments…",
+        "empty": "This staff member has no appointments yet.",
+        "time": "Time",
+        "customer": "Customer",
+        "service": "Service",
+        "total": "Total",
+        "status": "Status"
+      },
+      "compensation": {
+        "saveFailed": "Could not save the commission.",
+        "loading": "Loading…",
+        "loadFailed": "Could not load the configuration.",
+        "baseSalary": "Base salary",
+        "commission": "Commission",
+        "newBaseSalary": "New base salary (¥)",
+        "commissionPercent": "Commission (%)",
+        "effectiveFrom": "Effective from",
+        "saving": "Saving…",
+        "submit": "Update commission"
+      },
+      "create": {
+        "failed": "Could not create the staff member.",
+        "title": "Add staff member",
+        "name": "Full name",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "submit": "Add staff member"
+      },
+      "detail": {
+        "heading": "Staff details",
+        "phone": "Phone number",
+        "commissionRate": "Commission rate",
+        "totalRevenue": "Total revenue",
+        "commission": "Commission",
+        "salonShare": "Salon takes home",
+        "completedOrders": "Completed orders",
+        "payout": "Payout"
+      },
+      "edit": {
+        "failed": "Could not save the staff member.",
+        "title": "Edit staff member",
+        "name": "Name",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save"
+      },
+      "performance": {
+        "heading": "Performance by period",
+        "periodLabel": "Reporting period",
+        "loading": "Loading…",
+        "loadFailed": "Could not load the performance data.",
+        "orders": "Orders",
+        "commission": "Commission"
+      },
+      "skills": {
+        "saveFailed": "Could not save the skills.",
+        "heading": "Skills",
+        "loading": "Loading…",
+        "loadFailed": "Could not load the service catalogue.",
+        "saving": "Saving…",
+        "submit": "Save skills"
+      },
+      "table": {
+        "caption": "Staff and revenue",
+        "staff": "Staff",
+        "status": "Status",
+        "commission": "Commission",
+        "payout": "Payout",
+        "orders": "Orders",
+        "actions": "Actions",
+        "edit": "Edit {name}"
+      },
+      "shifts": {
+        "decisionFailed": "Could not process the leave request.",
+        "heading": "Shifts and leave",
+        "loading": "Loading shifts…",
+        "loadFailed": "Could not load the shifts.",
+        "empty": "No shifts for this staff member yet.",
+        "approval": {
+          "APPROVED": "Approved",
+          "PENDING": "Pending",
+          "REJECTED": "Rejected"
+        },
+        "requestsHeading": "Leave requests",
+        "noRequests": "No leave requests yet.",
+        "noReason": "No reason given",
+        "requestStatus": {
+          "PENDING": "Pending",
+          "APPROVED": "Approved",
+          "REJECTED": "Rejected"
+        },
+        "approve": "Approve (cancels clashing appointments)",
+        "reject": "Reject",
+        "saveFailed": "Could not save.",
+        "addShift": "Add shift",
+        "requestLeave": "Request leave",
+        "date": "Date",
+        "start": "Start",
+        "end": "End",
+        "reason": "Reason",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save"
+      }
     }
   }
 }

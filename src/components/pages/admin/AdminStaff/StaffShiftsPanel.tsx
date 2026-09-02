@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CalendarDaysIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -21,6 +22,11 @@ export function StaffShiftsPanel({
   branchId,
   staffId,
 }: Readonly<{ branchId: string; staffId: string }>) {
+  const t = useTranslations("admin.staff");
+  const approvalLabel = (code: string) =>
+    t.has(`shifts.approval.${code}`) ? t(`shifts.approval.${code}`) : code;
+  const requestStatusLabel = (code: string) =>
+    t.has(`shifts.requestStatus.${code}`) ? t(`shifts.requestStatus.${code}`) : code;
   const shifts = useAdminStaffShifts(branchId);
   const leaveRequests = useAdminLeaveRequests(branchId);
   const staffShifts = useMemo(
@@ -46,7 +52,7 @@ export function StaffShiftsPanel({
       );
       await Promise.all([leaveRequests.mutate(), shifts.mutate()]);
     } catch (thrown) {
-      setDecisionError(thrown instanceof Error ? thrown.message : "Không xử lý được yêu cầu nghỉ.");
+      setDecisionError(thrown instanceof Error ? thrown.message : t("shifts.decisionFailed"));
     } finally {
       setDecisionPending(null);
     }
@@ -55,7 +61,7 @@ export function StaffShiftsPanel({
   return (
     <section aria-labelledby="staff-shifts-heading" className="space-y-2 border-t border-admin-border pt-4">
       <div className="flex items-center justify-between">
-        <h3 id="staff-shifts-heading" className="text-sm font-bold text-admin-ink">Ca làm và ngày nghỉ</h3>
+        <h3 id="staff-shifts-heading" className="text-sm font-bold text-admin-ink">{t("shifts.heading")}</h3>
         <div className="flex gap-1">
           <Button size="sm" variant="ghost" onPress={() => setOpenMode("shift")}>
             <PlusIcon className="size-3.5" />Thêm ca
@@ -67,36 +73,36 @@ export function StaffShiftsPanel({
       </div>
 
       {shifts.isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải ca…</p>
+        <p className="text-xs text-admin-muted">{t("shifts.loading")}</p>
       ) : shifts.error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được ca làm.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("shifts.loadFailed")}</p>
       ) : staffShifts.length === 0 ? (
-        <p className="text-xs text-admin-muted">Chưa có ca nào cho nhân viên này.</p>
+        <p className="text-xs text-admin-muted">{t("shifts.empty")}</p>
       ) : (
         <ul className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
           {staffShifts.slice(0, 20).map((shift) => (
             <li key={shift.id} className="flex items-center justify-between gap-2">
               <span className="text-admin-ink">{shift.localDate.split("-").reverse().join("/")} · {shift.startLocalTime.slice(0, 5)} → {shift.endLocalTime.slice(0, 5)}</span>
-              <span className="text-[0.65rem] text-admin-muted">{{ APPROVED: "Đã duyệt", PENDING: "Chờ duyệt", REJECTED: "Từ chối" }[shift.approvalStatus ?? ""] ?? shift.approvalStatus ?? ""}</span>
+              <span className="text-[0.65rem] text-admin-muted">{approvalLabel(shift.approvalStatus ?? "")}</span>
             </li>
           ))}
         </ul>
       )}
 
       <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-admin-ink">Yêu cầu nghỉ</h4>
+        <h4 className="text-xs font-semibold text-admin-ink">{t("shifts.requestsHeading")}</h4>
         {staffLeaveRequests.length === 0 ? (
-          <p className="text-xs text-admin-muted">Chưa có yêu cầu nghỉ.</p>
+          <p className="text-xs text-admin-muted">{t("shifts.noRequests")}</p>
         ) : (
           <ul className="space-y-2">
             {staffLeaveRequests.map((request) => (
               <li key={request.id} className="rounded-lg border border-admin-border p-2 text-xs">
                 <p className="text-admin-ink">{request.from?.split("-").reverse().join("/")} → {request.to?.split("-").reverse().join("/")}</p>
-                <p className="text-admin-muted">{request.reason || "Không có lý do"} · {{ PENDING: "Chờ duyệt", APPROVED: "Đã duyệt", REJECTED: "Đã từ chối" }[request.status] ?? request.status}</p>
+                <p className="text-admin-muted">{request.reason || t("shifts.noReason")} · {requestStatusLabel(request.status)}</p>
                 {request.status === "PENDING" ? (
                   <div className="mt-2 flex gap-2">
-                    <Button size="sm" variant="primary" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "APPROVE")}>Duyệt (hủy lịch trùng)</Button>
-                    <Button size="sm" variant="outline" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "REJECT")}>Từ chối</Button>
+                    <Button size="sm" variant="primary" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "APPROVE")}>{t("shifts.approve")}</Button>
+                    <Button size="sm" variant="outline" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "REJECT")}>{t("shifts.reject")}</Button>
                   </div>
                 ) : null}
               </li>
@@ -132,6 +138,7 @@ function ShiftOrLeaveDialog({
   onClose: () => void;
   onSaved: () => void;
 }>) {
+  const t = useTranslations("admin.staff");
   const today = todayAtSalon();
   const [date, setDate] = useState(today);
   const [start, setStart] = useState("09:00");
@@ -180,7 +187,7 @@ function ShiftOrLeaveDialog({
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Không lưu được.");
+      setError(thrown instanceof Error ? thrown.message : t("shifts.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -193,12 +200,12 @@ function ShiftOrLeaveDialog({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                {mode === "shift" ? "Thêm ca làm" : "Đăng ký nghỉ"}
+                {mode === "shift" ? t("shifts.addShift") : t("shifts.requestLeave")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-3 px-5 py-4 text-sm">
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">Ngày</span>
+                <span className="text-xs font-semibold text-admin-ink">{t("shifts.date")}</span>
                 <input
                   type="date"
                   value={date}
@@ -208,7 +215,7 @@ function ShiftOrLeaveDialog({
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">Bắt đầu</span>
+                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.start")}</span>
                   <input
                     type="time"
                     value={start}
@@ -217,7 +224,7 @@ function ShiftOrLeaveDialog({
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">Kết thúc</span>
+                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.end")}</span>
                   <input
                     type="time"
                     value={end}
@@ -233,7 +240,7 @@ function ShiftOrLeaveDialog({
               ) : null}
               {mode === "leave" ? (
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">Lý do</span>
+                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.reason")}</span>
                   <input
                     value={reason}
                     onChange={(event) => setReason(event.target.value)}
@@ -244,14 +251,14 @@ function ShiftOrLeaveDialog({
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>Huỷ</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("shifts.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 onPress={() => void submit()}
                 isDisabled={!canSubmit}
               >
-                {busy ? "Đang lưu…" : "Lưu"}
+                {busy ? t("shifts.saving") : t("shifts.save")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

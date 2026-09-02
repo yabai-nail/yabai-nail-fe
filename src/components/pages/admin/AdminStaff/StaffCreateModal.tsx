@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ export function StaffCreateModal({
   onClose: () => void;
   onCreated: () => void;
 }>) {
+  const t = useTranslations("admin.staff");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function StaffCreateModal({
       onCreated();
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không tạo được nhân viên.");
+      setError(err instanceof Error && err.message ? err.message : t("create.failed"));
     } finally {
       setBusy(false);
     }
@@ -48,11 +50,11 @@ export function StaffCreateModal({
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
-              <Modal.Heading className="text-base font-bold text-admin-ink">Thêm nhân viên</Modal.Heading>
+              <Modal.Heading className="text-base font-bold text-admin-ink">{t("create.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Họ và tên</span>
+                <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                   value={name}
@@ -67,14 +69,14 @@ export function StaffCreateModal({
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Hủy</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("create.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
                 isDisabled={!canSubmit}
                 onPress={() => void submit()}
               >
-                {busy ? "Đang lưu…" : "Thêm nhân viên"}
+                {busy ? t("create.saving") : t("create.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

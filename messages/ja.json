@@ -999,6 +999,144 @@
         "save": "保存",
         "add": "追加"
       }
+    },
+    "staff": {
+      "unnamed": "名称未設定のスタッフ",
+      "metrics": {
+        "periodRevenue": "{period} の売上",
+        "orderCount": "{count} 件",
+        "noOrders": "件数のデータがありません",
+        "commissionDue": "支払うべき歩合の合計",
+        "noRate": "率のデータがありません",
+        "rateDetail": "{rate}% / 平均",
+        "salonShare": "店舗の実収入",
+        "period": "期間 {period}",
+        "working": "勤務中のスタッフ",
+        "offCount": "休暇 {count} 人"
+      },
+      "overviewRegion": "スタッフの概要",
+      "tabsLabel": "スタッフを絞り込み",
+      "tabs": {
+        "all": "すべてのスタッフ",
+        "working": "勤務中",
+        "off": "休暇中"
+      },
+      "loading": "スタッフ一覧を読み込み中…",
+      "emptyHeading": "スタッフがいません",
+      "retry": "ページを再読み込みしてください。",
+      "firstStaff": "最初のスタッフを追加すると、売上と歩合の記録が始まります。",
+      "noSelectionTitle": "スタッフが選択されていません",
+      "noSelectionDescription": "絞り込みを変えるとスタッフの情報が表示されます。",
+      "statusWorking": "勤務中",
+      "statusOff": "休暇中",
+      "orders": {
+        "multipleServices": "メニュー {count} 件",
+        "unnamedService": "名称未設定のメニュー",
+        "unnamedCustomer": "名称未設定の顧客",
+        "loading": "予約を読み込み中…",
+        "empty": "このスタッフにはまだ予約がありません。",
+        "time": "日時",
+        "customer": "顧客",
+        "service": "メニュー",
+        "total": "合計",
+        "status": "ステータス"
+      },
+      "compensation": {
+        "saveFailed": "歩合を保存できません。",
+        "loading": "読み込み中…",
+        "loadFailed": "設定を読み込めません。",
+        "baseSalary": "固定給",
+        "commission": "歩合",
+        "newBaseSalary": "新しい固定給 (¥)",
+        "commissionPercent": "歩合 (%)",
+        "effectiveFrom": "適用開始日",
+        "saving": "保存しています…",
+        "submit": "歩合を更新"
+      },
+      "create": {
+        "failed": "スタッフを作成できません。",
+        "title": "スタッフを追加",
+        "name": "氏名",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "submit": "スタッフを追加"
+      },
+      "detail": {
+        "heading": "スタッフの詳細",
+        "phone": "電話番号",
+        "commissionRate": "歩合率",
+        "totalRevenue": "総売上",
+        "commission": "歩合",
+        "salonShare": "店舗の実収入",
+        "completedOrders": "完了件数",
+        "payout": "受取額"
+      },
+      "edit": {
+        "failed": "スタッフを保存できません。",
+        "title": "スタッフを編集",
+        "name": "氏名",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存"
+      },
+      "performance": {
+        "heading": "期間ごとの実績",
+        "periodLabel": "集計期間",
+        "loading": "読み込み中…",
+        "loadFailed": "実績を読み込めません。",
+        "orders": "件数",
+        "commission": "歩合"
+      },
+      "skills": {
+        "saveFailed": "スキルを保存できません。",
+        "heading": "スキル",
+        "loading": "読み込み中…",
+        "loadFailed": "メニューのカテゴリーを読み込めません。",
+        "saving": "保存しています…",
+        "submit": "スキルを保存"
+      },
+      "table": {
+        "caption": "スタッフと売上の一覧",
+        "staff": "スタッフ",
+        "status": "ステータス",
+        "commission": "歩合",
+        "payout": "受取額",
+        "orders": "件数",
+        "actions": "操作",
+        "edit": "{name} の情報を編集"
+      },
+      "shifts": {
+        "decisionFailed": "休暇申請を処理できません。",
+        "heading": "シフトと休暇",
+        "loading": "シフトを読み込み中…",
+        "loadFailed": "シフトを読み込めません。",
+        "empty": "このスタッフのシフトはまだありません。",
+        "approval": {
+          "APPROVED": "承認済み",
+          "PENDING": "承認待ち",
+          "REJECTED": "却下"
+        },
+        "requestsHeading": "休暇申請",
+        "noRequests": "休暇申請はまだありません。",
+        "noReason": "理由なし",
+        "requestStatus": {
+          "PENDING": "承認待ち",
+          "APPROVED": "承認済み",
+          "REJECTED": "却下済み"
+        },
+        "approve": "承認（重複する予約をキャンセル）",
+        "reject": "却下",
+        "saveFailed": "保存できません。",
+        "addShift": "シフトを追加",
+        "requestLeave": "休暇を申請",
+        "date": "日付",
+        "start": "開始",
+        "end": "終了",
+        "reason": "理由",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存"
+      }
     }
   }
 }

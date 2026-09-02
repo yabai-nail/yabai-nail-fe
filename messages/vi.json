@@ -999,6 +999,144 @@
         "save": "Lưu",
         "add": "Thêm"
       }
+    },
+    "staff": {
+      "unnamed": "Nhân viên chưa có tên",
+      "metrics": {
+        "periodRevenue": "Doanh thu kỳ {period}",
+        "orderCount": "{count} đơn hàng",
+        "noOrders": "Chưa có số đơn",
+        "commissionDue": "Tổng hoa hồng phải trả",
+        "noRate": "Chưa có tỷ lệ",
+        "rateDetail": "{rate}% / Trung bình",
+        "salonShare": "Quán thực nhận",
+        "period": "Kỳ {period}",
+        "working": "Nhân viên đang làm",
+        "offCount": "{count} nghỉ phép"
+      },
+      "overviewRegion": "Tổng quan nhân viên",
+      "tabsLabel": "Lọc nhân viên",
+      "tabs": {
+        "all": "Tất cả nhân viên",
+        "working": "Đang làm",
+        "off": "Nghỉ phép"
+      },
+      "loading": "Đang tải danh sách nhân viên…",
+      "emptyHeading": "Chưa có nhân viên",
+      "retry": "Thử tải lại trang.",
+      "firstStaff": "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng.",
+      "noSelectionTitle": "Không có nhân viên",
+      "noSelectionDescription": "Thay đổi bộ lọc để xem thông tin nhân viên.",
+      "statusWorking": "Đang làm",
+      "statusOff": "Nghỉ phép",
+      "orders": {
+        "multipleServices": "{count} dịch vụ",
+        "unnamedService": "Dịch vụ chưa có tên",
+        "unnamedCustomer": "Khách chưa có tên",
+        "loading": "Đang tải lịch hẹn…",
+        "empty": "Nhân viên này chưa có lịch hẹn nào.",
+        "time": "Thời gian",
+        "customer": "Khách hàng",
+        "service": "Dịch vụ",
+        "total": "Tổng tiền",
+        "status": "Trạng thái"
+      },
+      "compensation": {
+        "saveFailed": "Không lưu được hoa hồng.",
+        "loading": "Đang tải…",
+        "loadFailed": "Không tải được cấu hình.",
+        "baseSalary": "Lương cứng",
+        "commission": "Hoa hồng",
+        "newBaseSalary": "Lương cứng mới (¥)",
+        "commissionPercent": "Hoa hồng (%)",
+        "effectiveFrom": "Áp dụng từ ngày",
+        "saving": "Đang lưu…",
+        "submit": "Cập nhật hoa hồng"
+      },
+      "create": {
+        "failed": "Không tạo được nhân viên.",
+        "title": "Thêm nhân viên",
+        "name": "Họ và tên",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "submit": "Thêm nhân viên"
+      },
+      "detail": {
+        "heading": "Chi tiết nhân viên",
+        "phone": "Số điện thoại",
+        "commissionRate": "Tỷ lệ hoa hồng",
+        "totalRevenue": "Tổng doanh thu",
+        "commission": "Hoa hồng",
+        "salonShare": "Quán thực nhận",
+        "completedOrders": "Số đơn hoàn thành",
+        "payout": "Nhận được"
+      },
+      "edit": {
+        "failed": "Không lưu được nhân viên.",
+        "title": "Chỉnh sửa nhân viên",
+        "name": "Họ tên",
+        "cancel": "Huỷ",
+        "saving": "Đang lưu…",
+        "save": "Lưu"
+      },
+      "performance": {
+        "heading": "Hiệu suất theo kỳ",
+        "periodLabel": "Kỳ thống kê",
+        "loading": "Đang tải…",
+        "loadFailed": "Không tải được hiệu suất.",
+        "orders": "Số đơn",
+        "commission": "Hoa hồng"
+      },
+      "skills": {
+        "saveFailed": "Không lưu được kỹ năng.",
+        "heading": "Kỹ năng",
+        "loading": "Đang tải…",
+        "loadFailed": "Không tải được danh mục dịch vụ.",
+        "saving": "Đang lưu…",
+        "submit": "Lưu kỹ năng"
+      },
+      "table": {
+        "caption": "Danh sách nhân viên và doanh thu",
+        "staff": "Nhân viên",
+        "status": "Trạng thái",
+        "commission": "Hoa hồng",
+        "payout": "Nhận được",
+        "orders": "Số đơn",
+        "actions": "Thao tác",
+        "edit": "Sửa thông tin {name}"
+      },
+      "shifts": {
+        "decisionFailed": "Không xử lý được yêu cầu nghỉ.",
+        "heading": "Ca làm và ngày nghỉ",
+        "loading": "Đang tải ca…",
+        "loadFailed": "Không tải được ca làm.",
+        "empty": "Chưa có ca nào cho nhân viên này.",
+        "approval": {
+          "APPROVED": "Đã duyệt",
+          "PENDING": "Chờ duyệt",
+          "REJECTED": "Từ chối"
+        },
+        "requestsHeading": "Yêu cầu nghỉ",
+        "noRequests": "Chưa có yêu cầu nghỉ.",
+        "noReason": "Không có lý do",
+        "requestStatus": {
+          "PENDING": "Chờ duyệt",
+          "APPROVED": "Đã duyệt",
+          "REJECTED": "Đã từ chối"
+        },
+        "approve": "Duyệt (hủy lịch trùng)",
+        "reject": "Từ chối",
+        "saveFailed": "Không lưu được.",
+        "addShift": "Thêm ca làm",
+        "requestLeave": "Đăng ký nghỉ",
+        "date": "Ngày",
+        "start": "Bắt đầu",
+        "end": "Kết thúc",
+        "reason": "Lý do",
+        "cancel": "Huỷ",
+        "saving": "Đang lưu…",
+        "save": "Lưu"
+      }
     }
   }
 }

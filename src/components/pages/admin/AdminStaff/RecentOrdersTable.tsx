@@ -1,5 +1,7 @@
 "use client";
 
+import type { Translator } from "@/i18n/config";
+import { useTranslations } from "next-intl";
 import { Card, Chip } from "@heroui/react";
 import { useMemo } from "react";
 import { formatMoney } from "@/lib/admin-format";
@@ -30,19 +32,11 @@ type OrderRow = {
   readonly status: string;
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  CHECKED_IN: "Đã đến",
-  IN_SERVICE: "Đang làm",
-  AWAITING_PAYMENT: "Chờ thanh toán",
-  COMPLETED: "Hoàn tất",
-  CANCELLED: "Đã huỷ",
-  NO_SHOW: "Không đến",
-};
-
-function statusLabel(status: string): string {
-  return STATUS_LABELS[status.toUpperCase()] ?? status;
+/** Reads the shared appointment-status branch, so this table names a state the same
+ *  way the dashboard, the operations panel and the appointments screen do. */
+function statusLabel(status: string, tStatus: Translator): string {
+  const code = status.toUpperCase();
+  return tStatus.has(code) ? tStatus(code) : status;
 }
 
 function statusColor(status: string): "success" | "warning" | "default" {
@@ -65,16 +59,18 @@ function formatClock(iso: string): string {
 }
 
 function resolveServiceLabel(
+  t: Translator,
   serviceIds: ReadonlyArray<string>,
   byId: ReadonlyMap<string, AdminServiceItem>,
 ): string {
   if (serviceIds.length === 0) return MISSING;
-  if (serviceIds.length > 1) return `${serviceIds.length} dịch vụ`;
+  if (serviceIds.length > 1) return t("orders.multipleServices", { count: serviceIds.length });
   const service = byId.get(serviceIds[0]);
-  return service?.name ?? "Dịch vụ chưa có tên";
+  return service?.name ?? t("orders.unnamedService");
 }
 
 function toOrderRow(
+  t: Translator,
   appointment: AdminAppointment,
   customers: ReadonlyMap<string, AdminCustomer>,
   services: ReadonlyMap<string, AdminServiceItem>,
@@ -86,8 +82,8 @@ function toOrderRow(
     customer:
       customer?.displayName
       ?? customer?.name
-      ?? "Khách chưa có tên",
-    service: resolveServiceLabel(appointment.serviceIds, services),
+      ?? t("orders.unnamedCustomer"),
+    service: resolveServiceLabel(t, appointment.serviceIds, services),
     total: appointment.total,
     status: appointment.status,
   };
@@ -98,6 +94,8 @@ export function RecentOrdersTable({
   staffId,
   staffName,
 }: Readonly<{ branchId: string; staffId: string; staffName: string }>) {
+  const t = useTranslations("admin.staff");
+  const tStatus = useTranslations("admin.appointmentStatus");
   const appointments = useAdminAppointments(branchId);
   const { data: customersData } = useAdminCustomers(branchId);
   const { data: servicesData } = useAdminServices();
@@ -110,8 +108,8 @@ export function RecentOrdersTable({
       .slice()
       .sort((left, right) => right.startsAt.localeCompare(left.startsAt))
       .slice(0, RECENT_LIMIT)
-      .map((appointment) => toOrderRow(appointment, customers, services));
-  }, [appointments.data, customersData, servicesData, staffId]);
+      .map((appointment) => toOrderRow(t, appointment, customers, services));
+  }, [appointments.data, customersData, servicesData, staffId, t]);
 
   return (
     <Card className="mt-4 min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -120,23 +118,23 @@ export function RecentOrdersTable({
       </Card.Header>
       <Card.Content className="min-w-0 overflow-x-auto p-0 pt-2">
         {appointments.isLoading ? (
-          <p className="px-4 pb-4 text-xs text-admin-muted">Đang tải lịch hẹn…</p>
+          <p className="px-4 pb-4 text-xs text-admin-muted">{t("orders.loading")}</p>
         ) : appointments.error ? (
           <p role="alert" className="mx-4 mb-4 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
             Không tải được lịch hẹn của nhân viên.
           </p>
         ) : rows.length === 0 ? (
-          <p className="px-4 pb-4 text-xs text-admin-muted">Nhân viên này chưa có lịch hẹn nào.</p>
+          <p className="px-4 pb-4 text-xs text-admin-muted">{t("orders.empty")}</p>
         ) : (
           <table className="w-full min-w-[560px] text-left text-sm">
             <caption className="sr-only">Lịch hẹn gần đây của {staffName}</caption>
             <thead className="border-b border-admin-border text-xs text-admin-muted">
               <tr>
-                <th scope="col" className="px-4 py-3">Thời gian</th>
-                <th scope="col" className="px-3 py-3">Khách hàng</th>
-                <th scope="col" className="px-3 py-3">Dịch vụ</th>
-                <th scope="col" className="px-3 py-3">Tổng tiền</th>
-                <th scope="col" className="px-3 py-3">Trạng thái</th>
+                <th scope="col" className="px-4 py-3">{t("orders.time")}</th>
+                <th scope="col" className="px-3 py-3">{t("orders.customer")}</th>
+                <th scope="col" className="px-3 py-3">{t("orders.service")}</th>
+                <th scope="col" className="px-3 py-3">{t("orders.total")}</th>
+                <th scope="col" className="px-3 py-3">{t("orders.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-admin-border">
@@ -150,7 +148,7 @@ export function RecentOrdersTable({
                   </td>
                   <td className="px-3 py-3">
                     <Chip size="sm" variant="soft" color={statusColor(order.status)}>
-                      <Chip.Label>{statusLabel(order.status)}</Chip.Label>
+                      <Chip.Label>{statusLabel(order.status, tStatus)}</Chip.Label>
                     </Chip>
                   </td>
                 </tr>

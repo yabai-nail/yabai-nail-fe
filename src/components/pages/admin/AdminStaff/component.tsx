@@ -2,6 +2,7 @@
 
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -50,8 +51,9 @@ function formatOptionalMoney(value: number | null): string {
  * carries identity and the active flag. A member with no row for the period
  * keeps `null` money fields so the table can say so.
  */
-function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined): StaffMember {
-  const name = server.displayName || "Nhân viên chưa có tên";
+// The fallback name is threaded in: this runs inside a useMemo, outside the component.
+function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined, unnamed: string): StaffMember {
+  const name = server.displayName || unnamed;
   return {
     id: server.id,
     name,
@@ -67,6 +69,7 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
 }
 
 export function AdminStaffComponent() {
+  const t = useTranslations("admin.staff");
   const { branchId } = useAdminBranch();
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
@@ -79,8 +82,8 @@ export function AdminStaffComponent() {
     [performance.data],
   );
   const source = useMemo<ReadonlyArray<StaffMember>>(
-    () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id))),
-    [data, performanceById],
+    () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id), t("unnamed"))),
+    [data, performanceById, t],
   );
 
   const [filter, setFilter] = useState<StaffFilter>("all");
@@ -92,7 +95,7 @@ export function AdminStaffComponent() {
   const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
   const staffDetail = useAdminStaffMember(selected?.id ?? null);
   const detailedStaff = staffDetail.data
-    ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id))
+    ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id), t("unnamed"))
     : selected;
 
   const kpi = performance.data?.kpi;
@@ -105,33 +108,33 @@ export function AdminStaffComponent() {
   const metrics = [
     {
       id: "revenue",
-      label: `Doanh thu kỳ ${period}`,
+      label: t("metrics.periodRevenue", { period }),
       value: formatOptionalMoney(revenue),
-      detail: typeof kpi?.orderCount === "number" ? `${kpi.orderCount} đơn hàng` : "Chưa có số đơn",
+      detail: typeof kpi?.orderCount === "number" ? t("metrics.orderCount", { count: kpi.orderCount }) : t("metrics.noOrders"),
       icon: BanknotesIcon,
       tone: "text-admin-accent bg-admin-soft",
     },
     {
       id: "commission",
-      label: "Tổng hoa hồng phải trả",
+      label: t("metrics.commissionDue"),
       value: formatOptionalMoney(commission),
-      detail: averageRate === null ? "Chưa có tỷ lệ" : `${averageRate}% / Trung bình`,
+      detail: averageRate === null ? t("metrics.noRate") : t("metrics.rateDetail", { rate: averageRate }),
       icon: WalletIcon,
       tone: "text-admin-success bg-green-50",
     },
     {
       id: "shop",
-      label: "Quán thực nhận",
+      label: t("metrics.salonShare"),
       value: formatOptionalMoney(salonShare),
-      detail: `Kỳ ${period}`,
+      detail: t("metrics.period", { period }),
       icon: BuildingStorefrontIcon,
       tone: "text-admin-info bg-sky-50",
     },
     {
       id: "working",
-      label: "Nhân viên đang làm",
+      label: t("metrics.working"),
       value: source.length === 0 ? MISSING : `${workingCount} / ${source.length}`,
-      detail: `${source.length - workingCount} nghỉ phép`,
+      detail: t("metrics.offCount", { count: source.length - workingCount }),
       icon: UserGroupIcon,
       tone: "text-admin-violet bg-purple-50",
     },
@@ -139,7 +142,7 @@ export function AdminStaffComponent() {
 
   return (
     <AdminPageLayout>
-      <section aria-label="Tổng quan nhân viên" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label={t("overviewRegion")} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(({ id, label, value, detail, icon: Icon, tone }) => (
           <Card key={id} className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
             <Card.Content className="flex flex-row items-start gap-3 p-4">
@@ -152,17 +155,17 @@ export function AdminStaffComponent() {
       <div className="mt-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as StaffFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
-            <Tabs.List aria-label="Lọc nhân viên">
+            <Tabs.List aria-label={t("tabsLabel")}>
               <Tabs.Tab id="all">
-                <AdminTabLabel>Tất cả nhân viên</AdminTabLabel>
+                <AdminTabLabel>{t("tabs.all")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="working">
-                <AdminTabLabel>Đang làm</AdminTabLabel>
+                <AdminTabLabel>{t("tabs.working")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="leave">
-                <AdminTabLabel>Nghỉ phép</AdminTabLabel>
+                <AdminTabLabel>{t("tabs.off")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
             </Tabs.List>
@@ -188,13 +191,13 @@ export function AdminStaffComponent() {
       ) : null}
       <div className="mt-4 min-w-0">
         {isLoading ? (
-          <p className="py-6 text-center text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+          <p className="py-6 text-center text-xs text-admin-muted">{t("loading")}</p>
         ) : source.length === 0 ? (
           <Card className="rounded-lg border-admin-border bg-admin-surface shadow-none">
             <Card.Content className="p-12 text-center">
-              <h2 className="font-bold">Chưa có nhân viên</h2>
+              <h2 className="font-bold">{t("emptyHeading")}</h2>
               <p className="mt-2 text-sm text-admin-muted">
-                {error ? "Thử tải lại trang." : "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng."}
+                {error ? t("retry") : t("firstStaff")}
               </p>
             </Card.Content>
           </Card>
@@ -210,8 +213,8 @@ export function AdminStaffComponent() {
                 />
               ) : (
                 <AdminEmptySelection
-                  title="Không có nhân viên"
-                  description="Thay đổi bộ lọc để xem thông tin nhân viên."
+                  title={t("noSelectionTitle")}
+                  description={t("noSelectionDescription")}
                 />
               )
             }
