@@ -2,7 +2,6 @@
   "admin": {
     "settings": {
       "language": {
-        "tab": "Ngôn ngữ",
         "heading": "Ngôn ngữ hiển thị",
         "description": "Chỉ đổi ngôn ngữ của bảng điều khiển, và chỉ trên trình duyệt này. Không ảnh hưởng tới ứng dụng khách hàng.",
         "legend": "Chọn ngôn ngữ hiển thị",
@@ -16,7 +15,8 @@
         "payment": "Thanh toán",
         "automation": "Tin nhắn tự động",
         "notifications": "Thông báo",
-        "backup": "Sao lưu dữ liệu"
+        "backup": "Sao lưu dữ liệu",
+        "language": "Ngôn ngữ"
       },
       "tabsLabel": "Nhóm cài đặt",
       "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",

@@ -2,7 +2,6 @@
   "admin": {
     "settings": {
       "language": {
-        "tab": "Language",
         "heading": "Display language",
         "description": "Changes the console's language on this browser only. It does not affect the customer app.",
         "legend": "Choose a display language",
@@ -16,7 +15,8 @@
         "payment": "Payments",
         "automation": "Automated messages",
         "notifications": "Notifications",
-        "backup": "Data backup"
+        "backup": "Data backup",
+        "language": "Language"
       },
       "tabsLabel": "Settings groups",
       "placeholder": "This settings group is coming in a later phase.",

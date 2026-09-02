@@ -209,6 +209,26 @@ for (const locale of CATALOGUES) {
   }
 }
 
+/**
+ * A key the code asks for and the catalogue does not hold renders as its own path:
+ * the settings tab spelled out `admin.settings.tabs.language` in the console for a
+ * whole afternoon, because the tab list reads `tabs.<id>` while the catalogue filed
+ * the word under `language.tab`. Key parity across the three files cannot see this --
+ * all three were equally wrong. Only literal keys are checked; a key built from a
+ * variable is beyond a static reader, so keep those ids in a list a human can eyeball.
+ */
+for (const file of SCOPE.flatMap((directory) => walk(directory))) {
+  const source = readFileSync(file, "utf8");
+  const hooks = [...source.matchAll(/const (\w+) = useTranslations\("([^"]+)"\)/g)];
+  for (const [, variable, namespace] of hooks) {
+    const calls = source.matchAll(new RegExp(String.raw`\b${variable}(?:\.rich)?\("([^"{}]+)"`, "g"));
+    for (const [, key] of calls) {
+      const full = `${namespace}.${key}`;
+      if (!base.has(full)) failures.push(`${file} asks for ${full}, which no catalogue holds`);
+    }
+  }
+}
+
 // -- report ----------------------------------------------------------------------
 for (const note of notes) console.log(note.startsWith("    ") ? note : `note: ${note}`);
 for (const failure of failures) console.error(`fail: ${failure}`);
