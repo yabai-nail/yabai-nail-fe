@@ -157,8 +157,14 @@ function readGlossary() {
 const glossary = readGlossary();
 const drift = [];
 for (const [key, viValue] of base.entries()) {
-  for (const term of glossary) {
-    if (!viValue.toLowerCase().includes(term.vi.toLowerCase())) continue;
+  const lowerVi = viValue.toLowerCase();
+  const matched = glossary.filter((term) => lowerVi.includes(term.vi.toLowerCase()));
+  // Longest match wins. "Lưu trữ" contains "Lưu", so without this every アーカイブ is
+  // reported against the row for 保存 and the real signal drowns in it.
+  const terms = matched.filter((term) =>
+    !matched.some((other) => other !== term && other.vi.toLowerCase().includes(term.vi.toLowerCase()))
+  );
+  for (const term of terms) {
     for (const [locale, expected] of [["ja", term.ja], ["en", term.en]]) {
       const translated = readCatalogue(locale).get(key);
       if (translated === undefined) continue;

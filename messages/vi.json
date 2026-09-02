@@ -109,6 +109,105 @@
     },
     "auth": {
       "restoring": "Đang khôi phục phiên đăng nhập…"
+    },
+    "recordDetail": {
+      "loading": "Đang tải…",
+      "error": "Không tải được chi tiết.",
+      "empty": "Không có dữ liệu.",
+      "close": "Đóng"
+    },
+    "branchSelector": {
+      "unnamed": "Chi nhánh chưa có tên",
+      "viewing": "Chi nhánh đang xem: {branch}. Bấm để đổi.",
+      "label": "Chi nhánh",
+      "listLabel": "Danh sách chi nhánh"
+    },
+    "login": {
+      "heading": "Đăng nhập quản trị",
+      "subheading": "Dành cho quản lý và chủ chuỗi YABAI.",
+      "phone": "Số điện thoại",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "hidePassword": "Ẩn mật khẩu",
+      "showPassword": "Hiện mật khẩu",
+      "submitting": "Đang đăng nhập...",
+      "submit": "Đăng nhập",
+      "footnote": "Tài khoản quản trị do chủ hệ thống cấp.",
+      "errors": {
+        "invalidCredentials": "Số điện thoại hoặc mật khẩu không đúng.",
+        "network": "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.",
+        "generic": "Không thể đăng nhập. Vui lòng thử lại."
+      }
+    },
+    "messages": {
+      "inbox": "Hộp thư",
+      "searchLabel": "Tìm tin nhắn",
+      "searchPlaceholder": "Tìm kiếm tin nhắn...",
+      "filterLabel": "Lọc hộp thư",
+      "tabs": {
+        "all": "Tất cả",
+        "unread": "Chưa đọc",
+        "read": "Đã đọc",
+        "archived": "Lưu trữ"
+      },
+      "unreadCount": "{count} tin chưa đọc",
+      "noConversations": "Không tìm thấy cuộc hội thoại.",
+      "customerInfo": "Thông tin khách hàng",
+      "createAppointment": "Tạo lịch hẹn",
+      "callCustomer": "Gọi điện cho khách",
+      "markRead": "Đánh dấu đã đọc",
+      "archive": "Lưu trữ",
+      "threadLabel": "Tin nhắn với {name}",
+      "composeLabel": "Nhập tin nhắn",
+      "composePlaceholder": "Nhập tin nhắn...",
+      "send": "Gửi",
+      "unnamedCustomer": "Khách chưa có tên",
+      "now": "Bây giờ",
+      "sendFailed": "Không gửi được tin nhắn.",
+      "statusFailed": "Không cập nhật được trạng thái hội thoại.",
+      "loadFailed": "Không tải được hội thoại.",
+      "threadLoadFailed": "Không tải được nội dung hội thoại.",
+      "emptyTitle": "Không có hội thoại",
+      "emptyDescription": "Thay đổi từ khóa hoặc bộ lọc để tiếp tục nhắn tin.",
+      "noCustomerTitle": "Chưa có khách hàng",
+      "noCustomerDescription": "Thông tin khách hàng sẽ xuất hiện khi có hội thoại phù hợp."
+    },
+    "nailDesigns": {
+      "status": {
+        "PUBLISHED": "Đã đăng",
+        "DRAFT": "Nháp",
+        "ARCHIVED": "Lưu trữ",
+        "HIDDEN": "Ẩn"
+      },
+      "statusLabel": "Trạng thái",
+      "filterLabel": "Lọc theo trạng thái mẫu nail",
+      "all": "Tất cả",
+      "searchLabel": "Tìm mẫu nail",
+      "searchPlaceholder": "Tên mẫu...",
+      "add": "Thêm mẫu",
+      "loading": "Đang tải mẫu nail…",
+      "loadFailed": "Không tải được danh sách mẫu nail.",
+      "columns": {
+        "design": "Mẫu",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "empty": "Không có mẫu phù hợp.",
+      "edit": "Sửa",
+      "pagination": "Hiển thị {shown} trong tổng số {total} mẫu",
+      "modal": {
+        "editTitle": "Sửa mẫu nail",
+        "addTitle": "Thêm mẫu nail",
+        "name": "Tên mẫu",
+        "namePlaceholder": "Gradient hồng pastel",
+        "status": "Trạng thái",
+        "statusLabel": "Trạng thái mẫu nail",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "add": "Thêm",
+        "saveFailed": "Không lưu được mẫu nail."
+      }
     }
   }
 }

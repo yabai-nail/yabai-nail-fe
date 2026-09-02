@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -36,8 +37,11 @@ function formatTimeLabel(iso: string): string {
   }
 }
 
-function toFixtureCustomer(server: ServerConversation): MessageCustomer {
-  const name = server.customer.displayName ?? "Khách chưa có tên";
+// The fallback label is threaded in rather than read from a hook: these two adapters
+// are plain functions outside the component, and keeping them that way is what lets
+// them stay in a useMemo without dragging React state through the mapping.
+function toFixtureCustomer(server: ServerConversation, unnamed: string): MessageCustomer {
+  const name = server.customer.displayName ?? unnamed;
   return {
     id: server.customer.customerId,
     name,
@@ -46,13 +50,13 @@ function toFixtureCustomer(server: ServerConversation): MessageCustomer {
   };
 }
 
-function toFixtureConversation(server: ServerConversation): Conversation {
+function toFixtureConversation(server: ServerConversation, unnamed: string): Conversation {
   const status = server.status.toLowerCase();
   const normalizedStatus =
     status === "unread" || status === "read" || status === "archived" ? status : "read";
   return {
     id: server.id,
-    customer: toFixtureCustomer(server),
+    customer: toFixtureCustomer(server, unnamed),
     preview: server.lastMessage?.content ?? "",
     timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt) : "",
     unreadCount: server.unreadCount,
@@ -73,6 +77,7 @@ function toChatMessage(server: ServerMessage): ChatMessage {
 }
 
 export function AdminMessagesComponent() {
+  const t = useTranslations("admin.messages");
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -85,8 +90,8 @@ export function AdminMessagesComponent() {
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
-    return conversationsData?.items?.map(toFixtureConversation) ?? [];
-  }, [conversationsData]);
+    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"))) ?? [];
+  }, [conversationsData, t]);
 
   const visibleConversations = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("vi");
@@ -127,7 +132,7 @@ export function AdminMessagesComponent() {
         id: localId,
         sender: "salon",
         content,
-        time: "Bây giờ",
+        time: t("now"),
       }),
     );
 
@@ -146,7 +151,7 @@ export function AdminMessagesComponent() {
       } catch (thrown) {
         setLocalMessages((current) => ({ ...current, [selected.id]: (current[selected.id] ?? []).filter(message => message.id !== localId) }));
         setDraft((current) => current || content);
-        setSendError(thrown instanceof Error ? thrown.message : "Không gửi được tin nhắn.");
+        setSendError(thrown instanceof Error ? thrown.message : t("sendFailed"));
       } finally {
         setSendPending(false);
       }
@@ -166,7 +171,7 @@ export function AdminMessagesComponent() {
       void mutateConversations();
     } catch (thrown) {
       setStatusError(
-        thrown instanceof Error ? thrown.message : "Không cập nhật được trạng thái hội thoại.",
+        thrown instanceof Error ? thrown.message : t("statusFailed"),
       );
     } finally {
       setStatusPending(false);
@@ -176,7 +181,7 @@ export function AdminMessagesComponent() {
   return (
     <AdminPageLayout>
       {conversationsError ? (
-        <p className="mb-3 text-xs text-admin-danger">Không tải được hội thoại.</p>
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
       <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none xl:grid-cols-[17rem_minmax(0,1fr)_19rem]">
         <ConversationList
@@ -196,7 +201,7 @@ export function AdminMessagesComponent() {
             onDraftChange={setDraft}
             onSend={sendMessage}
             statusPending={statusPending}
-            statusError={threadError ? "Không tải được nội dung hội thoại." : statusError}
+            statusError={threadError ? t("threadLoadFailed") : statusError}
             sendPending={sendPending}
             sendError={sendError}
             onMarkRead={
@@ -211,12 +216,12 @@ export function AdminMessagesComponent() {
             }
           />
         ) : (
-          <AdminEmptySelection title="Không có hội thoại" description="Thay đổi từ khóa hoặc bộ lọc để tiếp tục nhắn tin." />
+          <AdminEmptySelection title={t("emptyTitle")} description={t("emptyDescription")} />
         )}
         {selected ? (
           <CustomerSummary customer={selected.customer} />
         ) : (
-          <AdminEmptySelection title="Chưa có khách hàng" description="Thông tin khách hàng sẽ xuất hiện khi có hội thoại phù hợp." />
+          <AdminEmptySelection title={t("noCustomerTitle")} description={t("noCustomerDescription")} />
         )}
       </Card>
     </AdminPageLayout>

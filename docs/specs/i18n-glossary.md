@@ -39,6 +39,7 @@ Bám đúng `AppointmentStatus` của backend. Đây là nhóm nhạy cảm nh�
 | Chờ thanh toán | 会計待ち | Awaiting payment | `AWAITING_PAYMENT`. `会計` là việc tính tiền tại quầy |
 | Hoàn tất | 完了 | Completed | `COMPLETED` |
 | Đã hủy | キャンセル済み | Cancelled | |
+| Lưu trữ | アーカイブ | Archive | Khác `Lưu` (保存/Save). Cụm này chứa cụm kia, nên cổng kiểm tra khớp theo cụm **dài nhất** |
 | Hết hạn | 期限切れ | Expired | `EXPIRED` |
 | Không đến | 無断キャンセル | No-show | `NO_SHOW`. Từ nghiệp vụ chuẩn, không dịch chữ-theo-chữ thành `来ない` |
 
@@ -94,7 +95,7 @@ Nhóm phải soát kỹ nhất. Dịch sai ở đây là mất tiền thật, kh
 | VI | JA | EN | Ghi chú |
 |---|---|---|---|
 | Đang tải | 読み込み中 | Loading | |
-| Không tải được | 読み込めません | Failed to load | |
+| Không tải được | 読み込めません | Could not load | Câu tiếng Anh trong console viết `Could not load the details.` chứ không phải `Failed to load` |
 | Chưa có dữ liệu | データがありません | No data | |
 | Thành công | 成功 | Succeeded | |
 | Thất bại | 失敗 | Failed | |
@@ -111,7 +112,11 @@ thì báo — **không fail**.
 - **Báo nhầm**: câu tiếng Nhật diễn đạt lại tự nhiên mà không chứa nguyên từ,
   hoặc tiếng Anh chia động từ khác (`Cancel` vs `Cancelled`). Cách đối chiếu
   chuỗi con không có cách nào phân biệt.
-- **Bỏ sót**: dịch sai một từ không nằm trong 45 hàng này thì không ai bắt.
+- **Bỏ sót**: dịch sai một từ không nằm trong các hàng này thì không ai bắt.
+
+Khi nhiều hàng cùng khớp một chuỗi, chỉ hàng có cụm VI **dài nhất** được đối chiếu.
+Không có luật đó thì `Lưu trữ` luôn bị chấm theo hàng `Lưu`, và mọi bản dịch
+`アーカイブ` đều bị báo sai.
 
 Vì vậy nó chỉ báo, không chặn. Giá trị của nó là chỉ ra chỗ cần nhìn, không phải
 phán đúng sai.

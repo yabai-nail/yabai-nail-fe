@@ -109,6 +109,105 @@
     },
     "auth": {
       "restoring": "ログインセッションを復元しています…"
+    },
+    "recordDetail": {
+      "loading": "読み込み中…",
+      "error": "詳細を読み込めません。",
+      "empty": "データがありません。",
+      "close": "閉じる"
+    },
+    "branchSelector": {
+      "unnamed": "名称未設定の店舗",
+      "viewing": "表示中の店舗: {branch}。タップして切り替えます。",
+      "label": "店舗",
+      "listLabel": "店舗一覧"
+    },
+    "login": {
+      "heading": "管理者ログイン",
+      "subheading": "YABAI の店長とオーナー向けです。",
+      "phone": "電話番号",
+      "password": "パスワード",
+      "passwordPlaceholder": "パスワードを入力",
+      "hidePassword": "パスワードを非表示",
+      "showPassword": "パスワードを表示",
+      "submitting": "ログインしています…",
+      "submit": "ログイン",
+      "footnote": "管理者アカウントはシステム管理者が発行します。",
+      "errors": {
+        "invalidCredentials": "電話番号またはパスワードが正しくありません。",
+        "network": "サーバーに接続できません。ネットワークを確認してもう一度お試しください。",
+        "generic": "ログインできません。もう一度お試しください。"
+      }
+    },
+    "messages": {
+      "inbox": "受信箱",
+      "searchLabel": "メッセージを検索",
+      "searchPlaceholder": "メッセージを検索…",
+      "filterLabel": "受信箱を絞り込み",
+      "tabs": {
+        "all": "すべて",
+        "unread": "未読",
+        "read": "既読",
+        "archived": "アーカイブ"
+      },
+      "unreadCount": "未読 {count} 件",
+      "noConversations": "会話が見つかりません。",
+      "customerInfo": "顧客情報",
+      "createAppointment": "予約を作成",
+      "callCustomer": "顧客に電話する",
+      "markRead": "既読にする",
+      "archive": "アーカイブ",
+      "threadLabel": "{name} とのメッセージ",
+      "composeLabel": "メッセージを入力",
+      "composePlaceholder": "メッセージを入力…",
+      "send": "送信",
+      "unnamedCustomer": "名称未設定の顧客",
+      "now": "たった今",
+      "sendFailed": "メッセージを送信できません。",
+      "statusFailed": "会話の状態を更新できません。",
+      "loadFailed": "会話を読み込めません。",
+      "threadLoadFailed": "会話の内容を読み込めません。",
+      "emptyTitle": "会話がありません",
+      "emptyDescription": "キーワードまたは絞り込みを変更してください。",
+      "noCustomerTitle": "顧客が選択されていません",
+      "noCustomerDescription": "該当する会話を選ぶと顧客情報が表示されます。"
+    },
+    "nailDesigns": {
+      "status": {
+        "PUBLISHED": "公開済み",
+        "DRAFT": "下書き",
+        "ARCHIVED": "アーカイブ",
+        "HIDDEN": "非表示"
+      },
+      "statusLabel": "ステータス",
+      "filterLabel": "ネイルデザインのステータスで絞り込み",
+      "all": "すべて",
+      "searchLabel": "ネイルデザインを検索",
+      "searchPlaceholder": "デザイン名…",
+      "add": "デザインを追加",
+      "loading": "ネイルデザインを読み込み中…",
+      "loadFailed": "ネイルデザイン一覧を読み込めません。",
+      "columns": {
+        "design": "デザイン",
+        "status": "ステータス",
+        "actions": "操作"
+      },
+      "empty": "該当するデザインがありません。",
+      "edit": "編集",
+      "pagination": "全 {total} 件中 {shown} 件を表示",
+      "modal": {
+        "editTitle": "ネイルデザインを編集",
+        "addTitle": "ネイルデザインを追加",
+        "name": "デザイン名",
+        "namePlaceholder": "パステルピンクのグラデーション",
+        "status": "ステータス",
+        "statusLabel": "ネイルデザインのステータス",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "add": "追加",
+        "saveFailed": "ネイルデザインを保存できません。"
+      }
     }
   }
 }

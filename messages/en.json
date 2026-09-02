@@ -109,6 +109,105 @@
     },
     "auth": {
       "restoring": "Restoring your session…"
+    },
+    "recordDetail": {
+      "loading": "Loading…",
+      "error": "Could not load the details.",
+      "empty": "No data.",
+      "close": "Close"
+    },
+    "branchSelector": {
+      "unnamed": "Unnamed branch",
+      "viewing": "Viewing branch: {branch}. Tap to switch.",
+      "label": "Branch",
+      "listLabel": "Branch list"
+    },
+    "login": {
+      "heading": "Admin sign-in",
+      "subheading": "For YABAI managers and owners.",
+      "phone": "Phone number",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "submitting": "Signing in…",
+      "submit": "Sign in",
+      "footnote": "Admin accounts are issued by the system owner.",
+      "errors": {
+        "invalidCredentials": "That phone number or password is not correct.",
+        "network": "Could not reach the server. Check your connection and try again.",
+        "generic": "Could not sign in. Please try again."
+      }
+    },
+    "messages": {
+      "inbox": "Inbox",
+      "searchLabel": "Search messages",
+      "searchPlaceholder": "Search messages…",
+      "filterLabel": "Filter inbox",
+      "tabs": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read",
+        "archived": "Archived"
+      },
+      "unreadCount": "{count} unread",
+      "noConversations": "No conversations found.",
+      "customerInfo": "Customer details",
+      "createAppointment": "Create appointment",
+      "callCustomer": "Call the customer",
+      "markRead": "Mark as read",
+      "archive": "Archive",
+      "threadLabel": "Messages with {name}",
+      "composeLabel": "Write a message",
+      "composePlaceholder": "Write a message…",
+      "send": "Send",
+      "unnamedCustomer": "Unnamed customer",
+      "now": "Just now",
+      "sendFailed": "Could not send the message.",
+      "statusFailed": "Could not update the conversation status.",
+      "loadFailed": "Could not load conversations.",
+      "threadLoadFailed": "Could not load the conversation.",
+      "emptyTitle": "No conversations",
+      "emptyDescription": "Change the search or filter to continue.",
+      "noCustomerTitle": "No customer selected",
+      "noCustomerDescription": "Customer details appear once a matching conversation is selected."
+    },
+    "nailDesigns": {
+      "status": {
+        "PUBLISHED": "Published",
+        "DRAFT": "Draft",
+        "ARCHIVED": "Archived",
+        "HIDDEN": "Hidden"
+      },
+      "statusLabel": "Status",
+      "filterLabel": "Filter nail designs by status",
+      "all": "All",
+      "searchLabel": "Search nail designs",
+      "searchPlaceholder": "Design name…",
+      "add": "Add design",
+      "loading": "Loading nail designs…",
+      "loadFailed": "Could not load the nail designs.",
+      "columns": {
+        "design": "Design",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No matching designs.",
+      "edit": "Edit",
+      "pagination": "Showing {shown} of {total} designs",
+      "modal": {
+        "editTitle": "Edit nail design",
+        "addTitle": "Add nail design",
+        "name": "Design name",
+        "namePlaceholder": "Pastel pink gradient",
+        "status": "Status",
+        "statusLabel": "Nail design status",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "add": "Add",
+        "saveFailed": "Could not save the nail design."
+      }
     }
   }
 }

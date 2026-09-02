@@ -8,13 +8,6 @@ export type DesignRow = {
   readonly version: number;
 };
 
-export const designStatusLabels: Record<string, string> = {
-  PUBLISHED: "Đã đăng",
-  DRAFT: "Nháp",
-  ARCHIVED: "Lưu trữ",
-  HIDDEN: "Ẩn",
-};
-
 export function adaptDesign(design: AdminNailDesign): DesignRow {
   return {
     id: design.id,
