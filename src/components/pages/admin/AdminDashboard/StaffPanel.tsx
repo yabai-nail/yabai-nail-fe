@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -8,12 +9,13 @@ import { useAdminBranch, useAdminStaffPerformance } from "@/service";
 import { buildStaffCards, currentMonthPeriod } from "./adapters";
 
 export function StaffPanel() {
+  const t = useTranslations("admin.dashboard");
   const router = useRouter();
   const { branchId } = useAdminBranch();
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const { data, error, isLoading } = useAdminStaffPerformance(branchId, { period });
 
-  const members = useMemo(() => buildStaffCards(data?.rows), [data]);
+  const members = useMemo(() => buildStaffCards(data?.rows, t), [data, t]);
 
   return (
     <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
@@ -31,13 +33,13 @@ export function StaffPanel() {
             Không tải được hiệu suất nhân viên.
           </p>
         ) : !branchId || isLoading ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("staff.loading")}</p>
         ) : members.length === 0 ? (
           <p className="py-3 text-center text-xs text-admin-muted">Kỳ {period} chưa có nhân viên nào.</p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {members.map((member) => {
-              const isWorking = member.status === "Đang làm";
+              const isWorking = member.status === "working";
 
               return (
                 <article key={member.id} className="rounded-xl border border-admin-border p-3">
@@ -58,7 +60,7 @@ export function StaffPanel() {
                       <dd className="font-semibold text-admin-ink">{member.revenue}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-admin-muted">Dự kiến nhận</dt>
+                      <dt className="text-admin-muted">{t("staff.expectedPayout")}</dt>
                       <dd className="font-semibold text-admin-ink">{member.payout}</dd>
                     </div>
                   </dl>

@@ -1,4 +1,5 @@
 import { formatMoney } from "@/lib/admin-format";
+import type { Translator } from "@/i18n/config";
 import type { RevenueReport } from "@/service";
 
 export type ReportKind = "revenue" | "branches" | "customers" | "staff";
@@ -10,13 +11,6 @@ export const exportKindOf = {
   customers: "CUSTOMERS",
   staff: "STAFF_PERFORMANCE",
 } as const;
-
-/**
- * The translator is a parameter throughout this module: these are plain functions the
- * screen calls from render and from useMemo, and giving them a hook would make them
- * unusable in both places.
- */
-export type Translator = ((key: string) => string) & { has: (key: string) => boolean };
 
 export function exportStatusLabel(status: string | undefined, t: Translator): string {
   const code = String(status ?? "QUEUED").toUpperCase();

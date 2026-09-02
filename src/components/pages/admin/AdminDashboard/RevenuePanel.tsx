@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Card, Dropdown } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -12,13 +13,15 @@ import {
   buildTodayRevenueRows,
   formatOptionalMoney,
   revenueRange,
-  revenueRangeLabels,
+  revenueRangeLabelKeys,
   type RevenueRangePreset,
 } from "./adapters";
 
 const presets: ReadonlyArray<RevenueRangePreset> = ["today", "week", "month"];
 
 export function RevenuePanel() {
+  const t = useTranslations("admin.dashboard");
+  const tMethod = useTranslations("admin.paymentMethod");
   const { branchId } = useAdminBranch();
   const [preset, setPreset] = useState<RevenueRangePreset>("today");
 
@@ -38,11 +41,11 @@ export function RevenuePanel() {
   const isLoading = isToday ? !branchId || dashboard.isLoading : report.isLoading;
 
   const rows = useMemo(
-    () => (isToday ? buildTodayRevenueRows(dashboard.data?.kpi) : buildRangeRevenueRows(report.data)),
-    [isToday, dashboard.data, report.data],
+    () => (isToday ? buildTodayRevenueRows(dashboard.data?.kpi, t) : buildRangeRevenueRows(report.data, t)),
+    [isToday, dashboard.data, report.data, t],
   );
 
-  const netLabel = isToday ? "Tiền quán thực nhận" : "Doanh thu thuần";
+  const netLabel = isToday ? t("revenue.netToday") : t("revenue.net");
   const netValue = isToday
     ? formatOptionalMoney(dashboard.data?.kpi.salonShare)
     : formatOptionalMoney(
@@ -52,8 +55,8 @@ export function RevenuePanel() {
       );
 
   const paymentRows = useMemo(
-    () => buildPaymentMethodRows(dashboard.data?.paymentMethods),
-    [dashboard.data],
+    () => buildPaymentMethodRows(dashboard.data?.paymentMethods, t, tMethod),
+    [dashboard.data, t, tMethod],
   );
 
   return (
@@ -62,12 +65,12 @@ export function RevenuePanel() {
         <h2 className="text-sm font-bold text-admin-ink">Doanh thu nhanh</h2>
         <Dropdown>
           <Dropdown.Trigger className="flex min-h-9 items-center gap-2 rounded-lg border border-admin-border px-3 text-xs font-medium text-admin-ink outline-none focus-visible:ring-2 focus-visible:ring-admin-accent">
-            {revenueRangeLabels[preset]}
+            {t(revenueRangeLabelKeys[preset])}
             <ChevronDownIcon aria-hidden="true" className="size-4 text-admin-muted" />
           </Dropdown.Trigger>
           <Dropdown.Popover placement="bottom end" className="admin-shell">
             <Dropdown.Menu
-              aria-label="Khoảng thời gian doanh thu"
+              aria-label={t("revenue.rangeLabel")}
               selectionMode="single"
               selectedKeys={new Set([preset])}
               onSelectionChange={(keys) => {
@@ -78,8 +81,8 @@ export function RevenuePanel() {
               }}
             >
               {presets.map((id) => (
-                <Dropdown.Item key={id} id={id} textValue={revenueRangeLabels[id]}>
-                  {revenueRangeLabels[id]}
+                <Dropdown.Item key={id} id={id} textValue={t(revenueRangeLabelKeys[id])}>
+                  {t(revenueRangeLabelKeys[id])}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>
@@ -93,7 +96,7 @@ export function RevenuePanel() {
             Không tải được số liệu doanh thu.
           </p>
         ) : isLoading ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Đang tải số liệu doanh thu…</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("revenue.loading")}</p>
         ) : (
           <dl className="space-y-4">
             {rows.map((row) => (
@@ -115,17 +118,17 @@ export function RevenuePanel() {
         </div>
 
         <div className="rounded-xl bg-admin-soft/70 p-4">
-          <h3 className="text-xs font-bold text-admin-ink">Doanh thu theo phương thức</h3>
+          <h3 className="text-xs font-bold text-admin-ink">{t("revenue.byMethod")}</h3>
           {!isToday ? (
             <p className="mt-3 text-xs text-admin-muted">
               Chỉ có số liệu theo phương thức cho hôm nay.
             </p>
           ) : dashboard.error ? (
-            <p className="mt-3 text-xs text-danger">Không tải được phương thức thanh toán.</p>
+            <p className="mt-3 text-xs text-danger">{t("revenue.methodFailed")}</p>
           ) : !branchId || dashboard.isLoading ? (
-            <p className="mt-3 text-xs text-admin-muted">Đang tải…</p>
+            <p className="mt-3 text-xs text-admin-muted">{t("revenue.methodLoading")}</p>
           ) : paymentRows.length === 0 ? (
-            <p className="mt-3 text-xs text-admin-muted">Hôm nay chưa có giao dịch nào.</p>
+            <p className="mt-3 text-xs text-admin-muted">{t("revenue.noTransactions")}</p>
           ) : (
             <dl className="mt-3 space-y-3">
               {paymentRows.map((method) => (

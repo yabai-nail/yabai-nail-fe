@@ -507,7 +507,8 @@
       "card": "Thẻ",
       "paypay": "PayPay",
       "bank_transfer": "Chuyển khoản",
-      "other": "Khác"
+      "other": "Khác",
+      "transfer": "Chuyển khoản"
     },
     "accounts": {
       "role": {
@@ -781,6 +782,103 @@
         "saving": "Đang lưu…",
         "save": "Lưu",
         "placeholder": "Thêm ghi chú nội bộ (không hiển thị cho khách)…"
+      }
+    },
+    "dashboard": {
+      "metrics": {
+        "appointments": "Lịch hẹn hôm nay",
+        "appointmentsUnit": "lịch",
+        "revenue": "Doanh thu hôm nay",
+        "customers": "Khách hôm nay",
+        "customersUnit": "người",
+        "staff": "Nhân viên đang làm",
+        "staffUnit": "người"
+      },
+      "breakdown": {
+        "pendingTail": " · Chờ: {count}",
+        "line": "Đã xác nhận: {confirmed} · Đang phục vụ: {inService} · Hoàn tất: {completed}{tail}"
+      },
+      "loadFailed": "Không tải được dữ liệu hôm nay",
+      "loadingDetail": "Đang tải…",
+      "yesterdayRevenue": "Hôm qua: {amount}",
+      "noYesterday": "Chưa có số liệu hôm qua",
+      "newCustomers": "Khách mới: {count}",
+      "noNewCustomers": "Chưa có dữ liệu khách mới",
+      "offStaff": "{count} người nghỉ",
+      "noneOff": "Không có ai nghỉ",
+      "noShiftData": "Chưa có dữ liệu ca làm",
+      "summary": {
+        "gross": "Tổng doanh thu",
+        "cost": "Tổng chi phí (vật tư, khác)",
+        "commission": "Tổng hoa hồng nhân viên",
+        "recognized": "Doanh thu ghi nhận",
+        "refund": "Hoàn tiền",
+        "completed": "Lượt hoàn tất",
+        "staffCommission": "Hoa hồng nhân viên"
+      },
+      "unknownMethod": "Không rõ",
+      "unknownStaffName": "Chưa rõ tên",
+      "staffStatus": {
+        "working": "Đang làm",
+        "off": "Nghỉ"
+      },
+      "alert": {
+        "pendingTitle": "Có {count} lịch hẹn chờ xác nhận",
+        "pendingDetail": "Vui lòng xác nhận",
+        "today": "Hôm nay",
+        "needsAction": "Lịch hẹn cần xử lý",
+        "yesterdayRevenue": "Doanh thu hôm qua",
+        "yesterday": "Hôm qua"
+      },
+      "range": {
+        "today": "Hôm nay",
+        "week": "Tuần này",
+        "month": "Tháng này"
+      },
+      "appointments": {
+        "unnamedCustomer": "Khách chưa có tên",
+        "noService": "Chưa chọn dịch vụ",
+        "unnamedService": "Dịch vụ chưa có tên",
+        "serviceCount": "{count} dịch vụ",
+        "heading": "Lịch hẹn hôm nay",
+        "loading": "Đang tải lịch hẹn…",
+        "empty": "Hôm nay chưa có lịch hẹn nào.",
+        "listLabel": "Danh sách lịch hẹn hôm nay"
+      },
+      "overviewHeading": "Tổng quan hôm nay",
+      "activityRegion": "Hoạt động cửa hàng",
+      "performanceRegion": "Hiệu suất nhân viên và thu nhập tháng",
+      "monthly": {
+        "loading": "Đang tải tổng kết tháng…",
+        "afterCommission": "Còn lại sau hoa hồng"
+      },
+      "revenue": {
+        "netToday": "Tiền quán thực nhận",
+        "net": "Doanh thu thuần",
+        "rangeLabel": "Khoảng thời gian doanh thu",
+        "loading": "Đang tải số liệu doanh thu…",
+        "byMethod": "Doanh thu theo phương thức",
+        "methodFailed": "Không tải được phương thức thanh toán.",
+        "methodLoading": "Đang tải…",
+        "noTransactions": "Hôm nay chưa có giao dịch nào."
+      },
+      "staff": {
+        "loading": "Đang tải danh sách nhân viên…",
+        "expectedPayout": "Dự kiến nhận"
+      },
+      "quick": {
+        "appointment": "Tạo lịch hẹn",
+        "payment": "Thanh toán",
+        "customer": "Thêm khách",
+        "message": "Gửi tin nhắn",
+        "heading": "Thao tác nhanh",
+        "unavailable": "{label}, chức năng chưa khả dụng"
+      },
+      "notifications": {
+        "heading": "Thông báo",
+        "loading": "Đang tải thông báo…",
+        "empty": "Chưa có thông báo mới.",
+        "listLabel": "Thông báo mới"
       }
     }
   }

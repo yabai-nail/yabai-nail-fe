@@ -4,6 +4,7 @@
 // not carry the field yet.
 
 import { formatMoney } from "@/lib/admin-format";
+import type { Translator } from "@/i18n/config";
 import type { AdminDashboardKpi, RevenueReport } from "@/service";
 import type { DashboardMetric, MetricIcon, MetricTone, StaffMember } from "./data";
 
@@ -59,27 +60,28 @@ export function toInitials(name: string): string {
 
 type MetricBase = {
   readonly id: string;
-  readonly label: string;
-  readonly unit?: string;
+  /** Catalogue keys under admin.dashboard, resolved by the caller's translator. */
+  readonly labelKey: string;
+  readonly unitKey?: string;
   readonly icon: MetricIcon;
   readonly tone: MetricTone;
 };
 
 const metricBases: ReadonlyArray<MetricBase> = [
-  { id: "appointments", label: "Lịch hẹn hôm nay", unit: "lịch", icon: "calendar", tone: "accent" },
-  { id: "revenue", label: "Doanh thu hôm nay", icon: "revenue", tone: "success" },
-  { id: "customers", label: "Khách hôm nay", unit: "người", icon: "customers", tone: "info" },
-  { id: "staff", label: "Nhân viên đang làm", unit: "người", icon: "staff", tone: "violet" },
+  { id: "appointments", labelKey: "metrics.appointments", unitKey: "metrics.appointmentsUnit", icon: "calendar", tone: "accent" },
+  { id: "revenue", labelKey: "metrics.revenue", icon: "revenue", tone: "success" },
+  { id: "customers", labelKey: "metrics.customers", unitKey: "metrics.customersUnit", icon: "customers", tone: "info" },
+  { id: "staff", labelKey: "metrics.staff", unitKey: "metrics.staffUnit", icon: "staff", tone: "violet" },
 ];
 
 function formatPercent(value: number): string {
   return `${Math.abs(value).toFixed(1).replace(".", ",")}%`;
 }
 
-function appointmentDetail(kpi: AdminDashboardKpi): string {
+function appointmentDetail(kpi: AdminDashboardKpi, t: Translator): string {
   const pending = pendingAppointmentCount(kpi);
-  const tail = pending > 0 ? ` · Chờ: ${pending}` : "";
-  return `Đã xác nhận: ${kpi.confirmed} · Đang phục vụ: ${kpi.inService} · Hoàn tất: ${kpi.completed}${tail}`;
+  const tail = pending > 0 ? t("breakdown.pendingTail", { count: pending }) : "";
+  return t("breakdown.line", { confirmed: kpi.confirmed, inService: kpi.inService, completed: kpi.completed, tail });
 }
 
 function staffValue(kpi: AdminDashboardKpi): string {
@@ -90,20 +92,27 @@ function staffValue(kpi: AdminDashboardKpi): string {
   return `${working} / ${working + off}`;
 }
 
+/** Resolves a metric's catalogue keys into the words a card renders. */
+function resolveBase(base: MetricBase, t: Translator): Omit<DashboardMetric, "value" | "detail"> {
+  const { labelKey, unitKey, ...rest } = base;
+  return { ...rest, label: t(labelKey), ...(unitKey ? { unit: t(unitKey) } : {}) };
+}
+
 export function buildDashboardMetrics(
   kpi: AdminDashboardKpi | undefined,
   isLoading: boolean,
   hasError: boolean,
+  t: Translator,
 ): ReadonlyArray<DashboardMetric> {
   if (hasError) {
     return metricBases.map((base) => ({
-      ...base,
+      ...resolveBase(base, t),
       value: MISSING,
-      detail: "Không tải được dữ liệu hôm nay",
+      detail: t("loadFailed"),
     }));
   }
   if (isLoading || !kpi) {
-    return metricBases.map((base) => ({ ...base, value: "…", detail: "Đang tải…" }));
+    return metricBases.map((base) => ({ ...resolveBase(base, t), value: "…", detail: t("loadingDetail") }));
   }
 
   const change = kpi.revenueChangePercent;
@@ -112,37 +121,37 @@ export function buildDashboardMetrics(
   return metricBases.map((base): DashboardMetric => {
     switch (base.id) {
       case "appointments":
-        return { ...base, value: String(kpi.total), detail: appointmentDetail(kpi) };
+        return { ...resolveBase(base, t), value: String(kpi.total), detail: appointmentDetail(kpi, t) };
       case "revenue":
         return {
-          ...base,
+          ...resolveBase(base, t),
           value: formatOptionalMoney(kpi.revenue),
           detail:
             typeof kpi.previousRevenue === "number"
-              ? `Hôm qua: ${formatMoney(kpi.previousRevenue)}`
-              : "Chưa có số liệu hôm qua",
+              ? t("yesterdayRevenue", { amount: formatMoney(kpi.previousRevenue) })
+              : t("noYesterday"),
           trend: hasChange ? formatPercent(change) : undefined,
           trendDirection: hasChange ? (change < 0 ? "down" : "up") : undefined,
         };
       case "customers":
         return {
-          ...base,
+          ...resolveBase(base, t),
           value: formatOptionalCount(kpi.customerCount),
           detail:
             typeof kpi.newCustomerCount === "number"
-              ? `Khách mới: ${kpi.newCustomerCount}`
-              : "Chưa có dữ liệu khách mới",
+              ? t("newCustomers", { count: kpi.newCustomerCount })
+              : t("noNewCustomers"),
         };
       default:
         return {
-          ...base,
+          ...resolveBase(base, t),
           value: staffValue(kpi),
           detail:
             typeof kpi.offStaffCount === "number"
               ? kpi.offStaffCount > 0
-                ? `${kpi.offStaffCount} người nghỉ`
-                : "Không có ai nghỉ"
-              : "Chưa có dữ liệu ca làm",
+                ? t("offStaff", { count: kpi.offStaffCount })
+                : t("noneOff")
+              : t("noShiftData"),
         };
     }
   });
@@ -152,11 +161,12 @@ export function buildDashboardMetrics(
 
 export function buildTodayRevenueRows(
   kpi: AdminDashboardKpi | undefined,
+  t: Translator,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "gross", label: "Tổng doanh thu", value: formatOptionalMoney(kpi?.revenue) },
-    { id: "cost", label: "Tổng chi phí (vật tư, khác)", value: formatOptionalMoney(kpi?.expenses) },
-    { id: "commission", label: "Tổng hoa hồng nhân viên", value: formatOptionalMoney(kpi?.commission) },
+    { id: "gross", label: t("summary.gross"), value: formatOptionalMoney(kpi?.revenue) },
+    { id: "cost", label: t("summary.cost"), value: formatOptionalMoney(kpi?.expenses) },
+    { id: "commission", label: t("summary.commission"), value: formatOptionalMoney(kpi?.commission) },
   ];
 }
 
@@ -168,25 +178,27 @@ function readMetric(report: RevenueReport | undefined, key: string): number | nu
 
 export function buildRangeRevenueRows(
   report: RevenueReport | undefined,
+  t: Translator,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "gross", label: "Doanh thu ghi nhận", value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
-    { id: "refund", label: "Hoàn tiền", value: formatOptionalMoney(readMetric(report, "refundTotal")) },
-    { id: "orders", label: "Lượt hoàn tất", value: formatOptionalCount(readMetric(report, "completedAppointmentCount")) },
+    { id: "gross", label: t("summary.recognized"), value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
+    { id: "refund", label: t("summary.refund"), value: formatOptionalMoney(readMetric(report, "refundTotal")) },
+    { id: "orders", label: t("summary.completed"), value: formatOptionalCount(readMetric(report, "completedAppointmentCount")) },
   ];
 }
 
-const paymentMethodLabels: Readonly<Record<string, string>> = {
-  cash: "Tiền mặt",
-  bank_transfer: "Chuyển khoản",
-  transfer: "Chuyển khoản",
-  card: "Thẻ",
-  paypay: "PayPay",
-  other: "Khác",
-};
+/** The API has used both spellings for a bank transfer; the catalogue names it once. */
+const PAYMENT_METHOD_ALIASES: Readonly<Record<string, string>> = { transfer: "bank_transfer" };
+
+function methodLabel(method: string, tMethod: Translator): string {
+  const code = PAYMENT_METHOD_ALIASES[method.toLowerCase()] ?? method.toLowerCase();
+  return tMethod.has(code) ? tMethod(code) : method;
+}
 
 export function buildPaymentMethodRows(
   entries: ReadonlyArray<Record<string, unknown>> | undefined,
+  t: Translator,
+  tMethod: Translator,
 ): ReadonlyArray<AmountRow> {
   if (!entries) return [];
   return entries.map((entry, index) => {
@@ -194,7 +206,7 @@ export function buildPaymentMethodRows(
     const label = readString(entry, ["label", "displayName"]);
     return {
       id: method ?? `method-${index}`,
-      label: label ?? (method ? paymentMethodLabels[method.toLowerCase()] ?? method : "Không rõ"),
+      label: label ?? (method ? methodLabel(method, tMethod) : t("unknownMethod")),
       value: formatOptionalMoney(readNumber(entry, ["amount", "total", "amount", "value"])),
     };
   });
@@ -204,6 +216,7 @@ export function buildPaymentMethodRows(
 
 export function buildStaffCards(
   rows: ReadonlyArray<Record<string, unknown>> | undefined,
+  t: Translator,
 ): ReadonlyArray<StaffMember> {
   if (!rows) return [];
   return rows.map((row, index) => {
@@ -211,14 +224,14 @@ export function buildStaffCards(
       ? (row.staff as Record<string, unknown>)
       : {}) as Record<string, unknown>;
     const id = readString(staff, ["id"]) ?? readString(row, ["staffId", "id"]) ?? `staff-${index}`;
-    const name = readString(staff, ["displayName", "name"]) ?? readString(row, ["displayName", "staffName"]) ?? "Chưa rõ tên";
+    const name = readString(staff, ["displayName", "name"]) ?? readString(row, ["displayName", "staffName"]) ?? t("unknownStaffName");
     const status = readString(row, ["workingStatus", "status"]);
 
     return {
       id,
       name,
       initials: toInitials(name),
-      status: status?.toUpperCase() === "ACTIVE" ? "Đang làm" : "Nghỉ",
+      status: status?.toUpperCase() === "ACTIVE" ? "working" : "off",
       revenue: formatOptionalMoney(readNumber(row, ["revenue", "revenue"])),
       payout: formatOptionalMoney(readNumber(row, ["commissionAmount", "commission", "commission"])),
     };
@@ -230,11 +243,12 @@ export function buildStaffCards(
 export function buildMonthlyRows(
   report: RevenueReport | undefined,
   commission: number | null,
+  t: Translator,
 ): ReadonlyArray<AmountRow> {
   return [
-    { id: "revenue", label: "Doanh thu ghi nhận", value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
-    { id: "refund", label: "Hoàn tiền", value: formatOptionalMoney(readMetric(report, "refundTotal")) },
-    { id: "commission", label: "Hoa hồng nhân viên", value: formatOptionalMoney(commission) },
+    { id: "revenue", label: t("summary.recognized"), value: formatOptionalMoney(readMetric(report, "recognizedRevenue")) },
+    { id: "refund", label: t("summary.refund"), value: formatOptionalMoney(readMetric(report, "refundTotal")) },
+    { id: "commission", label: t("summary.staffCommission"), value: formatOptionalMoney(commission) },
   ];
 }
 
@@ -276,6 +290,7 @@ export type ActivitySource = {
 
 export function buildActivityItems(
   data: ActivitySource | undefined,
+  t: Translator,
 ): ReadonlyArray<NotificationItem> {
   if (!data) return [];
   const items: NotificationItem[] = [];
@@ -285,9 +300,9 @@ export function buildActivityItems(
     items.push({
       id: "pending-appointments",
       kind: "appointment",
-      title: `Có ${pending} lịch hẹn chờ xác nhận`,
-      detail: "Vui lòng xác nhận",
-      time: "Hôm nay",
+      title: t("alert.pendingTitle", { count: pending }),
+      detail: t("alert.pendingDetail"),
+      time: t("alert.today"),
     });
   }
 
@@ -295,7 +310,7 @@ export function buildActivityItems(
     items.push({
       id: `alert-${alert.id}`,
       kind: "reminder",
-      title: "Lịch hẹn cần xử lý",
+      title: t("alert.needsAction"),
       detail: alert.status,
       time: formatClock(alert.startsAt, data.branchTimeZone),
     });
@@ -305,9 +320,9 @@ export function buildActivityItems(
     items.push({
       id: "previous-revenue",
       kind: "revenue",
-      title: "Doanh thu hôm qua",
+      title: t("alert.yesterdayRevenue"),
       detail: formatMoney(data.kpi.previousRevenue),
-      time: "Hôm qua",
+      time: t("alert.yesterday"),
     });
   }
 
@@ -333,10 +348,11 @@ export function monthRange(period: string): { readonly from: string; readonly to
 
 export type RevenueRangePreset = "today" | "week" | "month";
 
-export const revenueRangeLabels: Readonly<Record<RevenueRangePreset, string>> = {
-  today: "Hôm nay",
-  week: "Tuần này",
-  month: "Tháng này",
+/** Catalogue keys under admin.dashboard, not words. */
+export const revenueRangeLabelKeys: Readonly<Record<RevenueRangePreset, string>> = {
+  today: "range.today",
+  week: "range.week",
+  month: "range.month",
 };
 
 function toIsoDate(date: Date): string {

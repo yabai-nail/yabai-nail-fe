@@ -47,3 +47,19 @@ export const appointmentStatusColor = {
   completed: "success",
   no_show: "default",
 } as const satisfies Record<AppointmentStatus, "accent" | "warning" | "default" | "success">;
+
+/**
+ * Display code to the key the shared catalogue names it under. The catalogue is keyed by
+ * the backend's own enum so the operations screen and this one agree; "cancelled" folds
+ * the three CANCELLED_* variants the normaliser already merged.
+ */
+export const APPOINTMENT_STATUS_KEY: Record<AppointmentStatus, string> = {
+  confirmed: "CONFIRMED",
+  pending: "PENDING",
+  cancelled: "CANCELLED",
+  checked_in: "CHECKED_IN",
+  in_service: "IN_SERVICE",
+  awaiting_payment: "AWAITING_PAYMENT",
+  completed: "COMPLETED",
+  no_show: "NO_SHOW",
+};

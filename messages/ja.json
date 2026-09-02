@@ -507,7 +507,8 @@
       "card": "カード",
       "paypay": "PayPay",
       "bank_transfer": "銀行振込",
-      "other": "その他"
+      "other": "その他",
+      "transfer": "銀行振込"
     },
     "accounts": {
       "role": {
@@ -781,6 +782,103 @@
         "saving": "保存しています…",
         "save": "保存",
         "placeholder": "社内メモを追加（お客様には表示されません）…"
+      }
+    },
+    "dashboard": {
+      "metrics": {
+        "appointments": "本日の予約",
+        "appointmentsUnit": "件",
+        "revenue": "本日の売上",
+        "customers": "本日の来客",
+        "customersUnit": "人",
+        "staff": "勤務中のスタッフ",
+        "staffUnit": "人"
+      },
+      "breakdown": {
+        "pendingTail": " · 確認待ち: {count}",
+        "line": "確認済み: {confirmed} · 施術中: {inService} · 完了: {completed}{tail}"
+      },
+      "loadFailed": "本日のデータを読み込めません",
+      "loadingDetail": "読み込み中…",
+      "yesterdayRevenue": "昨日: {amount}",
+      "noYesterday": "昨日のデータはありません",
+      "newCustomers": "新規顧客: {count}",
+      "noNewCustomers": "新規顧客のデータはありません",
+      "offStaff": "休み {count} 人",
+      "noneOff": "休みのスタッフはいません",
+      "noShiftData": "シフトのデータはありません",
+      "summary": {
+        "gross": "総売上",
+        "cost": "総費用（材料ほか）",
+        "commission": "スタッフ歩合の合計",
+        "recognized": "計上売上",
+        "refund": "返金",
+        "completed": "完了件数",
+        "staffCommission": "スタッフ歩合"
+      },
+      "unknownMethod": "不明",
+      "unknownStaffName": "名称未設定",
+      "staffStatus": {
+        "working": "勤務中",
+        "off": "休み"
+      },
+      "alert": {
+        "pendingTitle": "確認待ちの予約が {count} 件あります",
+        "pendingDetail": "確認してください",
+        "today": "今日",
+        "needsAction": "対応が必要な予約",
+        "yesterdayRevenue": "昨日の売上",
+        "yesterday": "昨日"
+      },
+      "range": {
+        "today": "今日",
+        "week": "今週",
+        "month": "今月"
+      },
+      "appointments": {
+        "unnamedCustomer": "名称未設定の顧客",
+        "noService": "メニュー未選択",
+        "unnamedService": "名称未設定のメニュー",
+        "serviceCount": "メニュー {count} 件",
+        "heading": "本日の予約",
+        "loading": "予約を読み込み中…",
+        "empty": "本日の予約はまだありません。",
+        "listLabel": "本日の予約一覧"
+      },
+      "overviewHeading": "本日の概要",
+      "activityRegion": "店舗の活動",
+      "performanceRegion": "スタッフの実績と月間収入",
+      "monthly": {
+        "loading": "月間サマリーを読み込み中…",
+        "afterCommission": "歩合控除後の残り"
+      },
+      "revenue": {
+        "netToday": "店舗の実収入",
+        "net": "純売上",
+        "rangeLabel": "売上の期間",
+        "loading": "売上データを読み込み中…",
+        "byMethod": "支払い方法別の売上",
+        "methodFailed": "支払い方法を読み込めません。",
+        "methodLoading": "読み込み中…",
+        "noTransactions": "本日の取引はまだありません。"
+      },
+      "staff": {
+        "loading": "スタッフ一覧を読み込み中…",
+        "expectedPayout": "支給予定額"
+      },
+      "quick": {
+        "appointment": "予約を作成",
+        "payment": "支払い",
+        "customer": "顧客を追加",
+        "message": "メッセージを送信",
+        "heading": "クイック操作",
+        "unavailable": "{label}、この機能はまだ利用できません"
+      },
+      "notifications": {
+        "heading": "通知",
+        "loading": "通知を読み込み中…",
+        "empty": "新しい通知はありません。",
+        "listLabel": "新しい通知"
       }
     }
   }

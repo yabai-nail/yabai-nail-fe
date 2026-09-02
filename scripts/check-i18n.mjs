@@ -73,10 +73,19 @@ function findLeaks() {
   for (const directory of SCOPE) {
     for (const path of walk(directory)) {
       const lines = readFileSync(path, "utf8").split(/\r?\n/);
+      // A `{/* ... */}` comment can span lines, and its middle lines look like prose.
+      let inJsxComment = false;
       lines.forEach((line, index) => {
         const trimmed = line.trim();
-        // `{/* ... */}` is a JSX comment: it reaches no screen, so it is not a leak.
-        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("{/*")) return;
+        if (inJsxComment) {
+          if (line.includes("*/}")) inJsxComment = false;
+          return;
+        }
+        if (trimmed.startsWith("{/*")) {
+          if (!line.includes("*/}")) inJsxComment = true;
+          return;
+        }
+        if (trimmed.startsWith("//") || trimmed.startsWith("*")) return;
         if (line.includes("i18n-check: allow")) return;
         if (!VIETNAMESE.test(line)) return;
         // Only text that can reach a screen: a quoted literal, or JSX text between tags.
@@ -180,6 +189,24 @@ if (drift.length) {
   notes.push(`${drift.length} translation(s) do not use the glossary term — substring matching, so expect false alarms on rephrasing:`);
   for (const entry of drift.slice(0, 20)) notes.push(`    ${entry}`);
   if (drift.length > 20) notes.push(`    …and ${drift.length - 20} more`);
+}
+
+// -- 5. stray scripts -------------------------------------------------------------
+/**
+ * Vietnamese, Japanese and English between them use Latin, kana, kanji and CJK
+ * punctuation. A Cyrillic, Greek, Hangul, Thai, Devanagari or Arabic character in a
+ * value is a machine-translation slip, not a choice -- one landed in a Japanese
+ * dashboard label as `総費用（материалほか）` and reads as plausible until someone who
+ * knows the language looks. This one fails rather than warns: there is no case where
+ * it is correct.
+ */
+const STRAY_SCRIPT = /[Ѐ-ӿͰ-Ͽ가-힯฀-๿ऀ-ॿ؀-ۿ]/;
+for (const locale of CATALOGUES) {
+  for (const [key, value] of readCatalogue(locale)) {
+    if (STRAY_SCRIPT.test(value)) {
+      failures.push(`${locale}.json ${key} contains a character from a script none of these languages use: ${JSON.stringify(value)}`);
+    }
+  }
 }
 
 // -- report ----------------------------------------------------------------------

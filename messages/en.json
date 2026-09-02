@@ -507,7 +507,8 @@
       "card": "Card",
       "paypay": "PayPay",
       "bank_transfer": "Bank transfer",
-      "other": "Other"
+      "other": "Other",
+      "transfer": "Bank transfer"
     },
     "accounts": {
       "role": {
@@ -781,6 +782,103 @@
         "saving": "Saving…",
         "save": "Save",
         "placeholder": "Add an internal note (not shown to the customer)…"
+      }
+    },
+    "dashboard": {
+      "metrics": {
+        "appointments": "Appointments today",
+        "appointmentsUnit": "booked",
+        "revenue": "Revenue today",
+        "customers": "Customers today",
+        "customersUnit": "people",
+        "staff": "Staff working",
+        "staffUnit": "people"
+      },
+      "breakdown": {
+        "pendingTail": " · Pending: {count}",
+        "line": "Confirmed: {confirmed} · In service: {inService} · Completed: {completed}{tail}"
+      },
+      "loadFailed": "Could not load today's data",
+      "loadingDetail": "Loading…",
+      "yesterdayRevenue": "Yesterday: {amount}",
+      "noYesterday": "No figures for yesterday",
+      "newCustomers": "New customers: {count}",
+      "noNewCustomers": "No new-customer data",
+      "offStaff": "{count} off",
+      "noneOff": "Nobody is off",
+      "noShiftData": "No shift data",
+      "summary": {
+        "gross": "Gross revenue",
+        "cost": "Total costs (supplies and other)",
+        "commission": "Total staff commission",
+        "recognized": "Recognized revenue",
+        "refund": "Refunds",
+        "completed": "Completed",
+        "staffCommission": "Staff commission"
+      },
+      "unknownMethod": "Unknown",
+      "unknownStaffName": "Name unknown",
+      "staffStatus": {
+        "working": "Working",
+        "off": "Off"
+      },
+      "alert": {
+        "pendingTitle": "{count} appointments awaiting confirmation",
+        "pendingDetail": "Please confirm them",
+        "today": "Today",
+        "needsAction": "Appointments needing action",
+        "yesterdayRevenue": "Yesterday's revenue",
+        "yesterday": "Yesterday"
+      },
+      "range": {
+        "today": "Today",
+        "week": "This week",
+        "month": "This month"
+      },
+      "appointments": {
+        "unnamedCustomer": "Unnamed customer",
+        "noService": "No service chosen",
+        "unnamedService": "Unnamed service",
+        "serviceCount": "{count} services",
+        "heading": "Today's appointments",
+        "loading": "Loading appointments…",
+        "empty": "No appointments today yet.",
+        "listLabel": "Today's appointment list"
+      },
+      "overviewHeading": "Today at a glance",
+      "activityRegion": "Salon activity",
+      "performanceRegion": "Staff performance and monthly income",
+      "monthly": {
+        "loading": "Loading the monthly summary…",
+        "afterCommission": "Left after commission"
+      },
+      "revenue": {
+        "netToday": "Salon takes home",
+        "net": "Net revenue",
+        "rangeLabel": "Revenue period",
+        "loading": "Loading revenue figures…",
+        "byMethod": "Revenue by payment method",
+        "methodFailed": "Could not load the payment methods.",
+        "methodLoading": "Loading…",
+        "noTransactions": "No transactions today yet."
+      },
+      "staff": {
+        "loading": "Loading the staff list…",
+        "expectedPayout": "Expected payout"
+      },
+      "quick": {
+        "appointment": "Create appointment",
+        "payment": "Payment",
+        "customer": "Add customer",
+        "message": "Send message",
+        "heading": "Quick actions",
+        "unavailable": "{label}, not available yet"
+      },
+      "notifications": {
+        "heading": "Notifications",
+        "loading": "Loading notifications…",
+        "empty": "No new notifications.",
+        "listLabel": "New notifications"
       }
     }
   }
