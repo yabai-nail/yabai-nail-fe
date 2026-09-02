@@ -6,6 +6,7 @@ import {
   BellAlertIcon,
   CalendarDaysIcon,
   ChatBubbleLeftEllipsisIcon,
+  ChevronRightIcon,
   ClockIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
@@ -43,20 +44,31 @@ export function UtilityPanel() {
         <Card.Header className="px-4 pt-4 sm:px-5 sm:pt-5">
           <h2 className="text-sm font-bold text-admin-ink">{t("quick.heading")}</h2>
         </Card.Header>
-        <Card.Content className="grid grid-cols-2 gap-2 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
+        {/*
+          A row each, not a two-by-two grid of tiles. The tiles were square boxes with
+          the icon stacked over a label that wrapped on the longer actions, so no two
+          were the same shape and the rail read as a phone home screen. As rows they
+          carry the same icon tile the notifications below them use — same size, same
+          soft background — so the two cards in this column share one rhythm, and a
+          label can grow in Japanese or English without changing the row's height.
+        */}
+        <Card.Content className="grid gap-2 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
           {quickActions.map(({ id, labelKey, icon: Icon, ...action }) => {
             const label = t(labelKey);
             return (
             <Button
               key={id}
               variant="outline"
-              className="h-auto min-h-16 flex-col gap-1 rounded-lg border-admin-border px-2 py-2 text-xs text-admin-ink"
+              className="h-auto min-h-11 w-full justify-start gap-3 rounded-lg border-admin-border px-3 py-2 text-xs font-semibold text-admin-ink"
               aria-label={"href" in action ? label : t("quick.unavailable", { label })}
               isDisabled={!("href" in action)}
               onPress={() => { if ("href" in action) router.push(action.href); }}
             >
-              <Icon aria-hidden="true" className="size-6 text-admin-accent" />
-              {label}
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-admin-soft text-admin-accent">
+                <Icon aria-hidden="true" className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+              <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0 text-admin-muted" />
             </Button>
             );
           })}
