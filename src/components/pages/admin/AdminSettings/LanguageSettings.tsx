@@ -57,12 +57,19 @@ export function LanguageSettings() {
             <Radio
               key={option}
               value={option}
-              className="rounded-lg border border-admin-border px-4 py-3 text-admin-muted data-[selected=true]:border-admin-accent data-[selected=true]:bg-admin-soft data-[selected=true]:text-admin-accent"
+              className="rounded-lg border border-admin-border data-[selected=true]:border-admin-accent data-[selected=true]:bg-admin-soft"
             >
-              <Radio.Control>
-                <Radio.Indicator />
-              </Radio.Control>
-              <Radio.Content className="text-sm font-semibold">
+              {/*
+                Everything clickable lives inside Radio.Content, because that is the
+                <label> that holds the radio input; Radio itself renders a plain <div>.
+                With the padding and the indicator outside it, only the language name
+                was clickable — the card and the circle around it did nothing, which
+                looked exactly like a switcher that does not work.
+              */}
+              <Radio.Content className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-sm font-semibold text-admin-muted data-[selected=true]:text-admin-accent">
+                <Radio.Control>
+                  <Radio.Indicator />
+                </Radio.Control>
                 {LANGUAGE_NAMES[option]}
               </Radio.Content>
             </Radio>
