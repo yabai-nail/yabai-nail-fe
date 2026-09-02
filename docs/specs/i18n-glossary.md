@@ -83,6 +83,7 @@ Nhóm phải soát kỹ nhất. Dịch sai ở đây là mất tiền thật, kh
 | Hủy | キャンセル | Cancel | |
 | Xóa | 削除 | Delete | |
 | Lưu | 保存 | Save | |
+| Đang lưu | 保存しています | Saving | Dạng đang diễn ra của `Lưu`; có hàng riêng vì cụm dài hơn nên được ưu tiên khớp |
 | Cập nhật | 更新 | Update | |
 | Tạo | 作成 | Create | |
 | Tìm kiếm | 検索 | Search | |
@@ -99,7 +100,7 @@ Nhóm phải soát kỹ nhất. Dịch sai ở đây là mất tiền thật, kh
 | Chưa có dữ liệu | データがありません | No data | |
 | Thành công | 成功 | Succeeded | |
 | Thất bại | 失敗 | Failed | |
-| Đang xử lý | 処理中 | Processing | |
+| Đang xử lý | 処理中 | Processing | **Chỉ dùng cho trạng thái giao diện** — request đang chạy. Trạng thái *nghiệp vụ* của một đánh giá đang được tiếp nhận là `対応中` / `In progress`; cổng kiểm tra sẽ báo hàng đó, và đó là báo nhầm đã biết |
 
 ## Cổng kiểm tra dùng bảng này thế nào
 
@@ -117,6 +118,10 @@ thì báo — **không fail**.
 Khi nhiều hàng cùng khớp một chuỗi, chỉ hàng có cụm VI **dài nhất** được đối chiếu.
 Không có luật đó thì `Lưu trữ` luôn bị chấm theo hàng `Lưu`, và mọi bản dịch
 `アーカイブ` đều bị báo sai.
+
+Một dạng báo nhầm nữa xuất hiện đều: chuỗi phân trang tiếng Nhật dùng lượng từ
+`件` và bỏ danh từ (`全 {total} 件中 {shown} 件を表示`), trong khi bản VI/EN giữ
+danh từ (`chi nhánh` / `branches`). Đó là tiếng Nhật tự nhiên, không phải thiếu sót.
 
 Vì vậy nó chỉ báo, không chặn. Giá trị của nó là chỉ ra chỗ cần nhìn, không phải
 phán đúng sai.

@@ -208,6 +208,100 @@
         "add": "追加",
         "saveFailed": "ネイルデザインを保存できません。"
       }
+    },
+    "branches": {
+      "status": {
+        "ACTIVE": "営業中",
+        "INACTIVE": "休止中"
+      },
+      "searchLabel": "店舗を検索",
+      "searchPlaceholder": "店舗名または住所…",
+      "add": "店舗を追加",
+      "loading": "店舗を読み込み中…",
+      "loadFailed": "店舗一覧を読み込めません。",
+      "columns": {
+        "branch": "店舗",
+        "address": "住所",
+        "status": "ステータス",
+        "actions": "操作"
+      },
+      "empty": "該当する店舗がありません。",
+      "detailAction": "詳細",
+      "edit": "編集",
+      "pagination": "全 {total} 件中 {shown} 件を表示",
+      "detail": {
+        "title": "店舗の詳細",
+        "unnamed": "名称未設定",
+        "name": "店舗名",
+        "address": "住所",
+        "status": "ステータス",
+        "timezone": "タイムゾーン",
+        "activeStaff": "稼働中のスタッフ",
+        "activeServices": "提供中のメニュー",
+        "totalAppointments": "予約の総数"
+      },
+      "modal": {
+        "editTitle": "店舗を編集",
+        "addTitle": "店舗を追加",
+        "name": "店舗名",
+        "namePlaceholder": "YABAI NAIL 1区店",
+        "address": "住所",
+        "addressPlaceholder": "45 Le Loi, 1区",
+        "status": "ステータス",
+        "statusLabel": "店舗のステータス",
+        "timezone": "タイムゾーン",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "add": "追加",
+        "saveFailed": "店舗を保存できません。"
+      }
+    },
+    "reviews": {
+      "status": {
+        "NEW": "未対応",
+        "IN_PROGRESS": "対応中",
+        "RESOLVED": "対応済み"
+      },
+      "unnamedCustomer": "名称未設定の顧客",
+      "updateFailed": "ステータスを更新できません。",
+      "scope": {
+        "branch": "店舗",
+        "all": "全店舗"
+      },
+      "handlingLabel": "対応ステータス",
+      "filterLabel": "対応ステータスで絞り込み",
+      "all": "すべて",
+      "searchLabel": "レビューを検索",
+      "searchPlaceholder": "顧客名または内容で検索…",
+      "loading": "レビューを読み込み中…",
+      "loadFailed": "レビューを読み込めません。",
+      "columns": {
+        "customer": "顧客",
+        "rating": "評価",
+        "content": "内容",
+        "handling": "対応",
+        "reply": "返信",
+        "actions": "操作"
+      },
+      "empty": "該当するレビューがありません。",
+      "ratingLabel": "メニュー {service} つ星、スタッフ {staff} つ星",
+      "ratingService": "メニュー",
+      "ratingStaff": "スタッフ",
+      "reply": "返信",
+      "reopen": "再オープン",
+      "markResolved": "対応済みにする",
+      "readOnly": "閲覧のみ",
+      "pagination": "全 {total} 件中 {shown} 件を表示",
+      "modal": {
+        "title": "レビューに返信 — {customer}",
+        "contentLabel": "返信の内容",
+        "placeholder": "ご評価ありがとうございます…",
+        "cancel": "キャンセル",
+        "sending": "送信しています…",
+        "send": "返信を送信",
+        "sendFailed": "返信を送信できません。"
+      }
     }
   }
 }

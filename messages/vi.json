@@ -208,6 +208,100 @@
         "add": "Thêm",
         "saveFailed": "Không lưu được mẫu nail."
       }
+    },
+    "branches": {
+      "status": {
+        "ACTIVE": "Hoạt động",
+        "INACTIVE": "Tạm ngưng"
+      },
+      "searchLabel": "Tìm chi nhánh",
+      "searchPlaceholder": "Tên hoặc địa chỉ...",
+      "add": "Thêm chi nhánh",
+      "loading": "Đang tải chi nhánh…",
+      "loadFailed": "Không tải được danh sách chi nhánh.",
+      "columns": {
+        "branch": "Chi nhánh",
+        "address": "Địa chỉ",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "empty": "Không có chi nhánh phù hợp.",
+      "detailAction": "Chi tiết",
+      "edit": "Sửa",
+      "pagination": "Hiển thị {shown} trong tổng số {total} chi nhánh",
+      "detail": {
+        "title": "Chi tiết chi nhánh",
+        "unnamed": "Chưa có tên",
+        "name": "Tên chi nhánh",
+        "address": "Địa chỉ",
+        "status": "Trạng thái",
+        "timezone": "Múi giờ",
+        "activeStaff": "Nhân viên đang hoạt động",
+        "activeServices": "Dịch vụ đang hoạt động",
+        "totalAppointments": "Tổng lịch hẹn"
+      },
+      "modal": {
+        "editTitle": "Sửa chi nhánh",
+        "addTitle": "Thêm chi nhánh",
+        "name": "Tên chi nhánh",
+        "namePlaceholder": "YABAI NAIL Quận 1",
+        "address": "Địa chỉ",
+        "addressPlaceholder": "45 Lê Lợi, Quận 1",
+        "status": "Trạng thái",
+        "statusLabel": "Trạng thái chi nhánh",
+        "timezone": "Múi giờ",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "add": "Thêm",
+        "saveFailed": "Không lưu được chi nhánh."
+      }
+    },
+    "reviews": {
+      "status": {
+        "NEW": "Chờ xử lý",
+        "IN_PROGRESS": "Đang xử lý",
+        "RESOLVED": "Đã xử lý"
+      },
+      "unnamedCustomer": "Khách chưa có tên",
+      "updateFailed": "Không cập nhật được trạng thái.",
+      "scope": {
+        "branch": "Chi nhánh",
+        "all": "Toàn hệ thống"
+      },
+      "handlingLabel": "Trạng thái xử lý",
+      "filterLabel": "Lọc theo trạng thái xử lý",
+      "all": "Tất cả",
+      "searchLabel": "Tìm đánh giá",
+      "searchPlaceholder": "Tìm theo khách hàng hoặc nội dung...",
+      "loading": "Đang tải đánh giá…",
+      "loadFailed": "Không tải được đánh giá.",
+      "columns": {
+        "customer": "Khách hàng",
+        "rating": "Điểm",
+        "content": "Nội dung",
+        "handling": "Xử lý",
+        "reply": "Phản hồi",
+        "actions": "Thao tác"
+      },
+      "empty": "Không có đánh giá phù hợp.",
+      "ratingLabel": "Dịch vụ {service} sao, nhân viên {staff} sao",
+      "ratingService": "dịch vụ",
+      "ratingStaff": "nhân viên",
+      "reply": "Trả lời",
+      "reopen": "Mở lại",
+      "markResolved": "Đã xử lý",
+      "readOnly": "Chỉ xem",
+      "pagination": "Hiển thị {shown} trong tổng số {total} đánh giá",
+      "modal": {
+        "title": "Trả lời đánh giá — {customer}",
+        "contentLabel": "Nội dung phản hồi",
+        "placeholder": "Cảm ơn bạn đã đánh giá...",
+        "cancel": "Hủy",
+        "sending": "Đang gửi…",
+        "send": "Gửi phản hồi",
+        "sendFailed": "Không gửi được phản hồi."
+      }
     }
   }
 }

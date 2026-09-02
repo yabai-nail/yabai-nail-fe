@@ -208,6 +208,100 @@
         "add": "Add",
         "saveFailed": "Could not save the nail design."
       }
+    },
+    "branches": {
+      "status": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      },
+      "searchLabel": "Search branches",
+      "searchPlaceholder": "Name or address…",
+      "add": "Add branch",
+      "loading": "Loading branches…",
+      "loadFailed": "Could not load the branches.",
+      "columns": {
+        "branch": "Branch",
+        "address": "Address",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No matching branches.",
+      "detailAction": "Details",
+      "edit": "Edit",
+      "pagination": "Showing {shown} of {total} branches",
+      "detail": {
+        "title": "Branch details",
+        "unnamed": "Unnamed",
+        "name": "Branch name",
+        "address": "Address",
+        "status": "Status",
+        "timezone": "Time zone",
+        "activeStaff": "Active staff",
+        "activeServices": "Active services",
+        "totalAppointments": "Total appointments"
+      },
+      "modal": {
+        "editTitle": "Edit branch",
+        "addTitle": "Add branch",
+        "name": "Branch name",
+        "namePlaceholder": "YABAI NAIL District 1",
+        "address": "Address",
+        "addressPlaceholder": "45 Le Loi, District 1",
+        "status": "Status",
+        "statusLabel": "Branch status",
+        "timezone": "Time zone",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "add": "Add",
+        "saveFailed": "Could not save the branch."
+      }
+    },
+    "reviews": {
+      "status": {
+        "NEW": "Pending",
+        "IN_PROGRESS": "In progress",
+        "RESOLVED": "Resolved"
+      },
+      "unnamedCustomer": "Unnamed customer",
+      "updateFailed": "Could not update the status.",
+      "scope": {
+        "branch": "Branch",
+        "all": "All branches"
+      },
+      "handlingLabel": "Handling status",
+      "filterLabel": "Filter by handling status",
+      "all": "All",
+      "searchLabel": "Search reviews",
+      "searchPlaceholder": "Search by customer or content…",
+      "loading": "Loading reviews…",
+      "loadFailed": "Could not load the reviews.",
+      "columns": {
+        "customer": "Customer",
+        "rating": "Rating",
+        "content": "Content",
+        "handling": "Handling",
+        "reply": "Reply",
+        "actions": "Actions"
+      },
+      "empty": "No matching reviews.",
+      "ratingLabel": "Service {service} stars, staff {staff} stars",
+      "ratingService": "service",
+      "ratingStaff": "staff",
+      "reply": "Reply",
+      "reopen": "Reopen",
+      "markResolved": "Mark resolved",
+      "readOnly": "Read only",
+      "pagination": "Showing {shown} of {total} reviews",
+      "modal": {
+        "title": "Reply to review — {customer}",
+        "contentLabel": "Reply content",
+        "placeholder": "Thank you for your review…",
+        "cancel": "Cancel",
+        "sending": "Sending…",
+        "send": "Send reply",
+        "sendFailed": "Could not send the reply."
+      }
     }
   }
 }

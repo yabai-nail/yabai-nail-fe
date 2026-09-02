@@ -10,11 +10,6 @@ export type BranchRow = {
   readonly version: number;
 };
 
-export const branchStatusLabels: Record<string, string> = {
-  ACTIVE: "Hoạt động",
-  INACTIVE: "Tạm ngưng",
-};
-
 /**
  * Backend trả cờ boolean `active`; bảng hiển thị dùng mã trạng thái dạng chuỗi.
  * Thiếu cờ (undefined) thì trả undefined để ô hiển thị "—" thay vì đoán bừa.
