@@ -680,6 +680,108 @@
         "addAction": "Add",
         "saveFailed": "Could not save the surcharge."
       }
+    },
+    "customers": {
+      "unnamed": "Unnamed customer",
+      "tabsLabel": "Customer segments",
+      "segment": {
+        "all": "All customers",
+        "loyal": "Loyal",
+        "new": "New",
+        "longTerm": "Long-standing"
+      },
+      "searchLabel": "Search customers",
+      "searchPlaceholder": "Search name or phone…",
+      "loading": "Loading the customers…",
+      "emptyHeading": "No customers yet",
+      "retry": "Try reloading the page.",
+      "firstCustomer": "Add your first customer to start tracking history and points.",
+      "pickBranch": "Choose a branch to see its customers.",
+      "noSelectionTitle": "No customer selected",
+      "noSelectionDescription": "Change the search or segment to see details.",
+      "saveFailed": "Could not save the customer.",
+      "rank": {
+        "gold": "Gold",
+        "silver": "Silver",
+        "bronze": "Bronze",
+        "none": "Unranked"
+      },
+      "detail": {
+        "heading": "Customer details",
+        "edit": "Edit {name}",
+        "social": "Social",
+        "preference": "Preferences",
+        "totalSpend": "Total spend",
+        "visits": "Visits",
+        "points": "Points",
+        "rank": "Rank",
+        "noteHeading": "Customer notes"
+      },
+      "table": {
+        "caption": "Customer list",
+        "customer": "Customer",
+        "phone": "Phone",
+        "lastVisit": "Last visit",
+        "totalSpend": "Total spend",
+        "points": "Points",
+        "rank": "Rank",
+        "actions": "Actions",
+        "edit": "Edit {name}",
+        "empty": "No matching customers."
+      },
+      "create": {
+        "title": "Add customer",
+        "name": "Full name",
+        "namePlaceholder": "Jane Doe",
+        "phone": "Phone number",
+        "note": "Note (optional)",
+        "notePlaceholder": "For example: an allergy to a product, a colour preference…",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "submit": "Add customer",
+        "failed": "Could not create the customer."
+      },
+      "edit": {
+        "title": "Edit customer",
+        "localeLabel": "Preferred language",
+        "statusLabel": "Account status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "saving": "Saving…",
+        "save": "Save"
+      },
+      "loyalty": {
+        "pointsFailed": "Could not adjust the points.",
+        "couponFailed": "Could not issue the coupon.",
+        "loading": "Loading benefits…",
+        "loadFailed": "Could not load the benefits.",
+        "tier": "Tier",
+        "points": "Points",
+        "pointsPlaceholder": "± points",
+        "reasonPlaceholder": "Reason (required)",
+        "pointsPending": "Processing…",
+        "pointsSubmit": "Record",
+        "pickCoupon": "Choose a coupon",
+        "unnamedCoupon": "Unnamed coupon",
+        "loadingCoupons": "Loading coupons…",
+        "noCoupons": "No active coupons.",
+        "couponPending": "Issuing…",
+        "couponSubmit": "Issue coupon",
+        "historyHeading": "Recent nail history",
+        "historyLoading": "Loading the history…",
+        "historyFailed": "Could not load the history.",
+        "historyEmpty": "No appointments yet."
+      },
+      "notes": {
+        "saveFailed": "Could not save the note.",
+        "updateFailed": "Could not update the note.",
+        "loading": "Loading notes…",
+        "loadFailed": "Could not load the notes.",
+        "empty": "No notes yet.",
+        "saving": "Saving…",
+        "save": "Save",
+        "placeholder": "Add an internal note (not shown to the customer)…"
+      }
     }
   }
 }

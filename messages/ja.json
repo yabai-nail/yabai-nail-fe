@@ -680,6 +680,108 @@
         "addAction": "追加",
         "saveFailed": "追加料金を保存できません。"
       }
+    },
+    "customers": {
+      "unnamed": "名称未設定の顧客",
+      "tabsLabel": "顧客のセグメント",
+      "segment": {
+        "all": "すべての顧客",
+        "loyal": "常連",
+        "new": "新規",
+        "longTerm": "長期のお客様"
+      },
+      "searchLabel": "顧客を検索",
+      "searchPlaceholder": "氏名・電話番号で検索…",
+      "loading": "顧客一覧を読み込み中…",
+      "emptyHeading": "顧客がいません",
+      "retry": "ページを再読み込みしてください。",
+      "firstCustomer": "最初の顧客を追加すると、来店履歴とポイントの記録が始まります。",
+      "pickBranch": "顧客一覧を見る店舗を選択してください。",
+      "noSelectionTitle": "顧客が選択されていません",
+      "noSelectionDescription": "キーワードまたはセグメントを変えると詳細が表示されます。",
+      "saveFailed": "顧客情報を保存できません。",
+      "rank": {
+        "gold": "ゴールド",
+        "silver": "シルバー",
+        "bronze": "ブロンズ",
+        "none": "ランクなし"
+      },
+      "detail": {
+        "heading": "顧客情報",
+        "edit": "{name} を編集",
+        "social": "ソーシャル",
+        "preference": "好み",
+        "totalSpend": "累計利用額",
+        "visits": "来店回数",
+        "points": "ポイント",
+        "rank": "ランク",
+        "noteHeading": "顧客のメモ"
+      },
+      "table": {
+        "caption": "顧客一覧",
+        "customer": "顧客",
+        "phone": "電話番号",
+        "lastVisit": "最終来店",
+        "totalSpend": "累計利用額",
+        "points": "ポイント",
+        "rank": "ランク",
+        "actions": "操作",
+        "edit": "{name} の情報を編集",
+        "empty": "該当する顧客がいません。"
+      },
+      "create": {
+        "title": "顧客を追加",
+        "name": "氏名",
+        "namePlaceholder": "山田 花子",
+        "phone": "電話番号",
+        "note": "メモ（任意）",
+        "notePlaceholder": "例: 特定の製品へのアレルギー、好みの色…",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "submit": "顧客を追加",
+        "failed": "顧客を作成できません。"
+      },
+      "edit": {
+        "title": "顧客を編集",
+        "localeLabel": "優先言語",
+        "statusLabel": "アカウントのステータス",
+        "statusActive": "有効",
+        "statusInactive": "停止中",
+        "saving": "保存しています…",
+        "save": "保存"
+      },
+      "loyalty": {
+        "pointsFailed": "ポイントを調整できません。",
+        "couponFailed": "クーポンを発行できません。",
+        "loading": "特典を読み込み中…",
+        "loadFailed": "特典を読み込めません。",
+        "tier": "ランク",
+        "points": "ポイント",
+        "pointsPlaceholder": "±ポイント",
+        "reasonPlaceholder": "理由（必須）",
+        "pointsPending": "処理中…",
+        "pointsSubmit": "記録する",
+        "pickCoupon": "クーポンを選択",
+        "unnamedCoupon": "名称未設定のクーポン",
+        "loadingCoupons": "クーポンを読み込み中…",
+        "noCoupons": "有効なクーポンはありません。",
+        "couponPending": "発行しています…",
+        "couponSubmit": "クーポンを発行",
+        "historyHeading": "最近のネイル履歴",
+        "historyLoading": "履歴を読み込み中…",
+        "historyFailed": "履歴を読み込めません。",
+        "historyEmpty": "予約の履歴はありません。"
+      },
+      "notes": {
+        "saveFailed": "メモを保存できません。",
+        "updateFailed": "メモを更新できません。",
+        "loading": "メモを読み込み中…",
+        "loadFailed": "メモを読み込めません。",
+        "empty": "メモはまだありません。",
+        "saving": "保存しています…",
+        "save": "保存",
+        "placeholder": "社内メモを追加（お客様には表示されません）…"
+      }
     }
   }
 }

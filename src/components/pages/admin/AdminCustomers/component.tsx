@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -32,8 +33,9 @@ function deriveInitials(name: string): string {
  * `[field: string]: unknown` escape and fall back to blank rather than to an
  * invented value.
  */
-function toCustomerRow(server: AdminCustomer): Customer {
-  const name = server.displayName ?? server.name ?? "Khách chưa có tên";
+// The fallback name is threaded in: this runs inside a useMemo, outside the component.
+function toCustomerRow(server: AdminCustomer, unnamed: string): Customer {
+  const name = server.displayName ?? server.name ?? unnamed;
   const record = server as unknown as Record<string, unknown>;
   const readNumber = (key: string): number => {
     const value = record[key];
@@ -77,6 +79,7 @@ function toCustomerRow(server: AdminCustomer): Customer {
 const pageSize = 8;
 
 export function AdminCustomersComponent() {
+  const t = useTranslations("admin.customers");
   const { branchId } = useAdminBranch();
   const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -87,8 +90,8 @@ export function AdminCustomersComponent() {
   // the list stays empty and the screen says so. A sample roster that looks
   // exactly like a real one is worse than an error message.
   const source = useMemo<ReadonlyArray<Customer>>(
-    () => (data?.items ?? []).map(toCustomerRow),
-    [data],
+    () => (data?.items ?? []).map((row) => toCustomerRow(row, t("unnamed"))),
+    [data, t],
   );
 
   const [filter, setFilter] = useState<CustomerFilter>("all");
@@ -108,28 +111,28 @@ export function AdminCustomersComponent() {
   const firstShown = filteredCustomers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const selectedCustomer = resolveVisibleSelection(visibleCustomers, selectedId || visibleCustomers[0]?.id || "");
   const customerDetail = useAdminCustomer(branchId, selectedCustomer?.id ?? null);
-  const detailedCustomer = customerDetail.data ? toCustomerRow(customerDetail.data) : selectedCustomer;
+  const detailedCustomer = customerDetail.data ? toCustomerRow(customerDetail.data, t("unnamed")) : selectedCustomer;
 
   return (
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 xl:flex-row xl:items-end xl:justify-between">
         <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as CustomerFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
-            <Tabs.List aria-label="Phân nhóm khách hàng">
+            <Tabs.List aria-label={t("tabsLabel")}>
               <Tabs.Tab id="all">
-                <AdminTabLabel count={source.length}>Tất cả khách hàng</AdminTabLabel>
+                <AdminTabLabel count={source.length}>{t("segment.all")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="loyal">
-                <AdminTabLabel count={source.filter((c) => c.segment === "loyal").length}>Khách thân thiết</AdminTabLabel>
+                <AdminTabLabel count={source.filter((c) => c.segment === "loyal").length}>{t("segment.loyal")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="new">
-                <AdminTabLabel count={source.filter((c) => c.segment === "new").length}>Khách mới</AdminTabLabel>
+                <AdminTabLabel count={source.filter((c) => c.segment === "new").length}>{t("segment.new")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="regular">
-                <AdminTabLabel>Khách lâu năm</AdminTabLabel>
+                <AdminTabLabel>{t("segment.longTerm")}</AdminTabLabel>
                 <Tabs.Indicator />
               </Tabs.Tab>
             </Tabs.List>
@@ -139,7 +142,7 @@ export function AdminCustomersComponent() {
           {/* "Bộ lọc" was a button with no handler. The tabs above already filter by
               segment and the search box filters by name and phone; there was no third
               dimension for it to open, so it only ever looked like a control. */}
-          <AdminSearchField label="Tìm khách hàng" placeholder="Tìm tên, SĐT..." value={query} onChange={setQuery} />
+          <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={setQuery} />
           <Button
             variant="primary"
             className="rounded-lg"
@@ -156,17 +159,17 @@ export function AdminCustomersComponent() {
         </p>
       ) : null}
       {isLoading ? (
-        <p className="py-6 text-center text-xs text-admin-muted">Đang tải danh sách khách hàng…</p>
+        <p className="py-6 text-center text-xs text-admin-muted">{t("loading")}</p>
       ) : source.length === 0 ? (
         <Card className="rounded-lg border-admin-border bg-admin-surface shadow-none">
           <Card.Content className="p-12 text-center">
-            <h2 className="font-bold">Chưa có khách hàng</h2>
+            <h2 className="font-bold">{t("emptyHeading")}</h2>
             <p className="mt-2 text-sm text-admin-muted">
               {error
-                ? "Thử tải lại trang."
+                ? t("retry")
                 : branchId
-                  ? "Thêm khách hàng đầu tiên để bắt đầu theo dõi lịch sử và điểm tích luỹ."
-                  : "Chọn chi nhánh để xem danh sách khách hàng."}
+                  ? t("firstCustomer")
+                  : t("pickBranch")}
             </p>
           </Card.Content>
         </Card>
@@ -188,8 +191,8 @@ export function AdminCustomersComponent() {
               />
             ) : (
               <AdminEmptySelection
-                title="Không có khách hàng"
-                description="Thay đổi từ khóa hoặc nhóm khách hàng để xem chi tiết."
+                title={t("noSelectionTitle")}
+                description={t("noSelectionDescription")}
               />
             )
           }
@@ -232,7 +235,7 @@ export function AdminCustomersComponent() {
               void mutateCustomers();
             } catch (thrown) {
               setEditError(
-                thrown instanceof Error ? thrown.message : "Không lưu được thông tin khách hàng.",
+                thrown instanceof Error ? thrown.message : t("saveFailed"),
               );
             } finally {
               setEditSubmitting(false);

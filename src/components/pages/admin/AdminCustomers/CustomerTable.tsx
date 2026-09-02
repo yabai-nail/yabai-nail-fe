@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { formatNumber, formatMoney } from "@/lib/admin-format";
@@ -17,19 +18,20 @@ export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Reado
   /** Absent until a branch is chosen, since editing needs one. */
   onEdit?: (id: string) => void;
 }>) {
+  const t = useTranslations("admin.customers");
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[760px] text-left text-sm">
-        <caption className="sr-only">Danh sách khách hàng</caption>
+        <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
-            <th scope="col" className="px-4 py-3 font-semibold">Khách hàng</th>
-            <th scope="col" className="px-3 py-3 font-semibold">SĐT</th>
-            <th scope="col" className="px-3 py-3 font-semibold">Lần đến gần nhất</th>
-            <th scope="col" className="px-3 py-3 font-semibold">Tổng chi tiêu</th>
-            <th scope="col" className="px-3 py-3 font-semibold">Điểm tích lũy</th>
-            <th scope="col" className="px-3 py-3 font-semibold">Hạng</th>
-            <th scope="col" className="px-3 py-3"><span className="sr-only">Thao tác</span></th>
+            <th scope="col" className="px-4 py-3 font-semibold">{t("table.customer")}</th>
+            <th scope="col" className="px-3 py-3 font-semibold">{t("table.phone")}</th>
+            <th scope="col" className="px-3 py-3 font-semibold">{t("table.lastVisit")}</th>
+            <th scope="col" className="px-3 py-3 font-semibold">{t("table.totalSpend")}</th>
+            <th scope="col" className="px-3 py-3 font-semibold">{t("table.points")}</th>
+            <th scope="col" className="px-3 py-3 font-semibold">{t("table.rank")}</th>
+            <th scope="col" className="px-3 py-3"><span className="sr-only">{t("table.actions")}</span></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
@@ -40,7 +42,7 @@ export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Reado
                   <Avatar size="sm" color="accent"><Avatar.Fallback>{customer.initials}</Avatar.Fallback></Avatar>
                   <span className="text-left">
                     <span className="block font-semibold text-admin-ink">{customer.name}</span>
-                    <span className="mt-0.5 block text-xs text-admin-accent">{customer.segment === "loyal" ? "Khách thân thiết" : customer.segment === "new" ? "Khách mới" : "Khách lâu năm"}</span>
+                    <span className="mt-0.5 block text-xs text-admin-accent">{customer.segment === "loyal" ? t("segment.loyal") : customer.segment === "new" ? t("segment.new") : t("segment.longTerm")}</span>
                   </span>
                 </Button>
               </td>
@@ -57,7 +59,7 @@ export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Reado
                     isIconOnly
                     size="sm"
                     variant="ghost"
-                    aria-label={`Sửa thông tin ${customer.name}`}
+                    aria-label={t("table.edit", { name: customer.name })}
                     onPress={() => onEdit(customer.id)}
                   >
                     <PencilSquareIcon className="size-4" />
@@ -68,7 +70,7 @@ export function CustomerTable({ customers, selectedId, onSelect, onEdit }: Reado
           ))}
         </tbody>
       </table>
-      {customers.length === 0 ? <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">Không tìm thấy khách hàng phù hợp.</p> : null}
+      {customers.length === 0 ? <p role="status" className="px-4 py-12 text-center text-sm text-admin-muted">{t("table.empty")}</p> : null}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
@@ -16,6 +17,7 @@ export function CustomerNotesPanel({
   branchId,
   customerId,
 }: Readonly<{ branchId: string; customerId: string }>) {
+  const t = useTranslations("admin.customers");
   const { data, isLoading, error, mutate } = useAdminCustomerNotes(branchId, customerId);
   const notes = data?.items ?? [];
 
@@ -36,7 +38,7 @@ export function CustomerNotesPanel({
       void mutate();
     } catch (thrown) {
       setSubmitError(
-        thrown instanceof Error ? thrown.message : "Không lưu được ghi chú.",
+        thrown instanceof Error ? thrown.message : t("notes.saveFailed"),
       );
     } finally {
       setPending(false);
@@ -61,7 +63,7 @@ export function CustomerNotesPanel({
       void mutate();
     } catch (thrown) {
       setSubmitError(
-        thrown instanceof Error ? thrown.message : "Không cập nhật được ghi chú.",
+        thrown instanceof Error ? thrown.message : t("notes.updateFailed"),
       );
     } finally {
       setPending(false);
@@ -77,11 +79,11 @@ export function CustomerNotesPanel({
       </div>
 
       {isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải ghi chú…</p>
+        <p className="text-xs text-admin-muted">{t("notes.loading")}</p>
       ) : error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được ghi chú.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("notes.loadFailed")}</p>
       ) : notes.length === 0 ? (
-        <p className="text-xs text-admin-muted">Chưa có ghi chú nào.</p>
+        <p className="text-xs text-admin-muted">{t("notes.empty")}</p>
       ) : (
         <ul className="space-y-2 text-xs">
           {notes.map((note) => (
@@ -105,7 +107,7 @@ export function CustomerNotesPanel({
                       onPress={() => void submitEdit(note)}
                       isDisabled={pending || editingContent.trim().length === 0}
                     >
-                      {pending ? "Đang lưu…" : "Lưu"}
+                      {pending ? t("notes.saving") : t("notes.save")}
                     </Button>
                   </div>
                 </div>
@@ -139,7 +141,7 @@ export function CustomerNotesPanel({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           rows={2}
-          placeholder="Thêm ghi chú nội bộ (không hiển thị cho khách)…"
+          placeholder={t("notes.placeholder")}
           className="block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-xs text-admin-ink"
         />
         <div className="flex justify-end">

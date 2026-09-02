@@ -680,6 +680,108 @@
         "addAction": "Thêm",
         "saveFailed": "Không lưu được phụ thu."
       }
+    },
+    "customers": {
+      "unnamed": "Khách chưa có tên",
+      "tabsLabel": "Phân nhóm khách hàng",
+      "segment": {
+        "all": "Tất cả khách hàng",
+        "loyal": "Khách thân thiết",
+        "new": "Khách mới",
+        "longTerm": "Khách lâu năm"
+      },
+      "searchLabel": "Tìm khách hàng",
+      "searchPlaceholder": "Tìm tên, SĐT...",
+      "loading": "Đang tải danh sách khách hàng…",
+      "emptyHeading": "Chưa có khách hàng",
+      "retry": "Thử tải lại trang.",
+      "firstCustomer": "Thêm khách hàng đầu tiên để bắt đầu theo dõi lịch sử và điểm tích luỹ.",
+      "pickBranch": "Chọn chi nhánh để xem danh sách khách hàng.",
+      "noSelectionTitle": "Không có khách hàng",
+      "noSelectionDescription": "Thay đổi từ khóa hoặc nhóm khách hàng để xem chi tiết.",
+      "saveFailed": "Không lưu được thông tin khách hàng.",
+      "rank": {
+        "gold": "Vàng",
+        "silver": "Bạc",
+        "bronze": "Đồng",
+        "none": "Chưa xếp hạng"
+      },
+      "detail": {
+        "heading": "Thông tin khách hàng",
+        "edit": "Chỉnh sửa {name}",
+        "social": "Mạng xã hội",
+        "preference": "Sở thích",
+        "totalSpend": "Tổng chi tiêu",
+        "visits": "Lần đến",
+        "points": "Điểm",
+        "rank": "Hạng",
+        "noteHeading": "Ghi chú của khách hàng"
+      },
+      "table": {
+        "caption": "Danh sách khách hàng",
+        "customer": "Khách hàng",
+        "phone": "SĐT",
+        "lastVisit": "Lần đến gần nhất",
+        "totalSpend": "Tổng chi tiêu",
+        "points": "Điểm tích lũy",
+        "rank": "Hạng",
+        "actions": "Thao tác",
+        "edit": "Sửa thông tin {name}",
+        "empty": "Không tìm thấy khách hàng phù hợp."
+      },
+      "create": {
+        "title": "Thêm khách hàng",
+        "name": "Họ và tên",
+        "namePlaceholder": "Nguyễn Thu Hương",
+        "phone": "Số điện thoại",
+        "note": "Ghi chú (tùy chọn)",
+        "notePlaceholder": "Ví dụ: dị ứng sản phẩm nào đó, sở thích màu…",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "submit": "Thêm khách hàng",
+        "failed": "Không tạo được khách hàng."
+      },
+      "edit": {
+        "title": "Chỉnh sửa khách hàng",
+        "localeLabel": "Ngôn ngữ ưu tiên",
+        "statusLabel": "Trạng thái tài khoản",
+        "statusActive": "Hoạt động",
+        "statusInactive": "Tạm ngưng",
+        "saving": "Đang lưu…",
+        "save": "Lưu"
+      },
+      "loyalty": {
+        "pointsFailed": "Không điều chỉnh được điểm.",
+        "couponFailed": "Không phát được coupon.",
+        "loading": "Đang tải ưu đãi…",
+        "loadFailed": "Không tải được ưu đãi.",
+        "tier": "Hạng",
+        "points": "Điểm",
+        "pointsPlaceholder": "±điểm",
+        "reasonPlaceholder": "Lý do (bắt buộc)",
+        "pointsPending": "Đang xử lý…",
+        "pointsSubmit": "Ghi nhận",
+        "pickCoupon": "Chọn coupon",
+        "unnamedCoupon": "Coupon chưa có tên",
+        "loadingCoupons": "Đang tải coupon…",
+        "noCoupons": "Chưa có coupon đang hoạt động.",
+        "couponPending": "Đang phát…",
+        "couponSubmit": "Phát coupon",
+        "historyHeading": "Lịch sử nail gần đây",
+        "historyLoading": "Đang tải lịch sử…",
+        "historyFailed": "Không tải được lịch sử.",
+        "historyEmpty": "Chưa có lịch nào."
+      },
+      "notes": {
+        "saveFailed": "Không lưu được ghi chú.",
+        "updateFailed": "Không cập nhật được ghi chú.",
+        "loading": "Đang tải ghi chú…",
+        "loadFailed": "Không tải được ghi chú.",
+        "empty": "Chưa có ghi chú nào.",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "placeholder": "Thêm ghi chú nội bộ (không hiển thị cho khách)…"
+      }
     }
   }
 }

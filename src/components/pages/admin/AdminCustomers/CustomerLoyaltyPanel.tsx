@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { GiftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
@@ -19,11 +20,14 @@ export function CustomerLoyaltyPanel({
   branchId,
   customerId,
 }: Readonly<{ branchId: string; customerId: string }>) {
+  const t = useTranslations("admin.customers");
+  const tTier = useTranslations("admin.tier");
   const benefitsQuery = useAdminCustomerBenefits(branchId, customerId);
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
   const promotionsQuery = useAdminPromotions();
   const benefits = benefitsQuery.data;
-  const tierLabel = benefits?.tier ? ({ MEMBER: "Thành viên", SILVER: "Bạc", GOLD: "Vàng", PLATINUM: "Bạch kim" }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
+  const tier = benefits?.tier?.toUpperCase();
+  const tierLabel = tier ? (tTier.has(tier) ? tTier(tier) : benefits!.tier!) : "—";
   const history = historyQuery.data?.items ?? [];
   const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 
@@ -47,7 +51,7 @@ export function CustomerLoyaltyPanel({
       await benefitsQuery.mutate();
     } catch (thrown) {
       setPointsError(
-        thrown instanceof Error ? thrown.message : "Không điều chỉnh được điểm.",
+        thrown instanceof Error ? thrown.message : t("loyalty.pointsFailed"),
       );
     } finally {
       setPointsPending(false);
@@ -70,7 +74,7 @@ export function CustomerLoyaltyPanel({
       await benefitsQuery.mutate();
     } catch (thrown) {
       setCouponError(
-        thrown instanceof Error ? thrown.message : "Không phát được coupon.",
+        thrown instanceof Error ? thrown.message : t("loyalty.couponFailed"),
       );
     } finally {
       setCouponPending(false);
@@ -84,17 +88,17 @@ export function CustomerLoyaltyPanel({
       </h3>
 
       {benefitsQuery.isLoading ? (
-        <p className="text-xs text-admin-muted">Đang tải ưu đãi…</p>
+        <p className="text-xs text-admin-muted">{t("loyalty.loading")}</p>
       ) : benefitsQuery.error ? (
-        <p role="alert" className="text-xs text-admin-danger">Không tải được ưu đãi.</p>
+        <p role="alert" className="text-xs text-admin-danger">{t("loyalty.loadFailed")}</p>
       ) : (
         <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
-            <dt className="text-admin-muted">Hạng</dt>
+            <dt className="text-admin-muted">{t("loyalty.tier")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">{tierLabel}</dd>
           </div>
           <div>
-            <dt className="text-admin-muted">Điểm</dt>
+            <dt className="text-admin-muted">{t("loyalty.points")}</dt>
             <dd className="mt-1 font-bold text-admin-accent">
               {typeof benefits?.pointBalance === "number" ? formatNumber(benefits.pointBalance) : "—"}
             </dd>
@@ -118,13 +122,13 @@ export function CustomerLoyaltyPanel({
             type="number"
             value={deltaText}
             onChange={(event) => setDeltaText(event.target.value)}
-            placeholder="±điểm"
+            placeholder={t("loyalty.pointsPlaceholder")}
             className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
           <input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="Lý do (bắt buộc)"
+            placeholder={t("loyalty.reasonPlaceholder")}
             className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
         </div>
@@ -136,7 +140,7 @@ export function CustomerLoyaltyPanel({
             onPress={() => void submitPoints()}
             isDisabled={pointsPending || benefits?.version === undefined || !reason.trim() || !Number.parseInt(deltaText, 10)}
           >
-            {pointsPending ? "Đang xử lý…" : "Ghi nhận"}
+            {pointsPending ? t("loyalty.pointsPending") : t("loyalty.pointsSubmit")}
           </Button>
         </div>
         {pointsError ? <p role="alert" className="text-xs text-admin-danger">{pointsError}</p> : null}
@@ -149,18 +153,18 @@ export function CustomerLoyaltyPanel({
         </p>
         {promotions.length > 0 ? (
           <AdminSelectField
-            label="Chọn coupon"
+            label={t("loyalty.pickCoupon")}
             value={couponId}
             onChange={setCouponId}
             fullWidth
             options={promotions.map((promotion) => ({
               value: promotion.id,
-              label: promotion.title ?? promotion.name ?? promotion.code ?? "Coupon chưa có tên",
+              label: promotion.title ?? promotion.name ?? promotion.code ?? t("loyalty.unnamedCoupon"),
             }))}
           />
         ) : (
           <p className="text-xs text-admin-muted">
-            {promotionsQuery.isLoading ? "Đang tải coupon…" : "Chưa có coupon đang hoạt động."}
+            {promotionsQuery.isLoading ? t("loyalty.loadingCoupons") : t("loyalty.noCoupons")}
           </p>
         )}
         <div className="flex justify-end">
@@ -171,20 +175,20 @@ export function CustomerLoyaltyPanel({
             onPress={() => void submitCoupon()}
             isDisabled={couponPending || benefits?.version === undefined || !couponId.trim()}
           >
-            {couponPending ? "Đang phát…" : "Phát coupon"}
+            {couponPending ? t("loyalty.couponPending") : t("loyalty.couponSubmit")}
           </Button>
         </div>
         {couponError ? <p role="alert" className="text-xs text-admin-danger">{couponError}</p> : null}
       </div>
 
       <div>
-        <h4 className="text-xs font-bold text-admin-ink">Lịch sử nail gần đây</h4>
+        <h4 className="text-xs font-bold text-admin-ink">{t("loyalty.historyHeading")}</h4>
         {historyQuery.isLoading ? (
-          <p className="mt-1 text-xs text-admin-muted">Đang tải lịch sử…</p>
+          <p className="mt-1 text-xs text-admin-muted">{t("loyalty.historyLoading")}</p>
         ) : historyQuery.error ? (
-          <p role="alert" className="mt-1 text-xs text-admin-danger">Không tải được lịch sử.</p>
+          <p role="alert" className="mt-1 text-xs text-admin-danger">{t("loyalty.historyFailed")}</p>
         ) : history.length === 0 ? (
-          <p className="mt-1 text-xs text-admin-muted">Chưa có lịch nào.</p>
+          <p className="mt-1 text-xs text-admin-muted">{t("loyalty.historyEmpty")}</p>
         ) : (
           <ul className="mt-1 space-y-1 text-xs">
             {history.slice(0, 5).map((entry) => (
