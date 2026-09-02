@@ -884,7 +884,9 @@
       },
       "staff": {
         "loading": "スタッフ一覧を読み込み中…",
-        "expectedPayout": "支給予定額"
+        "expectedPayout": "支給予定額",
+        "working": "勤務中",
+        "off": "休み"
       },
       "quick": {
         "appointment": "予約を作成",

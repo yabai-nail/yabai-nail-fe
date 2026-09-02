@@ -18,7 +18,7 @@ export function StaffPanel() {
   const members = useMemo(() => buildStaffCards(data?.rows, t), [data, t]);
 
   return (
-    <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
+    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
       <Card.Header className="flex flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">
           Nhân viên <span className="font-normal text-admin-muted">(kỳ {period})</span>
@@ -50,7 +50,7 @@ export function StaffPanel() {
                     <div className="min-w-0">
                       <h3 className="truncate text-xs font-semibold text-admin-ink">{member.name}</h3>
                       <Chip size="sm" variant="soft" color={isWorking ? "accent" : "default"} className="mt-1">
-                        <Chip.Label>{member.status}</Chip.Label>
+                        <Chip.Label>{t(`staff.${member.status}`)}</Chip.Label>
                       </Chip>
                     </div>
                   </div>

@@ -38,12 +38,12 @@ export function UtilityPanel() {
   const notifications = useMemo(() => buildActivityItems(data, t), [data, t]);
 
   return (
-    <div className="space-y-4 xl:col-span-3">
+    <div className="flex h-full flex-col gap-4 xl:col-span-4">
       <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="px-4 pt-4">
+        <Card.Header className="px-4 pt-4 sm:px-5 sm:pt-5">
           <h2 className="text-sm font-bold text-admin-ink">{t("quick.heading")}</h2>
         </Card.Header>
-        <Card.Content className="grid grid-cols-2 gap-2 px-4 pb-4 pt-3">
+        <Card.Content className="grid grid-cols-2 gap-2 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
           {quickActions.map(({ id, labelKey, icon: Icon, ...action }) => {
             const label = t(labelKey);
             return (
@@ -63,13 +63,13 @@ export function UtilityPanel() {
         </Card.Content>
       </Card>
 
-      <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Header className="flex flex-row items-center justify-between gap-2 px-4 pt-4">
+      <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
+        <Card.Header className="flex flex-row items-center justify-between gap-2 px-4 pt-4 sm:px-5 sm:pt-5">
           {/* No notifications screen exists to open, so the header carries no
               "Xem tất cả" — the card already lists everything there is. */}
           <h2 className="text-sm font-bold text-admin-ink">{t("notifications.heading")}</h2>
         </Card.Header>
-        <Card.Content className="px-4 pb-4 pt-2">
+        <Card.Content className="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
           {error ? (
             <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
               Không tải được thông báo.

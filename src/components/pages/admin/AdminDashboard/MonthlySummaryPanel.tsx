@@ -37,13 +37,13 @@ export function MonthlySummaryPanel() {
   const [year, month] = period.split("-");
 
   return (
-    <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-4">
+    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-4">
       <Card.Header className="px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">
           Thu nhập của quán <span className="font-normal text-admin-muted">(tháng {month}/{year})</span>
         </h2>
       </Card.Header>
-      <Card.Content className="px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
+      <Card.Content className="flex flex-1 flex-col px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {hasError ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
             Không tải được tổng kết tháng.
@@ -60,7 +60,7 @@ export function MonthlySummaryPanel() {
             ))}
           </dl>
         )}
-        <div className="mt-5 border-t border-admin-border pt-4">
+        <div className="mt-auto border-t border-admin-border pt-4">
           <div className="flex items-baseline justify-between gap-4">
             <p className="text-sm font-bold text-admin-ink">{t("monthly.afterCommission")}</p>
             <p className="text-xl font-extrabold text-admin-accent">

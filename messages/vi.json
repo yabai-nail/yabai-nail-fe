@@ -884,7 +884,9 @@
       },
       "staff": {
         "loading": "Đang tải danh sách nhân viên…",
-        "expectedPayout": "Dự kiến nhận"
+        "expectedPayout": "Dự kiến nhận",
+        "working": "Đang làm",
+        "off": "Nghỉ"
       },
       "quick": {
         "appointment": "Tạo lịch hẹn",

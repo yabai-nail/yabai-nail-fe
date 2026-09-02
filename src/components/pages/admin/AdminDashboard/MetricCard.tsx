@@ -26,8 +26,8 @@ export function MetricCard({ metric }: Readonly<{ metric: DashboardMetric }>) {
   const tone = toneClasses[metric.tone];
 
   return (
-    <Card className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
-      <Card.Content className="p-4 sm:p-5">
+    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
+      <Card.Content className="flex flex-1 flex-col justify-between p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span className={`grid size-11 shrink-0 place-items-center rounded-xl ${tone.icon}`}>
             <Icon aria-hidden="true" className="size-6" />

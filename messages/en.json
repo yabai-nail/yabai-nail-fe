@@ -884,7 +884,9 @@
       },
       "staff": {
         "loading": "Loading the staff list…",
-        "expectedPayout": "Expected payout"
+        "expectedPayout": "Expected payout",
+        "working": "Working",
+        "off": "Off"
       },
       "quick": {
         "appointment": "Create appointment",
