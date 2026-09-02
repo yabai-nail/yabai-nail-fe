@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { adminService } from "@/service";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { useTranslations } from "next-intl";
 
 export function ResetPasswordModal({
   accountId,
@@ -17,6 +18,8 @@ export function ResetPasswordModal({
   onClose: () => void;
   onDone: () => void;
 }>) {
+  const t = useTranslations("admin.accounts");
+
   const [reason, setReason] = useState("");
   const [notifyChannel, setNotifyChannel] = useState("SMS");
   const [busy, setBusy] = useState(false);
@@ -33,7 +36,7 @@ export function ResetPasswordModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Không đặt lại được mật khẩu.");
+      setError(err instanceof Error && err.message ? err.message : t("reset.failed"));
     } finally {
       setBusy(false);
     }
@@ -53,9 +56,9 @@ export function ResetPasswordModal({
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
               <div className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Kênh thông báo</span>
+                <span className="font-semibold text-admin-ink">{t("reset.channel")}</span>
                 <AdminSelectField
-                  label="Kênh thông báo"
+                  label={t("reset.channel")}
                   fullWidth
                   value={notifyChannel}
                   onChange={setNotifyChannel}
@@ -66,15 +69,15 @@ export function ResetPasswordModal({
                 />
               </div>
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Lý do (tuỳ chọn)</span>
-                <input className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Nhân viên quên mật khẩu" autoFocus />
+                <span className="font-semibold text-admin-ink">{t("reset.reason")}</span>
+                <input className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={t("reset.reasonPlaceholder")} autoFocus />
               </label>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose}>Hủy</Button>
+              <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("reset.cancel")}</Button>
               <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void submit()}>
-                {busy ? "Đang xử lý…" : "Đặt lại mật khẩu"}
+                {busy ? t("reset.busy") : t("reset.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

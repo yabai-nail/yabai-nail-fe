@@ -7,6 +7,86 @@
         "description": "管理コンソールの表示言語のみを、このブラウザーでのみ変更します。お客様向けアプリには影響しません。",
         "legend": "表示言語を選択",
         "pending": "適用しています…"
+      },
+      "tabs": {
+        "overview": "概要",
+        "salon": "店舗情報",
+        "booking": "予約",
+        "commission": "スタッフと歩合",
+        "payment": "支払い",
+        "automation": "自動メッセージ",
+        "notifications": "通知",
+        "backup": "データのバックアップ"
+      },
+      "tabsLabel": "設定グループ",
+      "placeholder": "この設定グループは今後の段階で追加されます。",
+      "roles": {
+        "OWNER": "オーナー",
+        "MANAGER": "店長"
+      },
+      "unnamedStaff": "名称未設定のスタッフ",
+      "metrics": {
+        "totalStaff": "スタッフの総数",
+        "workingDetail": "勤務中: {count}",
+        "avgRate": "平均歩合率",
+        "average": "平均",
+        "totalCommission": "当期の歩合合計",
+        "salonShare": "店舗取り分の売上"
+      },
+      "commission": {
+        "heading": "スタッフと歩合の設定",
+        "listHeading": "スタッフと歩合率の一覧",
+        "addStaff": "スタッフを追加",
+        "loading": "スタッフ一覧を読み込み中…",
+        "retry": "ページを再読み込みしてください。",
+        "noStaff": "この店舗にはまだスタッフがいません。",
+        "generalHeading": "共通設定",
+        "generalNote": "以下の 2 つのスイッチはこのブラウザーにのみ適用されます — 店舗ごとの歩合設定 API はまだありません。",
+        "autoCalculate": "会計時に歩合を自動計算する",
+        "showRate": "スタッフに歩合率を表示する"
+      },
+      "switchOn": "オン",
+      "switchOff": "オフ",
+      "formula": {
+        "heading": "歩合の計算方法",
+        "revenueTitle": "個人売上",
+        "revenueDetail": "スタッフが施術したメニューの合計金額",
+        "rateTitle": "歩合率",
+        "rateDetail": "個別に設定した率による",
+        "staffTitle": "スタッフの受取額",
+        "staffDetail": "売上 × 歩合率",
+        "salonTitle": "店舗の取り分",
+        "salonDetail": "売上 − スタッフの受取額"
+      },
+      "table": {
+        "caption": "スタッフと歩合率の一覧",
+        "staff": "スタッフ",
+        "status": "ステータス",
+        "rate": "歩合率",
+        "personalRevenue": "個人売上",
+        "staffPayout": "スタッフの受取額",
+        "salonShare": "店舗の取り分",
+        "actions": "操作",
+        "working": "勤務中",
+        "leave": "休暇中",
+        "edit": "編集"
+      },
+      "booking": {
+        "heading": "店舗の予約設定",
+        "loading": "設定を読み込み中…",
+        "loadFailed": "読み込めません — 既定値を表示しています。",
+        "leadDays": "予約可能な最大日数（日）",
+        "cancelHours": "キャンセル期限（時間前）",
+        "slotMinutes": "予約枠の刻み（分）",
+        "saving": "保存しています…",
+        "save": "設定を保存",
+        "saveFailed": "予約設定を保存できません。"
+      },
+      "aside": {
+        "heading": "メモ",
+        "note1": "歩合率は能力と合意に応じて変わることがあります。",
+        "note2": "個々の率はスタッフ画面の「歩合設定」で変更します。",
+        "note3": "表の売上と歩合は選択中の期間の数値です。"
       }
     },
     "nav": {
@@ -428,6 +508,84 @@
       "paypay": "PayPay",
       "bank_transfer": "銀行振込",
       "other": "その他"
+    },
+    "accounts": {
+      "role": {
+        "OWNER": "オーナー",
+        "MANAGER": "店長",
+        "STAFF": "スタッフ",
+        "CUSTOMER": "顧客"
+      },
+      "status": {
+        "ACTIVE": "有効",
+        "INACTIVE": "停止中",
+        "SUSPENDED": "一時停止",
+        "DISABLED": "無効",
+        "MERGED": "統合済み",
+        "PENDING_DELETION": "削除待ち",
+        "DELETED": "削除済み"
+      },
+      "tabs": {
+        "accounts": "アカウント",
+        "config": "構成"
+      },
+      "filterLabel": "役割で絞り込み",
+      "all": "すべて",
+      "searchLabel": "アカウントを検索",
+      "searchPlaceholder": "氏名または電話番号…",
+      "loading": "アカウントを読み込み中…",
+      "loadFailed": "アカウント一覧を読み込めません。",
+      "columns": {
+        "name": "氏名",
+        "phone": "電話番号",
+        "role": "役割",
+        "status": "ステータス",
+        "actions": "操作"
+      },
+      "empty": "該当するアカウントがありません。",
+      "customerAccount": "顧客アカウント",
+      "edit": "編集",
+      "resetPassword": "パスワード再設定",
+      "systemLoadFailed": "システム構成を読み込めません。",
+      "systemLoading": "システム構成を読み込み中…",
+      "loyaltyLoadFailed": "ロイヤルティ構成を読み込めません。",
+      "loyaltyLoading": "ロイヤルティ構成を読み込み中…",
+      "systemSaved": "システム構成を保存しました。",
+      "systemSaveFailed": "システム構成を保存できません。",
+      "featuresHeading": "システム機能",
+      "noFeatures": "設定できる機能はまだありません。",
+      "saveFeatures": "機能を保存",
+      "loyaltyInvalidJson": "ロイヤルティ構成の JSON が不正です。",
+      "loyaltySaved": "ロイヤルティ構成を保存しました。",
+      "loyaltySaveFailed": "ロイヤルティ構成を保存できません。",
+      "loyaltyHeading": "ロイヤルティ構成 (JSON)",
+      "saveLoyalty": "ロイヤルティを保存",
+      "modal": {
+        "editTitle": "アカウントを編集",
+        "addTitle": "アカウントを追加",
+        "phone": "電話番号",
+        "displayName": "表示名",
+        "displayNamePlaceholder": "山田 太郎",
+        "role": "役割",
+        "status": "ステータス",
+        "statusLabel": "アカウントのステータス",
+        "tempPassword": "仮パスワード",
+        "tempPasswordPlaceholder": "8 文字以上、英字と数字を含む",
+        "cancel": "キャンセル",
+        "saving": "保存しています…",
+        "save": "保存",
+        "add": "追加",
+        "saveFailed": "アカウントを保存できません。"
+      },
+      "reset": {
+        "channel": "通知チャネル",
+        "reason": "理由（任意）",
+        "reasonPlaceholder": "スタッフがパスワードを忘れたため",
+        "cancel": "キャンセル",
+        "busy": "処理中…",
+        "submit": "パスワードを再設定",
+        "failed": "パスワードを再設定できません。"
+      }
     }
   }
 }

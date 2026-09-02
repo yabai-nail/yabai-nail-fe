@@ -21,15 +21,16 @@ import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
 import type { CommissionPolicy } from "./data";
 
-const settingsTabs = [
-  { id: "overview", label: "Tổng quan" },
-  { id: "salon", label: "Thông tin tiệm" },
-  { id: "booking", label: "Đặt lịch" },
-  { id: "commission", label: "Nhân viên & Hoa hồng" },
-  { id: "payment", label: "Thanh toán" },
-  { id: "automation", label: "Tin nhắn tự động" },
-  { id: "notifications", label: "Thông báo" },
-  { id: "backup", label: "Sao lưu dữ liệu" },
+/** Ids only; the labels are read from admin.settings.tabs at render. */
+const settingsTabIds = [
+  "overview",
+  "salon",
+  "booking",
+  "commission",
+  "payment",
+  "automation",
+  "notifications",
+  "backup",
 ] as const;
 
 const MISSING = "—";
@@ -37,11 +38,6 @@ const MISSING = "—";
 // `account.role` uses the same vocabulary as the admin session. Only a role
 // above plain staff earns a chip; an unknown value is dropped rather than
 // guessed at.
-const ROLE_LABELS: Record<string, string> = {
-  OWNER: "Chủ chuỗi",
-  MANAGER: "Quản lý",
-};
-
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -54,14 +50,14 @@ function formatOptionalMoney(value: number | null): string {
 }
 
 export function AdminSettingsComponent() {
+  const t = useTranslations("admin.settings");
   const { branchId } = useAdminBranch();
   const [activeTab, setActiveTab] = useState("commission");
   // Appended at render because its label is the one string on this screen that is
   // already translated; the other eight are extracted in their own slice.
-  const tLanguage = useTranslations("admin.settings.language");
   const tabs = useMemo(
-    () => [...settingsTabs, { id: "language", label: tLanguage("tab") }],
-    [tLanguage]
+    () => [...settingsTabIds, "language"].map((id) => ({ id, label: t(`tabs.${id}`) })),
+    [t]
   );
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [showRate, setShowRate] = useState(true);
@@ -77,20 +73,23 @@ export function AdminSettingsComponent() {
     const byStaffId = indexStaffPerformance(performance.data?.rows);
     return (staff.data?.items ?? []).map((member) => {
       const row = byStaffId.get(member.id);
-      const name = member.displayName || "Nhân viên chưa có tên";
+      const name = member.displayName || t("unnamedStaff");
       return {
         id: `policy-${member.id}`,
         staffId: member.id,
         name,
         initials: deriveInitials(name),
-        roleLabel: ROLE_LABELS[member.account?.role?.toUpperCase() ?? ""] ?? null,
+        roleLabel: (() => {
+          const role = member.account?.role?.toUpperCase() ?? "";
+          return t.has(`roles.${role}`) ? t(`roles.${role}`) : null;
+        })(),
         status: member.active ? "working" : "leave",
         rate: row?.commissionRate ?? null,
         personalRevenue: row?.revenue ?? null,
         payout: row?.commissionAmount ?? null,
       } satisfies CommissionPolicy;
     });
-  }, [staff.data, performance.data]);
+  }, [staff.data, performance.data, t]);
 
   const kpi = performance.data?.kpi;
   const revenue = kpi?.revenue ?? null;
@@ -102,23 +101,23 @@ export function AdminSettingsComponent() {
   const metrics = [
     {
       id: "staff",
-      label: "Tổng nhân viên",
+      label: t("metrics.totalStaff"),
       value: commissionPolicies.length === 0 ? MISSING : String(commissionPolicies.length),
-      detail: `Đang làm việc: ${workingCount}`,
+      detail: t("metrics.workingDetail", { count: workingCount }),
       icon: UserGroupIcon,
       tone: "bg-admin-soft text-admin-accent",
     },
     {
       id: "rate",
-      label: "Tỷ lệ hoa hồng TB",
+      label: t("metrics.avgRate"),
       value: averageRate === null ? MISSING : `${averageRate}%`,
-      detail: "Trung bình",
+      detail: t("metrics.average"),
       icon: BanknotesIcon,
       tone: "bg-amber-50 text-admin-warning",
     },
     {
       id: "commission",
-      label: "Tổng tiền hoa hồng kỳ này",
+      label: t("metrics.totalCommission"),
       value: formatOptionalMoney(commission),
       detail: period,
       icon: WalletIcon,
@@ -126,7 +125,7 @@ export function AdminSettingsComponent() {
     },
     {
       id: "shop",
-      label: "Phần doanh thu thuộc tiệm",
+      label: t("metrics.salonShare"),
       value: formatOptionalMoney(salonShare),
       detail: period,
       icon: BuildingStorefrontIcon,
@@ -138,7 +137,7 @@ export function AdminSettingsComponent() {
     <AdminPageLayout>
       <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} variant="secondary">
         <Tabs.ListContainer className="overflow-x-auto">
-          <Tabs.List aria-label="Nhóm cài đặt">
+          <Tabs.List aria-label={t("tabsLabel")}>
             {tabs.map((tab) => (
               <Tabs.Tab key={tab.id} id={tab.id}>
                 <AdminTabLabel>{tab.label}</AdminTabLabel>
@@ -156,7 +155,7 @@ export function AdminSettingsComponent() {
         <Card className="mt-4 rounded-lg border-admin-border bg-admin-surface shadow-none">
           <Card.Content className="p-12 text-center">
             <h2 className="font-bold">{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
-            <p className="mt-2 text-sm text-admin-muted">Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.</p>
+            <p className="mt-2 text-sm text-admin-muted">{t("placeholder")}</p>
           </Card.Content>
         </Card>
       ) : (
@@ -209,13 +208,14 @@ function CommissionSettings({
   onAutoCalculateChange: (value: boolean) => void;
   onShowRateChange: (value: boolean) => void;
 }>) {
+  const t = useTranslations("admin.settings");
   const router = useRouter();
   return (
     <>
       <section className="mt-4" aria-labelledby="commission-settings-heading">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 id="commission-settings-heading" className="text-lg font-bold">Nhân viên &amp; Cài đặt hoa hồng</h2>
+            <h2 id="commission-settings-heading" className="text-lg font-bold">{t("commission.heading")}</h2>
             <p className="mt-1 text-sm text-admin-muted">Tỷ lệ, doanh thu và hoa hồng của kỳ {period}.</p>
           </div>
           {/* "Hướng dẫn tính hoa hồng" pointed at documentation that does not exist. */}
@@ -231,7 +231,7 @@ function CommissionSettings({
       <div className="mt-4">
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Header className="flex flex-row items-center justify-between px-4 pt-4"><h2 className="font-bold">Danh sách nhân viên &amp; tỷ lệ hoa hồng</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />Thêm nhân viên</Button></Card.Header>
+            <Card.Header className="flex flex-row items-center justify-between px-4 pt-4"><h2 className="font-bold">{t("commission.listHeading")}</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />{t("commission.addStaff")}</Button></Card.Header>
             <Card.Content className="min-w-0 p-0 pt-2">
               {staffError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -243,10 +243,10 @@ function CommissionSettings({
                 </p>
               ) : null}
               {isLoading ? (
-                <p className="px-4 pb-4 text-xs text-admin-muted">Đang tải danh sách nhân viên…</p>
+                <p className="px-4 pb-4 text-xs text-admin-muted">{t("commission.loading")}</p>
               ) : policies.length === 0 ? (
                 <p className="px-4 pb-4 text-xs text-admin-muted">
-                  {staffError ? "Thử tải lại trang." : "Chi nhánh này chưa có nhân viên nào."}
+                  {staffError ? t("commission.retry") : t("commission.noStaff")}
                 </p>
               ) : (
                 <CommissionTable policies={policies} />
@@ -257,24 +257,26 @@ function CommissionSettings({
         </AdminSplitLayout>
       </div>
       <Card className="mt-4 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center"><div className="mr-auto"><h2 className="font-bold">Cài đặt chung</h2><p className="mt-1 text-xs text-admin-muted">Hai công tắc dưới đây chỉ áp dụng trên trình duyệt này — chưa có API cấu hình hoa hồng theo chi nhánh.</p></div><LabeledSwitch label="Tự động tính hoa hồng khi thanh toán đơn" value={autoCalculate} onChange={onAutoCalculateChange} /><LabeledSwitch label="Hiển thị % hoa hồng với nhân viên" value={showRate} onChange={onShowRateChange} /></Card.Content>
+        <Card.Content className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center"><div className="mr-auto"><h2 className="font-bold">{t("commission.generalHeading")}</h2><p className="mt-1 text-xs text-admin-muted">{t("commission.generalNote")}</p></div><LabeledSwitch label={t("commission.autoCalculate")} value={autoCalculate} onChange={onAutoCalculateChange} /><LabeledSwitch label={t("commission.showRate")} value={showRate} onChange={onShowRateChange} /></Card.Content>
       </Card>
     </>
   );
 }
 
 function CommissionGuide() {
+  const t = useTranslations("admin.settings");
   const steps = [
-    ["Doanh thu cá nhân", "Tổng giá trị dịch vụ nhân viên thực hiện"],
-    ["% Hoa hồng", "Theo tỷ lệ cài đặt riêng"],
-    ["Tiền nhân viên nhận", "Doanh thu × % hoa hồng"],
-    ["Phần tiệm nhận", "Doanh thu − tiền nhân viên nhận"],
+    [t("formula.revenueTitle"), t("formula.revenueDetail")],
+    [t("formula.rateTitle"), t("formula.rateDetail")],
+    [t("formula.staffTitle"), t("formula.staffDetail")],
+    [t("formula.salonTitle"), t("formula.salonDetail")],
   ] as const;
-  return <section className="border-t border-admin-border p-4" aria-labelledby="commission-formula-heading"><h3 id="commission-formula-heading" className="font-bold">Cách tính hoa hồng</h3><div className="mt-3 grid gap-2 md:grid-cols-4">{steps.map(([title, detail]) => <div key={title} className="rounded-lg border border-admin-border p-3 text-center"><strong className="text-xs">{title}</strong><p className="mt-1 text-[0.7rem] leading-4 text-admin-muted">{detail}</p></div>)}</div></section>;
+  return <section className="border-t border-admin-border p-4" aria-labelledby="commission-formula-heading"><h3 id="commission-formula-heading" className="font-bold">{t("formula.heading")}</h3><div className="mt-3 grid gap-2 md:grid-cols-4">{steps.map(([title, detail]) => <div key={title} className="rounded-lg border border-admin-border p-3 text-center"><strong className="text-xs">{title}</strong><p className="mt-1 text-[0.7rem] leading-4 text-admin-muted">{detail}</p></div>)}</div></section>;
 }
 
 function LabeledSwitch({ label, value, onChange }: Readonly<{ label: string; value: boolean; onChange: (value: boolean) => void }>) {
-  return <div className="flex items-center gap-2 text-xs"><span>{label}</span><Switch isSelected={value} onChange={onChange} aria-label={label}><Switch.Content><Switch.Control><Switch.Thumb /></Switch.Control></Switch.Content></Switch><strong>{value ? "Bật" : "Tắt"}</strong></div>;
+  const t = useTranslations("admin.settings");
+  return <div className="flex items-center gap-2 text-xs"><span>{label}</span><Switch isSelected={value} onChange={onChange} aria-label={label}><Switch.Content><Switch.Control><Switch.Thumb /></Switch.Control></Switch.Content></Switch><strong>{value ? t("switchOn") : t("switchOff")}</strong></div>;
 }
 
 export const meta = { world: "connected", domain: "admin-settings" } as const;

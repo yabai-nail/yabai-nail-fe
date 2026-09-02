@@ -7,6 +7,86 @@
         "description": "Chỉ đổi ngôn ngữ của bảng điều khiển, và chỉ trên trình duyệt này. Không ảnh hưởng tới ứng dụng khách hàng.",
         "legend": "Chọn ngôn ngữ hiển thị",
         "pending": "Đang áp dụng…"
+      },
+      "tabs": {
+        "overview": "Tổng quan",
+        "salon": "Thông tin tiệm",
+        "booking": "Đặt lịch",
+        "commission": "Nhân viên & Hoa hồng",
+        "payment": "Thanh toán",
+        "automation": "Tin nhắn tự động",
+        "notifications": "Thông báo",
+        "backup": "Sao lưu dữ liệu"
+      },
+      "tabsLabel": "Nhóm cài đặt",
+      "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",
+      "roles": {
+        "OWNER": "Chủ chuỗi",
+        "MANAGER": "Quản lý"
+      },
+      "unnamedStaff": "Nhân viên chưa có tên",
+      "metrics": {
+        "totalStaff": "Tổng nhân viên",
+        "workingDetail": "Đang làm việc: {count}",
+        "avgRate": "Tỷ lệ hoa hồng TB",
+        "average": "Trung bình",
+        "totalCommission": "Tổng tiền hoa hồng kỳ này",
+        "salonShare": "Phần doanh thu thuộc tiệm"
+      },
+      "commission": {
+        "heading": "Nhân viên & Cài đặt hoa hồng",
+        "listHeading": "Danh sách nhân viên & tỷ lệ hoa hồng",
+        "addStaff": "Thêm nhân viên",
+        "loading": "Đang tải danh sách nhân viên…",
+        "retry": "Thử tải lại trang.",
+        "noStaff": "Chi nhánh này chưa có nhân viên nào.",
+        "generalHeading": "Cài đặt chung",
+        "generalNote": "Hai công tắc dưới đây chỉ áp dụng trên trình duyệt này — chưa có API cấu hình hoa hồng theo chi nhánh.",
+        "autoCalculate": "Tự động tính hoa hồng khi thanh toán đơn",
+        "showRate": "Hiển thị % hoa hồng với nhân viên"
+      },
+      "switchOn": "Bật",
+      "switchOff": "Tắt",
+      "formula": {
+        "heading": "Cách tính hoa hồng",
+        "revenueTitle": "Doanh thu cá nhân",
+        "revenueDetail": "Tổng giá trị dịch vụ nhân viên thực hiện",
+        "rateTitle": "% Hoa hồng",
+        "rateDetail": "Theo tỷ lệ cài đặt riêng",
+        "staffTitle": "Tiền nhân viên nhận",
+        "staffDetail": "Doanh thu × % hoa hồng",
+        "salonTitle": "Phần tiệm nhận",
+        "salonDetail": "Doanh thu − tiền nhân viên nhận"
+      },
+      "table": {
+        "caption": "Danh sách nhân viên và tỷ lệ hoa hồng",
+        "staff": "Nhân viên",
+        "status": "Trạng thái",
+        "rate": "Tỷ lệ hoa hồng",
+        "personalRevenue": "Doanh thu cá nhân",
+        "staffPayout": "Tiền nhân viên nhận",
+        "salonShare": "Phần tiệm nhận",
+        "actions": "Thao tác",
+        "working": "Đang làm",
+        "leave": "Nghỉ phép",
+        "edit": "Sửa"
+      },
+      "booking": {
+        "heading": "Cài đặt đặt lịch chi nhánh",
+        "loading": "Đang tải cài đặt…",
+        "loadFailed": "Không tải được — hiển thị giá trị mặc định.",
+        "leadDays": "Cho phép đặt trước tối đa (ngày)",
+        "cancelHours": "Hạn huỷ trước lịch (giờ)",
+        "slotMinutes": "Bước thời gian slot (phút)",
+        "saving": "Đang lưu…",
+        "save": "Lưu cài đặt",
+        "saveFailed": "Không lưu được cài đặt đặt lịch."
+      },
+      "aside": {
+        "heading": "Ghi chú",
+        "note1": "Tỷ lệ hoa hồng có thể thay đổi theo năng lực và thỏa thuận.",
+        "note2": "Sửa tỷ lệ của từng nhân viên ở màn Nhân viên, mục “Cấu hình hoa hồng”.",
+        "note3": "Doanh thu và hoa hồng trong bảng là số liệu của kỳ đang chọn."
       }
     },
     "nav": {
@@ -428,6 +508,84 @@
       "paypay": "PayPay",
       "bank_transfer": "Chuyển khoản",
       "other": "Khác"
+    },
+    "accounts": {
+      "role": {
+        "OWNER": "Chủ tiệm",
+        "MANAGER": "Quản lý",
+        "STAFF": "Nhân viên",
+        "CUSTOMER": "Khách hàng"
+      },
+      "status": {
+        "ACTIVE": "Hoạt động",
+        "INACTIVE": "Ngưng hoạt động",
+        "SUSPENDED": "Tạm khoá",
+        "DISABLED": "Vô hiệu",
+        "MERGED": "Đã gộp",
+        "PENDING_DELETION": "Chờ xoá",
+        "DELETED": "Đã xoá"
+      },
+      "tabs": {
+        "accounts": "Tài khoản",
+        "config": "Cấu hình"
+      },
+      "filterLabel": "Lọc theo vai trò",
+      "all": "Tất cả",
+      "searchLabel": "Tìm tài khoản",
+      "searchPlaceholder": "Tên hoặc SĐT...",
+      "loading": "Đang tải tài khoản…",
+      "loadFailed": "Không tải được danh sách tài khoản.",
+      "columns": {
+        "name": "Tên",
+        "phone": "SĐT",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "empty": "Không có tài khoản phù hợp.",
+      "customerAccount": "Tài khoản khách",
+      "edit": "Sửa",
+      "resetPassword": "Đặt lại MK",
+      "systemLoadFailed": "Không tải được cấu hình hệ thống.",
+      "systemLoading": "Đang tải cấu hình hệ thống…",
+      "loyaltyLoadFailed": "Không tải được cấu hình loyalty.",
+      "loyaltyLoading": "Đang tải cấu hình loyalty…",
+      "systemSaved": "Đã lưu cấu hình hệ thống.",
+      "systemSaveFailed": "Không lưu được cấu hình hệ thống.",
+      "featuresHeading": "Tính năng hệ thống",
+      "noFeatures": "Chưa có tính năng nào để cấu hình.",
+      "saveFeatures": "Lưu tính năng",
+      "loyaltyInvalidJson": "JSON cấu hình loyalty không hợp lệ.",
+      "loyaltySaved": "Đã lưu cấu hình loyalty.",
+      "loyaltySaveFailed": "Không lưu được cấu hình loyalty.",
+      "loyaltyHeading": "Cấu hình loyalty (JSON)",
+      "saveLoyalty": "Lưu loyalty",
+      "modal": {
+        "editTitle": "Sửa tài khoản",
+        "addTitle": "Thêm tài khoản",
+        "phone": "Số điện thoại",
+        "displayName": "Tên hiển thị",
+        "displayNamePlaceholder": "Nguyễn Văn A",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "statusLabel": "Trạng thái tài khoản",
+        "tempPassword": "Mật khẩu tạm",
+        "tempPasswordPlaceholder": "Ít nhất 8 ký tự, có A-z và số",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "add": "Thêm",
+        "saveFailed": "Không lưu được tài khoản."
+      },
+      "reset": {
+        "channel": "Kênh thông báo",
+        "reason": "Lý do (tuỳ chọn)",
+        "reasonPlaceholder": "Nhân viên quên mật khẩu",
+        "cancel": "Hủy",
+        "busy": "Đang xử lý…",
+        "submit": "Đặt lại mật khẩu",
+        "failed": "Không đặt lại được mật khẩu."
+      }
     }
   }
 }

@@ -7,6 +7,86 @@
         "description": "Changes the console's language on this browser only. It does not affect the customer app.",
         "legend": "Choose a display language",
         "pending": "Applying…"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "salon": "Salon details",
+        "booking": "Booking",
+        "commission": "Staff & commission",
+        "payment": "Payments",
+        "automation": "Automated messages",
+        "notifications": "Notifications",
+        "backup": "Data backup"
+      },
+      "tabsLabel": "Settings groups",
+      "placeholder": "This settings group is coming in a later phase.",
+      "roles": {
+        "OWNER": "Owner",
+        "MANAGER": "Manager"
+      },
+      "unnamedStaff": "Unnamed staff member",
+      "metrics": {
+        "totalStaff": "Total staff",
+        "workingDetail": "Working: {count}",
+        "avgRate": "Average commission rate",
+        "average": "Average",
+        "totalCommission": "Commission this period",
+        "salonShare": "Salon's share of revenue"
+      },
+      "commission": {
+        "heading": "Staff & commission settings",
+        "listHeading": "Staff and commission rates",
+        "addStaff": "Add staff",
+        "loading": "Loading the staff list…",
+        "retry": "Try reloading the page.",
+        "noStaff": "This branch has no staff yet.",
+        "generalHeading": "General settings",
+        "generalNote": "The two switches below apply to this browser only — there is no per-branch commission configuration API yet.",
+        "autoCalculate": "Calculate commission automatically at payment",
+        "showRate": "Show the commission rate to staff"
+      },
+      "switchOn": "On",
+      "switchOff": "Off",
+      "formula": {
+        "heading": "How commission is calculated",
+        "revenueTitle": "Personal revenue",
+        "revenueDetail": "Total value of the services that staff member performed",
+        "rateTitle": "Commission %",
+        "rateDetail": "Per the individually configured rate",
+        "staffTitle": "Staff payout",
+        "staffDetail": "Revenue × commission %",
+        "salonTitle": "Salon's share",
+        "salonDetail": "Revenue − staff payout"
+      },
+      "table": {
+        "caption": "Staff and commission rates",
+        "staff": "Staff",
+        "status": "Status",
+        "rate": "Commission rate",
+        "personalRevenue": "Personal revenue",
+        "staffPayout": "Staff payout",
+        "salonShare": "Salon's share",
+        "actions": "Actions",
+        "working": "Working",
+        "leave": "On leave",
+        "edit": "Edit"
+      },
+      "booking": {
+        "heading": "Branch booking settings",
+        "loading": "Loading settings…",
+        "loadFailed": "Could not load — showing the defaults.",
+        "leadDays": "Book up to this many days ahead",
+        "cancelHours": "Cancellation deadline (hours before)",
+        "slotMinutes": "Slot step (minutes)",
+        "saving": "Saving…",
+        "save": "Save settings",
+        "saveFailed": "Could not save the booking settings."
+      },
+      "aside": {
+        "heading": "Notes",
+        "note1": "Commission rates can change with performance and agreement.",
+        "note2": "Edit an individual rate on the staff screen, under \"Commission settings\".",
+        "note3": "The revenue and commission in the table are for the selected period."
       }
     },
     "nav": {
@@ -428,6 +508,84 @@
       "paypay": "PayPay",
       "bank_transfer": "Bank transfer",
       "other": "Other"
+    },
+    "accounts": {
+      "role": {
+        "OWNER": "Owner",
+        "MANAGER": "Manager",
+        "STAFF": "Staff",
+        "CUSTOMER": "Customer"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+        "SUSPENDED": "Suspended",
+        "DISABLED": "Disabled",
+        "MERGED": "Merged",
+        "PENDING_DELETION": "Pending deletion",
+        "DELETED": "Deleted"
+      },
+      "tabs": {
+        "accounts": "Accounts",
+        "config": "Configuration"
+      },
+      "filterLabel": "Filter by role",
+      "all": "All",
+      "searchLabel": "Search accounts",
+      "searchPlaceholder": "Name or phone…",
+      "loading": "Loading accounts…",
+      "loadFailed": "Could not load the accounts.",
+      "columns": {
+        "name": "Name",
+        "phone": "Phone",
+        "role": "Role",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No matching accounts.",
+      "customerAccount": "Customer account",
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "systemLoadFailed": "Could not load the system configuration.",
+      "systemLoading": "Loading the system configuration…",
+      "loyaltyLoadFailed": "Could not load the loyalty configuration.",
+      "loyaltyLoading": "Loading the loyalty configuration…",
+      "systemSaved": "The system configuration has been saved.",
+      "systemSaveFailed": "Could not save the system configuration.",
+      "featuresHeading": "System features",
+      "noFeatures": "There are no features to configure yet.",
+      "saveFeatures": "Save features",
+      "loyaltyInvalidJson": "The loyalty configuration JSON is not valid.",
+      "loyaltySaved": "The loyalty configuration has been saved.",
+      "loyaltySaveFailed": "Could not save the loyalty configuration.",
+      "loyaltyHeading": "Loyalty configuration (JSON)",
+      "saveLoyalty": "Save loyalty",
+      "modal": {
+        "editTitle": "Edit account",
+        "addTitle": "Add account",
+        "phone": "Phone number",
+        "displayName": "Display name",
+        "displayNamePlaceholder": "Jane Doe",
+        "role": "Role",
+        "status": "Status",
+        "statusLabel": "Account status",
+        "tempPassword": "Temporary password",
+        "tempPasswordPlaceholder": "At least 8 characters, with letters and numbers",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "add": "Add",
+        "saveFailed": "Could not save the account."
+      },
+      "reset": {
+        "channel": "Notification channel",
+        "reason": "Reason (optional)",
+        "reasonPlaceholder": "Staff member forgot their password",
+        "cancel": "Cancel",
+        "busy": "Processing…",
+        "submit": "Reset password",
+        "failed": "Could not reset the password."
+      }
     }
   }
 }

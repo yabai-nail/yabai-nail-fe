@@ -75,7 +75,8 @@ function findLeaks() {
       const lines = readFileSync(path, "utf8").split(/\r?\n/);
       lines.forEach((line, index) => {
         const trimmed = line.trim();
-        if (trimmed.startsWith("//") || trimmed.startsWith("*")) return;
+        // `{/* ... */}` is a JSX comment: it reaches no screen, so it is not a leak.
+        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("{/*")) return;
         if (line.includes("i18n-check: allow")) return;
         if (!VIETNAMESE.test(line)) return;
         // Only text that can reach a screen: a quoted literal, or JSX text between tags.
