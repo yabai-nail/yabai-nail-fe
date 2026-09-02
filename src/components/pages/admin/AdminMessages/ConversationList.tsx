@@ -29,9 +29,12 @@ export function ConversationList({
   return (
     <section
       aria-labelledby="inbox-heading"
-      className="min-w-0 border-r border-admin-border bg-admin-surface"
+      /* The card is a fixed height now, so this column has to scroll on its own
+         or a long inbox would push straight through the bottom of it. The
+         search and the filters stay put while the list moves under them. */
+      className="flex min-h-0 min-w-0 flex-col border-r border-admin-border bg-admin-surface"
     >
-      <div className="space-y-3 p-3">
+      <div className="shrink-0 space-y-3 border-b border-admin-border p-3">
         <h2 id="inbox-heading" className="font-bold">Hộp thư</h2>
         <AdminSearchField label="Tìm tin nhắn" placeholder="Tìm kiếm tin nhắn..." value={query} onChange={onQueryChange} />
         <Tabs selectedKey={filter} onSelectionChange={(key) => onFilterChange(String(key) as InboxFilter)} variant="secondary">
@@ -57,7 +60,7 @@ export function ConversationList({
           </Tabs.ListContainer>
         </Tabs>
       </div>
-      <ul className="divide-y divide-admin-border">
+      <ul className="min-h-0 flex-1 divide-y divide-admin-border overflow-y-auto">
         {conversations.map((conversation) => {
           const isSelected = selectedId === conversation.id;
           const isUnread = conversation.unreadCount > 0;

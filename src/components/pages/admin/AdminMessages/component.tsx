@@ -187,7 +187,18 @@ export function AdminMessagesComponent() {
         two buttons — which now sit in that header. The conversation takes the
         width back.
       */}
-      <Card className="grid gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none lg:grid-cols-[19rem_minmax(0,1fr)]">
+      {/*
+        The pane is as tall as the space it sits in, so the composer stays on
+        the bottom edge and the thread scrolls inside itself. It used to be
+        min-h-[38rem]: a fixed 608px that left 142px of dead space on a tall
+        screen and, on a 650px one, put the message box 232px below the fold —
+        you scrolled the whole page to reach the thing you type into.
+
+        dvh, not vh: on a phone the address bar shrinking must not shove the
+        composer off-screen. min-h keeps it usable if the viewport is tiny, and
+        the page scrolls then, as it should.
+      */}
+      <Card className="grid h-[calc(100dvh-var(--admin-pane-offset))] min-h-[26rem] gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none lg:grid-cols-[19rem_minmax(0,1fr)]">
         <ConversationList
           conversations={visibleConversations}
           selectedId={selected?.id ?? null}

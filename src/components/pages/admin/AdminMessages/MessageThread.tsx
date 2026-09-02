@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, InputGroup } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 import { groupThread } from "./thread";
 
@@ -75,14 +75,30 @@ export function MessageThread({
   };
   const days = groupThread(messages);
 
+  /*
+    Land on the newest message, the way every chat client does. This became
+    necessary the moment the thread started scrolling inside itself: without it,
+    opening a long conversation drops you at its oldest message and you scroll
+    down to find out what was actually said.
+
+    Keyed on the conversation and the message count, so it fires when you switch
+    threads and again when a message arrives — but not while you are reading
+    back through the history.
+  */
+  const scroller = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const el = scroller.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [customer.id, messages.length]);
+
   return (
-    <section aria-labelledby="thread-heading" className="flex min-h-[38rem] min-w-0 flex-col bg-admin-canvas">
+    <section aria-labelledby="thread-heading" className="flex min-h-0 min-w-0 flex-col bg-admin-canvas">
       {/*
         The customer's name, number and the two things you would do about them
         all sit here. They used to be a third column 304px wide that repeated
         the name, printed an empty phone row, and held these two buttons.
       */}
-      <header className="flex flex-wrap items-center gap-3 border-b border-admin-border bg-admin-surface px-4 py-3">
+      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-admin-border bg-admin-surface px-4 py-3">
         <Avatar size="sm" color="accent" className="shrink-0">
           <Avatar.Fallback>{customer.initials}</Avatar.Fallback>
         </Avatar>
@@ -145,7 +161,7 @@ export function MessageThread({
           </p>
         </div>
       ) : (
-        <ol aria-label={`Tin nhắn với ${customer.name}`} className="flex-1 space-y-4 overflow-y-auto px-4 py-5">
+        <ol ref={scroller} aria-label={`Tin nhắn với ${customer.name}`} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5">
           {days.map((day) => (
             <li key={day.key || "khong-ro-ngay"}>
               {day.label ? (
@@ -180,7 +196,7 @@ export function MessageThread({
         </ol>
       )}
 
-      <form onSubmit={submit} className="border-t border-admin-border bg-admin-surface p-3">
+      <form onSubmit={submit} className="shrink-0 border-t border-admin-border bg-admin-surface p-3">
         {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
         <InputGroup fullWidth>
           <InputGroup.Input aria-label="Nhập tin nhắn" maxLength={2000} placeholder={`Nhắn cho ${customer.name}…`} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
