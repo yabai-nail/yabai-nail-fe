@@ -4,6 +4,8 @@ import { I18nProvider } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 
+import { SALON_TIME_ZONE } from "@/lib/salon-date";
+
 export interface AdminIntlProviderProps {
   readonly locale: string;
   readonly messages: Record<string, unknown>;
@@ -25,7 +27,7 @@ export interface AdminIntlProviderProps {
  */
 export function AdminIntlProvider({ locale, messages, children }: AdminIntlProviderProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone={SALON_TIME_ZONE}>
       <I18nProvider locale={locale}>
         <div lang={locale} className="contents">
           {children}

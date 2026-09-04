@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "contract:check": "node ./scripts/check-api-contract.mjs",
     "staging:chat": "node ./scripts/check-chat-e2e.mjs",
     "ui:check": "node ./scripts/check-ui-invariants.mjs",
@@ -28,6 +30,7 @@
     "swr": "^2.5.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -1,4 +1,5 @@
 import type { ChatMessage } from "./data";
+import { isoDateInTimeZone, SALON_TIME_ZONE } from "@/lib/salon-date";
 
 /** Consecutive messages from one sender, on one day. */
 export type ThreadRun = {
@@ -15,7 +16,7 @@ export type ThreadDay = {
 };
 
 function dayKey(date: Date): string {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  return isoDateInTimeZone(date, SALON_TIME_ZONE);
 }
 
 /**
@@ -24,13 +25,13 @@ function dayKey(date: Date): string {
  */
 function dayLabel(date: Date, now: Date): string {
   const today = dayKey(now);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterday = new Date(now.getTime() - 86_400_000);
 
   const key = dayKey(date);
   if (key === today) return "Hôm nay";
   if (key === dayKey(yesterday)) return "Hôm qua";
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  const [year, month, day] = key.split("-");
+  return `${Number(day)}/${Number(month)}/${year}`;
 }
 
 /**
