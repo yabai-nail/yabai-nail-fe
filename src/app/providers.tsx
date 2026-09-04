@@ -8,6 +8,7 @@ import { SWRConfig } from "swr";
 
 import { apiFetcher, AuthProvider } from "@/service";
 import { AppToastProvider } from "@/components/overlays/AppToastProvider";
+import { SALON_TIME_ZONE } from "@/lib/salon-date";
 
 export interface AppProvidersProps {
   locale: string;
@@ -21,7 +22,7 @@ export function AppProviders({
   children,
 }: AppProvidersProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone={SALON_TIME_ZONE}>
       <I18nProvider locale={locale}>
         <SWRConfig value={{ fetcher: apiFetcher }}>
           <AuthProvider>
