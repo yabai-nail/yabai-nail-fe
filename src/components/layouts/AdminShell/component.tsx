@@ -76,7 +76,7 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
     <div className="admin-shell min-h-screen bg-admin-canvas text-admin-ink">
       <a
         href="#main-content"
-        className="fixed left-3 top-3 z-[100] -translate-y-24 rounded-lg bg-admin-accent px-4 py-2 text-sm font-semibold text-white transition-transform focus:translate-y-0"
+        className="fixed left-3 top-3 z-[100] -translate-y-24 rounded-lg bg-admin-accent px-4 py-2 text-sm font-semibold text-admin-on-accent transition-transform focus:translate-y-0"
       >
         Bỏ qua đến nội dung chính
       </a>

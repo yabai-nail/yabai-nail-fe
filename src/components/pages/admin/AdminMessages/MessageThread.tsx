@@ -47,7 +47,7 @@ function Bubble({
     <div
       className={`max-w-[min(34rem,78%)] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${tail} ${
         fromSalon
-          ? "bg-admin-accent text-white"
+          ? "bg-admin-accent text-admin-on-accent"
           : "border border-admin-border bg-admin-surface text-admin-ink"
       }`}
     >

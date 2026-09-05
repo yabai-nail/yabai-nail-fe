@@ -174,7 +174,7 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
                             <Switch.Control style={{ width: "4.25rem" }}>
                               <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center text-[0.625rem] font-semibold uppercase tracking-wide">
                                 {category.status === "ACTIVE" ? (
-                                  <span className="pl-2.5 text-white">Bật</span>
+                                  <span className="pl-2.5 text-admin-on-accent">Bật</span>
                                 ) : (
                                   <span className="ml-auto pr-2.5 text-admin-muted">Tắt</span>
                                 )}

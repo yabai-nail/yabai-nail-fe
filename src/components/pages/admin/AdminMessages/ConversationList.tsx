@@ -100,7 +100,7 @@ export function ConversationList({
                     {isUnread ? (
                       <span
                         aria-label={`${conversation.unreadCount} tin chưa đọc`}
-                        className="grid size-5 shrink-0 place-items-center rounded-full bg-admin-accent text-[0.65rem] font-bold text-white"
+                        className="grid size-5 shrink-0 place-items-center rounded-full bg-admin-accent text-[0.65rem] font-bold text-admin-on-accent"
                       >
                         {conversation.unreadCount}
                       </span>

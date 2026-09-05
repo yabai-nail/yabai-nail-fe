@@ -3,7 +3,7 @@
 ## Trạng thái
 
 - Capability id: `admin-settings`
-- Trạng thái: Đã triển khai và kiểm chứng ngày 2026-08-16
+- Trạng thái: Đã triển khai và kiểm chứng ngày 2026-08-16; bổ sung tab Giao diện (sáng/tối) ngày 2026-09-05
 - URL: `/admin/settings`
 - Phụ thuộc: `admin-foundation`, `admin-staff`
 
@@ -18,6 +18,7 @@ Dựng màn Cài đặt tập trung vào tab “Nhân viên & Hoa hồng”: sum
 3. Chọn tab khác chỉ thay active state và hiển thị trạng thái “đang phát triển”, không điều hướng 404.
 4. Toggle cài đặt chung thay đổi local state và có accessible name/state.
 5. Công thức hoa hồng và history được trình bày bằng semantic sections.
+6. Tab Giao diện cho chọn Sáng / Tối / Theo hệ thống; lựa chọn do `next-themes` lưu trên trình duyệt, không gọi backend. Chọn Tối đổi toàn bộ token `--admin-*` (kể cả modal/popover portal ra ngoài shell) sang bảng màu tối dùng chung với site khách hàng.
 
 ## Tech stack and commands
 
@@ -77,6 +78,7 @@ type CommissionPolicy = {
 - [x] Tabs và toggles hoạt động bằng local state.
 - [x] Sidebar bật link Cài đặt và chuyển trang SPA.
 - [x] Test, typecheck, lint, build và browser verification pass.
+- [x] Tab Giao diện: 3 lựa chọn, server render không đoán theme (system + disabled tới khi hydrate), block `.dark` khai báo đủ mọi token của block sáng (test parity đọc thẳng `globals.css`).
 
 ## Open questions
 

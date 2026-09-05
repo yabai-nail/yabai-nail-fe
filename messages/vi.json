@@ -7,6 +7,21 @@
         "legend": "Chọn ngôn ngữ hiển thị",
         "pending": "Đang áp dụng…"
       },
+      "appearance": {
+        "heading": "Giao diện hiển thị",
+        "description": "Chỉ đổi giao diện của bảng điều khiển, và chỉ trên trình duyệt này. Không ảnh hưởng tới ứng dụng khách hàng.",
+        "legend": "Chọn giao diện hiển thị",
+        "options": {
+          "light": "Sáng",
+          "dark": "Tối",
+          "system": "Theo hệ thống"
+        },
+        "hints": {
+          "light": "Luôn dùng nền sáng.",
+          "dark": "Luôn dùng nền tối.",
+          "system": "Đổi theo cài đặt của thiết bị."
+        }
+      },
       "tabs": {
         "overview": "Tổng quan",
         "salon": "Thông tin tiệm",
@@ -16,7 +31,8 @@
         "automation": "Tin nhắn tự động",
         "notifications": "Thông báo",
         "backup": "Sao lưu dữ liệu",
-        "language": "Ngôn ngữ"
+        "language": "Ngôn ngữ",
+        "appearance": "Giao diện"
       },
       "tabsLabel": "Nhóm cài đặt",
       "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",
@@ -868,6 +884,13 @@
       "overviewHeading": "Tổng quan hôm nay",
       "activityRegion": "Hoạt động cửa hàng",
       "performanceRegion": "Hiệu suất nhân viên và thu nhập tháng",
+      "trend": {
+        "title": "Doanh thu theo ngày (tháng này)",
+        "loading": "Đang tải biểu đồ doanh thu…",
+        "empty": "Chưa có doanh thu trong tháng này.",
+        "error": "Không tải được biểu đồ doanh thu.",
+        "seriesLabel": "Doanh thu"
+      },
       "monthly": {
         "loading": "Đang tải tổng kết tháng…",
         "afterCommission": "Còn lại sau hoa hồng"

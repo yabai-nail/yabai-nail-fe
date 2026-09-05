@@ -7,6 +7,21 @@
         "legend": "表示言語を選択",
         "pending": "適用しています…"
       },
+      "appearance": {
+        "heading": "表示テーマ",
+        "description": "管理コンソールの外観のみを、このブラウザーでのみ変更します。お客様向けアプリには影響しません。",
+        "legend": "表示テーマを選択",
+        "options": {
+          "light": "ライト",
+          "dark": "ダーク",
+          "system": "システムに合わせる"
+        },
+        "hints": {
+          "light": "常に明るい背景を使います。",
+          "dark": "常に暗い背景を使います。",
+          "system": "端末の設定に合わせて切り替えます。"
+        }
+      },
       "tabs": {
         "overview": "概要",
         "salon": "店舗情報",
@@ -16,7 +31,8 @@
         "automation": "自動メッセージ",
         "notifications": "通知",
         "backup": "データのバックアップ",
-        "language": "言語"
+        "language": "言語",
+        "appearance": "外観"
       },
       "tabsLabel": "設定グループ",
       "placeholder": "この設定グループは今後の段階で追加されます。",
@@ -868,6 +884,13 @@
       "overviewHeading": "本日の概要",
       "activityRegion": "店舗の活動",
       "performanceRegion": "スタッフの実績と月間収入",
+      "trend": {
+        "title": "日別売上（今月）",
+        "loading": "売上グラフを読み込み中…",
+        "empty": "今月の売上はまだありません。",
+        "error": "売上グラフを読み込めませんでした。",
+        "seriesLabel": "売上"
+      },
       "monthly": {
         "loading": "月間サマリーを読み込み中…",
         "afterCommission": "歩合控除後の残り"

@@ -187,6 +187,77 @@ export function buildRangeRevenueRows(
   ];
 }
 
+// -- Revenue trend (chart) -------------------------------------------------------
+
+export type RevenueTrendPoint = {
+  readonly date: string;
+  /** Short "d/M" tick label derived from `date`; falls back to the raw date. */
+  readonly label: string;
+  readonly revenue: number;
+};
+
+/** "2026-08-22" -> "22/8". Anything that is not an ISO date is passed through. */
+function shortDayLabel(date: string): string {
+  const parts = date.split("-");
+  if (parts.length !== 3) return date;
+  const [, month, day] = parts;
+  const m = Number(month);
+  const d = Number(day);
+  if (!Number.isFinite(m) || !Number.isFinite(d)) return date;
+  return `${d}/${m}`;
+}
+
+/**
+ * Turns the revenue report's loosely-typed daily rows into chart points. Rows
+ * missing a numeric revenue or a date are dropped rather than plotted as zero,
+ * so a gap in the data reads as a gap and not as a real dip to nothing.
+ */
+export function buildRevenueTrend(
+  rows: ReadonlyArray<Record<string, unknown>> | undefined,
+): ReadonlyArray<RevenueTrendPoint> {
+  if (!rows) return [];
+  return rows.flatMap((row) => {
+    const revenue = readNumber(row, ["revenue", "grossRevenue", "amount", "total"]);
+    const date = readString(row, ["date", "day", "period"]);
+    if (revenue === null || date === null) return [];
+    return [{ date, label: shortDayLabel(date), revenue }];
+  });
+}
+
+// -- Payment methods (chart) -----------------------------------------------------
+
+export type PaymentMethodSlice = {
+  readonly id: string;
+  readonly label: string;
+  readonly value: number;
+};
+
+/**
+ * Same source as buildPaymentMethodRows, but keeps the amount as a number for a
+ * chart and drops entries with no positive value — a zero slice is invisible on
+ * a donut and only clutters the legend.
+ */
+export function buildPaymentMethodSlices(
+  entries: ReadonlyArray<Record<string, unknown>> | undefined,
+  t: Translator,
+  tMethod: Translator,
+): ReadonlyArray<PaymentMethodSlice> {
+  if (!entries) return [];
+  return entries.flatMap((entry, index) => {
+    const method = readString(entry, ["method", "paymentMethod", "type", "code"]);
+    const label = readString(entry, ["label", "displayName"]);
+    const value = readNumber(entry, ["amount", "total", "value"]);
+    if (value === null || value <= 0) return [];
+    return [
+      {
+        id: method ?? `method-${index}`,
+        label: label ?? (method ? methodLabel(method, tMethod) : t("unknownMethod")),
+        value,
+      },
+    ];
+  });
+}
+
 /** The API has used both spellings for a bank transfer; the catalogue names it once. */
 const PAYMENT_METHOD_ALIASES: Readonly<Record<string, string>> = { transfer: "bank_transfer" };
 

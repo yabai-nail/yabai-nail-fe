@@ -152,6 +152,7 @@ body:has(.admin-shell) {
   --admin-violet: #a640e8;
   --admin-warning: #d88318;
   --admin-danger: #d1113f;
+  --admin-on-accent: #ffffff;
 
   --background: var(--admin-canvas);
   --foreground: var(--admin-ink);
@@ -168,7 +169,7 @@ body:has(.admin-shell) {
   --default-foreground: var(--admin-ink);
   --default-hover: #f3e2e8;
   --accent: var(--admin-accent);
-  --accent-foreground: #ffffff;
+  --accent-foreground: var(--admin-on-accent);
   --accent-hover: var(--admin-accent-hover);
   --accent-soft: var(--admin-soft);
   --accent-soft-foreground: #b10d4b;
@@ -179,6 +180,64 @@ body:has(.admin-shell) {
   --warning-foreground: #2a1b08;
   --danger: #d91f57;
   --danger-foreground: #ffffff;
+  --border: var(--admin-border);
+  --separator: var(--admin-border);
+  --focus: var(--admin-accent);
+}
+
+/*
+ * The same tokens for the dark scheme. next-themes puts `.dark` on <html>, which
+ * is why every selector descends from it; `[data-theme="dark"]` mirrors the site
+ * block above. The values come from the site's dark palette so the console and
+ * the customer site share one night-time look, with the status colours lifted
+ * enough to read on a #22191d card.
+ */
+.dark .admin-shell,
+.dark body:has(.admin-shell),
+[data-theme="dark"] .admin-shell,
+[data-theme="dark"] body:has(.admin-shell) {
+  color-scheme: dark;
+  --admin-accent: #ff6ca3;
+  --admin-accent-hover: #ff8ab5;
+  --admin-canvas: #181114;
+  --admin-surface: #22191d;
+  --admin-soft: #351f28;
+  --admin-ink: #fff7fa;
+  --admin-muted: #cbbcc2;
+  --admin-border: #46323a;
+  --admin-success: #70b696;
+  --admin-info: #7cbcf0;
+  --admin-violet: #c99af5;
+  --admin-warning: #e8a34a;
+  --admin-danger: #ef8b9a;
+  --admin-on-accent: #2b0715;
+
+  --background: var(--admin-canvas);
+  --foreground: var(--admin-ink);
+  --surface: var(--admin-surface);
+  --surface-foreground: var(--admin-ink);
+  --surface-secondary: var(--admin-soft);
+  --surface-secondary-foreground: var(--admin-ink);
+  --overlay: var(--admin-surface);
+  --overlay-foreground: var(--admin-ink);
+  --overlay-shadow: 0 16px 40px rgb(0 0 0 / 50%);
+  --backdrop: rgb(0 0 0 / 60%);
+  --muted: var(--admin-muted);
+  --default: #2b2024;
+  --default-foreground: var(--admin-ink);
+  --default-hover: #35282d;
+  --accent: var(--admin-accent);
+  --accent-foreground: var(--admin-on-accent);
+  --accent-hover: var(--admin-accent-hover);
+  --accent-soft: var(--admin-soft);
+  --accent-soft-foreground: #ffbad2;
+  --accent-soft-hover: #432a34;
+  --success: var(--admin-success);
+  --success-foreground: #10261c;
+  --warning: var(--admin-warning);
+  --warning-foreground: #2b1e0b;
+  --danger: var(--admin-danger);
+  --danger-foreground: #2d1015;
   --border: var(--admin-border);
   --separator: var(--admin-border);
   --focus: var(--admin-accent);
@@ -226,6 +285,7 @@ body:has(.admin-shell) {
   --color-admin-violet: var(--admin-violet);
   --color-admin-warning: var(--admin-warning);
   --color-admin-danger: var(--admin-danger);
+  --color-admin-on-accent: var(--admin-on-accent);
 }
 
 @layer components {

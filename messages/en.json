@@ -7,6 +7,21 @@
         "legend": "Choose a display language",
         "pending": "Applying…"
       },
+      "appearance": {
+        "heading": "Display theme",
+        "description": "Changes the console's appearance on this browser only. It does not affect the customer app.",
+        "legend": "Choose a display theme",
+        "options": {
+          "light": "Light",
+          "dark": "Dark",
+          "system": "Follow system"
+        },
+        "hints": {
+          "light": "Always use the light background.",
+          "dark": "Always use the dark background.",
+          "system": "Switches with the device setting."
+        }
+      },
       "tabs": {
         "overview": "Overview",
         "salon": "Salon details",
@@ -16,7 +31,8 @@
         "automation": "Automated messages",
         "notifications": "Notifications",
         "backup": "Data backup",
-        "language": "Language"
+        "language": "Language",
+        "appearance": "Appearance"
       },
       "tabsLabel": "Settings groups",
       "placeholder": "This settings group is coming in a later phase.",
@@ -868,6 +884,13 @@
       "overviewHeading": "Today at a glance",
       "activityRegion": "Salon activity",
       "performanceRegion": "Staff performance and monthly income",
+      "trend": {
+        "title": "Revenue by day (this month)",
+        "loading": "Loading the revenue chart…",
+        "empty": "No revenue yet this month.",
+        "error": "Could not load the revenue chart.",
+        "seriesLabel": "Revenue"
+      },
       "monthly": {
         "loading": "Loading the monthly summary…",
         "afterCommission": "Left after commission"

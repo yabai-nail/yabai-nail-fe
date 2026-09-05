@@ -9,6 +9,7 @@ import { AppointmentsPanel } from "./AppointmentsPanel";
 import { MetricCard } from "./MetricCard";
 import { MonthlySummaryPanel } from "./MonthlySummaryPanel";
 import { RevenuePanel } from "./RevenuePanel";
+import { RevenueTrendPanel } from "./RevenueTrendPanel";
 import { StaffPanel } from "./StaffPanel";
 import { UtilityPanel } from "./UtilityPanel";
 import { buildDashboardMetrics } from "./adapters";
@@ -33,6 +34,10 @@ export function AdminDashboardComponent() {
             <MetricCard key={metric.id} metric={metric} />
           ))}
         </div>
+      </section>
+
+      <section aria-label={t("trend.title")} className="mt-4">
+        <RevenueTrendPanel />
       </section>
 
       {/*

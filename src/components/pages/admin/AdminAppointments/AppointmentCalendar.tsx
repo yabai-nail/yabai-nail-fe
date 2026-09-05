@@ -121,7 +121,7 @@ function MonthCalendar({ appointments, selectedDate, selectedId, onSelect }: Cal
                 <span className={`text-xs font-semibold ${date === selectedDate ? "text-admin-accent" : "text-admin-muted"}`}>{Number(date.slice(-2))}</span>
                 <div className="mt-1 space-y-1">
                   {appointments.filter((appointment) => appointment.date === date).slice(0, 3).map((appointment) => (
-                    <Button key={appointment.id} variant="ghost" className={`h-auto min-h-7 w-full justify-start truncate rounded-md px-1.5 py-1 text-[0.65rem] ${selectedId === appointment.id ? "bg-admin-accent text-white" : "bg-admin-soft text-admin-accent"}`} onPress={() => onSelect(appointment.id)}>
+                    <Button key={appointment.id} variant="ghost" className={`h-auto min-h-7 w-full justify-start truncate rounded-md px-1.5 py-1 text-[0.65rem] ${selectedId === appointment.id ? "bg-admin-accent text-admin-on-accent" : "bg-admin-soft text-admin-accent"}`} onPress={() => onSelect(appointment.id)}>
                       {appointment.startTime} {appointment.customer.name}
                     </Button>
                   ))}
