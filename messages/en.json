@@ -884,6 +884,13 @@
       "overviewHeading": "Today at a glance",
       "activityRegion": "Salon activity",
       "performanceRegion": "Staff performance and monthly income",
+      "trend": {
+        "title": "Revenue by day (this month)",
+        "loading": "Loading the revenue chart…",
+        "empty": "No revenue yet this month.",
+        "error": "Could not load the revenue chart.",
+        "seriesLabel": "Revenue"
+      },
       "monthly": {
         "loading": "Loading the monthly summary…",
         "afterCommission": "Left after commission"

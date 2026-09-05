@@ -884,6 +884,13 @@
       "overviewHeading": "本日の概要",
       "activityRegion": "店舗の活動",
       "performanceRegion": "スタッフの実績と月間収入",
+      "trend": {
+        "title": "日別売上（今月）",
+        "loading": "売上グラフを読み込み中…",
+        "empty": "今月の売上はまだありません。",
+        "error": "売上グラフを読み込めませんでした。",
+        "seriesLabel": "売上"
+      },
       "monthly": {
         "loading": "月間サマリーを読み込み中…",
         "afterCommission": "歩合控除後の残り"

@@ -884,6 +884,13 @@
       "overviewHeading": "Tổng quan hôm nay",
       "activityRegion": "Hoạt động cửa hàng",
       "performanceRegion": "Hiệu suất nhân viên và thu nhập tháng",
+      "trend": {
+        "title": "Doanh thu theo ngày (tháng này)",
+        "loading": "Đang tải biểu đồ doanh thu…",
+        "empty": "Chưa có doanh thu trong tháng này.",
+        "error": "Không tải được biểu đồ doanh thu.",
+        "seriesLabel": "Doanh thu"
+      },
       "monthly": {
         "loading": "Đang tải tổng kết tháng…",
         "afterCommission": "Còn lại sau hoa hồng"
