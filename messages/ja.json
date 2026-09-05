@@ -1147,6 +1147,7 @@
         "commission": "歩合",
         "payout": "受取額",
         "orders": "件数",
+        "branch": "店舗",
         "actions": "操作",
         "edit": "{name} の情報を編集"
       },

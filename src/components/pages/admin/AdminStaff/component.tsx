@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-staff-performance";
 import {
   useAdminBranch,
+  useAdminBranchList,
   useAdminStaff,
   useAdminStaffMember,
   useAdminStaffPerformance,
@@ -50,7 +51,7 @@ function formatOptionalMoney(value: number | null): string {
  * carries identity and the active flag. A member with no row for the period
  * keeps `null` money fields so the table can say so.
  */
-function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined, unnamed: string): StaffMember {
+function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | undefined, unnamed: string, branchName: string | null): StaffMember {
   const name = server.displayName || unnamed;
   return {
     id: server.id,
@@ -63,6 +64,8 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
     commissionAmount: performance?.commissionAmount ?? null,
     orders: performance?.orderCount ?? null,
     version: server.version,
+    branchId: server.branchId,
+    branchName,
   };
 }
 
@@ -72,6 +75,14 @@ export function AdminStaffComponent() {
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
   const performance = useAdminStaffPerformance(branchId, { period });
+  // The roster is org-level, so a row needs to say which salon it belongs to.
+  // The roster carries only `branchId`; the names come from the branch list the
+  // header selector already reads.
+  const branches = useAdminBranchList();
+  const branchNameById = useMemo(
+    () => new Map((branches.data?.items ?? []).map((branch) => [branch.id, branch.name] as const)),
+    [branches.data],
+  );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
 
@@ -80,8 +91,8 @@ export function AdminStaffComponent() {
     [performance.data],
   );
   const source = useMemo<ReadonlyArray<StaffMember>>(
-    () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id), t("unnamed"))),
-    [data, performanceById, t],
+    () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id), t("unnamed"), branchNameById.get(member.branchId) ?? null)),
+    [data, performanceById, t, branchNameById],
   );
 
   const [filter, setFilter] = useState<StaffFilter>("all");
@@ -93,7 +104,7 @@ export function AdminStaffComponent() {
   const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
   const staffDetail = useAdminStaffMember(selected?.id ?? null);
   const detailedStaff = staffDetail.data
-    ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id), t("unnamed"))
+    ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id), t("unnamed"), branchNameById.get(staffDetail.data.branchId) ?? null)
     : selected;
 
   const kpi = performance.data?.kpi;

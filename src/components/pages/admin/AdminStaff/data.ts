@@ -21,4 +21,10 @@ export type StaffMember = {
   readonly commissionAmount: number | null;
   readonly orders: number | null;
   readonly version: number;
+  readonly branchId: string;
+  /**
+   * Resolved from the admin branch list; `null` when that list has not arrived or
+   * does not name this branch, so the table shows a dash instead of a guess.
+   */
+  readonly branchName: string | null;
 };

@@ -19,12 +19,13 @@ export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
   const t = useTranslations("admin.staff");
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[680px] text-left text-sm">
+      <table className="w-full min-w-[760px] text-left text-sm">
         <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border text-xs text-admin-muted">
           <tr>
             <th scope="col" className="px-4 py-3">{t("table.staff")}</th>
             <th scope="col" className="px-3 py-3">{t("orders.status")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.branch")}</th>
             <th scope="col" className="px-3 py-3">Doanh thu</th>
             <th scope="col" className="px-3 py-3">{t("compensation.commission")}</th>
             <th scope="col" className="px-3 py-3">{t("detail.payout")}</th>
@@ -51,6 +52,7 @@ export function StaffTable({ staff, selectedId, onSelect }: StaffTableProps) {
                   <Chip.Label>{member.status === "working" ? t("tabs.working") : t("tabs.off")}</Chip.Label>
                 </Chip>
               </td>
+              <td className="px-3 py-2 text-admin-muted">{member.branchName ?? MISSING}</td>
               <td className="px-3 py-2 font-medium">{formatOptionalMoney(member.revenue)}</td>
               <td className="px-3 py-2">
                 {typeof member.commissionRate === "number" ? `${member.commissionRate}%` : MISSING}
