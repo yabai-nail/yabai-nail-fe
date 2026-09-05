@@ -16,6 +16,7 @@ import {
 } from "@/lib/admin-staff-performance";
 import { useAdminBranch, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
+import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
@@ -53,10 +54,10 @@ export function AdminSettingsComponent() {
   const t = useTranslations("admin.settings");
   const { branchId } = useAdminBranch();
   const [activeTab, setActiveTab] = useState("commission");
-  // Appended at render because its label is the one string on this screen that is
-  // already translated; the other eight are extracted in their own slice.
+  // Appended at render because their labels are the strings on this screen that
+  // are already translated; the other eight are extracted in their own slice.
   const tabs = useMemo(
-    () => [...settingsTabIds, "language"].map((id) => ({ id, label: t(`tabs.${id}`) })),
+    () => [...settingsTabIds, "language", "appearance"].map((id) => ({ id, label: t(`tabs.${id}`) })),
     [t]
   );
   const [autoCalculate, setAutoCalculate] = useState(true);
@@ -113,7 +114,7 @@ export function AdminSettingsComponent() {
       value: averageRate === null ? MISSING : `${averageRate}%`,
       detail: t("metrics.average"),
       icon: BanknotesIcon,
-      tone: "bg-amber-50 text-admin-warning",
+      tone: "bg-admin-warning/10 text-admin-warning",
     },
     {
       id: "commission",
@@ -121,7 +122,7 @@ export function AdminSettingsComponent() {
       value: formatOptionalMoney(commission),
       detail: period,
       icon: WalletIcon,
-      tone: "bg-green-50 text-admin-success",
+      tone: "bg-admin-success/10 text-admin-success",
     },
     {
       id: "shop",
@@ -129,7 +130,7 @@ export function AdminSettingsComponent() {
       value: formatOptionalMoney(salonShare),
       detail: period,
       icon: BuildingStorefrontIcon,
-      tone: "bg-purple-50 text-admin-violet",
+      tone: "bg-admin-violet/10 text-admin-violet",
     },
   ] as const;
 
@@ -149,6 +150,8 @@ export function AdminSettingsComponent() {
       </Tabs>
       {activeTab === "language" ? (
         <LanguageSettings />
+      ) : activeTab === "appearance" ? (
+        <AppearanceSettings />
       ) : activeTab === "booking" && branchId ? (
         <BranchSettingsForm branchId={branchId} />
       ) : activeTab !== "commission" ? (

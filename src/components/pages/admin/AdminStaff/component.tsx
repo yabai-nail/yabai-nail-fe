@@ -118,7 +118,7 @@ export function AdminStaffComponent() {
       value: formatOptionalMoney(commission),
       detail: averageRate === null ? t("metrics.noRate") : `${averageRate}% / Trung bình`,
       icon: WalletIcon,
-      tone: "text-admin-success bg-green-50",
+      tone: "text-admin-success bg-admin-success/10",
     },
     {
       id: "shop",
@@ -126,7 +126,7 @@ export function AdminStaffComponent() {
       value: formatOptionalMoney(salonShare),
       detail: `Kỳ ${period}`,
       icon: BuildingStorefrontIcon,
-      tone: "text-admin-info bg-sky-50",
+      tone: "text-admin-info bg-admin-info/10",
     },
     {
       id: "working",
@@ -134,7 +134,7 @@ export function AdminStaffComponent() {
       value: source.length === 0 ? MISSING : `${workingCount} / ${source.length}`,
       detail: `${source.length - workingCount} nghỉ phép`,
       icon: UserGroupIcon,
-      tone: "text-admin-violet bg-purple-50",
+      tone: "text-admin-violet bg-admin-violet/10",
     },
   ] as const;
 

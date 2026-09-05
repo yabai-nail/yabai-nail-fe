@@ -16,9 +16,9 @@ const metricIcons: Record<MetricIcon, typeof CalendarDaysIcon> = {
 
 const toneClasses: Record<MetricTone, { icon: string; value: string }> = {
   accent: { icon: "bg-admin-soft text-admin-accent", value: "text-admin-accent" },
-  success: { icon: "bg-green-50 text-admin-success", value: "text-admin-success" },
-  info: { icon: "bg-sky-50 text-admin-info", value: "text-admin-info" },
-  violet: { icon: "bg-purple-50 text-admin-violet", value: "text-admin-violet" },
+  success: { icon: "bg-admin-success/10 text-admin-success", value: "text-admin-success" },
+  info: { icon: "bg-admin-info/10 text-admin-info", value: "text-admin-info" },
+  violet: { icon: "bg-admin-violet/10 text-admin-violet", value: "text-admin-violet" },
 };
 
 export function MetricCard({ metric }: Readonly<{ metric: DashboardMetric }>) {
