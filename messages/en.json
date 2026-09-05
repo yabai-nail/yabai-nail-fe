@@ -1147,6 +1147,7 @@
         "commission": "Commission",
         "payout": "Payout",
         "orders": "Orders",
+        "branch": "Branch",
         "actions": "Actions",
         "edit": "Edit {name}"
       },

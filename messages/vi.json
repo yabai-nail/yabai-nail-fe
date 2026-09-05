@@ -1147,6 +1147,7 @@
         "commission": "Hoa hồng",
         "payout": "Nhận được",
         "orders": "Số đơn",
+        "branch": "Chi nhánh",
         "actions": "Thao tác",
         "edit": "Sửa thông tin {name}"
       },
