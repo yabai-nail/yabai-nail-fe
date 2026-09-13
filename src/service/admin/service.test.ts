@@ -101,6 +101,7 @@ const CATALOG_OPERATION_IDS = [
   "GET /api/v1/admin/services",
   "POST /api/v1/admin/services",
   "PATCH /api/v1/admin/services/{serviceId}",
+  "DELETE /api/v1/admin/services/{serviceId}",
   "GET /api/v1/admin/service-categories",
   "POST /api/v1/admin/service-categories",
   "PATCH /api/v1/admin/service-categories/{categoryId}",
@@ -356,6 +357,7 @@ describe("adminService catalog surface", () => {
       adminService.services,
       adminService.createService,
       adminService.updateService,
+      adminService.deleteService,
       adminService.serviceCategories,
       adminService.createServiceCategory,
       adminService.updateServiceCategory,
@@ -366,6 +368,15 @@ describe("adminService catalog surface", () => {
     ]) {
       expect(typeof fn).toBe("function");
     }
+  });
+
+  it("deletes a service with optimistic concurrency", async () => {
+    await adminService.deleteService("service-a", 7);
+
+    expect(executeApiOperation).toHaveBeenLastCalledWith(
+      "DELETE /api/v1/admin/services/{serviceId}",
+      { path: { serviceId: "service-a" }, version: 7 },
+    );
   });
 });
 

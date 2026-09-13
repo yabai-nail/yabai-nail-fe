@@ -17,6 +17,7 @@ export type SalonService = {
   readonly durationMinutes: number;
   readonly isVisible: boolean;
   readonly soldCount: number;
+  readonly isFeatured?: boolean;
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;
@@ -28,7 +29,7 @@ const combo: ServiceCategoryRef = { id: "cat-combo", name: "Combo" };
 
 /** Fixture for the derivation tests only; the screen itself renders the live catalogue. */
 export const salonServices: ReadonlyArray<SalonService> = [
-  { id: "sv1", name: "Sơn gel đơn sắc", category: primary, imageUrl: null, price: 850000, durationMinutes: 90, isVisible: true, soldCount: 16 },
+  { id: "sv1", name: "Sơn gel đơn sắc", category: primary, imageUrl: null, price: 850000, durationMinutes: 90, isVisible: true, isFeatured: false, soldCount: 16 },
   { id: "sv2", name: "Sơn gel nâng cao", category: primary, imageUrl: null, price: 950000, durationMinutes: 90, isVisible: true, soldCount: 32 },
   { id: "sv3", name: "Thiết kế theo mẫu", category: primary, imageUrl: null, price: 1050000, durationMinutes: 120, isVisible: true, soldCount: 28 },
   { id: "sv4", name: "Gradient + Đính đá", category: primary, imageUrl: null, price: 1250000, durationMinutes: 120, isVisible: true, soldCount: 14 },
@@ -54,6 +55,20 @@ export function filterServices(
       (filter === "all" || service.category?.id === filter) &&
       matchesSearch(query, [service.name]),
   );
+}
+
+export function getPopularityWindow(now: Date = new Date()) {
+  return {
+    from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+    to: now.toISOString(),
+  } as const;
+}
+
+/** Keeps the statistics list useful without conflating it with Admin's featured selection. */
+export function getPopularServices(services: ReadonlyArray<SalonService>) {
+  return [...services]
+    .filter((service) => service.isVisible && service.soldCount >= 3)
+    .sort((left, right) => right.soldCount - left.soldCount || left.id.localeCompare(right.id));
 }
 
 /** Shared by both tables on this screen: services and, in the other view, categories. */

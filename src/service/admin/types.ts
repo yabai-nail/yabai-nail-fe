@@ -97,6 +97,7 @@ export interface AdminServiceItem {
   readonly categoryName?: string | null;
   readonly imageUrl?: string | null;
   readonly soldCount?: number;
+  readonly isFeatured?: boolean;
   readonly active: boolean;
   readonly version: number;
 }
@@ -528,6 +529,7 @@ export interface AdminServiceItemDraft {
   readonly status?: "ACTIVE" | "INACTIVE";
   readonly imageUrl?: string | null;
   readonly imageMediaId?: string | null;
+  readonly isFeatured?: boolean;
   readonly [field: string]: unknown;
 }
 
@@ -541,6 +543,7 @@ export interface AdminServiceItemPatch {
   readonly status?: "ACTIVE" | "INACTIVE";
   readonly imageUrl?: string | null;
   readonly imageMediaId?: string | null;
+  readonly isFeatured?: boolean;
   readonly [field: string]: unknown;
 }
 

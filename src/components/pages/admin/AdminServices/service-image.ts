@@ -11,12 +11,14 @@ export type ServiceImageChange =
   | { readonly kind: "remove" }
   | { readonly kind: "replace"; readonly mediaId: string };
 
-export function validateServiceImage(file: Pick<File, "size" | "type">): string | null {
+export type ServiceImageValidationError = "empty" | "tooLarge" | "unsupportedType";
+
+export function validateServiceImage(file: Pick<File, "size" | "type">): ServiceImageValidationError | null {
   if (!ACCEPTED_SERVICE_IMAGE_TYPES.has(file.type)) {
-    return "Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.";
+    return "unsupportedType";
   }
-  if (file.size === 0) return "Tệp ảnh đang trống.";
-  if (file.size > MAX_SERVICE_IMAGE_BYTES) return "Ảnh không được vượt quá 10 MB.";
+  if (file.size === 0) return "empty";
+  if (file.size > MAX_SERVICE_IMAGE_BYTES) return "tooLarge";
   return null;
 }
 
