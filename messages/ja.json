@@ -632,21 +632,42 @@
       },
       "all": "すべて",
       "tabsLabel": "メニューの分類",
+      "viewLabel": "メニュー管理エリア",
+      "categoriesTab": "カテゴリー",
+      "filterCategory": "カテゴリーで絞り込む",
+      "categoryPrefix": "カテゴリー：",
+      "categorySearchLabel": "カテゴリーを検索",
+      "categorySearchPlaceholder": "カテゴリーを検索…",
+      "allServices": "すべてのメニュー",
+      "uncategorizedWarning": "{count}件のメニューが未分類です。「すべてのメニュー」でのみ表示されます。",
+      "showing": "全{total}件中{visible}件を表示",
       "searchLabel": "メニューを検索",
       "searchPlaceholder": "メニューを検索…",
       "loading": "メニュー一覧を読み込み中…",
       "loadFailed": "メニュー一覧を読み込めません。",
+      "form": {
+        "category": "カテゴリー",
+        "categoryPlaceholder": "— カテゴリーを選択 —",
+        "categoriesLoading": "カテゴリーを読み込み中…",
+        "categoriesEmpty": "カテゴリーがありません。メニューを追加する前にカテゴリーを作成してください。"
+      },
       "table": {
         "caption": "メニュー一覧",
         "service": "メニュー",
         "type": "種別",
         "price": "料金",
         "duration": "所要時間",
+        "durationValue": "{minutes}分",
+        "category": "カテゴリー",
+        "bookingCount90Days": "予約数（90日）",
         "status": "ステータス",
         "actions": "操作",
         "visible": "表示中",
         "hidden": "非表示",
+        "featured": "最も人気",
+        "uncategorized": "未分類",
         "editService": "{name} を編集",
+        "deleteService": "{name} を削除",
         "empty": "該当するメニューがありません。"
       },
       "sidebar": {
@@ -659,6 +680,9 @@
         "rename": "{name} の名前を変更",
         "reorderFailed": "並び順を変更できません。",
         "topServices": "人気メニュー",
+        "popularityPeriod": "直近90日間に完了した予約に基づく",
+        "popularityEmpty": "予約されたメニューはまだありません。",
+        "bookingCount": "{count}件",
         "noteHeading": "メモ",
         "noteBody": "予約ページでメニューの表示・非表示を切り替えられます。非表示のメニューはお客様には表示されません。"
       },
@@ -684,6 +708,7 @@
         "cancel": "キャンセル",
         "saving": "保存しています…",
         "submit": "メニューを追加",
+        "success": "メニューを追加しました",
         "failed": "メニューを作成できません。"
       },
       "edit": {
@@ -691,7 +716,48 @@
         "cancel": "キャンセル",
         "saving": "保存しています…",
         "save": "保存",
+        "success": "メニューを更新しました",
         "failed": "メニューを更新できません。"
+      },
+      "image": {
+        "title": "メニュー画像",
+        "optional": "（任意）",
+        "previewAlt": "{name} のプレビュー",
+        "currentAlt": "{name} の現在の画像",
+        "current": "現在の画像",
+        "removeSelected": "選択した画像を外す",
+        "removeReplacement": "選択した差し替え画像を外す",
+        "pick": "端末から画像を選択",
+        "replace": "画像を変更",
+        "remove": "画像を削除",
+        "removalPending": "保存すると現在の画像が削除されます。",
+        "undo": "元に戻す",
+        "requirements": "JPG、PNG、WebP · 最大10 MB",
+        "uploading": "画像をアップロード中…",
+        "errors": {
+          "unsupportedType": "JPG、PNG、WebP画像のみ対応しています。",
+          "empty": "画像ファイルが空です。",
+          "tooLarge": "画像は10 MB以下にしてください。"
+        }
+      },
+      "visibility": {
+        "heading": "表示設定",
+        "publicLabel": "お客様に公開",
+        "publicDescription": "お客様がアプリでメニューを確認し、予約を開始できます。",
+        "featuredLabel": "モバイルで最も人気",
+        "featuredDescription": "選択できるメニューは1件のみです。新しい選択が現在のメニューに置き換わります。",
+        "featuredRequiresPublic": "人気メニューに設定する前に公開を有効にしてください。"
+      },
+      "delete": {
+        "title": "メニューを削除",
+        "confirm": "「{name}」を削除しますか？この操作は元に戻せません。",
+        "historyHint": "予約履歴があるメニューは削除できません。過去データを残すには非表示にしてください。",
+        "cancel": "キャンセル",
+        "action": "メニューを削除",
+        "deleting": "削除しています…",
+        "success": "{name} を削除しました",
+        "failed": "メニューを削除できません。再読み込みしてもう一度お試しください。",
+        "hasHistory": "予約履歴があるため削除できません。編集画面で「お客様に公開」をオフにしてください。"
       },
       "surcharge": {
         "heading": "追加料金",

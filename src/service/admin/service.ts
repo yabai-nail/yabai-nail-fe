@@ -349,6 +349,11 @@ export const adminService = {
       body: patch,
       version,
     }),
+  deleteService: (serviceId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/services/{serviceId}", {
+      path: { serviceId },
+      version,
+    }),
   createServiceCategory: (draft: AdminServiceCategoryDraft, idempotencyKey?: string) =>
     executeApiOperation<AdminServiceCategory>("POST /api/v1/admin/service-categories", {
       body: draft,

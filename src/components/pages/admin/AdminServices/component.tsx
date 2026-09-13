@@ -12,16 +12,19 @@ import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import {
   useAdminServiceCategories,
+  useAdminBranch,
   useAdminServices,
   type AdminServiceItem as ServerService,
 } from "@/service";
 import { CategoryTable } from "./CategoryTable";
 import { ServiceCreateModal } from "./ServiceCreateModal";
+import { ServiceDeleteModal } from "./ServiceDeleteModal";
 import { ServiceEditModal } from "./ServiceEditModal";
 import { ServiceSidebar } from "./ServiceSidebar";
 import { ServiceTable } from "./ServiceTable";
 import {
   filterServices,
+  getPopularityWindow,
   paginate,
   type SalonService,
   type ServiceFilter,
@@ -41,13 +44,21 @@ function toScreenService(server: ServerService): SalonService {
     durationMinutes: server.durationMinutes,
     isVisible: server.active,
     soldCount: server.soldCount ?? 0,
+    isFeatured: server.isFeatured ?? false,
     version: server.version,
   };
 }
 
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
-  const { data, isLoading, error, mutate: mutateServices } = useAdminServices();
+  const { branchId } = useAdminBranch();
+  const popularityWindow = useMemo(() => getPopularityWindow(), []);
+  const { data, isLoading, error, mutate: mutateServices } = useAdminServices({
+    branchId: branchId ?? undefined,
+    from: popularityWindow.from,
+    limit: 100,
+    to: popularityWindow.to,
+  });
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   // Two jobs, two surfaces: browsing the catalogue, and maintaining the categories it is filed
@@ -55,6 +66,7 @@ export function AdminServicesComponent() {
   const [view, setView] = useState<"services" | "categories">("services");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
+  const [deleting, setDeleting] = useState<SalonService | null>(null);
   const source = useMemo<ReadonlyArray<SalonService>>(
     () => (data?.items ?? []).map(toScreenService),
     [data],
@@ -83,13 +95,13 @@ export function AdminServicesComponent() {
     <AdminPageLayout>
       <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as "services" | "categories")} variant="secondary">
         <Tabs.ListContainer className="mb-4 w-fit max-w-full overflow-x-auto">
-          <Tabs.List aria-label="Khu vực quản lý">
+          <Tabs.List aria-label={t("viewLabel")}>
             <Tabs.Tab id="services">
               <AdminTabLabel count={source.length}>{t("table.service")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="categories">
-              <AdminTabLabel count={categoryItems.length}>Danh mục</AdminTabLabel>
+              <AdminTabLabel count={categoryItems.length}>{t("categoriesTab")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
           </Tabs.List>
@@ -107,7 +119,7 @@ export function AdminServicesComponent() {
               the salon keeps four categories or forty.
             */}
             <Autocomplete
-              aria-label="Lọc theo danh mục"
+              aria-label={t("filterCategory")}
               selectedKey={filter}
               onSelectionChange={(key) => {
                 if (typeof key === "string") changeFilter(key);
@@ -115,7 +127,7 @@ export function AdminServicesComponent() {
               className="w-full sm:w-72"
             >
               <Autocomplete.Trigger className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-left text-sm font-medium text-admin-ink outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
-                <span className="shrink-0 text-admin-muted">Danh mục:</span>
+                <span className="shrink-0 text-admin-muted">{t("categoryPrefix")}</span>
                 <Autocomplete.Value className="flex-1 truncate" />
                 <ChevronDownIcon aria-hidden className="size-4 shrink-0 text-admin-muted" />
               </Autocomplete.Trigger>
@@ -137,15 +149,15 @@ export function AdminServicesComponent() {
                       .includes(inputValue.trim().toLocaleLowerCase("vi"))
                   }
                 >
-                  <SearchField aria-label="Tìm danh mục" autoFocus className="p-2">
+                  <SearchField aria-label={t("categorySearchLabel")} autoFocus className="p-2">
                     <SearchField.Group>
                       <SearchField.SearchIcon />
-                      <SearchField.Input placeholder="Tìm danh mục..." />
+                      <SearchField.Input placeholder={t("categorySearchPlaceholder")} />
                     </SearchField.Group>
                   </SearchField>
-                  <ListBox aria-label="Danh mục" className="max-h-64 overflow-y-auto">
-                    <ListBox.Item id="all" textValue="Tất cả dịch vụ">
-                      Tất cả dịch vụ · {source.length}
+                  <ListBox aria-label={t("categoriesTab")} className="max-h-64 overflow-y-auto">
+                    <ListBox.Item id="all" textValue={t("allServices")}>
+                      {t("allServices")} · {source.length}
                     </ListBox.Item>
                     {categoryItems.map((category) => (
                       <ListBox.Item
@@ -167,7 +179,7 @@ export function AdminServicesComponent() {
                 className="rounded-lg"
                 onPress={() => setIsCreateOpen(true)}
               >
-                <PlusIcon className="size-4" />Thêm dịch vụ
+                <PlusIcon className="size-4" />{t("create.submit")}
               </Button>
             </div>
           </div>
@@ -178,16 +190,16 @@ export function AdminServicesComponent() {
           ) : null}
           {unfiledCount > 0 ? (
             <p role="status" className="mb-3 text-xs text-admin-danger">
-              {unfiledCount} dịch vụ chưa thuộc danh mục nào — chỉ thấy được ở “Tất cả dịch vụ”.
+              {t("uncategorizedWarning", { count: unfiledCount })}
             </p>
           ) : null}
           <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
               <Card.Content className="min-w-0 p-0">
-                <ServiceTable services={visible} onEdit={setEditing} />
+                <ServiceTable services={visible} onEdit={setEditing} onDelete={setDeleting} />
               </Card.Content>
               <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-                <span>Hiển thị {visible.length} trong tổng số {filtered.length} dịch vụ</span>
+                <span>{t("showing", { visible: visible.length, total: filtered.length })}</span>
                 <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
               </Card.Footer>
             </Card>
@@ -206,6 +218,13 @@ export function AdminServicesComponent() {
           service={editing}
           onClose={() => setEditing(null)}
           onSaved={() => void mutateServices()}
+        />
+      ) : null}
+      {deleting ? (
+        <ServiceDeleteModal
+          service={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => void mutateServices()}
         />
       ) : null}
     </AdminPageLayout>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { adminMediaService, adminService, useAdminServiceCategories } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import { validateServiceImage } from "./service-image";
+import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
 
 // Service creation is org-level (no branchId in the path). The category is required by the
 // API, not merely by this form: the column is NOT NULL, so a service with no category cannot
@@ -21,6 +22,7 @@ export function ServiceCreateModal({
   onCreated: () => void;
 }>) {
   const t = useTranslations("admin.services");
+  const locale = useLocale();
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState("");
@@ -31,6 +33,7 @@ export function ServiceCreateModal({
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [isFeatured, setIsFeatured] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,8 +68,9 @@ export function ServiceCreateModal({
         durationMinutes: durationNum,
         ...(uploadedMediaId ? { imageMediaId: uploadedMediaId } : {}),
         status: isVisible ? "ACTIVE" : "INACTIVE",
+        isFeatured,
       });
-      notifySuccess("Đã thêm dịch vụ");
+      notifySuccess(t("create.success"));
       onCreated();
       onClose();
     } catch (err) {
@@ -86,12 +90,13 @@ export function ServiceCreateModal({
   return (
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
-        <Modal.Container size="md" placement="center" scroll="inside">
+        <Modal.Container size="lg" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">{t("create.title")}</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="grid gap-4 px-5 py-5">
+            <Modal.Body className="grid gap-5 px-6 py-5">
+              <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
@@ -103,13 +108,13 @@ export function ServiceCreateModal({
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Danh mục</span>
+                <span className="font-semibold text-admin-ink">{t("form.category")}</span>
                 <select
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                   value={categoryId}
                   onChange={(event) => setCategoryId(event.target.value)}
                 >
-                  <option value="">— Chọn danh mục —</option>
+                  <option value="">{t("form.categoryPlaceholder")}</option>
                   {categoryItems.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.nameVi ?? category.name}
@@ -117,14 +122,14 @@ export function ServiceCreateModal({
                   ))}
                 </select>
                 {categories.isLoading ? (
-                  <span className="text-xs text-admin-muted">Đang tải danh mục…</span>
+                  <span className="text-xs text-admin-muted">{t("form.categoriesLoading")}</span>
                 ) : categoryItems.length === 0 ? (
                   <span role="alert" className="text-xs text-admin-danger">
-                    Chưa có danh mục nào. Hãy tạo danh mục ở cột bên phải trước.
+                    {t("form.categoriesEmpty")}
                   </span>
                 ) : null}
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="contents">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("create.price")}</span>
                   <input
@@ -147,26 +152,27 @@ export function ServiceCreateModal({
                   />
                 </label>
               </div>
-              <div className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">Ảnh dịch vụ (không bắt buộc)</span>
+              </div>
+              <section className="flex flex-col gap-3 rounded-xl border border-admin-border bg-admin-soft p-4 text-sm">
+                <h3 className="font-semibold text-admin-ink">{t("image.title")} <span className="font-normal text-admin-muted">{t("image.optional")}</span></h3>
                 {imagePreviewUrl && imageFile ? (
-                  <div className="flex items-center gap-3 rounded-xl border border-admin-border bg-admin-soft p-3">
+                  <div className="flex items-center gap-3 rounded-xl border border-admin-border bg-admin-surface p-3">
                     {/* A blob URL is browser-local and must bypass Next's server image optimizer. */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imagePreviewUrl}
-                      alt={`Xem trước ${imageFile.name}`}
+                      alt={t("image.previewAlt", { name: imageFile.name })}
                       className="size-20 shrink-0 rounded-lg border border-admin-border object-cover"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-admin-ink">{imageFile.name}</p>
                       <p className="mt-1 text-xs text-admin-muted">
-                        {(imageFile.size / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} MB
+                        {new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(imageFile.size / 1_000_000)} MB
                       </p>
                     </div>
                     <button
                       type="button"
-                      aria-label="Bỏ ảnh đã chọn"
+                      aria-label={t("image.removeSelected")}
                       className="rounded-lg p-2 text-admin-muted hover:bg-admin-surface hover:text-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
                       onClick={() => {
                         setImageFile(null);
@@ -179,14 +185,14 @@ export function ServiceCreateModal({
                     </button>
                   </div>
                 ) : (
-                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-admin-border bg-admin-soft px-4 py-5 text-center transition-colors hover:border-admin-accent hover:bg-admin-surface focus-within:ring-2 focus-within:ring-admin-accent">
+                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-admin-border bg-admin-surface px-4 py-5 text-center transition-colors hover:border-admin-accent focus-within:ring-2 focus-within:ring-admin-accent">
                     <span className="flex size-10 items-center justify-center rounded-full bg-admin-surface text-admin-accent">
                       <PhotoIcon aria-hidden className="size-5" />
                     </span>
                     <span className="flex items-center gap-1.5 font-semibold text-admin-ink">
-                      <ArrowUpTrayIcon aria-hidden className="size-4" /> Chọn ảnh từ máy
+                      <ArrowUpTrayIcon aria-hidden className="size-4" /> {t("image.pick")}
                     </span>
-                    <span className="text-xs text-admin-muted">JPG, PNG hoặc WebP · tối đa 10 MB</span>
+                    <span className="text-xs text-admin-muted">{t("image.requirements")}</span>
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
@@ -204,16 +210,15 @@ export function ServiceCreateModal({
                     />
                   </label>
                 )}
-                {imageError ? <span role="alert" className="text-xs text-admin-danger">{imageError}</span> : null}
-              </div>
-              <label className="flex items-center gap-3 text-sm text-admin-ink">
-                <input
-                  type="checkbox" className="accent-admin-accent"
-                  checked={isVisible}
-                  onChange={(event) => setIsVisible(event.target.checked)}
-                />
-                Hiển thị công khai cho khách
-              </label>
+                {imageError ? <span role="alert" className="text-xs text-admin-danger">{t(`image.errors.${imageError}`)}</span> : null}
+              </section>
+              <ServiceVisibilityFields
+                busy={busy}
+                isFeatured={isFeatured}
+                isVisible={isVisible}
+                onFeaturedChange={setIsFeatured}
+                onVisibleChange={setIsVisible}
+              />
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
@@ -224,7 +229,7 @@ export function ServiceCreateModal({
                 isDisabled={!canSubmit}
                 onPress={() => void submit()}
               >
-                {busy ? (imageFile ? "Đang tải ảnh…" : t("categoryEditor.saving")) : t("create.title")}
+                {busy ? (imageFile ? t("image.uploading") : t("create.saving")) : t("create.submit")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

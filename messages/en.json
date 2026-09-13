@@ -632,21 +632,42 @@
       },
       "all": "All",
       "tabsLabel": "Service categories",
+      "viewLabel": "Service management area",
+      "categoriesTab": "Categories",
+      "filterCategory": "Filter by category",
+      "categoryPrefix": "Category:",
+      "categorySearchLabel": "Search categories",
+      "categorySearchPlaceholder": "Search categories…",
+      "allServices": "All services",
+      "uncategorizedWarning": "{count} services are uncategorized and appear only under “All services”.",
+      "showing": "Showing {visible} of {total} services",
       "searchLabel": "Search services",
       "searchPlaceholder": "Search services…",
       "loading": "Loading the services…",
       "loadFailed": "Could not load the services.",
+      "form": {
+        "category": "Category",
+        "categoryPlaceholder": "— Select a category —",
+        "categoriesLoading": "Loading categories…",
+        "categoriesEmpty": "There are no categories yet. Create one before adding a service."
+      },
       "table": {
         "caption": "Service list",
         "service": "Service",
         "type": "Type",
         "price": "Price",
         "duration": "Duration",
+        "durationValue": "{minutes} min",
+        "category": "Category",
+        "bookingCount90Days": "Bookings (90 days)",
         "status": "Status",
         "actions": "Actions",
         "visible": "Visible",
         "hidden": "Hidden",
+        "featured": "Most popular",
+        "uncategorized": "Uncategorized",
         "editService": "Edit {name}",
+        "deleteService": "Delete {name}",
         "empty": "No matching services."
       },
       "sidebar": {
@@ -659,6 +680,9 @@
         "rename": "Rename {name}",
         "reorderFailed": "Could not change the order.",
         "topServices": "Best-selling services",
+        "popularityPeriod": "Based on completed bookings in the last 90 days",
+        "popularityEmpty": "No services have been booked yet.",
+        "bookingCount": "{count} bookings",
         "noteHeading": "Notes",
         "noteBody": "You can show or hide a service on the booking page. Hidden services are not shown to customers."
       },
@@ -684,6 +708,7 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "submit": "Add service",
+        "success": "Service added",
         "failed": "Could not create the service."
       },
       "edit": {
@@ -691,7 +716,48 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "save": "Save",
+        "success": "Service updated",
         "failed": "Could not update the service."
+      },
+      "image": {
+        "title": "Service image",
+        "optional": "(optional)",
+        "previewAlt": "Preview of {name}",
+        "currentAlt": "Current image for {name}",
+        "current": "Current image",
+        "removeSelected": "Remove selected image",
+        "removeReplacement": "Remove selected replacement image",
+        "pick": "Choose an image",
+        "replace": "Change image",
+        "remove": "Delete image",
+        "removalPending": "The current image will be deleted when you save.",
+        "undo": "Undo",
+        "requirements": "JPG, PNG or WebP · up to 10 MB",
+        "uploading": "Uploading image…",
+        "errors": {
+          "unsupportedType": "Only JPG, PNG or WebP images are supported.",
+          "empty": "The image file is empty.",
+          "tooLarge": "The image must not exceed 10 MB."
+        }
+      },
+      "visibility": {
+        "heading": "Visibility settings",
+        "publicLabel": "Public to customers",
+        "publicDescription": "Customers can view this service and start a booking in the app.",
+        "featuredLabel": "Most popular on Mobile",
+        "featuredDescription": "Only one service can be selected; a new selection replaces the current one.",
+        "featuredRequiresPublic": "Make the service public before featuring it."
+      },
+      "delete": {
+        "title": "Delete service",
+        "confirm": "Delete “{name}”? This action cannot be undone.",
+        "historyHint": "Services with booking history cannot be deleted. Hide the service instead to preserve historical data.",
+        "cancel": "Cancel",
+        "action": "Delete service",
+        "deleting": "Deleting…",
+        "success": "Deleted {name}",
+        "failed": "Could not delete the service. Reload and try again.",
+        "hasHistory": "This service has booking history and cannot be deleted. Edit it and turn off “Public to customers” instead."
       },
       "surcharge": {
         "heading": "Surcharges",

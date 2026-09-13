@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { filterServices, paginate, salonServices } from "./data";
+import {
+  filterServices,
+  getPopularServices,
+  getPopularityWindow,
+  paginate,
+  salonServices,
+} from "./data";
 
 describe("service list derivation", () => {
   it("filters services by the category the backend assigned them", () => {
@@ -39,5 +45,23 @@ describe("service list derivation", () => {
 
     expect(result.page).toBe(1);
     expect(result.items).toHaveLength(2);
+  });
+
+  it("uses a stable 90-day popularity window", () => {
+    expect(getPopularityWindow(new Date("2026-09-13T00:00:00.000Z"))).toEqual({
+      from: "2026-06-15T00:00:00.000Z",
+      to: "2026-09-13T00:00:00.000Z",
+    });
+  });
+
+  it("ranks only visible services with enough completed bookings", () => {
+    const pool = [
+      { ...salonServices[0], id: "low", soldCount: 2 },
+      { ...salonServices[0], id: "popular", soldCount: 8 },
+      { ...salonServices[0], id: "hidden", soldCount: 20, isVisible: false },
+      { ...salonServices[0], id: "second", soldCount: 5 },
+    ];
+
+    expect(getPopularServices(pool).map((service) => service.id)).toEqual(["popular", "second"]);
   });
 });
