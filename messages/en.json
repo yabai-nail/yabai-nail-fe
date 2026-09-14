@@ -647,6 +647,11 @@
       "loadFailed": "Could not load the services.",
       "form": {
         "category": "Category",
+        "serviceType": "Service type",
+        "baseService": "Base service",
+        "addonService": "Add-on service",
+        "addonGroup": "Option group code",
+        "nameJa": "Japanese name",
         "categoryPlaceholder": "— Select a category —",
         "categoriesLoading": "Loading categories…",
         "categoriesEmpty": "There are no categories yet. Create one before adding a service."
@@ -666,6 +671,7 @@
         "hidden": "Hidden",
         "featured": "Most popular",
         "uncategorized": "Uncategorized",
+        "addon": "Add-on",
         "editService": "Edit {name}",
         "deleteService": "Delete {name}",
         "empty": "No matching services."
@@ -747,6 +753,19 @@
         "featuredLabel": "Most popular on Mobile",
         "featuredDescription": "Only one service can be selected; a new selection replaces the current one.",
         "featuredRequiresPublic": "Make the service public before featuring it."
+      },
+      "addons": {
+        "title": "Service add-ons",
+        "description": "Choose customer add-ons, then enable or override their price and duration for each branch.",
+        "loading": "Loading add-ons…",
+        "loadFailed": "Could not load add-on settings.",
+        "empty": "No add-ons exist yet. Create an “Add-on service” first.",
+        "priceOverride": "Price override (¥)",
+        "durationOverride": "Minutes override",
+        "save": "Save add-ons",
+        "saving": "Saving…",
+        "success": "Add-ons saved",
+        "failed": "Could not save add-ons."
       },
       "delete": {
         "title": "Delete service",

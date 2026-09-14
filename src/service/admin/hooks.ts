@@ -14,6 +14,7 @@ import type {
   AdminDashboardData,
   AdminServiceCategory,
   AdminServiceItem,
+  AdminServiceAddonConfiguration,
   AdminSurcharge,
   AdminStaffMember,
   AdminStaffPerformance,
@@ -173,6 +174,13 @@ export function useAdminServices(query?: Readonly<Record<string, string | number
 export function useAdminServiceCategories() {
   return useApiOperation<BackendList<AdminServiceCategory>>(
     "GET /api/v1/admin/service-categories",
+  );
+}
+
+export function useAdminServiceAddons(serviceId: string | null) {
+  return useApiOperation<AdminServiceAddonConfiguration>(
+    serviceId ? "GET /api/v1/admin/services/{serviceId}/add-ons" : null,
+    { path: serviceId ? { serviceId } : undefined },
   );
 }
 

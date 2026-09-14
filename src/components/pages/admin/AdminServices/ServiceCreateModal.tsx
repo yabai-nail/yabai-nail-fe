@@ -26,6 +26,9 @@ export function ServiceCreateModal({
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState("");
+  const [nameJa, setNameJa] = useState("");
+  const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">("BASE");
+  const [addonGroup, setAddonGroup] = useState("NAIL_REMOVAL");
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("60");
@@ -47,7 +50,8 @@ export function ServiceCreateModal({
 
   const canSubmit =
     name.trim().length >= 2 &&
-    categoryId !== "" &&
+    (serviceType === "ADD_ON" || categoryId !== "") &&
+    (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
     durationNum % 15 === 0 &&
@@ -63,12 +67,15 @@ export function ServiceCreateModal({
       if (imageFile) uploadedMediaId = await adminMediaService.uploadFile(imageFile);
       await adminService.createService({
         name: name.trim(),
-        categoryId,
+        nameJa: nameJa.trim() || undefined,
+        serviceType,
+        addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
+        ...(serviceType === "BASE" ? { categoryId } : {}),
         price: priceNum,
         durationMinutes: durationNum,
         ...(uploadedMediaId ? { imageMediaId: uploadedMediaId } : {}),
         status: isVisible ? "ACTIVE" : "INACTIVE",
-        isFeatured,
+        isFeatured: serviceType === "BASE" && isFeatured,
       });
       notifySuccess(t("create.success"));
       onCreated();
@@ -98,6 +105,13 @@ export function ServiceCreateModal({
             <Modal.Body className="grid gap-5 px-6 py-5">
               <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("form.serviceType")}</span>
+                <select className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink" value={serviceType} onChange={(event) => { const next = event.target.value as "BASE" | "ADD_ON"; setServiceType(next); if (next === "ADD_ON") setIsFeatured(false); }}>
+                  <option value="BASE">{t("form.baseService")}</option>
+                  <option value="ADD_ON">{t("form.addonService")}</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -107,6 +121,17 @@ export function ServiceCreateModal({
                   autoFocus
                 />
               </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("form.nameJa")}</span>
+                <input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink" value={nameJa} onChange={(event) => setNameJa(event.target.value)} />
+              </label>
+              {serviceType === "ADD_ON" ? (
+                <label className="flex flex-col gap-2 text-sm sm:col-span-2">
+                  <span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span>
+                  <input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} placeholder="NAIL_REMOVAL" />
+                </label>
+              ) : null}
+              {serviceType === "BASE" ? (
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("form.category")}</span>
                 <select
@@ -129,6 +154,7 @@ export function ServiceCreateModal({
                   </span>
                 ) : null}
               </label>
+              ) : null}
               <div className="contents">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("create.price")}</span>
@@ -213,6 +239,7 @@ export function ServiceCreateModal({
                 {imageError ? <span role="alert" className="text-xs text-admin-danger">{t(`image.errors.${imageError}`)}</span> : null}
               </section>
               <ServiceVisibilityFields
+                allowFeatured={serviceType === "BASE"}
                 busy={busy}
                 isFeatured={isFeatured}
                 isVisible={isVisible}

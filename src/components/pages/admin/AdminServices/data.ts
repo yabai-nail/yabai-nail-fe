@@ -18,6 +18,9 @@ export type SalonService = {
   readonly isVisible: boolean;
   readonly soldCount: number;
   readonly isFeatured?: boolean;
+  readonly serviceType?: "BASE" | "ADD_ON";
+  readonly addonGroup?: string | null;
+  readonly bookableStandalone?: boolean;
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;
@@ -67,7 +70,7 @@ export function getPopularityWindow(now: Date = new Date()) {
 /** Keeps the statistics list useful without conflating it with Admin's featured selection. */
 export function getPopularServices(services: ReadonlyArray<SalonService>) {
   return [...services]
-    .filter((service) => service.isVisible && service.soldCount >= 3)
+    .filter((service) => service.serviceType !== "ADD_ON" && service.isVisible && service.soldCount >= 3)
     .sort((left, right) => right.soldCount - left.soldCount || left.id.localeCompare(right.id));
 }
 

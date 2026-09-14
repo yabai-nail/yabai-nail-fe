@@ -192,6 +192,8 @@ GET /api/v1/admin/nail-design-proposals/{proposalId}
 GET /api/v1/admin/branches/{branchId}/leave-requests
 GET /api/v1/admin/notification-campaigns
 DELETE /api/v1/admin/services/{serviceId}
+GET /api/v1/admin/services/{serviceId}/add-ons
+PUT /api/v1/admin/services/{serviceId}/add-ons
 `;
 
 // Concrete NestJS controller routes present in runtime Swagger but absent from

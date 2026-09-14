@@ -8,6 +8,7 @@ type ServiceVisibilityFieldsProps = {
   readonly isVisible: boolean;
   readonly onFeaturedChange: (value: boolean) => void;
   readonly onVisibleChange: (value: boolean) => void;
+  readonly allowFeatured?: boolean;
 };
 
 /** Shared settings keep create and edit behavior, wording and spacing identical. */
@@ -17,6 +18,7 @@ export function ServiceVisibilityFields({
   isVisible,
   onFeaturedChange,
   onVisibleChange,
+  allowFeatured = true,
 }: ServiceVisibilityFieldsProps) {
   const t = useTranslations("admin.services");
   const changeVisibility = (visible: boolean) => {
@@ -44,7 +46,7 @@ export function ServiceVisibilityFields({
           </span>
         </label>
 
-        <label className={`flex min-h-24 items-start gap-3 rounded-lg border border-admin-border bg-admin-surface p-4 text-sm text-admin-ink transition-colors focus-within:ring-2 focus-within:ring-admin-accent ${isVisible ? "cursor-pointer hover:border-admin-accent" : "cursor-not-allowed opacity-60"}`}>
+        {allowFeatured ? <label className={`flex min-h-24 items-start gap-3 rounded-lg border border-admin-border bg-admin-surface p-4 text-sm text-admin-ink transition-colors focus-within:ring-2 focus-within:ring-admin-accent ${isVisible ? "cursor-pointer hover:border-admin-accent" : "cursor-not-allowed opacity-60"}`}>
           <input
             type="checkbox"
             className="mt-0.5 size-4 accent-admin-accent"
@@ -60,7 +62,7 @@ export function ServiceVisibilityFields({
                 : t("visibility.featuredRequiresPublic")}
             </span>
           </span>
-        </label>
+        </label> : null}
       </div>
     </fieldset>
   );

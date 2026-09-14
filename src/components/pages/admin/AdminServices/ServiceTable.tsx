@@ -57,8 +57,8 @@ export function ServiceTable({
                 </div>
               </td>
               <td className="px-3 py-2">
-                <Chip size="sm" variant="soft" color={service.category ? "accent" : "warning"}>
-                  <Chip.Label>{service.category?.name || t("table.uncategorized")}</Chip.Label>
+                <Chip size="sm" variant="soft" color={service.serviceType === "ADD_ON" ? "default" : service.category ? "accent" : "warning"}>
+                  <Chip.Label>{service.serviceType === "ADD_ON" ? t("table.addon") : service.category?.name || t("table.uncategorized")}</Chip.Label>
                 </Chip>
               </td>
               <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>

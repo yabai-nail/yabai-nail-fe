@@ -647,6 +647,11 @@
       "loadFailed": "メニュー一覧を読み込めません。",
       "form": {
         "category": "カテゴリー",
+        "serviceType": "メニュー種別",
+        "baseService": "基本メニュー",
+        "addonService": "追加オプション",
+        "addonGroup": "オプショングループコード",
+        "nameJa": "日本語名",
         "categoryPlaceholder": "— カテゴリーを選択 —",
         "categoriesLoading": "カテゴリーを読み込み中…",
         "categoriesEmpty": "カテゴリーがありません。メニューを追加する前にカテゴリーを作成してください。"
@@ -666,6 +671,7 @@
         "hidden": "非表示",
         "featured": "最も人気",
         "uncategorized": "未分類",
+        "addon": "追加オプション",
         "editService": "{name} を編集",
         "deleteService": "{name} を削除",
         "empty": "該当するメニューがありません。"
@@ -747,6 +753,19 @@
         "featuredLabel": "モバイルで最も人気",
         "featuredDescription": "選択できるメニューは1件のみです。新しい選択が現在のメニューに置き換わります。",
         "featuredRequiresPublic": "人気メニューに設定する前に公開を有効にしてください。"
+      },
+      "addons": {
+        "title": "追加オプション設定",
+        "description": "追加できるオプションを選び、店舗ごとの提供可否・料金・所要時間を設定します。",
+        "loading": "追加オプションを読み込み中…",
+        "loadFailed": "追加オプション設定を読み込めません。",
+        "empty": "追加オプションがありません。先に「追加オプション」を作成してください。",
+        "priceOverride": "店舗料金 (¥)",
+        "durationOverride": "店舗所要時間",
+        "save": "オプションを保存",
+        "saving": "保存中…",
+        "success": "追加オプションを保存しました",
+        "failed": "追加オプションを保存できません。"
       },
       "delete": {
         "title": "メニューを削除",

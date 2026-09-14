@@ -45,6 +45,9 @@ function toScreenService(server: ServerService): SalonService {
     isVisible: server.active,
     soldCount: server.soldCount ?? 0,
     isFeatured: server.isFeatured ?? false,
+    serviceType: server.serviceType ?? "BASE",
+    addonGroup: server.addonGroup ?? null,
+    bookableStandalone: server.bookableStandalone ?? false,
     version: server.version,
   };
 }
@@ -88,7 +91,7 @@ export function AdminServicesComponent() {
     setFilter(value);
     setPage(1);
   };
-  const unfiledCount = source.filter((service) => service.category === null).length;
+  const unfiledCount = source.filter((service) => service.serviceType !== "ADD_ON" && service.category === null).length;
   const countIn = (categoryId: string) => source.filter((service) => service.category?.id === categoryId).length;
 
   return (

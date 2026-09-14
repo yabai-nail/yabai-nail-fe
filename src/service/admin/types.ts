@@ -98,6 +98,9 @@ export interface AdminServiceItem {
   readonly imageUrl?: string | null;
   readonly soldCount?: number;
   readonly isFeatured?: boolean;
+  readonly serviceType?: "BASE" | "ADD_ON";
+  readonly addonGroup?: string | null;
+  readonly bookableStandalone?: boolean;
   readonly active: boolean;
   readonly version: number;
 }
@@ -530,6 +533,9 @@ export interface AdminServiceItemDraft {
   readonly imageUrl?: string | null;
   readonly imageMediaId?: string | null;
   readonly isFeatured?: boolean;
+  readonly serviceType?: "BASE" | "ADD_ON";
+  readonly addonGroup?: string | null;
+  readonly bookableStandalone?: boolean;
   readonly [field: string]: unknown;
 }
 
@@ -544,7 +550,57 @@ export interface AdminServiceItemPatch {
   readonly imageUrl?: string | null;
   readonly imageMediaId?: string | null;
   readonly isFeatured?: boolean;
+  readonly serviceType?: "BASE" | "ADD_ON";
+  readonly addonGroup?: string | null;
+  readonly bookableStandalone?: boolean;
   readonly [field: string]: unknown;
+}
+
+export interface AdminServiceAddonBranchConfig {
+  readonly branchId: string;
+  readonly enabled: boolean;
+  readonly priceOverride: number | null;
+  readonly durationOverride: number | null;
+}
+
+export interface AdminServiceAddonRuleItem {
+  readonly ruleId: string;
+  readonly addonServiceId: string;
+  readonly sortOrder: number;
+  readonly addon: AdminServiceItem;
+  readonly branches: ReadonlyArray<AdminServiceAddonBranchConfig>;
+}
+
+export interface AdminServiceAddonGroup {
+  readonly code: string;
+  readonly selectionMode: "SINGLE" | "MULTIPLE";
+  readonly required: boolean;
+  readonly minSelections: number;
+  readonly maxSelections: number;
+  readonly items: ReadonlyArray<AdminServiceAddonRuleItem>;
+}
+
+export interface AdminServiceAddonConfiguration {
+  readonly serviceId: string;
+  readonly version: number;
+  readonly groups: ReadonlyArray<AdminServiceAddonGroup>;
+  readonly addonCatalog: ReadonlyArray<AdminServiceItem>;
+  readonly branches: ReadonlyArray<AdminBranch>;
+}
+
+export interface AdminServiceAddonConfigurationInput {
+  readonly groups: ReadonlyArray<{
+    readonly code: string;
+    readonly selectionMode: "SINGLE" | "MULTIPLE";
+    readonly required: boolean;
+    readonly minSelections: number;
+    readonly maxSelections: number;
+    readonly items: ReadonlyArray<{
+      readonly addonServiceId: string;
+      readonly sortOrder: number;
+      readonly branches: ReadonlyArray<AdminServiceAddonBranchConfig>;
+    }>;
+  }>;
 }
 
 export interface AdminServiceCategoryDraft {

@@ -8,6 +8,7 @@ import { API_BASE_URL, adminMediaService, adminService, useAdminServiceCategorie
 import { notifySuccess } from "@/lib/app-toast";
 import type { SalonService } from "./data";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
+import { ServiceAddonConfiguration } from "./ServiceAddonConfiguration";
 import {
   serviceImagePatch,
   serviceMediaIdFromUrl,
@@ -32,6 +33,8 @@ export function ServiceEditModal({
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState(service.name);
+  const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(service.serviceType ?? "BASE");
+  const [addonGroup, setAddonGroup] = useState(service.addonGroup ?? "NAIL_REMOVAL");
   const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
@@ -63,7 +66,8 @@ export function ServiceEditModal({
 
   const canSubmit =
     name.trim().length >= 2 &&
-    categoryId !== "" &&
+    (serviceType === "ADD_ON" || categoryId !== "") &&
+    (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
     durationNum % 15 === 0 &&
@@ -87,10 +91,12 @@ export function ServiceEditModal({
         service.id,
         {
           name: name.trim(),
-          categoryId,
+          serviceType,
+          addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
+          ...(serviceType === "BASE" ? { categoryId } : {}),
           price: priceNum,
           durationMinutes: durationNum,
-          isFeatured,
+          isFeatured: serviceType === "BASE" && isFeatured,
           status: isVisible ? "ACTIVE" : "INACTIVE",
           ...serviceImagePatch(imageChange),
         },
@@ -135,6 +141,13 @@ export function ServiceEditModal({
             <Modal.Body className="grid gap-5 px-6 py-5">
               <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("form.serviceType")}</span>
+                <select disabled className="min-h-10 rounded-lg border border-admin-border bg-admin-soft px-3 text-admin-muted" value={serviceType} onChange={(event) => setServiceType(event.target.value as "BASE" | "ADD_ON")}>
+                  <option value="BASE">{t("form.baseService")}</option>
+                  <option value="ADD_ON">{t("form.addonService")}</option>
+                </select>
+              </label>
+              {serviceType === "BASE" ? <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -142,7 +155,7 @@ export function ServiceEditModal({
                   onChange={(event) => setName(event.target.value)}
                   autoFocus
                 />
-              </label>
+              </label> : <label className="flex flex-col gap-2 text-sm"><span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span><input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} /></label>}
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("form.category")}</span>
                 <select
@@ -288,12 +301,14 @@ export function ServiceEditModal({
                 {imageError ? <span role="alert" className="text-xs text-admin-danger">{t(`image.errors.${imageError}`)}</span> : null}
               </section>
               <ServiceVisibilityFields
+                allowFeatured={serviceType === "BASE"}
                 busy={busy}
                 isFeatured={isFeatured}
                 isVisible={isVisible}
                 onFeaturedChange={setIsFeatured}
                 onVisibleChange={setIsVisible}
               />
+              {serviceType === "BASE" && service.version !== undefined ? <ServiceAddonConfiguration serviceId={service.id} version={service.version} /> : null}
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">

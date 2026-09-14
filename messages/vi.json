@@ -647,6 +647,11 @@
       "loadFailed": "Không tải được danh sách dịch vụ.",
       "form": {
         "category": "Danh mục",
+        "serviceType": "Loại dịch vụ",
+        "baseService": "Dịch vụ chính",
+        "addonService": "Dịch vụ bổ sung",
+        "addonGroup": "Mã nhóm tùy chọn",
+        "nameJa": "Tên tiếng Nhật",
         "categoryPlaceholder": "— Chọn danh mục —",
         "categoriesLoading": "Đang tải danh mục…",
         "categoriesEmpty": "Chưa có danh mục nào. Hãy tạo danh mục trước khi thêm dịch vụ."
@@ -666,6 +671,7 @@
         "hidden": "Đang ẩn",
         "featured": "Ưa chuộng nhất",
         "uncategorized": "Chưa phân loại",
+        "addon": "Dịch vụ bổ sung",
         "editService": "Sửa {name}",
         "deleteService": "Xóa {name}",
         "empty": "Không tìm thấy dịch vụ phù hợp."
@@ -747,6 +753,19 @@
         "featuredLabel": "Ưa chuộng nhất trên Mobile",
         "featuredDescription": "Chỉ một dịch vụ được chọn; lựa chọn mới sẽ thay thế dịch vụ hiện tại.",
         "featuredRequiresPublic": "Bật công khai trước khi chọn dịch vụ nổi bật."
+      },
+      "addons": {
+        "title": "Tùy chọn bổ sung cho dịch vụ",
+        "description": "Chọn các tùy chọn khách có thể thêm, rồi bật hoặc ghi đè giá và thời lượng theo từng chi nhánh.",
+        "loading": "Đang tải tùy chọn bổ sung…",
+        "loadFailed": "Không tải được cấu hình tùy chọn bổ sung.",
+        "empty": "Chưa có dịch vụ bổ sung. Hãy tạo dịch vụ loại “Dịch vụ bổ sung” trước.",
+        "priceOverride": "Giá riêng (¥)",
+        "durationOverride": "Phút riêng",
+        "save": "Lưu tùy chọn",
+        "saving": "Đang lưu…",
+        "success": "Đã lưu tùy chọn bổ sung",
+        "failed": "Không lưu được tùy chọn bổ sung."
       },
       "delete": {
         "title": "Xóa dịch vụ",

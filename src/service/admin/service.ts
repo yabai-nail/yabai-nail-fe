@@ -37,6 +37,8 @@ import type {
   AdminServiceItem,
   AdminServiceItemDraft,
   AdminServiceItemPatch,
+  AdminServiceAddonConfiguration,
+  AdminServiceAddonConfigurationInput,
   AdminSurcharge,
   AdminSurchargeDraft,
   AdminSurchargePatch,
@@ -354,6 +356,21 @@ export const adminService = {
       path: { serviceId },
       version,
     }),
+  serviceAddons: (serviceId: string) =>
+    executeApiOperation<AdminServiceAddonConfiguration>(
+      "GET /api/v1/admin/services/{serviceId}/add-ons",
+      { path: { serviceId } },
+    ),
+  updateServiceAddons: (
+    serviceId: string,
+    input: AdminServiceAddonConfigurationInput,
+    version: string | number,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminServiceAddonConfiguration>(
+      "PUT /api/v1/admin/services/{serviceId}/add-ons",
+      { path: { serviceId }, body: input, version, idempotencyKey },
+    ),
   createServiceCategory: (draft: AdminServiceCategoryDraft, idempotencyKey?: string) =>
     executeApiOperation<AdminServiceCategory>("POST /api/v1/admin/service-categories", {
       body: draft,
