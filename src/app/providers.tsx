@@ -8,6 +8,7 @@ import { SWRConfig } from "swr";
 
 import { apiFetcher, AuthProvider } from "@/service";
 import { AppToastProvider } from "@/components/overlays/AppToastProvider";
+import { DEFAULT_TIME_ZONE } from "@/i18n/config";
 
 export interface AppProvidersProps {
   locale: string;
@@ -21,7 +22,7 @@ export function AppProviders({
   children,
 }: AppProvidersProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} timeZone={DEFAULT_TIME_ZONE} messages={messages}>
       <I18nProvider locale={locale}>
         <SWRConfig value={{ fetcher: apiFetcher }}>
           <AuthProvider>

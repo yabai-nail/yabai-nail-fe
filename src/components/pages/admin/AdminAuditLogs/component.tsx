@@ -30,7 +30,12 @@ const pageSize = 10;
 
 export function AdminAuditLogsComponent() {
   const t = useTranslations("admin.auditLogs");
-  const { data, isLoading, error } = useAdminAuditLogs();
+  const [query, setQuery] = useState("");
+  const [action, setAction] = useState("all");
+  const { data, isLoading, error } = useAdminAuditLogs({
+    q: query.trim() || undefined,
+    action: action === "all" ? undefined : action,
+  });
   // Parallel joins: the log rows only carry ids, so the account and branch
   // lists resolve `actorId` / `metadata.branchId` into names the same way
   // AdminAppointments resolves its customer and staff ids.
@@ -53,8 +58,6 @@ export function AdminAuditLogsComponent() {
     [data, lookups, t],
   );
 
-  const [query, setQuery] = useState("");
-  const [action, setAction] = useState("all");
   const [page, setPage] = useState(1);
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = useAdminAuditLog(detailId);
@@ -70,7 +73,7 @@ export function AdminAuditLogsComponent() {
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          Hành động
+          {t("columns.action")}
           <AdminSelectField
             label={t("filterLabel")}
             value={action}
@@ -114,7 +117,7 @@ export function AdminAuditLogsComponent() {
               {visible.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">
-                    Không có nhật ký phù hợp.
+                    {t("empty")}
                   </td>
                 </tr>
               ) : (
@@ -149,7 +152,7 @@ export function AdminAuditLogsComponent() {
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
           <span>
-            Hiển thị {visible.length} trong tổng số {filtered.length} bản ghi
+            {t("pagination", { shown: visible.length, total: filtered.length })}
           </span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>

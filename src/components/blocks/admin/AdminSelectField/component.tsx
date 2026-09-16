@@ -20,6 +20,7 @@ type AdminSelectFieldProps = {
   readonly fullWidth?: boolean;
   readonly id?: string;
   readonly isInvalid?: boolean;
+  readonly isDisabled?: boolean;
   readonly describedBy?: string;
   readonly className?: string;
 };
@@ -44,6 +45,7 @@ export function _AdminSelectField({
   fullWidth = false,
   id,
   isInvalid,
+  isDisabled,
   describedBy,
   className,
 }: AdminSelectFieldProps) {
@@ -56,6 +58,7 @@ export function _AdminSelectField({
         if (typeof key === "string") onChange(key);
       }}
       isInvalid={isInvalid}
+      isDisabled={isDisabled}
       aria-describedby={describedBy}
       className={[fullWidth ? "w-full" : "", className ?? ""].filter(Boolean).join(" ") || undefined}
     >

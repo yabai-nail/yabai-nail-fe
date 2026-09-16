@@ -1,5 +1,13 @@
 {
   "admin": {
+    "common": {
+      "accountUpdated": "Đã cập nhật tài khoản", "accountCreated": "Đã thêm tài khoản", "systemSaved": "Đã lưu cấu hình hệ thống", "loyaltySaved": "Đã lưu cấu hình loyalty", "passwordReset": "Đã đặt lại mật khẩu", "passwordResetBody": "Thông báo đã được gửi cho {name}.",
+      "appointmentCreated": "Đã tạo lịch hẹn", "appointmentUpdated": "Đã cập nhật lịch hẹn", "staffAssigned": "Đã phân công nhân viên", "actualServicesUpdated": "Đã cập nhật dịch vụ thực tế", "photoAttached": "Đã đính kèm ảnh vào lịch hẹn", "appointmentCancelled": "Đã hủy lịch hẹn", "checkInDone": "Đã check-in lịch hẹn", "serviceStarted": "Đã bắt đầu dịch vụ", "serviceCompleted": "Đã hoàn tất dịch vụ", "noShowDone": "Đã đánh dấu khách không đến",
+      "branchUpdated": "Đã cập nhật chi nhánh", "branchCreated": "Đã thêm chi nhánh", "customerUpdated": "Đã cập nhật khách hàng", "customerCreated": "Đã thêm khách hàng", "pointsUpdated": "Đã cập nhật điểm khách hàng", "couponIssued": "Đã phát coupon cho khách hàng", "noteCreated": "Đã thêm ghi chú", "noteUpdated": "Đã cập nhật ghi chú",
+      "promotionActivated": "Đã kích hoạt khuyến mãi", "promotionPaused": "Đã tạm ngưng khuyến mãi", "campaignCreated": "Đã tạo chiến dịch", "campaignStatus": "Trạng thái: {status}.", "campaignCancelled": "Đã hủy chiến dịch", "promotionIssued": "Đã phát hành khuyến mãi", "promotionIssuedBody": "Đã gửi cho {count} khách hàng.", "promotionUpdated": "Đã cập nhật khuyến mãi", "promotionCreated": "Đã thêm khuyến mãi",
+      "conversationArchived": "Đã lưu trữ hội thoại", "conversationUpdated": "Đã cập nhật trạng thái hội thoại", "membershipFound": "Đã tra cứu thẻ của {name}.", "customersFound": "Tìm thấy {count} khách.", "reportExportCreated": "Đã tạo yêu cầu xuất báo cáo", "reviewResolved": "Đã xử lý đánh giá", "reviewReopened": "Đã mở lại đánh giá", "reviewReplySent": "Đã gửi phản hồi đánh giá", "surchargeUpdated": "Đã cập nhật phụ thu", "surchargeCreated": "Đã thêm phụ thu", "settingsSaved": "Đã cập nhật cài đặt", "compensationSaved": "Đã cập nhật lương và hoa hồng", "staffCreated": "Đã thêm nhân viên", "staffUpdated": "Đã cập nhật nhân viên", "leaveApproved": "Đã duyệt yêu cầu nghỉ", "leaveRejected": "Đã từ chối yêu cầu nghỉ", "shiftCreated": "Đã thêm ca làm việc", "leaveRequested": "Đã gửi yêu cầu nghỉ", "skillsSaved": "Đã cập nhật kỹ năng nhân viên"
+    },
+    "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
     "settings": {
       "language": {
         "heading": "Ngôn ngữ hiển thị",
@@ -27,6 +35,7 @@
         "salon": "Thông tin tiệm",
         "booking": "Đặt lịch",
         "commission": "Nhân viên & Hoa hồng",
+        "account": "Bảo mật tài khoản",
         "payment": "Thanh toán",
         "automation": "Tin nhắn tự động",
         "notifications": "Thông báo",
@@ -36,6 +45,19 @@
       },
       "tabsLabel": "Nhóm cài đặt",
       "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",
+      "account": {
+        "heading": "Đổi mật khẩu quản trị",
+        "description": "Mật khẩu mới phải có chữ thường, chữ hoa, chữ số và ít nhất 8 ký tự.",
+        "currentPassword": "Mật khẩu hiện tại",
+        "newPassword": "Mật khẩu mới",
+        "confirmation": "Nhập lại mật khẩu mới",
+        "requirements": "Mật khẩu chưa đáp ứng yêu cầu bảo mật.",
+        "mismatch": "Mật khẩu nhập lại chưa khớp.",
+        "saving": "Đang đổi mật khẩu…",
+        "save": "Đổi mật khẩu",
+        "success": "Đã đổi mật khẩu",
+        "failed": "Không đổi được mật khẩu."
+      },
       "roles": {
         "OWNER": "Chủ chuỗi",
         "MANAGER": "Quản lý"
@@ -50,6 +72,8 @@
         "salonShare": "Phần doanh thu thuộc tiệm"
       },
       "commission": {
+        "periodDescription": "Tỷ lệ, doanh thu và hoa hồng của kỳ {period}.",
+        "periodLoadFailed": "Không tải được số liệu kỳ {period} — cột tỷ lệ, doanh thu và hoa hồng hiển thị “{missing}”.",
         "heading": "Nhân viên & Cài đặt hoa hồng",
         "listHeading": "Danh sách nhân viên & tỷ lệ hoa hồng",
         "addStaff": "Thêm nhân viên",
@@ -59,7 +83,7 @@
         "generalHeading": "Cài đặt chung",
         "generalNote": "Hai công tắc dưới đây chỉ áp dụng trên trình duyệt này — chưa có API cấu hình hoa hồng theo chi nhánh.",
         "autoCalculate": "Tự động tính hoa hồng khi thanh toán đơn",
-        "showRate": "Hiển thị % hoa hồng với nhân viên"
+        "showRate": "Hiển thị % hoa hồng với nhân viên", "loadFailed": "Không tải được danh sách nhân viên."
       },
       "switchOn": "Bật",
       "switchOff": "Tắt",
@@ -97,6 +121,17 @@
         "saving": "Đang lưu…",
         "save": "Lưu cài đặt",
         "saveFailed": "Không lưu được cài đặt đặt lịch."
+      },
+      "salon": {
+        "heading": "Thông tin hiển thị trên trang chủ",
+        "openTime": "Giờ mở cửa",
+        "closeTime": "Giờ đóng cửa",
+        "lastBookingTime": "Giờ nhận lịch cuối",
+        "amenities": "Tiện ích của salon",
+        "paymentMethods": "Phương thức thanh toán",
+        "ownerOnly": "Chỉ chủ chuỗi có thể thay đổi thông tin công khai này.",
+        "amenity": { "WIFI": "Wi-Fi", "REFRESHMENTS": "Nước uống & bánh kẹo", "PHONE_CHARGING": "Sạc điện thoại", "LUGGAGE_STORAGE": "Gửi hành lý" },
+        "payment": { "CASH": "Tiền mặt", "PAYPAY": "PayPay", "VISA": "Visa", "MASTERCARD": "Mastercard" }
       },
       "aside": {
         "heading": "Ghi chú",
@@ -201,10 +236,12 @@
       "closeNav": "Đóng điều hướng quản trị",
       "navLabel": "Điều hướng quản trị",
       "brand": "YABAI Nail Salon — Tổng quan quản trị",
-      "comingSoon": "Tính năng sẽ được phát triển sau"
+      "comingSoon": "Tính năng sẽ được phát triển sau", "skipToContent": "Bỏ qua đến nội dung chính"
     },
     "auth": {
-      "restoring": "Đang khôi phục phiên đăng nhập…"
+      "restoring": "Đang khôi phục phiên đăng nhập…",
+      "forbiddenTitle": "Bạn không có quyền mở màn hình này",
+      "forbiddenDescription": "Hãy chọn một mục được cấp quyền trong thanh điều hướng hoặc liên hệ chủ chuỗi."
     },
     "recordDetail": {
       "loading": "Đang tải…",
@@ -236,6 +273,8 @@
       }
     },
     "messages": {
+      "call": "Gọi",
+      "emptyThread": "Viết dòng đầu tiên cho {name} ở ô bên dưới.",
       "inbox": "Hộp thư",
       "searchLabel": "Tìm tin nhắn",
       "searchPlaceholder": "Tìm kiếm tin nhắn...",
@@ -256,9 +295,15 @@
       "threadLabel": "Tin nhắn với {name}",
       "composeLabel": "Nhập tin nhắn",
       "composePlaceholder": "Nhập tin nhắn...",
+      "composeTo": "Nhắn cho {name}…",
+      "sending": "Đang gửi…",
+      "noMessages": "Chưa có tin nhắn",
+      "noPhone": "Chưa có số điện thoại",
       "send": "Gửi",
       "unnamedCustomer": "Khách chưa có tên",
       "now": "Bây giờ",
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
       "sendFailed": "Không gửi được tin nhắn.",
       "statusFailed": "Không cập nhật được trạng thái hội thoại.",
       "loadFailed": "Không tải được hội thoại.",
@@ -281,6 +326,8 @@
       "searchLabel": "Tìm mẫu nail",
       "searchPlaceholder": "Tên mẫu...",
       "add": "Thêm mẫu",
+      "catalogTab": "Kho mẫu",
+      "proposalsTab": "Đề xuất chờ duyệt",
       "loading": "Đang tải mẫu nail…",
       "loadFailed": "Không tải được danh sách mẫu nail.",
       "columns": {
@@ -303,6 +350,35 @@
         "save": "Lưu",
         "add": "Thêm",
         "saveFailed": "Không lưu được mẫu nail."
+        ,"image": "Ảnh mẫu nail",
+        "imageRequirements": "JPG, PNG hoặc WebP, tối đa 10 MB.",
+        "imagePick": "Chọn ảnh",
+        "imageReplace": "Thay ảnh hiện tại",
+        "imageRemove": "Bỏ ảnh đã chọn",
+        "imagePreview": "Xem trước {name}",
+        "imageUnsupported": "Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.",
+        "imageEmpty": "Tệp ảnh đang trống.",
+        "imageTooLarge": "Ảnh không được lớn hơn 10 MB.",
+        "updated": "Đã cập nhật mẫu nail",
+        "created": "Đã thêm mẫu nail"
+      },
+      "proposals": {
+        "loading": "Đang tải đề xuất…",
+        "loadFailed": "Không tải được đề xuất mẫu nail.",
+        "empty": "Không có đề xuất nào chờ duyệt.",
+        "untitled": "Mẫu chưa đặt tên",
+        "createdAt": "Gửi lúc {value}",
+        "unknownDate": "không rõ thời gian",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "approveTitle": "Duyệt đề xuất mẫu nail",
+        "rejectTitle": "Từ chối đề xuất mẫu nail",
+        "reason": "Lý do",
+        "approveReasonPlaceholder": "Ghi chú tùy chọn…",
+        "rejectReasonPlaceholder": "Nhập lý do từ chối…",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "saveFailed": "Không cập nhật được đề xuất."
       }
     },
     "branches": {
@@ -547,6 +623,8 @@
       "transfer": "Chuyển khoản"
     },
     "accounts": {
+      "add": "Thêm tài khoản",
+      "pagination": "Hiển thị {shown} trong tổng số {total} tài khoản",
       "role": {
         "OWNER": "Chủ tiệm",
         "MANAGER": "Quản lý",
@@ -608,6 +686,10 @@
         "statusLabel": "Trạng thái tài khoản",
         "tempPassword": "Mật khẩu tạm",
         "tempPasswordPlaceholder": "Ít nhất 8 ký tự, có A-z và số",
+        "branches": "Chi nhánh được phép truy cập",
+        "branchesLoading": "Đang tải chi nhánh…",
+        "branchesLoadFailed": "Không tải được chi nhánh.",
+        "branchRequired": "Hãy chọn ít nhất một chi nhánh.",
         "cancel": "Hủy",
         "saving": "Đang lưu…",
         "save": "Lưu",
@@ -615,6 +697,7 @@
         "saveFailed": "Không lưu được tài khoản."
       },
       "reset": {
+        "title": "Đặt lại mật khẩu — {name}",
         "channel": "Kênh thông báo",
         "reason": "Lý do (tuỳ chọn)",
         "reasonPlaceholder": "Nhân viên quên mật khẩu",
@@ -692,6 +775,15 @@
         "noteHeading": "Ghi chú",
         "noteBody": "Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng."
       },
+      "categoryTable": {
+        "all": "Tất cả", "branchCount": "{count} chi nhánh", "allBranches": "Mọi chi nhánh",
+        "reorderSuccess": "Đã cập nhật thứ tự danh mục", "reorderFailed": "Không đổi được thứ tự.",
+        "enabledSuccess": "Đã bật danh mục", "disabledSuccess": "Đã tắt danh mục", "statusFailed": "Không đổi được trạng thái.",
+        "searchLabel": "Tìm danh mục", "searchPlaceholder": "Tìm theo tên hoặc mã...", "add": "Thêm danh mục", "loadFailed": "Không tải được danh mục.", "caption": "Danh mục dịch vụ",
+        "columns": { "order": "Thứ tự", "name": "Tên", "code": "Mã", "japanese": "Nhật ngữ", "branches": "Chi nhánh", "services": "Dịch vụ", "status": "Trạng thái", "actions": "Thao tác" },
+        "toggleLabel": "Bật hoặc tắt danh mục {name}", "enabled": "Bật", "disabled": "Tắt", "editLabel": "Sửa {name}",
+        "loading": "Đang tải danh mục…", "empty": "Chưa có danh mục nào. Thêm một danh mục để tạo được dịch vụ.", "noResults": "Không tìm thấy danh mục phù hợp.", "count": "{count} danh mục", "reorderHint": " · xoá ô tìm kiếm để đổi được thứ tự"
+      },
       "categoryEditor": {
         "editTitle": "Đổi tên danh mục",
         "addTitle": "Thêm danh mục",
@@ -703,7 +795,10 @@
         "saving": "Đang lưu…",
         "save": "Lưu",
         "add": "Thêm",
-        "saveFailed": "Không lưu được danh mục."
+        "saveFailed": "Không lưu được danh mục.", "updated": "Đã cập nhật danh mục", "created": "Đã thêm danh mục",
+        "japaneseName": "Nhật ngữ", "branchScope": "Chi nhánh hiển thị", "branchScopeHint": "Không chọn chi nhánh nào cũng có nghĩa là hiện ở tất cả.",
+        "clearAll": "Bỏ chọn", "selectAll": "Chọn tất cả", "members": "Đang có {count} dịch vụ: {names}. Muốn chuyển một dịch vụ đi, hãy gán nó vào danh mục khác.",
+        "noMembers": "chưa có dịch vụ nào", "pickServices": "Chọn dịch vụ để chuyển vào danh mục này:", "allAssigned": "Mọi dịch vụ đều đã ở đây.", "uncategorized": "chưa phân loại"
       },
       "create": {
         "title": "Thêm dịch vụ",
@@ -776,6 +871,7 @@
         "deleting": "Đang xóa…",
         "success": "Đã xóa {name}",
         "failed": "Không xóa được dịch vụ. Vui lòng tải lại và thử lại.",
+        "failedWithDetails": "Không xóa được dịch vụ: {details}",
         "hasHistory": "Dịch vụ đã có lịch sử đặt nên không thể xóa. Hãy chỉnh sửa và tắt “Công khai cho khách” thay thế."
       },
       "surcharge": {
@@ -800,10 +896,12 @@
         "saving": "Đang lưu…",
         "save": "Lưu",
         "addAction": "Thêm",
-        "saveFailed": "Không lưu được phụ thu."
+        "saveFailed": "Không lưu được phụ thu.", "active": "Đang áp dụng"
       }
     },
     "customers": {
+      "add": "Thêm khách hàng",
+      "pagination": "Hiển thị {first}–{last} trong tổng số {total} khách hàng",
       "unnamed": "Khách chưa có tên",
       "tabsLabel": "Phân nhóm khách hàng",
       "segment": {
@@ -814,7 +912,7 @@
       },
       "searchLabel": "Tìm khách hàng",
       "searchPlaceholder": "Tìm tên, SĐT...",
-      "loading": "Đang tải danh sách khách hàng…",
+      "loading": "Đang tải danh sách khách hàng…", "loadFailed": "Không tải được danh sách khách hàng.",
       "emptyHeading": "Chưa có khách hàng",
       "retry": "Thử tải lại trang.",
       "firstCustomer": "Thêm khách hàng đầu tiên để bắt đầu theo dõi lịch sử và điểm tích luỹ.",
@@ -823,6 +921,8 @@
       "noSelectionDescription": "Thay đổi từ khóa hoặc nhóm khách hàng để xem chi tiết.",
       "saveFailed": "Không lưu được thông tin khách hàng.",
       "rank": {
+        "member": "Thành viên",
+        "platinum": "Bạch kim",
         "gold": "Vàng",
         "silver": "Bạc",
         "bronze": "Đồng",
@@ -831,6 +931,8 @@
       "detail": {
         "heading": "Thông tin khách hàng",
         "edit": "Chỉnh sửa {name}",
+        "editAction": "Chỉnh sửa thông tin",
+        "messageAction": "Nhắn tin cho khách",
         "social": "Mạng xã hội",
         "preference": "Sở thích",
         "totalSpend": "Tổng chi tiêu",
@@ -865,12 +967,14 @@
       },
       "edit": {
         "title": "Chỉnh sửa khách hàng",
+        "name": "Họ tên hiển thị",
         "localeLabel": "Ngôn ngữ ưu tiên",
         "statusLabel": "Trạng thái tài khoản",
         "statusActive": "Hoạt động",
         "statusInactive": "Tạm ngưng",
         "saving": "Đang lưu…",
-        "save": "Lưu"
+        "save": "Lưu",
+        "close": "Đóng"
       },
       "loyalty": {
         "pointsFailed": "Không điều chỉnh được điểm.",
@@ -892,7 +996,7 @@
         "historyHeading": "Lịch sử nail gần đây",
         "historyLoading": "Đang tải lịch sử…",
         "historyFailed": "Không tải được lịch sử.",
-        "historyEmpty": "Chưa có lịch nào."
+        "historyEmpty": "Chưa có lịch nào.", "heading": "Ưu đãi và điểm tích luỹ", "adjustPoints": "Cộng / trừ điểm", "issueCoupon": "Phát coupon"
       },
       "notes": {
         "saveFailed": "Không lưu được ghi chú.",
@@ -902,7 +1006,7 @@
         "empty": "Chưa có ghi chú nào.",
         "saving": "Đang lưu…",
         "save": "Lưu",
-        "placeholder": "Thêm ghi chú nội bộ (không hiển thị cho khách)…"
+        "placeholder": "Thêm ghi chú nội bộ (không hiển thị cho khách)…", "heading": "Ghi chú nhân viên", "cancel": "Huỷ", "edit": "Sửa", "add": "Thêm ghi chú"
       }
     },
     "dashboard": {
@@ -964,7 +1068,10 @@
         "heading": "Lịch hẹn hôm nay",
         "loading": "Đang tải lịch hẹn…",
         "empty": "Hôm nay chưa có lịch hẹn nào.",
-        "listLabel": "Danh sách lịch hẹn hôm nay"
+        "listLabel": "Danh sách lịch hẹn hôm nay",
+        "viewAll": "Xem lịch",
+        "loadFailed": "Không tải được lịch hẹn hôm nay.",
+        "add": "Thêm lịch hẹn"
       },
       "overviewHeading": "Tổng quan hôm nay",
       "activityRegion": "Hoạt động cửa hàng",
@@ -977,8 +1084,11 @@
         "seriesLabel": "Doanh thu"
       },
       "monthly": {
+        "heading": "Thu nhập của quán (tháng {month}/{year})",
         "loading": "Đang tải tổng kết tháng…",
-        "afterCommission": "Còn lại sau hoa hồng"
+        "afterCommission": "Còn lại sau hoa hồng",
+        "loadFailed": "Không tải được tổng kết tháng.",
+        "costUnavailable": "Chưa trừ chi phí vận hành — backend chưa có chi phí theo tháng"
       },
       "revenue": {
         "netToday": "Tiền quán thực nhận",
@@ -988,13 +1098,20 @@
         "byMethod": "Doanh thu theo phương thức",
         "methodFailed": "Không tải được phương thức thanh toán.",
         "methodLoading": "Đang tải…",
-        "noTransactions": "Hôm nay chưa có giao dịch nào."
+        "noTransactions": "Hôm nay chưa có giao dịch nào.",
+        "loadFailed": "Không tải được số liệu doanh thu.",
+        "todayOnly": "Chỉ có số liệu theo phương thức cho hôm nay."
       },
       "staff": {
+        "heading": "Nhân viên (kỳ {period})",
+        "empty": "Kỳ {period} chưa có nhân viên nào.",
+        "revenue": "Doanh thu",
         "loading": "Đang tải danh sách nhân viên…",
         "expectedPayout": "Dự kiến nhận",
         "working": "Đang làm",
-        "off": "Nghỉ"
+        "off": "Nghỉ",
+        "viewAll": "Xem tất cả",
+        "loadFailed": "Không tải được hiệu suất nhân viên."
       },
       "quick": {
         "appointment": "Tạo lịch hẹn",
@@ -1008,10 +1125,15 @@
         "heading": "Thông báo",
         "loading": "Đang tải thông báo…",
         "empty": "Chưa có thông báo mới.",
-        "listLabel": "Thông báo mới"
+        "listLabel": "Thông báo mới",
+        "loadFailed": "Không tải được thông báo."
       }
     },
     "marketing": {
+      "add": "Thêm khuyến mãi",
+      "pagination": "Hiển thị {shown} trong tổng số {total} khuyến mãi",
+      "matchingCustomers": "{count, number} khách phù hợp",
+      "customerCount": "{count, number} khách",
       "promotionStatus": {
         "ACTIVE": "Đang chạy",
         "SCHEDULED": "Lên lịch",
@@ -1097,6 +1219,8 @@
       "metricsEmpty": "Không có chỉ số hiển thị.",
       "cancelCampaign": "Huỷ chiến dịch",
       "issueModal": {
+        "title": "Phát hành — {name}",
+        "selected": "Đã chọn {count} khách",
         "failed": "Không phát hành được.",
         "pickCustomer": "Chọn khách hàng",
         "searchPlaceholder": "Tìm theo tên hoặc số điện thoại...",
@@ -1131,6 +1255,8 @@
       }
     },
     "staff": {
+      "add": "Thêm nhân viên",
+      "editAction": "Chỉnh sửa",
       "unnamed": "Nhân viên chưa có tên",
       "metrics": {
         "periodRevenue": "Doanh thu kỳ {period}",
@@ -1152,6 +1278,7 @@
         "off": "Nghỉ phép"
       },
       "loading": "Đang tải danh sách nhân viên…",
+      "loadingFailed": "Không tải được danh sách nhân viên.",
       "emptyHeading": "Chưa có nhân viên",
       "retry": "Thử tải lại trang.",
       "firstStaff": "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng.",
@@ -1160,6 +1287,7 @@
       "statusWorking": "Đang làm",
       "statusOff": "Nghỉ phép",
       "orders": {
+        "heading": "Lịch hẹn gần đây của {name}",
         "multipleServices": "{count} dịch vụ",
         "unnamedService": "Dịch vụ chưa có tên",
         "unnamedCustomer": "Khách chưa có tên",
@@ -1169,7 +1297,8 @@
         "customer": "Khách hàng",
         "service": "Dịch vụ",
         "total": "Tổng tiền",
-        "status": "Trạng thái"
+        "status": "Trạng thái",
+        "loadFailed": "Không tải được lịch hẹn của nhân viên."
       },
       "compensation": {
         "saveFailed": "Không lưu được hoa hồng.",
@@ -1181,7 +1310,9 @@
         "commissionPercent": "Hoa hồng (%)",
         "effectiveFrom": "Áp dụng từ ngày",
         "saving": "Đang lưu…",
-        "submit": "Cập nhật hoa hồng"
+        "submit": "Cập nhật hoa hồng",
+        "heading": "Cấu hình hoa hồng",
+        "effectiveHint": "Phải sau ngày hiệu lực của cấu hình hiện tại. Hoa hồng đã chốt trước ngày này giữ nguyên."
       },
       "create": {
         "failed": "Không tạo được nhân viên.",
@@ -1189,10 +1320,12 @@
         "name": "Họ và tên",
         "cancel": "Hủy",
         "saving": "Đang lưu…",
-        "submit": "Thêm nhân viên"
+        "submit": "Thêm nhân viên",
+        "afterCreateHint": "Kỹ năng, mức hoa hồng và ca làm việc có thể cấu hình sau khi tạo."
       },
       "detail": {
         "heading": "Chi tiết nhân viên",
+        "periodRevenue": "Doanh thu kỳ {period}",
         "phone": "Số điện thoại",
         "commissionRate": "Tỷ lệ hoa hồng",
         "totalRevenue": "Tổng doanh thu",
@@ -1207,9 +1340,13 @@
         "name": "Họ tên",
         "cancel": "Huỷ",
         "saving": "Đang lưu…",
-        "save": "Lưu"
+        "save": "Lưu",
+        "active": "Đang hoạt động"
       },
       "performance": {
+        "empty": "Không có dữ liệu kỳ {period}.",
+        "revenue": "Doanh thu",
+        "periodLoadFailed": "Không tải được doanh thu kỳ {period} — cột doanh thu và hoa hồng hiển thị “{missing}”.",
         "heading": "Hiệu suất theo kỳ",
         "periodLabel": "Kỳ thống kê",
         "loading": "Đang tải…",
@@ -1266,10 +1403,12 @@
         "reason": "Lý do",
         "cancel": "Huỷ",
         "saving": "Đang lưu…",
-        "save": "Lưu"
+        "save": "Lưu",
+        "timeValidation": "Giờ bắt đầu và kết thúc phải rơi vào mốc 15 phút (00, 15, 30, 45), và giờ kết thúc phải sau giờ bắt đầu."
       }
     },
     "auditLogs": {
+      "pagination": "Hiển thị {shown} trong tổng số {total} bản ghi",
       "action": {
         "ACCOUNT_CREATED": "Tạo tài khoản",
         "ACCOUNT_PASSWORD_RESET": "Đặt lại mật khẩu tài khoản",
@@ -1376,7 +1515,7 @@
         "target": "Đối tượng",
         "branch": "Chi nhánh"
       },
-      "detailTitle": "Chi tiết nhật ký"
+      "detailTitle": "Chi tiết nhật ký", "empty": "Không có nhật ký phù hợp."
     },
     "appointments": {
       "toolbar": {
@@ -1583,12 +1722,15 @@
       "serverBackedNote": "Kết nối với lịch hẹn thật — hệ thống gọi payment-quote trước khi ghi nhận thanh toán.",
       "recorded": "Giao dịch đã ghi nhận",
       "submitting": "Đang gọi quote và ghi giao dịch…",
+      "paymentRecorded": "Đã ghi nhận thanh toán",
       "step3": "Xác nhận & thanh toán",
       "grandTotalLabel": "Tổng tiền khách thanh toán",
       "error": {
         "noAppointment": "Hóa đơn này chưa gắn với lịch hẹn thật nên không ghi được giao dịch.",
         "amountMismatch": "Số tiền trên màn hình ({screen}) khác số máy chủ sẽ thu ({server}). Hãy tải lại và kiểm tra trước khi thu tiền.",
-        "record": "Không ghi được giao dịch."
+        "record": "Không ghi được giao dịch.",
+        "services": "Không lưu được danh sách dịch vụ thực tế.",
+        "adjustments": "Không lưu được giảm giá và ghi chú thanh toán."
       },
       "customer": {
         "heading": "Thông tin khách hàng",
@@ -1643,6 +1785,7 @@
         "addTitle": "Thêm dịch vụ phát sinh",
         "source": "Nguồn dịch vụ",
         "custom": "Khoản tùy chỉnh",
+        "catalogOnly": "Chỉ các dịch vụ trong danh mục mới được lưu vào lịch hẹn.",
         "name": "Tên dịch vụ",
         "price": "Giá (¥)",
         "note": "Ghi chú",
@@ -1656,7 +1799,14 @@
         "pending": "Chờ thanh toán",
         "subtotal": "Tổng tiền dịch vụ",
         "discount": "Giảm giá (¥)",
+        "benefitDiscount": "Ưu đãi thành viên",
+        "discountReason": "Lý do giảm giá",
+        "discountReasonPlaceholder": "Ví dụ: xử lý khiếu nại tại salon",
+        "discountReasonRequired": "Hãy nhập lý do khi giảm giá thủ công.",
         "applyDiscount": "Áp dụng giảm giá",
+        "saveAdjustments": "Lưu giảm giá & ghi chú",
+        "saving": "Đang lưu…",
+        "adjustmentUnavailable": "Chỉ có thể chỉnh giảm giá khi lịch đang phục vụ hoặc chờ thanh toán.",
         "grandTotal": "Khách cần thanh toán",
         "orderNote": "Ghi chú đơn hàng",
         "orderNotePlaceholder": "Nhập ghi chú nếu có...",
@@ -1687,7 +1837,8 @@
         "submit": "Xác nhận"
       },
       "methodPicker": {
-        "label": "Phương thức thanh toán"
+        "label": "Phương thức thanh toán",
+        "cashOnly": "Hệ thống hiện chỉ ghi nhận thanh toán tiền mặt."
       },
       "state": {
         "paidLocked": "Hóa đơn đã thanh toán nên không thể thay đổi số tiền.",

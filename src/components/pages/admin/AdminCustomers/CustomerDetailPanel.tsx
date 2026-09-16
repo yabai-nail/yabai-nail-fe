@@ -67,10 +67,10 @@ export function CustomerDetailPanel({
             286px cell and sat short of the edge with nothing beside them. */}
         <div className="grid gap-2">
           <Button fullWidth variant="primary" className="rounded-lg" isDisabled={!onEdit} onPress={onEdit}>
-            <PencilSquareIcon className="size-4" />Chỉnh sửa thông tin
+            <PencilSquareIcon className="size-4" />{t("detail.editAction")}
           </Button>
           <Button fullWidth variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/messages")}>
-            <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
+            <ChatBubbleLeftRightIcon className="size-4" />{t("detail.messageAction")}
           </Button>
         </div>
       </Card.Content>

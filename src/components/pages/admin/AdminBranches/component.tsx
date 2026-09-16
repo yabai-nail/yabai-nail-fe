@@ -8,7 +8,7 @@ import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
-import { useAdminBranchDetail, useAdminBranchList } from "@/service";
+import { useAdminBranchDetail, useAdminBranchList, useAdminPermission } from "@/service";
 import { BranchModal } from "./BranchModal";
 import {
   adaptBranch,
@@ -21,16 +21,19 @@ const pageSize = 8;
 
 export function AdminBranchesComponent() {
   const t = useTranslations("admin.branches");
+  const canWrite = useAdminPermission("branch.write.all");
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
-  const { data, isLoading, error, mutate } = useAdminBranchList();
+  const [query, setQuery] = useState("");
+  const { data, isLoading, error, mutate } = useAdminBranchList({
+    q: query.trim() || undefined,
+  });
 
   const source = useMemo<ReadonlyArray<BranchRow>>(
     () => (data?.items ? data.items.map(adaptBranch) : []),
     [data],
   );
 
-  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<BranchRow | null>(null);
   const [creating, setCreating] = useState(false);
@@ -56,8 +59,8 @@ export function AdminBranchesComponent() {
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-        <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-          <PlusIcon className="size-4" />Thêm chi nhánh
+        <Button variant="primary" className="rounded-lg" isDisabled={!canWrite} onPress={() => setCreating(true)}>
+          <PlusIcon className="size-4" />{t("add")}
         </Button>
       </div>
 
@@ -94,7 +97,7 @@ export function AdminBranchesComponent() {
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setDetailId(row.id)}>{t("detailAction")}</Button>
-                        <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
+                        <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canWrite} onPress={() => setEditing(row)}>{t("edit")}</Button>
                       </div>
                     </td>
                   </tr>
@@ -104,13 +107,16 @@ export function AdminBranchesComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>Hiển thị {visible.length} trong tổng số {filtered.length} chi nhánh</span>
+          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 
-      {creating ? <BranchModal branch={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
-      {editing ? <BranchModal branch={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canWrite && creating ? <BranchModal branch={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
+      {canWrite && editing ? <BranchModal branch={editing} onClose={() => setEditing(null)} onSaved={() => {
+        void mutate();
+        if (detailId === editing.id) void detail.mutate();
+      }} /> : null}
       {detailId ? (
         <AdminRecordDetail
           title={t("detail.title")}

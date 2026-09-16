@@ -34,8 +34,10 @@ interface AuthContextValue {
   readonly activeBranchId: string | null;
   readonly status: AuthStatus;
   readonly isAuthenticated: boolean;
+  readonly permissions: ReadonlyArray<string> | null;
+  readonly capabilities: ReadonlyArray<string> | null;
   readonly login: (input: AdminLoginInput) => Promise<AdminSession>;
-  readonly logout: () => void;
+  readonly logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -65,6 +67,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
   const [status, setStatus] = useState<AuthStatus>("restoring");
+  const [permissions, setPermissions] = useState<ReadonlyArray<string> | null>(null);
+  const [capabilities, setCapabilities] = useState<ReadonlyArray<string> | null>(null);
   // The refresher is called from an axios interceptor, outside React's render
   // cycle, so it reads the live session id from a ref rather than from state.
   const refreshTokenRef = useRef<string | null>(null);
@@ -77,6 +81,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     setSessionId(null);
     setActiveBranchId(null);
     setStatus("anonymous");
+    setPermissions(null);
+    setCapabilities(null);
   }, []);
 
   const adoptSession = useCallback((session: AdminSession) => {
@@ -88,6 +94,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     setUser(session.user);
     setSessionId(session.sessionId);
     setStatus("authenticated");
+    setPermissions(null);
+    setCapabilities(null);
   }, []);
 
   const login = useCallback(
@@ -99,13 +107,28 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       try {
         const summary = await authService.adminSession();
         setActiveBranchId(summary.session.activeBranchId);
+        setPermissions(summary.user.permissions);
+        setCapabilities(summary.user.capabilities);
       } catch {
         setActiveBranchId(null);
+        setPermissions([]);
+        setCapabilities([]);
       }
       return session;
     },
     [adoptSession],
   );
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.revokeCurrentSession();
+    } finally {
+      // Local cleanup must still happen when the session has already expired
+      // or the network is unavailable. The server call runs first so the
+      // bearer token is still present while revocation is attempted.
+      clearSession();
+    }
+  }, [clearSession]);
 
   // Exchange the stored refresh token for a live access token on boot. Runs
   // once; a failure here means the token was revoked, rotated behind our back,
@@ -120,7 +143,11 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         if (cancelled) return;
         adoptSession(session);
         const summary = await authService.adminSession();
-        if (!cancelled) setActiveBranchId(summary.session.activeBranchId);
+        if (!cancelled) {
+          setActiveBranchId(summary.session.activeBranchId);
+          setPermissions(summary.user.permissions);
+          setCapabilities(summary.user.capabilities);
+        }
       } catch {
         if (!cancelled) clearSession();
       }
@@ -157,10 +184,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       activeBranchId,
       status,
       isAuthenticated: status === "authenticated",
+      permissions,
+      capabilities,
       login,
-      logout: clearSession,
+      logout,
     }),
-    [activeBranchId, clearSession, login, sessionId, status, user],
+    [activeBranchId, capabilities, login, logout, permissions, sessionId, status, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -170,4 +199,9 @@ export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;
+}
+
+export function useAdminPermission(...requiredAny: ReadonlyArray<string>): boolean {
+  const { permissions } = useAuth();
+  return permissions !== null && requiredAny.some((permission) => permissions.includes(permission));
 }

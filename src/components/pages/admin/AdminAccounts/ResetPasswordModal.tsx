@@ -20,6 +20,7 @@ export function ResetPasswordModal({
   onDone: () => void;
 }>) {
   const t = useTranslations("admin.accounts");
+  const tc = useTranslations("admin.common");
 
   const [reason, setReason] = useState("");
   const [notifyChannel, setNotifyChannel] = useState("SMS");
@@ -34,7 +35,7 @@ export function ResetPasswordModal({
         reason: reason.trim() || undefined,
         notifyChannel,
       });
-      notifySuccess("Đã đặt lại mật khẩu", `Thông báo đã được gửi cho ${accountName}.`);
+      notifySuccess(tc("passwordReset"), tc("passwordResetBody", { name: accountName }));
       onDone();
       onClose();
     } catch (err) {
@@ -53,7 +54,7 @@ export function ResetPasswordModal({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                Đặt lại mật khẩu — {accountName}
+                {t("reset.title", { name: accountName })}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">

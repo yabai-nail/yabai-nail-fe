@@ -93,7 +93,7 @@ export function RevenuePanel() {
       <Card.Content className="flex flex-1 flex-col px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {hasError ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
-            Không tải được số liệu doanh thu.
+            {t("revenue.loadFailed")}
           </p>
         ) : isLoading ? (
           <p className="py-3 text-center text-xs text-admin-muted">{t("revenue.loading")}</p>
@@ -121,7 +121,7 @@ export function RevenuePanel() {
           <h3 className="text-xs font-bold text-admin-ink">{t("revenue.byMethod")}</h3>
           {!isToday ? (
             <p className="mt-3 text-xs text-admin-muted">
-              Chỉ có số liệu theo phương thức cho hôm nay.
+              {t("revenue.todayOnly")}
             </p>
           ) : dashboard.error ? (
             <p className="mt-3 text-xs text-danger">{t("revenue.methodFailed")}</p>

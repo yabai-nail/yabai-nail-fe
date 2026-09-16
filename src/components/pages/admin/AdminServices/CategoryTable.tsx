@@ -3,6 +3,7 @@
 import { Bars3Icon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Switch } from "@heroui/react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { adminService, useAdminBranchList, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
@@ -16,7 +17,8 @@ const pageSize = 10;
 // The management surface for categories, at full page width. It sits here rather than in the
 // right-hand column because that column is 17rem wide: names truncated to an ellipsis, and there
 // was no room for the branch scope, the Japanese name or the on/off switch.
-export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<SalonService> }>) {
+export function CategoryTable({ services, canWrite }: Readonly<{ services: ReadonlyArray<SalonService>; canWrite: boolean }>) {
+  const t = useTranslations("admin.services.categoryTable");
   const categories = useAdminServiceCategories();
   const branches = useAdminBranchList();
   const ordered = categories.data?.items ?? [];
@@ -35,19 +37,19 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
   // A search reorders nothing: the API wants the complete list, so a drag while filtered would
   // move a row against positions the screen is not showing.
-  const canReorder = query.trim() === "";
+  const canReorder = canWrite && query.trim() === "";
   const absoluteIndexOf = (category: AdminServiceCategory) => ordered.findIndex((row) => row.id === category.id);
   const countIn = (categoryId: string) => services.filter((service) => service.category?.id === categoryId).length;
   // Naming all four branches says no more than "Tất cả" does, and it cost half the table width.
   // Past two names the count carries the meaning; the full list stays in the tooltip.
   const branchLabel = (scope: ReadonlyArray<string>) => {
     const total = branchName.size;
-    if (scope.length === 0 || (total > 0 && scope.length >= total)) return "Tất cả";
-    if (scope.length > 2) return `${scope.length} chi nhánh`;
+    if (scope.length === 0 || (total > 0 && scope.length >= total)) return t("all");
+    if (scope.length > 2) return t("branchCount", { count: scope.length });
     return scope.map((id) => branchName.get(id) ?? id).join(", ");
   };
   const branchTitle = (scope: ReadonlyArray<string>) =>
-    scope.length ? scope.map((id) => branchName.get(id) ?? id).join(", ") : "Mọi chi nhánh";
+    scope.length ? scope.map((id) => branchName.get(id) ?? id).join(", ") : t("allBranches");
 
   const applyOrder = async (from: number, to: number) => {
     const orderedCategoryIds = moveCategory(ordered.map((category) => category.id), from, to);
@@ -55,10 +57,10 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
     setError(null);
     try {
       await adminService.reorderServiceCategories({ orderedCategoryIds });
-      notifySuccess("Đã cập nhật thứ tự danh mục");
+      notifySuccess(t("reorderSuccess"));
       void categories.mutate();
     } catch (thrown) {
-      setError(thrown instanceof Error && thrown.message ? thrown.message : "Không đổi được thứ tự.");
+      setError(thrown instanceof Error && thrown.message ? thrown.message : t("reorderFailed"));
     }
   };
 
@@ -68,10 +70,10 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
     setError(null);
     try {
       await adminService.updateServiceCategory(category.id, { status: next }, category.version);
-      notifySuccess(next === "ACTIVE" ? "Đã bật danh mục" : "Đã tắt danh mục");
+      notifySuccess(next === "ACTIVE" ? t("enabledSuccess") : t("disabledSuccess"));
       void categories.mutate();
     } catch (thrown) {
-      setError(thrown instanceof Error && thrown.message ? thrown.message : "Không đổi được trạng thái.");
+      setError(thrown instanceof Error && thrown.message ? thrown.message : t("statusFailed"));
     } finally {
       setBusyId(null);
     }
@@ -80,28 +82,28 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
   return (
     <>
       <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <AdminSearchField label="Tìm danh mục" placeholder="Tìm theo tên hoặc mã..." value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-        <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-          <PlusIcon className="size-4" />Thêm danh mục
+        <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+        <Button variant="primary" className="rounded-lg" isDisabled={!canWrite} onPress={() => setCreating(true)}>
+          <PlusIcon className="size-4" />{t("add")}
         </Button>
       </div>
-      {categories.error ? <p role="alert" className="mb-3 text-xs text-admin-danger">Không tải được danh mục.</p> : null}
+      {categories.error ? <p role="alert" className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p> : null}
       {error ? <p role="alert" className="mb-3 text-xs text-admin-danger">{error}</p> : null}
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Content className="min-w-0 p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-left text-sm">
-              <caption className="sr-only">Danh mục dịch vụ</caption>
+              <caption className="sr-only">{t("caption")}</caption>
               <thead className="border-b border-admin-border text-xs text-admin-muted">
                 <tr>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3">Thứ tự</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Tên</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Mã</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Nhật ngữ</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Chi nhánh</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Dịch vụ</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Trạng thái</th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Thao tác</th>
+                  <th scope="col" className="whitespace-nowrap px-4 py-3">{t("columns.order")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.name")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.code")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.japanese")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.branches")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.services")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.status")}</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{t("columns.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">
@@ -158,9 +160,9 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
                       <td className="px-3 py-2">
                         <Switch
                           isSelected={category.status === "ACTIVE"}
-                          isDisabled={busyId === category.id}
+                          isDisabled={!canWrite || busyId === category.id}
                           onChange={() => void toggleStatus(category)}
-                          aria-label={`Bật hoặc tắt danh mục ${category.nameVi ?? category.name}`}
+                          aria-label={t("toggleLabel", { name: category.nameVi ?? category.name })}
                         >
                           <Switch.Content>
                             {/*
@@ -174,9 +176,9 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
                             <Switch.Control style={{ width: "4.25rem" }}>
                               <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center text-[0.625rem] font-semibold uppercase tracking-wide">
                                 {category.status === "ACTIVE" ? (
-                                  <span className="pl-2.5 text-admin-on-accent">Bật</span>
+                                  <span className="pl-2.5 text-admin-on-accent">{t("enabled")}</span>
                                 ) : (
-                                  <span className="ml-auto pr-2.5 text-admin-muted">Tắt</span>
+                                  <span className="ml-auto pr-2.5 text-admin-muted">{t("disabled")}</span>
                                 )}
                               </span>
                               <Switch.Thumb />
@@ -185,7 +187,7 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
                         </Switch>
                       </td>
                       <td className="px-3 py-2">
-                        <Button isIconOnly size="sm" variant="ghost" aria-label={`Sửa ${category.name}`} onPress={() => setEditing(category)}>
+                        <Button isIconOnly size="sm" variant="ghost" isDisabled={!canWrite} aria-label={t("editLabel", { name: category.name })} onPress={() => setEditing(category)}>
                           <PencilSquareIcon className="size-4" />
                         </Button>
                       </td>
@@ -195,23 +197,23 @@ export function CategoryTable({ services }: Readonly<{ services: ReadonlyArray<S
               </tbody>
             </table>
             {categories.isLoading ? (
-              <p role="status" className="p-12 text-center text-sm text-admin-muted">Đang tải danh mục…</p>
+              <p role="status" className="p-12 text-center text-sm text-admin-muted">{t("loading")}</p>
             ) : visible.length === 0 ? (
               <p role="status" className="p-12 text-center text-sm text-admin-muted">
-                {ordered.length === 0 ? "Chưa có danh mục nào. Thêm một danh mục để tạo được dịch vụ." : "Không tìm thấy danh mục phù hợp."}
+                {ordered.length === 0 ? t("empty") : t("noResults")}
               </p>
             ) : null}
           </div>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
           <span>
-            {filtered.length} danh mục
-            {canReorder ? null : " · xoá ô tìm kiếm để đổi được thứ tự"}
+            {t("count", { count: filtered.length })}
+            {canReorder ? null : t("reorderHint")}
           </span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
-      {(creating || editing) ? (
+      {canWrite && (creating || editing) ? (
         <CategoryEditor
           category={editing}
           services={services}

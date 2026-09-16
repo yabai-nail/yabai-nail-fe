@@ -64,6 +64,12 @@ export interface AdminAppointment {
   readonly status: string;
   readonly total: number;
   readonly discount: number;
+  readonly benefitDiscount?: number;
+  readonly manualDiscount?: number;
+  readonly manualDiscountReason?: string;
+  readonly discountReason?: string;
+  readonly checkoutNote?: string;
+  readonly services?: ReadonlyArray<AdminAppointmentServiceSnapshot>;
   readonly note?: string;
   readonly version: number;
 }
@@ -219,6 +225,35 @@ export interface AdminAppointmentPaymentInput {
 export interface AdminAppointmentActualServicesInput {
   readonly serviceIds: ReadonlyArray<string>;
   readonly [field: string]: unknown;
+}
+
+export interface AdminAppointmentServiceSnapshot {
+  readonly id?: string;
+  readonly serviceId: string;
+  readonly name?: string;
+  readonly serviceName: string;
+  readonly unitPrice: number;
+  readonly durationMinutes: number;
+  readonly sortOrder: number;
+}
+
+export interface AdminCheckoutAdjustmentInput {
+  readonly manualDiscount: number;
+  readonly discountReason: string;
+  readonly checkoutNote?: string;
+}
+
+export interface AdminCheckoutAdjustment {
+  readonly appointmentId: string;
+  readonly subtotal: number;
+  readonly benefitDiscount: number;
+  readonly manualDiscount: number;
+  readonly totalDiscount: number;
+  readonly amountDue: number;
+  readonly checkoutNote?: string;
+  readonly discountReason: string;
+  readonly currency: string;
+  readonly version: number;
 }
 
 export interface AdminAppointmentPhotoInput {
@@ -835,6 +870,7 @@ export interface AdminBranchSettings {
   readonly automation?: Readonly<Record<string, unknown>>;
   readonly notification?: Readonly<Record<string, unknown>>;
   readonly backup?: Readonly<Record<string, unknown>>;
+  readonly salon?: AdminSalonSettings;
   readonly version: number;
   readonly [field: string]: unknown;
 }
@@ -845,7 +881,21 @@ export interface AdminBranchSettingsPatch {
   readonly automation?: Readonly<Record<string, unknown>>;
   readonly notification?: Readonly<Record<string, unknown>>;
   readonly backup?: Readonly<Record<string, unknown>>;
+  readonly salon?: AdminSalonSettings;
   readonly [field: string]: unknown;
+}
+
+export type AdminSalonAmenity = "WIFI" | "REFRESHMENTS" | "PHONE_CHARGING" | "LUGGAGE_STORAGE";
+export type AdminSalonPaymentMethod = "CASH" | "PAYPAY" | "VISA" | "MASTERCARD";
+
+export interface AdminSalonSettings {
+  readonly openingHours: {
+    readonly openTime: string;
+    readonly closeTime: string;
+    readonly lastBookingTime: string;
+  };
+  readonly amenities: ReadonlyArray<AdminSalonAmenity>;
+  readonly paymentMethods: ReadonlyArray<AdminSalonPaymentMethod>;
 }
 
 // -- Admin promotions ------------------------------------------------------------
@@ -975,6 +1025,7 @@ export interface AdminNailDesign {
 
 export interface AdminNailDesignDraft {
   readonly title: string;
+  readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   /** Required by the backend before a design may be PUBLISHED. */
   readonly consentToPublish?: boolean;
@@ -983,6 +1034,7 @@ export interface AdminNailDesignDraft {
 
 export interface AdminNailDesignPatch {
   readonly title?: string;
+  readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   readonly consentToPublish?: boolean;
   readonly [field: string]: unknown;
@@ -997,6 +1049,9 @@ export interface AdminNailDesignProposalDecisionInput {
 export interface AdminNailDesignProposal {
   readonly proposalId: string;
   readonly status: string;
+  readonly payload?: Readonly<Record<string, unknown>>;
+  readonly createdAt?: string;
+  readonly updatedAt?: string;
   readonly decidedAt?: string;
   readonly note?: string;
   readonly version: number;

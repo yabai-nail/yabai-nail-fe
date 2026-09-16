@@ -3,8 +3,8 @@
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, Card, Switch, Tabs } from "@heroui/react";
-import { useMemo, useState } from "react";
+import { Button, Card, Tabs } from "@heroui/react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
@@ -14,24 +14,19 @@ import {
   currentMonthPeriod,
   indexStaffPerformance,
 } from "@/lib/admin-staff-performance";
-import { useAdminBranch, useAdminStaff, useAdminStaffPerformance } from "@/service";
+import { useAdminBranch, useAdminPermission, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
+import { AccountSecuritySettings } from "./AccountSecuritySettings";
 import type { CommissionPolicy } from "./data";
 
 /** Ids only; the labels are read from admin.settings.tabs at render. */
 const settingsTabIds = [
-  "overview",
-  "salon",
   "booking",
   "commission",
-  "payment",
-  "automation",
-  "notifications",
-  "backup",
 ] as const;
 
 const MISSING = "—";
@@ -53,23 +48,35 @@ function formatOptionalMoney(value: number | null): string {
 export function AdminSettingsComponent() {
   const t = useTranslations("admin.settings");
   const { branchId } = useAdminBranch();
-  const [activeTab, setActiveTab] = useState("commission");
+  const canReadBooking = useAdminPermission("branch.settings.read.branch");
+  const canReadStaff = useAdminPermission("staff.read.branch");
+  const canReadStaffPerformance = useAdminPermission("report.staff.read.branch", "report.staff.read.all");
+  const canReadCommission = canReadStaff && canReadStaffPerformance;
+  const [activeTab, setActiveTab] = useState(canReadCommission ? "commission" : canReadBooking ? "booking" : "account");
   // Appended at render because their labels are the strings on this screen that
   // are already translated; the other eight are extracted in their own slice.
   const tabs = useMemo(
-    () => [...settingsTabIds, "language", "appearance"].map((id) => ({ id, label: t(`tabs.${id}`) })),
-    [t]
+    () => [...settingsTabIds, "account", "language", "appearance"]
+      .filter((id) => id === "booking" ? canReadBooking : id === "commission" ? canReadCommission : true)
+      .map((id) => ({ id, label: t(`tabs.${id}`) })),
+    [canReadBooking, canReadCommission, t]
   );
-  const [autoCalculate, setAutoCalculate] = useState(true);
-  const [showRate, setShowRate] = useState(true);
+  useEffect(() => {
+    const syncHash = () => {
+      if (window.location.hash === "#account") setActiveTab("account");
+    };
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, []);
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
 
   // The commission table is the staff roster joined with the branch
   // staff-performance read model: the roster carries identity, role and the
   // active flag, the read model carries rate, revenue and commission for the
   // period. Two requests, no per-staff fan-out.
-  const staff = useAdminStaff();
-  const performance = useAdminStaffPerformance(branchId, { period });
+  const staff = useAdminStaff(undefined, canReadCommission);
+  const performance = useAdminStaffPerformance(branchId, { period }, canReadCommission);
   const commissionPolicies = useMemo<ReadonlyArray<CommissionPolicy>>(() => {
     const byStaffId = indexStaffPerformance(performance.data?.rows);
     return (staff.data?.items ?? []).map((member) => {
@@ -152,15 +159,10 @@ export function AdminSettingsComponent() {
         <LanguageSettings />
       ) : activeTab === "appearance" ? (
         <AppearanceSettings />
-      ) : activeTab === "booking" && branchId ? (
+      ) : activeTab === "account" ? (
+        <AccountSecuritySettings />
+      ) : activeTab === "booking" && canReadBooking && branchId ? (
         <BranchSettingsForm branchId={branchId} />
-      ) : activeTab !== "commission" ? (
-        <Card className="mt-4 rounded-lg border-admin-border bg-admin-surface shadow-none">
-          <Card.Content className="p-12 text-center">
-            <h2 className="font-bold">{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
-            <p className="mt-2 text-sm text-admin-muted">{t("placeholder")}</p>
-          </Card.Content>
-        </Card>
       ) : (
         <CommissionSettings
           metrics={metrics}
@@ -169,10 +171,6 @@ export function AdminSettingsComponent() {
           isLoading={staff.isLoading}
           staffError={Boolean(staff.error)}
           performanceError={Boolean(performance.error)}
-          autoCalculate={autoCalculate}
-          showRate={showRate}
-          onAutoCalculateChange={setAutoCalculate}
-          onShowRateChange={setShowRate}
         />
       )}
     </AdminPageLayout>
@@ -195,10 +193,6 @@ function CommissionSettings({
   isLoading,
   staffError,
   performanceError,
-  autoCalculate,
-  showRate,
-  onAutoCalculateChange,
-  onShowRateChange,
 }: Readonly<{
   metrics: ReadonlyArray<CommissionMetric>;
   period: string;
@@ -206,10 +200,6 @@ function CommissionSettings({
   isLoading: boolean;
   staffError: boolean;
   performanceError: boolean;
-  autoCalculate: boolean;
-  showRate: boolean;
-  onAutoCalculateChange: (value: boolean) => void;
-  onShowRateChange: (value: boolean) => void;
 }>) {
   const t = useTranslations("admin.settings");
   const router = useRouter();
@@ -219,7 +209,7 @@ function CommissionSettings({
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 id="commission-settings-heading" className="text-lg font-bold">{t("commission.heading")}</h2>
-            <p className="mt-1 text-sm text-admin-muted">Tỷ lệ, doanh thu và hoa hồng của kỳ {period}.</p>
+            <p className="mt-1 text-sm text-admin-muted">{t("commission.periodDescription", { period })}</p>
           </div>
           {/* "Hướng dẫn tính hoa hồng" pointed at documentation that does not exist. */}
         </div>
@@ -238,11 +228,11 @@ function CommissionSettings({
             <Card.Content className="min-w-0 p-0 pt-2">
               {staffError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-                  Không tải được danh sách nhân viên.
+                  {t("commission.loadFailed")}
                 </p>
               ) : performanceError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-                  Không tải được số liệu kỳ {period} — cột tỷ lệ, doanh thu và hoa hồng hiển thị “{MISSING}”.
+                  {t("commission.periodLoadFailed", { period, missing: MISSING })}
                 </p>
               ) : null}
               {isLoading ? (
@@ -259,9 +249,6 @@ function CommissionSettings({
           </Card>
         </AdminSplitLayout>
       </div>
-      <Card className="mt-4 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center"><div className="mr-auto"><h2 className="font-bold">{t("commission.generalHeading")}</h2><p className="mt-1 text-xs text-admin-muted">{t("commission.generalNote")}</p></div><LabeledSwitch label={t("commission.autoCalculate")} value={autoCalculate} onChange={onAutoCalculateChange} /><LabeledSwitch label={t("commission.showRate")} value={showRate} onChange={onShowRateChange} /></Card.Content>
-      </Card>
     </>
   );
 }
@@ -275,11 +262,6 @@ function CommissionGuide() {
     [t("formula.salonTitle"), t("formula.salonDetail")],
   ] as const;
   return <section className="border-t border-admin-border p-4" aria-labelledby="commission-formula-heading"><h3 id="commission-formula-heading" className="font-bold">{t("formula.heading")}</h3><div className="mt-3 grid gap-2 md:grid-cols-4">{steps.map(([title, detail]) => <div key={title} className="rounded-lg border border-admin-border p-3 text-center"><strong className="text-xs">{title}</strong><p className="mt-1 text-[0.7rem] leading-4 text-admin-muted">{detail}</p></div>)}</div></section>;
-}
-
-function LabeledSwitch({ label, value, onChange }: Readonly<{ label: string; value: boolean; onChange: (value: boolean) => void }>) {
-  const t = useTranslations("admin.settings");
-  return <div className="flex items-center gap-2 text-xs"><span>{label}</span><Switch isSelected={value} onChange={onChange} aria-label={label}><Switch.Content><Switch.Control><Switch.Thumb /></Switch.Control></Switch.Content></Switch><strong>{value ? t("switchOn") : t("switchOff")}</strong></div>;
 }
 
 export const meta = { world: "connected", domain: "admin-settings" } as const;

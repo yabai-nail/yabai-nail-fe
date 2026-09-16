@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { GiftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import {
   useAdminCustomerBenefits,
   useAdminCustomerNailHistory,
   useAdminPromotions,
+  useAdminPermission,
 } from "@/service";
 
 // Read-side (benefits + nail history) and the two write mutations (adjust
@@ -22,11 +23,15 @@ export function CustomerLoyaltyPanel({
   customerId,
 }: Readonly<{ branchId: string; customerId: string }>) {
   const t = useTranslations("admin.customers");
+  const tc = useTranslations("admin.common");
+  const format = useFormatter();
   const benefitsQuery = useAdminCustomerBenefits(branchId, customerId);
+  const canWrite = useAdminPermission("customer.update.branch");
+  const canReadPromotions = useAdminPermission("promotion.read.all");
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
-  const promotionsQuery = useAdminPromotions();
+  const promotionsQuery = useAdminPromotions(undefined, canReadPromotions);
   const benefits = benefitsQuery.data;
-  const tierLabel = benefits?.tier ? ({ MEMBER: "Thành viên", SILVER: t("rank.silver"), GOLD: t("rank.gold"), PLATINUM: "Bạch kim" }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
+  const tierLabel = benefits?.tier ? ({ MEMBER: t("rank.member"), SILVER: t("rank.silver"), GOLD: t("rank.gold"), PLATINUM: t("rank.platinum") }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
   const history = historyQuery.data?.items ?? [];
   const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 
@@ -45,7 +50,7 @@ export function CustomerLoyaltyPanel({
         pointsSigned: delta,
         reasonCode: reason.trim(),
       }, benefits?.version);
-      notifySuccess("Đã cập nhật điểm khách hàng");
+      notifySuccess(tc("pointsUpdated"));
       setDeltaText("");
       setReason("");
       await benefitsQuery.mutate();
@@ -70,7 +75,7 @@ export function CustomerLoyaltyPanel({
       await adminService.issueCustomerCoupon(branchId, customerId, {
         couponId: couponId.trim(),
       }, benefits?.version);
-      notifySuccess("Đã phát coupon cho khách hàng");
+      notifySuccess(tc("couponIssued"));
       setCouponId("");
       await benefitsQuery.mutate();
     } catch (thrown) {
@@ -85,7 +90,7 @@ export function CustomerLoyaltyPanel({
   return (
     <section aria-labelledby="customer-loyalty-heading" className="space-y-3 border-t border-admin-border pt-3">
       <h3 id="customer-loyalty-heading" className="text-sm font-bold text-admin-ink">
-        Ưu đãi và điểm tích luỹ
+        {t("loyalty.heading")}
       </h3>
 
       {benefitsQuery.isLoading ? (
@@ -116,7 +121,7 @@ export function CustomerLoyaltyPanel({
       <div className="space-y-2 rounded-lg border border-admin-border p-3">
         <p className="flex items-center gap-2 text-xs font-semibold text-admin-ink">
           <SparklesIcon className="size-4 text-admin-accent" />
-          Cộng / trừ điểm
+          {t("loyalty.adjustPoints")}
         </p>
         {/* min-w-0 on both inputs: an input's automatic minimum is its own
             intrinsic width, 184px here, so the 1fr track could not shrink below
@@ -125,6 +130,7 @@ export function CustomerLoyaltyPanel({
         <div className="grid grid-cols-[6rem_1fr] gap-2 text-xs">
           <input
             type="number"
+            disabled={!canWrite}
             value={deltaText}
             onChange={(event) => setDeltaText(event.target.value)}
             placeholder={t("loyalty.pointsPlaceholder")}
@@ -132,6 +138,7 @@ export function CustomerLoyaltyPanel({
           />
           <input
             value={reason}
+            disabled={!canWrite}
             onChange={(event) => setReason(event.target.value)}
             placeholder={t("loyalty.reasonPlaceholder")}
             className="min-w-0 rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
@@ -143,7 +150,7 @@ export function CustomerLoyaltyPanel({
             variant="primary"
             className="rounded-lg"
             onPress={() => void submitPoints()}
-            isDisabled={pointsPending || benefits?.version === undefined || !reason.trim() || !Number.parseInt(deltaText, 10)}
+            isDisabled={!canWrite || pointsPending || benefits?.version === undefined || !reason.trim() || !Number.parseInt(deltaText, 10)}
           >
             {pointsPending ? t("loyalty.pointsPending") : t("loyalty.pointsSubmit")}
           </Button>
@@ -154,12 +161,13 @@ export function CustomerLoyaltyPanel({
       <div className="space-y-2 rounded-lg border border-admin-border p-3">
         <p className="flex items-center gap-2 text-xs font-semibold text-admin-ink">
           <GiftIcon className="size-4 text-admin-accent" />
-          Phát coupon
+          {t("loyalty.issueCoupon")}
         </p>
         {promotions.length > 0 ? (
           <AdminSelectField
             label={t("loyalty.pickCoupon")}
             value={couponId}
+            isDisabled={!canWrite}
             onChange={setCouponId}
             fullWidth
             options={promotions.map((promotion) => ({
@@ -178,7 +186,7 @@ export function CustomerLoyaltyPanel({
             variant="primary"
             className="rounded-lg"
             onPress={() => void submitCoupon()}
-            isDisabled={couponPending || benefits?.version === undefined || !couponId.trim()}
+            isDisabled={!canWrite || couponPending || benefits?.version === undefined || !couponId.trim()}
           >
             {couponPending ? t("loyalty.couponPending") : t("loyalty.couponSubmit")}
           </Button>
@@ -202,7 +210,7 @@ export function CustomerLoyaltyPanel({
                 className="grid grid-cols-[6rem_1fr_auto] gap-2"
               >
                 <span className="text-admin-muted">
-                  {new Date(entry.startsAt).toLocaleDateString("vi-VN")}
+                  {format.dateTime(new Date(entry.startsAt), { dateStyle: "short" })}
                 </span>
                 <span className="truncate text-admin-ink">
                   {(entry.services ?? []).map((service) => service.serviceName).join(", ") || "—"}

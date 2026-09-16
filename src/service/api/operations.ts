@@ -189,6 +189,8 @@ GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings
 GET /api/v1/admin/branches/{branchId}/payments/{paymentId}
 GET /api/v1/admin/nail-design-proposals/{proposalId}
+GET /api/v1/admin/nail-design-proposals
+PUT /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/checkout-adjustments
 GET /api/v1/admin/branches/{branchId}/leave-requests
 GET /api/v1/admin/notification-campaigns
 DELETE /api/v1/admin/services/{serviceId}

@@ -8,12 +8,15 @@ import { notifySuccess } from "@/lib/app-toast";
 import { todayAtSalon } from "@/lib/salon-date";
 import {
   adminService,
+  useAdminPermission,
   useStaffCompensation,
   type StaffCompensation,
 } from "@/service";
 
 export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
+  const canWrite = useAdminPermission("staff.compensation.write.branch");
   const query = useStaffCompensation(staffId);
   const compensation = query.data as StaffCompensation | undefined;
 
@@ -53,7 +56,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
         // version 0, which is the correct first-write value.
         compensation?.version ?? 0,
       );
-      notifySuccess("Đã cập nhật lương và hoa hồng");
+      notifySuccess(tc("compensationSaved"));
       setBaseSalary("");
       setRate("");
       void query.mutate();
@@ -67,7 +70,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
   return (
     <section aria-labelledby="staff-compensation-heading" className="space-y-3">
       <h3 id="staff-compensation-heading" className="text-sm font-bold text-admin-ink">
-        Cấu hình hoa hồng
+        {t("compensation.heading")}
       </h3>
 
       {query.isLoading ? (
@@ -123,7 +126,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
         />
         <span className="text-admin-muted">
-          Phải sau ngày hiệu lực của cấu hình hiện tại. Hoa hồng đã chốt trước ngày này giữ nguyên.
+          {t("compensation.effectiveHint")}
         </span>
       </label>
       <div className="flex justify-end">
@@ -132,7 +135,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           variant="primary"
           className="rounded-lg"
           onPress={() => void submit()}
-          isDisabled={!canSubmit}
+          isDisabled={!canWrite || !canSubmit}
         >
           {busy ? t("compensation.saving") : t("compensation.submit")}
         </Button>

@@ -22,6 +22,7 @@ export function BranchModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.branches");
+  const tc = useTranslations("admin.common");
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const isEdit = branch !== null;
@@ -52,7 +53,7 @@ export function BranchModal({
           timezone,
         });
       }
-      notifySuccess(isEdit ? "Đã cập nhật chi nhánh" : "Đã thêm chi nhánh");
+      notifySuccess(isEdit ? tc("branchUpdated") : tc("branchCreated"));
       onSaved();
       onClose();
     } catch (err) {

@@ -40,7 +40,7 @@ export function AppointmentToolbar({
   onToday: () => void;
   onViewChange: (view: AppointmentView) => void;
   onStatusChange: (status: AppointmentStatusFilter) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
 }>) {
   const t = useTranslations("admin.appointments");
   const tStatus = useTranslations("admin.appointmentStatus");
@@ -77,7 +77,7 @@ export function AppointmentToolbar({
             icon={FunnelIcon}
             onChange={(value) => onStatusChange(value as AppointmentStatusFilter)}
           />
-          <Button variant="primary" className="rounded-lg" onPress={onCreate}>
+          <Button variant="primary" className="rounded-lg" isDisabled={!onCreate} onPress={onCreate}>
             <PlusIcon className="size-4" />{t("toolbar.create")}
           </Button>
         </div>

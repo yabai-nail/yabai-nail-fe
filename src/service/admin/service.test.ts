@@ -27,6 +27,7 @@ const APPOINTMENT_OPERATION_IDS = [
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/service-completion",
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/no-show",
   "PUT /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/actual-services",
+  "PUT /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/checkout-adjustments",
   "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/allocation-candidates",
   "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
@@ -66,6 +67,7 @@ const MARKETING_OPERATION_IDS = [
   "POST /api/v1/admin/nail-designs",
   "PATCH /api/v1/admin/nail-designs/{designId}",
   "GET /api/v1/admin/nail-design-proposals/{proposalId}",
+  "GET /api/v1/admin/nail-design-proposals",
   "POST /api/v1/admin/nail-design-proposals/{proposalId}/decision",
 ] as const;
 
@@ -163,6 +165,7 @@ describe("adminService appointment surface", () => {
       adminService.completeAppointmentService,
       adminService.markAppointmentNoShow,
       adminService.setAppointmentActualServices,
+      adminService.updateAppointmentCheckoutAdjustments,
       adminService.appointmentAllocationCandidates,
       adminService.appointmentPayments,
       adminService.recordAppointmentPayment,
@@ -223,6 +226,7 @@ describe("adminService marketing surface", () => {
       adminService.notificationCampaignAudiencePreview,
       adminService.previewAudience,
       adminService.nailDesigns,
+      adminService.nailDesignProposals,
       adminService.createNailDesign,
       adminService.updateNailDesign,
       adminService.nailDesignProposal,

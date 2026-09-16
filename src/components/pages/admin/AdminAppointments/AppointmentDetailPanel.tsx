@@ -17,7 +17,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card, Chip } from "@heroui/react";
-import { useRouter } from "next/navigation";
 import { formatNumber, formatMoney } from "@/lib/admin-format";
 import type { Appointment, AppointmentLifecycleAction } from "./data";
 import {
@@ -50,6 +49,7 @@ export function AppointmentDetailPanel({
   onEdit,
   onCancel,
   onMessage,
+  onPayment,
   onAssignStaff,
   onEditActualServices,
   onAttachPhoto,
@@ -63,9 +63,10 @@ export function AppointmentDetailPanel({
   lifecycleError?: string | null;
   /** Fires when the admin picks a transition; parent runs the API call. */
   onLifecycle?: (action: AppointmentLifecycleAction) => void;
-  onEdit: () => void;
-  onCancel: () => void;
-  onMessage: () => void;
+  onEdit?: () => void;
+  onCancel?: () => void;
+  onMessage?: () => void;
+  onPayment?: () => void;
   /** Opens the assign-staff modal; hidden when omitted (local overlays). */
   onAssignStaff?: () => void;
   /** Opens the actual-services modal; hidden when omitted (local overlays). */
@@ -75,7 +76,6 @@ export function AppointmentDetailPanel({
 }>) {
   const t = useTranslations("admin.appointments");
   const tStatus = useTranslations("admin.appointmentStatus");
-  const router = useRouter();
   // Mirrors the backend's own guard on the actual-services endpoint.
   const canEditActualServices =
     appointment.serverStatus === "IN_SERVICE" ||
@@ -105,7 +105,7 @@ export function AppointmentDetailPanel({
     );
   };
   const details = [
-    { icon: ClockIcon, label: t("detail.time"), value: `${appointment.startTime} - ${appointment.endTime} (${appointment.service.durationMinutes} phút)` },
+    { icon: ClockIcon, label: t("detail.time"), value: t("detail.timeValue", { start: appointment.startTime, end: appointment.endTime, minutes: appointment.service.durationMinutes }) },
     { icon: CalendarDaysIcon, label: t("toolbar.day"), value: appointment.date.split("-").reverse().join("/") },
     { icon: ScissorsIcon, label: t("detail.service"), value: appointment.service.name },
     { icon: UserIcon, label: t("detail.staff"), value: appointment.staff.name },
@@ -125,7 +125,7 @@ export function AppointmentDetailPanel({
 
         <div className="space-y-3 border-b border-admin-border pb-4 text-sm">
           <p className="flex items-center gap-2 text-admin-ink"><PhoneIcon className="size-4 text-admin-muted" />{appointment.customer.phone}</p>
-          <p className="text-xs text-admin-muted">Ngày sinh: {appointment.customer.birthday}</p>
+          <p className="text-xs text-admin-muted">{t("detail.birthday", { date: appointment.customer.birthday })}</p>
           <p className="text-xs leading-5 text-admin-muted">{appointment.customer.preference}</p>
         </div>
 
@@ -179,21 +179,21 @@ export function AppointmentDetailPanel({
             ) : null}
           </div>
         ) : null}
-        {appointment.status !== "cancelled" ? (
+        {onPayment && appointment.status !== "cancelled" ? (
           <Button
             fullWidth
             variant="primary"
             className="rounded-lg"
-            onPress={() => router.push(`/admin/payments?appointmentId=${encodeURIComponent(appointment.id)}`)}
+            onPress={onPayment}
           >
             <BanknotesIcon className="size-4" />
-            Thanh toán
+            {t("detail.pay")}
           </Button>
         ) : null}
-        <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEdit}><PencilSquareIcon className="size-4" />{t("detail.edit")}</Button>
+        {onEdit ? <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEdit}><PencilSquareIcon className="size-4" />{t("detail.edit")}</Button> : null}
         {onAssignStaff && appointment.status !== "cancelled" ? (
           <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onAssignStaff}>
-            <ArrowsRightLeftIcon className="size-4" />Đổi nhân viên
+            <ArrowsRightLeftIcon className="size-4" />{t("detail.assignStaff")}
           </Button>
         ) : null}
         {/*
@@ -203,18 +203,18 @@ export function AppointmentDetailPanel({
         */}
         {onEditActualServices && canEditActualServices ? (
           <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onEditActualServices}>
-            <WrenchScrewdriverIcon className="size-4" />Cập nhật dịch vụ thực tế
+            <WrenchScrewdriverIcon className="size-4" />{t("detail.actualServices")}
           </Button>
         ) : null}
         {onAttachPhoto && appointment.status !== "cancelled" ? (
           <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onAttachPhoto}>
-            <PhotoIcon className="size-4" />Đính kèm ảnh
+            <PhotoIcon className="size-4" />{t("detail.attachPhoto")}
           </Button>
         ) : null}
-        {appointment.status !== "cancelled" ? <Button fullWidth variant="outline" className="rounded-lg border-admin-accent text-admin-accent" onPress={onCancel}><XMarkIcon className="size-4" />{t("detail.cancel")}</Button> : null}
-        <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onMessage}>
-          <ChatBubbleLeftRightIcon className="size-4" />Nhắn tin cho khách
-        </Button>
+        {onCancel && appointment.status !== "cancelled" ? <Button fullWidth variant="outline" className="rounded-lg border-admin-accent text-admin-accent" onPress={onCancel}><XMarkIcon className="size-4" />{t("detail.cancel")}</Button> : null}
+        {onMessage ? <Button fullWidth variant="outline" className="rounded-lg border-admin-border" onPress={onMessage}>
+          <ChatBubbleLeftRightIcon className="size-4" />{t("detail.message")}
+        </Button> : null}
       </Card.Footer>
     </Card>
   );

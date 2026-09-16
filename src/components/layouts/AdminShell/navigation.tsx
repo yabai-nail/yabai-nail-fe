@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { useAuth } from "@/service";
-import { adminRoutes } from "./config";
+import { adminRoutes, canAccessAdminRoute } from "./config";
 
 export function AdminBrand() {
   const t = useTranslations("admin.shell");
@@ -38,14 +38,14 @@ export function AdminSidebarContent() {
   const tNav = useTranslations("admin.nav");
   // The sidebar's own sign-out was a button with no handler; the only working
   // way out was the avatar menu in the header.
-  const { logout } = useAuth();
+  const { logout, permissions } = useAuth();
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <ScrollShadow className="min-h-0 flex-1 py-5" hideScrollBar>
         <nav aria-label={t("navLabel")}>
           <ul className="space-y-1">
-            {adminRoutes.map(({ id, href, icon: Icon, isAvailable }) => {
+            {adminRoutes.filter((route) => permissions && canAccessAdminRoute(route, permissions)).map(({ id, href, icon: Icon, isAvailable }) => {
               const label = tNav(`${id}.label`);
               const isCurrent =
                 pathname === href ||
@@ -87,7 +87,7 @@ export function AdminSidebarContent() {
         variant="outline"
         fullWidth
         className="mb-1 justify-start rounded-lg border-admin-accent/25 text-admin-accent"
-        onPress={logout}
+        onPress={() => void logout()}
       >
         <ArrowLeftStartOnRectangleIcon aria-hidden="true" className="size-5" />
         {t("signOut")}

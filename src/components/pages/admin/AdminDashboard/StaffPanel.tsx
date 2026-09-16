@@ -21,21 +21,21 @@ export function StaffPanel() {
     <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
       <Card.Header className="flex flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">
-          Nhân viên <span className="font-normal text-admin-muted">(kỳ {period})</span>
+          {t("staff.heading", { period })}
         </h2>
         <Button size="sm" variant="ghost" className="rounded-lg text-xs text-admin-accent" onPress={() => router.push("/admin/staff")}>
-          Xem tất cả
+          {t("staff.viewAll")}
         </Button>
       </Card.Header>
       <Card.Content className="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {error ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
-            Không tải được hiệu suất nhân viên.
+            {t("staff.loadFailed")}
           </p>
         ) : !branchId || isLoading ? (
           <p className="py-3 text-center text-xs text-admin-muted">{t("staff.loading")}</p>
         ) : members.length === 0 ? (
-          <p className="py-3 text-center text-xs text-admin-muted">Kỳ {period} chưa có nhân viên nào.</p>
+          <p className="py-3 text-center text-xs text-admin-muted">{t("staff.empty", { period })}</p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {members.map((member) => {
@@ -56,7 +56,7 @@ export function StaffPanel() {
                   </div>
                   <dl className="mt-4 space-y-2 text-xs">
                     <div className="flex justify-between gap-3">
-                      <dt className="text-admin-muted">Doanh thu</dt>
+                      <dt className="text-admin-muted">{t("staff.revenue")}</dt>
                       <dd className="font-semibold text-admin-ink">{member.revenue}</dd>
                     </div>
                     <div className="flex justify-between gap-3">

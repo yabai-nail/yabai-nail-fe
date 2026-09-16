@@ -21,6 +21,7 @@ export function StaffCreateModal({
   onCreated: () => void;
 }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export function StaffCreateModal({
         displayName: name.trim(),
         branchId,
       });
-      notifySuccess("Đã thêm nhân viên");
+      notifySuccess(tc("staffCreated"));
       onCreated();
       onClose();
     } catch (err) {
@@ -66,7 +67,7 @@ export function StaffCreateModal({
                 />
               </label>
               <p className="text-xs text-admin-muted">
-                Kỹ năng, mức hoa hồng và ca làm việc có thể cấu hình sau khi tạo.
+                {t("create.afterCreateHint")}
               </p>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>

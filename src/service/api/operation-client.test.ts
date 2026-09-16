@@ -6,7 +6,7 @@ const { apiRequest } = vi.hoisted(() => ({ apiRequest: vi.fn() }));
 
 vi.mock("./request", () => ({ apiRequest }));
 
-import { executeApiOperation } from "./operation-client";
+import { executeApiOperation, executePaginatedApiOperation } from "./operation-client";
 
 describe("executeApiOperation", () => {
   beforeEach(() => {
@@ -63,5 +63,59 @@ describe("executeApiOperation", () => {
         authScope: "admin",
       }),
     );
+  });
+
+  it("follows cursor pages and returns a complete collection", async () => {
+    apiRequest
+      .mockResolvedValueOnce({
+        items: [{ id: "first" }],
+        pageInfo: { endCursor: "next", hasNextPage: true, limit: 100 },
+      })
+      .mockResolvedValueOnce({
+        items: [{ id: "second" }],
+        pageInfo: { endCursor: null, hasNextPage: false, limit: 100 },
+      });
+
+    const result = await executePaginatedApiOperation<{ id: string }>(
+      "GET /api/v1/admin/services",
+      { query: { branchId: "b1" } },
+    );
+
+    expect(apiRequest).toHaveBeenNthCalledWith(1, {
+      method: "GET",
+      url: "/admin/services",
+      params: { branchId: "b1", limit: 100 },
+    });
+    expect(apiRequest).toHaveBeenNthCalledWith(2, {
+      method: "GET",
+      url: "/admin/services",
+      params: { branchId: "b1", limit: 100, cursor: "next" },
+    });
+    expect(result).toEqual({
+      items: [{ id: "first" }, { id: "second" }],
+      pageInfo: { endCursor: null, hasNextPage: false, limit: 2 },
+    });
+  });
+
+  it("rejects a repeated pagination cursor instead of returning partial data", async () => {
+    apiRequest.mockResolvedValue({
+      items: [],
+      pageInfo: { endCursor: "same", hasNextPage: true, limit: 100 },
+    });
+
+    await expect(
+      executePaginatedApiOperation("GET /api/v1/admin/services"),
+    ).rejects.toThrow("Invalid pagination cursor");
+  });
+
+  it("accepts a legacy bare-array list during a rolling API deployment", async () => {
+    apiRequest.mockResolvedValue([{ id: "legacy" }]);
+
+    await expect(
+      executePaginatedApiOperation<{ id: string }>("GET /api/v1/admin/accounts"),
+    ).resolves.toEqual({
+      items: [{ id: "legacy" }],
+      pageInfo: { endCursor: null, hasNextPage: false, limit: 1 },
+    });
   });
 });

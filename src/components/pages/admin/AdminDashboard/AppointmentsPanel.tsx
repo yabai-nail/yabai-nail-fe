@@ -76,13 +76,13 @@ export function AppointmentsPanel() {
       <Card.Header className="flex w-full flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">{t("appointments.heading")}</h2>
         <Button size="sm" variant="outline" className="rounded-lg border-admin-border" onPress={() => router.push("/admin/appointments")}>
-          Xem lịch
+          {t("appointments.viewAll")}
         </Button>
       </Card.Header>
       <Card.Content className="flex flex-1 flex-col px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {error ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
-            Không tải được lịch hẹn hôm nay.
+            {t("appointments.loadFailed")}
           </p>
         ) : !branchId || isLoading ? (
           <p className="py-3 text-center text-xs text-admin-muted">{t("appointments.loading")}</p>
@@ -127,7 +127,7 @@ export function AppointmentsPanel() {
             row end on one line however many appointments the day holds. */}
         <Button fullWidth variant="primary" className="mt-auto pt-3 rounded-lg" onPress={() => router.push("/admin/appointments?create=1")}>
           <PlusIcon aria-hidden="true" className="size-5" />
-          Thêm lịch hẹn
+          {t("appointments.add")}
         </Button>
       </Card.Content>
     </Card>

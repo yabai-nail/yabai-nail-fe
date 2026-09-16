@@ -16,6 +16,7 @@ import {
   useAdminCustomers,
   useAdminServices,
   useAdminStaff,
+  useAdminPermission,
   type AdminAppointment as ServerAppointment,
   type AdminCustomer,
   type AdminServiceItem,
@@ -54,11 +55,11 @@ import {
 } from "./date-utils";
 import { normalizeAppointmentStatus } from "./status";
 
-const lifecycleSuccessMessages: Record<AppointmentLifecycleAction, string> = {
-  "check-in": "Đã check-in lịch hẹn",
-  "service-start": "Đã bắt đầu dịch vụ",
-  "service-complete": "Đã hoàn tất dịch vụ",
-  "no-show": "Đã đánh dấu khách không đến",
+const lifecycleSuccessKeys: Record<AppointmentLifecycleAction, "checkInDone" | "serviceStarted" | "serviceCompleted" | "noShowDone"> = {
+  "check-in": "checkInDone",
+  "service-start": "serviceStarted",
+  "service-complete": "serviceCompleted",
+  "no-show": "noShowDone",
 };
 
 function toDatePart(iso: string): string {
@@ -179,8 +180,23 @@ export function AdminAppointmentsComponent({
   initialSelectedId?: string;
 }>) {
   const t = useTranslations("admin.appointments");
+  const tc = useTranslations("admin.common");
   const router = useRouter();
   const { branchId } = useAdminBranch();
+  const canCreate = useAdminPermission("appointment.create.branch");
+  const canReschedule = useAdminPermission("appointment.reschedule.branch");
+  const canCancel = useAdminPermission("appointment.cancel.branch");
+  const canAssign = useAdminPermission("appointment.assign.branch");
+  const canEditActualServices = useAdminPermission("catalog.write.branch", "catalog.write.all");
+  const canAttachPhoto = useAdminPermission("appointment.media.write.assigned", "appointment.media.write.branch");
+  const canMessage = useAdminPermission("message.read.branch");
+  const canTakePayment = useAdminPermission("payment.create.branch");
+  const canLifecycle = {
+    "check-in": useAdminPermission("appointment.checkin.branch"),
+    "service-start": useAdminPermission("appointment.service.start.assigned", "appointment.service.start.branch"),
+    "service-complete": useAdminPermission("appointment.service.finish.assigned", "appointment.service.finish.branch"),
+    "no-show": useAdminPermission("appointment.noshow.branch"),
+  } satisfies Record<AppointmentLifecycleAction, boolean>;
   const [selectedDate, setSelectedDate] = useState(todayAtSalon);
   const [view, setView] = useState<AppointmentView>("day");
   const viewRange = useMemo(
@@ -288,7 +304,7 @@ export function AdminAppointmentsComponent({
     } else {
       throw new Error(t("error.notLoaded"));
     }
-    notifySuccess(formMode === "edit" ? "Đã cập nhật lịch hẹn" : "Đã tạo lịch hẹn");
+    notifySuccess(formMode === "edit" ? tc("appointmentUpdated") : tc("appointmentCreated"));
     await mutateAppointments();
     setFormMode(null);
   }
@@ -317,7 +333,7 @@ export function AdminAppointmentsComponent({
       } else {
         await adminService.markAppointmentNoShow(branchId, appointmentId, version);
       }
-      notifySuccess(lifecycleSuccessMessages[action]);
+      notifySuccess(tc(lifecycleSuccessKeys[action]));
       void mutateAppointments();
     } catch (thrown) {
       setLifecycleError(
@@ -344,7 +360,7 @@ export function AdminAppointmentsComponent({
         note ? { staffId, note } : { staffId },
         selectedAppointment.version,
       );
-      notifySuccess("Đã phân công nhân viên");
+      notifySuccess(tc("staffAssigned"));
       setIsAssignOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -373,7 +389,7 @@ export function AdminAppointmentsComponent({
         { serviceIds: [...serviceIds] },
         selectedAppointment.version,
       );
-      notifySuccess("Đã cập nhật dịch vụ thực tế");
+      notifySuccess(tc("actualServicesUpdated"));
       setIsActualOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -396,7 +412,7 @@ export function AdminAppointmentsComponent({
     setPhotoError(null);
     try {
       await adminService.attachAppointmentPhoto(branchId, selectedAppointment.id, input);
-      notifySuccess("Đã đính kèm ảnh vào lịch hẹn");
+      notifySuccess(tc("photoAttached"));
       setIsPhotoOpen(false);
       void mutateAppointments();
     } catch (thrown) {
@@ -421,7 +437,7 @@ export function AdminAppointmentsComponent({
         { reasonCode: "ADMIN_CALENDAR_CANCEL" },
         selectedAppointment.version,
       );
-      notifySuccess("Đã hủy lịch hẹn");
+      notifySuccess(tc("appointmentCancelled"));
       await mutateAppointments();
       setIsCancelOpen(false);
     } catch (thrown) {
@@ -447,7 +463,7 @@ export function AdminAppointmentsComponent({
         onToday={() => setSelectedDate(todayAtSalon())}
         onViewChange={setView}
         onStatusChange={setStatus}
-        onCreate={() => setFormMode("create")}
+        onCreate={canCreate ? () => setFormMode("create") : undefined}
       />
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-[19rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)_19rem]">
@@ -470,7 +486,7 @@ export function AdminAppointmentsComponent({
               appointment={selectedAppointment}
               lifecycleActions={
                 selectedAppointment.serverStatus
-                  ? LIFECYCLE_BY_STATUS[selectedAppointment.serverStatus] ?? []
+                  ? (LIFECYCLE_BY_STATUS[selectedAppointment.serverStatus] ?? []).filter((action) => canLifecycle[action])
                   : []
               }
               lifecyclePending={lifecyclePending}
@@ -478,11 +494,12 @@ export function AdminAppointmentsComponent({
               onLifecycle={(action) =>
                 runLifecycle(action, selectedAppointment.id, selectedAppointment.version)
               }
-              onEdit={() => setFormMode("edit")}
-              onCancel={() => { setCancelError(null); setIsCancelOpen(true); }}
-              onMessage={() => router.push("/admin/messages")}
+              onEdit={canReschedule ? () => setFormMode("edit") : undefined}
+              onCancel={canCancel ? () => { setCancelError(null); setIsCancelOpen(true); } : undefined}
+              onMessage={canMessage ? () => router.push("/admin/messages") : undefined}
+              onPayment={canTakePayment ? () => router.push(`/admin/payments?appointmentId=${encodeURIComponent(selectedAppointment.id)}`) : undefined}
               onAssignStaff={
-                selectedAppointment.version !== undefined
+                canAssign && selectedAppointment.version !== undefined
                   ? () => {
                       setAssignError(null);
                       setIsAssignOpen(true);
@@ -490,7 +507,7 @@ export function AdminAppointmentsComponent({
                   : undefined
               }
               onEditActualServices={
-                selectedAppointment.version !== undefined
+                canEditActualServices && selectedAppointment.version !== undefined
                   ? () => {
                       setActualError(null);
                       setIsActualOpen(true);
@@ -498,7 +515,7 @@ export function AdminAppointmentsComponent({
                   : undefined
               }
               onAttachPhoto={
-                selectedAppointment.version !== undefined
+                canAttachPhoto && selectedAppointment.version !== undefined
                   ? () => {
                       setPhotoError(null);
                       setIsPhotoOpen(true);
@@ -512,7 +529,7 @@ export function AdminAppointmentsComponent({
         </aside>
       </div>
 
-      {formMode ? (
+      {formMode && ((formMode === "create" && canCreate) || (formMode === "edit" && canReschedule)) ? (
         <AppointmentFormModal
           key={`${formMode}-${selectedAppointment?.id ?? "new"}-${selectedDate}`}
           appointment={formMode === "edit" ? selectedAppointment : null}
@@ -523,10 +540,10 @@ export function AdminAppointmentsComponent({
           onSubmit={saveAppointment}
         />
       ) : null}
-      {isCancelOpen && selectedAppointment ? (
+      {canCancel && isCancelOpen && selectedAppointment ? (
         <CancelAppointmentDialog appointment={selectedAppointment} onClose={() => setIsCancelOpen(false)} onConfirm={confirmCancel} pending={cancelPending} error={cancelError} />
       ) : null}
-      {isAssignOpen && selectedAppointment ? (
+      {canAssign && isAssignOpen && selectedAppointment ? (
         <AssignStaffModal
           branchId={branchId}
           appointment={selectedAppointment}
@@ -536,7 +553,7 @@ export function AdminAppointmentsComponent({
           error={assignError}
         />
       ) : null}
-      {isActualOpen && selectedAppointment ? (
+      {canEditActualServices && isActualOpen && selectedAppointment ? (
         <ActualServicesModal
           appointment={selectedAppointment}
           onClose={() => setIsActualOpen(false)}
@@ -545,7 +562,7 @@ export function AdminAppointmentsComponent({
           error={actualError}
         />
       ) : null}
-      {isPhotoOpen && selectedAppointment ? (
+      {canAttachPhoto && isPhotoOpen && selectedAppointment ? (
         <AttachPhotoModal
           appointment={selectedAppointment}
           onClose={() => setIsPhotoOpen(false)}

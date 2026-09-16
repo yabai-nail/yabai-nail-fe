@@ -3,6 +3,7 @@
 import { I18nProvider } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
+import { DEFAULT_TIME_ZONE } from "@/i18n/config";
 
 export interface AdminIntlProviderProps {
   readonly locale: string;
@@ -25,7 +26,7 @@ export interface AdminIntlProviderProps {
  */
 export function AdminIntlProvider({ locale, messages, children }: AdminIntlProviderProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} timeZone={DEFAULT_TIME_ZONE} messages={messages}>
       <I18nProvider locale={locale}>
         <div lang={locale} className="contents">
           {children}

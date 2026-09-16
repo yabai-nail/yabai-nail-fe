@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -14,6 +14,7 @@ import {
   useAdminCustomers,
   useAdminServices,
   useAdminStaff,
+  useAdminPermission,
   type AdminAppointment as ServerAppointment,
   type AdminCustomer,
   type AdminServiceItem,
@@ -52,23 +53,27 @@ function buildInvoiceFromServer(
     readonly staff: Map<string, AdminStaffMember>;
   },
   t: Translator,
+  formatDate: (value: Date) => string,
+  formatTime: (value: Date) => string,
 ): CheckoutInvoice {
   const customer = lookups.customers.get(appointment.customerId);
   const staff = lookups.staff.get(appointment.staffId);
-  const primaryServiceId = appointment.serviceIds[0] ?? "unknown";
+  const orderedSnapshots = [...(appointment.services ?? [])].sort((left, right) => left.sortOrder - right.sortOrder);
+  const primaryServiceId = orderedSnapshots[0]?.serviceId ?? appointment.serviceIds[0] ?? "unknown";
   const primaryService = lookups.services.get(primaryServiceId);
   const start = new Date(appointment.startsAt);
-  const date = start.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", weekday: "long" });
-  const time = start.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const date = formatDate(start);
+  const time = formatTime(start);
   const customerName = customer?.displayName ?? customer?.name ?? t("fallback.customer");
   const staffName = staff?.displayName ?? t("fallback.staff");
 
   const asService = (serviceId: string) => {
+    const snapshot = orderedSnapshots.find((item) => item.serviceId === serviceId);
     const server = lookups.services.get(serviceId);
     return {
       id: serviceId,
-      name: server?.name ?? t("fallback.service"),
-      price: server?.price ?? 0,
+      name: snapshot?.serviceName ?? snapshot?.name ?? server?.name ?? t("fallback.service"),
+      price: snapshot?.unitPrice ?? server?.price ?? 0,
     };
   };
 
@@ -92,22 +97,25 @@ function buildInvoiceFromServer(
     },
     bookedService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? t("fallback.service"),
-      price: primaryService?.price ?? 0,
+      name: orderedSnapshots[0]?.serviceName ?? orderedSnapshots[0]?.name ?? primaryService?.name ?? t("fallback.service"),
+      price: orderedSnapshots[0]?.unitPrice ?? primaryService?.price ?? 0,
     },
     currentService: {
       id: primaryServiceId,
-      name: primaryService?.name ?? t("fallback.service"),
-      price: primaryService?.price ?? 0,
+      name: orderedSnapshots[0]?.serviceName ?? orderedSnapshots[0]?.name ?? primaryService?.name ?? t("fallback.service"),
+      price: orderedSnapshots[0]?.unitPrice ?? primaryService?.price ?? 0,
     },
     additionalItems: appointment.serviceIds.slice(1).map((serviceId) => ({
       ...asService(serviceId),
       note: "",
       source: "catalog" as const,
     })),
-    discount: appointment.discount,
+    discount: (appointment.benefitDiscount ?? appointment.discount) + (appointment.manualDiscount ?? 0),
+    benefitDiscount: appointment.benefitDiscount ?? appointment.discount,
+    manualDiscount: appointment.manualDiscount ?? 0,
+    discountReason: appointment.discountReason ?? appointment.manualDiscountReason ?? "",
     paymentMethod: null,
-    orderNote: "",
+    orderNote: appointment.checkoutNote ?? "",
     status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
     paidAt: null,
   };
@@ -116,9 +124,12 @@ function buildInvoiceFromServer(
 export function AdminPaymentsComponent() {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
+  const format = useFormatter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId");
   const { branchId } = useAdminBranch();
+  const hasServiceEditPermission = useAdminPermission("catalog.write.branch", "catalog.write.all");
+  const hasPaymentPermission = useAdminPermission("payment.create.branch");
 
   // Parallel joins — same shape as the appointments page.
   const {
@@ -146,7 +157,13 @@ export function AdminPaymentsComponent() {
   // handlers hydrate the working state below.
   const seededInvoice = useMemo<CheckoutInvoice | null>(() => {
     if (appointment) {
-      const invoice = buildInvoiceFromServer(appointment, lookups, t);
+      const invoice = buildInvoiceFromServer(
+        appointment,
+        lookups,
+        t,
+        (value) => format.dateTime(value, { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" }),
+        (value) => format.dateTime(value, { hour: "2-digit", minute: "2-digit", hour12: false }),
+      );
       const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
       if (captured) {
         const method = captured.method.toLowerCase();
@@ -160,7 +177,7 @@ export function AdminPaymentsComponent() {
       return invoice;
     }
     return null;
-  }, [appointment, lookups, payments.data, t]);
+  }, [appointment, format, lookups, payments.data, t]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
@@ -171,15 +188,70 @@ export function AdminPaymentsComponent() {
     });
   };
 
-  const [isAppointmentCancelled, setIsAppointmentCancelled] = useState(false);
+  const isAppointmentCancelled = Boolean(appointment?.status.toUpperCase().includes("CANCELLED"));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const totals = useMemo(() => (invoice ? calculatePaymentTotals(invoice) : null), [invoice]);
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
+  const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active).map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
+  const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const canAdjust = hasPaymentPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const canCreatePayment = hasPaymentPermission && appointment?.status === "AWAITING_PAYMENT";
 
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
+  const persistServices = async (nextInvoice: CheckoutInvoice): Promise<string | null> => {
+    if (!branchId || !appointmentId || !appointment) return t("error.noAppointment");
+    try {
+      const saved = await adminService.setAppointmentActualServices(
+        branchId,
+        appointmentId,
+        { serviceIds: [nextInvoice.currentService.id, ...nextInvoice.additionalItems.map((item) => item.id)] },
+        appointment.version,
+      );
+      setInvoice(nextInvoice);
+      await mutateAppointment(saved, { revalidate: false });
+      return null;
+    } catch (thrown) {
+      return thrown instanceof Error ? thrown.message : t("error.services");
+    }
+  };
+
+  const persistAdjustments = async (manualDiscount: number, discountReason: string, checkoutNote: string): Promise<string | null> => {
+    if (!branchId || !appointmentId || !appointment) return t("error.noAppointment");
+    try {
+      const saved = await adminService.updateAppointmentCheckoutAdjustments(
+        branchId,
+        appointmentId,
+        { manualDiscount, discountReason, ...(checkoutNote ? { checkoutNote } : {}) },
+        appointment.version,
+        crypto.randomUUID(),
+      );
+      setInvoice((current) => ({
+        ...current,
+        benefitDiscount: saved.benefitDiscount,
+        manualDiscount: saved.manualDiscount,
+        discount: saved.totalDiscount,
+        discountReason: saved.discountReason,
+        orderNote: saved.checkoutNote ?? "",
+      }));
+      await mutateAppointment({
+        ...appointment,
+        total: saved.subtotal,
+        discount: saved.benefitDiscount,
+        benefitDiscount: saved.benefitDiscount,
+        manualDiscount: saved.manualDiscount,
+        manualDiscountReason: saved.discountReason,
+        discountReason: saved.discountReason,
+        checkoutNote: saved.checkoutNote,
+        version: saved.version,
+      }, { revalidate: false });
+      return null;
+    } catch (thrown) {
+      return thrown instanceof Error ? thrown.message : t("error.adjustments");
+    }
+  };
   const handleConfirm = () => {
     if (!invoice || !totals) return;
     // Local status change so the UI flips to paid immediately.
@@ -236,7 +308,7 @@ export function AdminPaymentsComponent() {
           // quote's own field is loosely typed, so only trust a number.
           typeof quote.version === "number" ? quote.version : appointment?.version,
         );
-        notifySuccess("Đã ghi nhận thanh toán");
+        notifySuccess(t("paymentRecorded"));
         setInvoice(result.value);
         void mutateAppointment();
       } catch (thrown) {
@@ -308,16 +380,11 @@ export function AdminPaymentsComponent() {
         <CustomerAppointmentPanel
           invoice={invoice}
           isCancelled={isAppointmentCancelled}
-          onAppointmentChange={(patch) => setInvoice((current) => ({
-            ...current,
-            appointment: { ...current.appointment, ...patch },
-          }))}
-          onCancel={() => setIsAppointmentCancelled(true)}
         />
-        <ServiceCheckoutPanel invoice={invoice} onChange={setInvoice}>
-          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
+        <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
+          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
-        <PaymentSummaryPanel invoice={invoice} totals={totals} onChange={setInvoice} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
+        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canCreatePayment={canCreatePayment} onSaveAdjustments={persistAdjustments} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
       </div>
       {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}

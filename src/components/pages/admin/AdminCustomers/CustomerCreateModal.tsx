@@ -22,6 +22,7 @@ export function CustomerCreateModal({
   onCreated: () => void;
 }>) {
   const t = useTranslations("admin.customers");
+  const tc = useTranslations("admin.common");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -40,7 +41,7 @@ export function CustomerCreateModal({
         phone: phone.trim(),
         note: note.trim() || undefined,
       });
-      notifySuccess("Đã thêm khách hàng");
+      notifySuccess(tc("customerCreated"));
       onCreated();
       onClose();
     } catch (err) {

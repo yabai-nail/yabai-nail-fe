@@ -9,9 +9,15 @@ export type ThreadRun = {
 export type ThreadDay = {
   /** Local calendar day, or "" for messages whose timestamp would not parse. */
   readonly key: string;
-  /** "Hôm nay" · "Hôm qua" · "28/8/2026" · "" when the day is unknown. */
+  /** Localized relative/date label, or an empty string when the day is unknown. */
   readonly label: string;
   readonly runs: ReadonlyArray<ThreadRun>;
+};
+
+export type ThreadDateLabels = {
+  readonly today: string;
+  readonly yesterday: string;
+  readonly formatDate: (date: Date) => string;
 };
 
 function dayKey(date: Date): string {
@@ -19,18 +25,37 @@ function dayKey(date: Date): string {
 }
 
 /**
+ * The API returns the newest page first but keeps each page chronological.
+ * Sorting the merged collection restores one chronological thread across page
+ * boundaries; id makes equal timestamps deterministic.
+ */
+export function sortThreadChronologically(
+  messages: ReadonlyArray<ChatMessage>,
+): ReadonlyArray<ChatMessage> {
+  return [...messages].sort((left, right) => {
+    const leftTime = Date.parse(left.sentAt);
+    const rightTime = Date.parse(right.sentAt);
+    if (!Number.isNaN(leftTime) && !Number.isNaN(rightTime) && leftTime !== rightTime) {
+      return leftTime - rightTime;
+    }
+    const timestampOrder = left.sentAt.localeCompare(right.sentAt);
+    return timestampOrder || left.id.localeCompare(right.id);
+  });
+}
+
+/**
  * Built by hand rather than through toLocaleDateString so the label does not
  * change with the ICU data the test happens to run against.
  */
-function dayLabel(date: Date, now: Date): string {
+function dayLabel(date: Date, now: Date, labels: ThreadDateLabels): string {
   const today = dayKey(now);
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
 
   const key = dayKey(date);
-  if (key === today) return "Hôm nay";
-  if (key === dayKey(yesterday)) return "Hôm qua";
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  if (key === today) return labels.today;
+  if (key === dayKey(yesterday)) return labels.yesterday;
+  return labels.formatDate(date);
 }
 
 /**
@@ -50,6 +75,11 @@ function dayLabel(date: Date, now: Date): string {
 export function groupThread(
   messages: ReadonlyArray<ChatMessage>,
   now: Date = new Date(),
+  labels: ThreadDateLabels = {
+    today: dayKey(now),
+    yesterday: dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
+    formatDate: dayKey,
+  },
 ): ReadonlyArray<ThreadDay> {
   const days: ThreadDay[] = [];
 
@@ -60,7 +90,7 @@ export function groupThread(
 
     // An undatable message belongs to whichever day is already open.
     const key = dated ? dayKey(date) : (open?.key ?? "");
-    const label = dated ? dayLabel(date, now) : (open?.label ?? "");
+    const label = dated ? dayLabel(date, now, labels) : (open?.label ?? "");
 
     if (!open || open.key !== key) {
       days.push({ key, label, runs: [{ sender: message.sender, messages: [message] }] });

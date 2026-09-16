@@ -2,6 +2,8 @@ import { executeApiOperation } from "../api";
 import type {
   AdminAppointment,
   AdminAppointmentActualServicesInput,
+  AdminCheckoutAdjustment,
+  AdminCheckoutAdjustmentInput,
   AdminAppointmentAllocationCandidate,
   AdminAppointmentAssignmentInput,
   AdminAppointmentCancellationInput,
@@ -192,6 +194,17 @@ export const adminService = {
     executeApiOperation<AdminAppointment>(
       "PUT /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/actual-services",
       { path: { branchId, appointmentId }, body: input, version },
+    ),
+  updateAppointmentCheckoutAdjustments: (
+    branchId: string,
+    appointmentId: string,
+    input: AdminCheckoutAdjustmentInput,
+    version?: string | number,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminCheckoutAdjustment>(
+      "PUT /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/checkout-adjustments",
+      { path: { branchId, appointmentId }, body: input, version, idempotencyKey },
     ),
   appointmentAllocationCandidates: (branchId: string, appointmentId: string) =>
     executeApiOperation<BackendList<AdminAppointmentAllocationCandidate>>(
@@ -700,6 +713,11 @@ export const adminService = {
     }),
   nailDesigns: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminNailDesign>>("GET /api/v1/admin/nail-designs", { query }),
+  nailDesignProposals: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminNailDesignProposal>>(
+      "GET /api/v1/admin/nail-design-proposals",
+      { query },
+    ),
   createNailDesign: (draft: AdminNailDesignDraft, idempotencyKey?: string) =>
     executeApiOperation<AdminNailDesign>("POST /api/v1/admin/nail-designs", {
       body: draft,

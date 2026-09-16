@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Button, Card, Chip } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
@@ -13,6 +13,7 @@ import {
   useAdminBranch,
   useAdminCustomers,
   useAdminPaymentRefund,
+  useAdminPermission,
 } from "@/service";
 import {
   formatMoney,
@@ -44,6 +45,8 @@ function resolutionInput(value: string): { phone: string } | { qrPayload: string
 export function AdminOperationsComponent() {
   const t = useTranslations("admin.operations");
   const { branchId } = useAdminBranch();
+  const canRefund = useAdminPermission("refund.create.branch");
+  const canResolveQueue = useAdminPermission("appointment.queue.read.branch");
 
   if (!branchId) {
     return (
@@ -61,10 +64,10 @@ export function AdminOperationsComponent() {
         width and the rest share the grid below it.
       */}
       <div className="grid gap-4">
-        <RefundForm branchId={branchId} />
+        {canRefund ? <RefundForm branchId={branchId} /> : null}
         <div className="grid gap-4 lg:grid-cols-2">
-          <CheckInForm branchId={branchId} />
-          <MembershipForm branchId={branchId} />
+          {canResolveQueue ? <CheckInForm branchId={branchId} /> : null}
+          {canResolveQueue ? <MembershipForm branchId={branchId} /> : null}
           <CustomerLookup branchId={branchId} />
         </div>
       </div>
@@ -106,6 +109,7 @@ const REFUND_PAGE_SIZE = 8;
 
 function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.operations");
+  const format = useFormatter();
   const tStatus = useTranslations("admin.appointmentStatus");
   const tMethod = useTranslations("admin.paymentMethod");
   const tPayment = useTranslations("admin.payments");
@@ -206,7 +210,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                       </Button>
                     </td>
                     <td className="px-3 py-2 text-admin-muted">
-                      {new Date(appointment.startsAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      {format.dateTime(new Date(appointment.startsAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </td>
                     <td className="px-3 py-2 text-right font-medium">{formatMoney(appointment.total)}</td>
                     <td className="px-3 py-2">
@@ -275,7 +279,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                     <td className="px-3 py-2">{methodLabel(payment.method)}</td>
                     <td className="px-3 py-2 text-admin-muted">{paymentStatusLabel(payment.status)}</td>
                     <td className="px-3 py-2 text-admin-muted">
-                      {payment.paidAt ? new Date(payment.paidAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
+                      {payment.paidAt ? format.dateTime(new Date(payment.paidAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -324,13 +328,14 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
 /** Name, tier and point balance — what the receptionist greets the customer with. */
 function CustomerCard({ customer }: Readonly<{ customer: ResolvedCustomer }>) {
   const t = useTranslations("admin.operations");
+  const format = useFormatter();
 
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <span className="text-sm font-semibold text-admin-ink">{customer.name}</span>
       <span className="font-mono text-sm text-admin-muted">{customer.phone}</span>
       <span className="text-xs text-admin-muted">
-        {t("tierLine", { tier: membershipTierLabel(customer.tier, t), points: customer.points.toLocaleString("vi-VN") })}
+        {t("tierLine", { tier: membershipTierLabel(customer.tier, t), points: format.number(customer.points) })}
       </span>
     </div>
   );
@@ -358,7 +363,7 @@ function CheckInForm({ branchId }: Readonly<{ branchId: string }>) {
       {result ? (
         <div className="grid gap-2 rounded-lg border border-admin-border p-3">
           <CustomerCard customer={result.customer} />
-          <p className="text-xs font-semibold text-admin-muted">Lịch hẹn ngày {result.localDate}</p>
+          <p className="text-xs font-semibold text-admin-muted">{t("checkin.dayHeading", { date: result.localDate })}</p>
           {result.appointments.length > 0 ? (
             <ul className="divide-y divide-admin-border">
               {result.appointments.map((appointment) => (
@@ -389,6 +394,7 @@ function CheckInForm({ branchId }: Readonly<{ branchId: string }>) {
 
 function MembershipForm({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.operations");
+  const tc = useTranslations("admin.common");
   const [code, setCode] = useState("");
   const [result, setResult] = useState<MembershipResolutionView | null>(null);
   const { busy, message, error, run } = useAction();
@@ -412,7 +418,7 @@ function MembershipForm({ branchId }: Readonly<{ branchId: string }>) {
           const resolution = await adminService.resolveMembershipCard(branchId, resolutionInput(code.trim()));
           const view = summarizeMembership(resolution);
           setResult(view);
-          return `Đã tra cứu thẻ của ${view.customer.name}.`;
+          return tc("membershipFound", { name: view.customer.name });
         })}>{busy ? t("lookupBusy") : t("lookupSubmit")}</Button>
       </div>
     </Card>
@@ -421,6 +427,7 @@ function MembershipForm({ branchId }: Readonly<{ branchId: string }>) {
 
 function CustomerLookup({ branchId }: Readonly<{ branchId: string }>) {
   const t = useTranslations("admin.operations");
+  const tc = useTranslations("admin.common");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<ReadonlyArray<CustomerHit>>([]);
   const { busy, message, error, run } = useAction();
@@ -436,7 +443,7 @@ function CustomerLookup({ branchId }: Readonly<{ branchId: string }>) {
         <Button variant="primary" className="rounded-lg" isDisabled={busy || query.trim().length < 2} onPress={() => void run(async () => {
           const result = await adminService.lookupCustomer(branchId, { q: query.trim() });
           setHits(result.items.map(summarizeCustomer));
-          return `Tìm thấy ${result.items.length} khách.`;
+          return tc("customersFound", { count: result.items.length });
         })}>{busy ? t("customerLookup.busy") : t("lookupSubmit")}</Button>
       </div>
       <Feedback message={message} error={error} />

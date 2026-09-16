@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   ArchiveBoxIcon,
   CalendarDaysIcon,
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 import { groupThread } from "./thread";
+import { useAdminPermission } from "@/service";
 
 type MessageThreadProps = {
   readonly customer: MessageCustomer;
@@ -19,6 +20,7 @@ type MessageThreadProps = {
   readonly draft: string;
   readonly onDraftChange: (value: string) => void;
   readonly onSend: () => void;
+  readonly canWrite: boolean;
   /** Fired when the admin marks the current thread read. Hidden if omitted. */
   readonly onMarkRead?: () => void;
   /** Fired when the admin archives the current thread. Hidden if omitted. */
@@ -62,6 +64,7 @@ export function MessageThread({
   draft,
   onDraftChange,
   onSend,
+  canWrite,
   onMarkRead,
   onArchive,
   statusPending = false,
@@ -70,12 +73,18 @@ export function MessageThread({
   sendError = null,
 }: MessageThreadProps) {
   const t = useTranslations("admin.messages");
+  const format = useFormatter();
   const router = useRouter();
+  const canCreateAppointment = useAdminPermission("appointment.create.branch");
   const submit = (event: FormEvent) => {
     event.preventDefault();
     onSend();
   };
-  const days = groupThread(messages);
+  const days = groupThread(messages, new Date(), {
+    today: t("today"),
+    yesterday: t("yesterday"),
+    formatDate: (date) => format.dateTime(date, { dateStyle: "medium" }),
+  });
 
   /*
     Land on the newest message, the way every chat client does. This became
@@ -88,10 +97,11 @@ export function MessageThread({
     back through the history.
   */
   const scroller = useRef<HTMLOListElement>(null);
+  const newestMessageId = messages.at(-1)?.id;
   useEffect(() => {
     const el = scroller.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [customer.id, messages.length]);
+  }, [customer.id, messages.length, newestMessageId]);
 
   return (
     <section aria-labelledby="thread-heading" className="flex min-h-0 min-w-0 flex-col bg-admin-canvas">
@@ -115,7 +125,7 @@ export function MessageThread({
           {customer.phone ? (
             <p className="truncate text-xs text-admin-muted">{customer.phone}</p>
           ) : (
-            <p className="truncate text-xs text-admin-muted">Chưa có số điện thoại</p>
+            <p className="truncate text-xs text-admin-muted">{t("noPhone")}</p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -126,15 +136,16 @@ export function MessageThread({
             isDisabled={!customer.phone}
             onPress={() => { window.location.href = `tel:${customer.phone}`; }}
           >
-            <PhoneIcon className="size-4" />Gọi
+            <PhoneIcon className="size-4" />{t("call")}
           </Button>
           <Button
             size="sm"
             variant="outline"
             className="rounded-lg border-admin-accent bg-admin-soft text-admin-accent"
+            isDisabled={!canCreateAppointment}
             onPress={() => router.push("/admin/appointments?create=1")}
           >
-            <CalendarDaysIcon className="size-4" />Tạo lịch hẹn
+            <CalendarDaysIcon className="size-4" />{t("createAppointment")}
           </Button>
           {onMarkRead ? (
             <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label={t("markRead")}>
@@ -157,13 +168,13 @@ export function MessageThread({
       {days.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <ChatBubbleLeftRightIcon className="size-8 text-admin-border" />
-          <p className="text-sm font-semibold text-admin-ink">Chưa có tin nhắn</p>
+          <p className="text-sm font-semibold text-admin-ink">{t("noMessages")}</p>
           <p className="max-w-xs text-xs text-admin-muted">
-            Viết dòng đầu tiên cho {customer.name} ở ô bên dưới.
+            {t("emptyThread", { name: customer.name })}
           </p>
         </div>
       ) : (
-        <ol ref={scroller} aria-label={`Tin nhắn với ${customer.name}`} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5">
+        <ol ref={scroller} aria-label={t("threadLabel", { name: customer.name })} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5">
           {days.map((day) => (
             <li key={day.key || "khong-ro-ngay"}>
               {day.label ? (
@@ -201,8 +212,8 @@ export function MessageThread({
       <form onSubmit={submit} className="shrink-0 border-t border-admin-border bg-admin-surface p-3">
         {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
         <InputGroup fullWidth>
-          <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} placeholder={`Nhắn cho ${customer.name}…`} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
-          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? "Đang gửi…" : t("send")}</Button></InputGroup.Suffix>
+          <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} disabled={!canWrite} placeholder={t("composeTo", { name: customer.name })} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!canWrite || !draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? t("sending") : t("send")}</Button></InputGroup.Suffix>
         </InputGroup>
       </form>
     </section>

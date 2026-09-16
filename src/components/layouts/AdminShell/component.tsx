@@ -7,11 +7,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { Avatar, Drawer, Dropdown } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { BranchSelector } from "@/components/blocks/admin/BranchSelector";
 import { useAuth } from "@/service";
-import { getAdminRoute } from "./config";
+import { canAccessAdminRoute, getAdminRoute } from "./config";
 import { AdminBrand, AdminSidebarContent } from "./navigation";
 
 function initialsOf(displayName: string): string {
@@ -32,6 +32,7 @@ function OwnerMenu() {
   // else and rendered nothing, while t() on a missing key throws and takes the shell
   // down with it.
   const roleLabel = user && t.has(`roles.${user.role}`) ? t(`roles.${user.role}`) : "";
+  const router = useRouter();
 
   return (
     <Dropdown>
@@ -51,7 +52,8 @@ function OwnerMenu() {
         <Dropdown.Menu
           aria-label={t("accountMenu")}
           onAction={(key) => {
-            if (key === "logout") logout();
+            if (key === "settings") router.push("/admin/settings#account");
+            if (key === "logout") void logout();
           }}
         >
           <Dropdown.Item id="settings" textValue={t("accountSettings")}>
@@ -70,7 +72,10 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
   const t = useTranslations("admin.shell");
   const tNav = useTranslations("admin.nav");
+  const tAuth = useTranslations("admin.auth");
+  const { permissions } = useAuth();
   const currentRoute = getAdminRoute(pathname);
+  const canAccess = permissions !== null && canAccessAdminRoute(currentRoute, permissions);
 
   return (
     <div className="admin-shell min-h-screen bg-admin-canvas text-admin-ink">
@@ -78,7 +83,7 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
         href="#main-content"
         className="fixed left-3 top-3 z-[100] -translate-y-24 rounded-lg bg-admin-accent px-4 py-2 text-sm font-semibold text-admin-on-accent transition-transform focus:translate-y-0"
       >
-        Bỏ qua đến nội dung chính
+        {t("skipToContent")}
       </a>
 
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col border-r border-admin-border bg-admin-surface px-4 py-3 lg:flex">
@@ -131,7 +136,14 @@ export function AdminShell({ children }: Readonly<{ children: ReactNode }>) {
           </div>
         </header>
 
-        {children}
+        {canAccess ? children : (
+          <main id="main-content" className="grid min-h-[calc(100vh-5rem)] place-items-center p-6">
+            <div role="alert" className="max-w-md rounded-lg border border-admin-border bg-admin-surface p-6 text-center">
+              <h2 className="font-bold text-admin-ink">{tAuth("forbiddenTitle")}</h2>
+              <p className="mt-2 text-sm text-admin-muted">{tAuth("forbiddenDescription")}</p>
+            </div>
+          </main>
+        )}
       </div>
     </div>
   );

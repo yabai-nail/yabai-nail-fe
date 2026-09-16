@@ -1,6 +1,6 @@
 "use client";
 
-import { useApiOperation } from "../api";
+import { useApiOperation, usePaginatedApiOperation } from "../api";
 import type {
   AdminAppointment,
   AdminAppointmentAllocationCandidate,
@@ -29,6 +29,7 @@ import type {
   AdminConversation,
   AdminMessage,
   AdminNailDesign,
+  AdminNailDesignProposal,
   AdminLeaveRequest,
   AdminNotificationCampaign,
   AdminNotificationCampaignMetrics,
@@ -57,7 +58,7 @@ export function useAdminCalendar(branchId: string | null, from: string, to: stri
 }
 
 export function useAdminAppointments(branchId: string | null, query?: Readonly<Record<string, string | number | undefined>>) {
-  return useApiOperation<BackendList<AdminAppointment>>(
+  return usePaginatedApiOperation<AdminAppointment>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/appointments" : null,
     { path: branchId ? { branchId } : undefined, query },
   );
@@ -97,7 +98,7 @@ export function useAdminAppointmentPayments(
 }
 
 export function useAdminCustomers(branchId: string | null, query?: Readonly<Record<string, string | number | undefined>>) {
-  return useApiOperation<BackendList<AdminCustomer>>(
+  return usePaginatedApiOperation<AdminCustomer>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/customers" : null,
     { path: branchId ? { branchId } : undefined, query },
   );
@@ -126,7 +127,7 @@ export function useAdminCustomerNailHistory(
   customerId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminCustomerNailHistoryEntry>>(
+  return usePaginatedApiOperation<AdminCustomerNailHistoryEntry>(
     branchId && customerId
       ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/nail-history"
       : null,
@@ -139,7 +140,7 @@ export function useAdminCustomerNotes(
   customerId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminCustomerNote>>(
+  return usePaginatedApiOperation<AdminCustomerNote>(
     branchId && customerId
       ? "GET /api/v1/admin/branches/{branchId}/customers/{customerId}/notes"
       : null,
@@ -164,15 +165,18 @@ export function useAdminCustomerLookup(
   );
 }
 
-export function useAdminServices(query?: Readonly<Record<string, string | number | undefined>>) {
-  return useApiOperation<BackendList<AdminServiceItem>>(
-    "GET /api/v1/admin/services",
+export function useAdminServices(
+  query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
+) {
+  return usePaginatedApiOperation<AdminServiceItem>(
+    enabled ? "GET /api/v1/admin/services" : null,
     { query },
   );
 }
 
 export function useAdminServiceCategories() {
-  return useApiOperation<BackendList<AdminServiceCategory>>(
+  return usePaginatedApiOperation<AdminServiceCategory>(
     "GET /api/v1/admin/service-categories",
   );
 }
@@ -185,12 +189,12 @@ export function useAdminServiceAddons(serviceId: string | null) {
 }
 
 export function useAdminSurcharges() {
-  return useApiOperation<BackendList<AdminSurcharge>>("GET /api/v1/admin/surcharges");
+  return usePaginatedApiOperation<AdminSurcharge>("GET /api/v1/admin/surcharges");
 }
 
-export function useAdminStaff(query?: Readonly<Record<string, string | number | undefined>>) {
-  return useApiOperation<BackendList<AdminStaffMember>>(
-    "GET /api/v1/admin/staff",
+export function useAdminStaff(query?: Readonly<Record<string, string | number | undefined>>, enabled = true) {
+  return usePaginatedApiOperation<AdminStaffMember>(
+    enabled ? "GET /api/v1/admin/staff" : null,
     { query },
   );
 }
@@ -220,7 +224,7 @@ export function useAdminStaffShifts(
   branchId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminStaffShift>>(
+  return usePaginatedApiOperation<AdminStaffShift>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/shifts" : null,
     { path: branchId ? { branchId } : undefined, query },
   );
@@ -229,16 +233,17 @@ export function useAdminStaffShifts(
 export function useAdminStaffPerformance(
   branchId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
   return useApiOperation<AdminStaffPerformance>(
-    branchId ? "GET /api/v1/admin/branches/{branchId}/staff-performance" : null,
+    branchId && enabled ? "GET /api/v1/admin/branches/{branchId}/staff-performance" : null,
     { path: branchId ? { branchId } : undefined, query },
   );
 }
 
-export function useRevenueReport(from?: string, to?: string) {
+export function useRevenueReport(from?: string, to?: string, enabled = true) {
   return useApiOperation<RevenueReport>(
-    "GET /api/v1/admin/reports/revenue-summary",
+    enabled ? "GET /api/v1/admin/reports/revenue-summary" : null,
     { query: { from, to } },
   );
 }
@@ -254,20 +259,23 @@ export function useRevenueReportRange(from: string | null, to: string | null) {
 
 export function useAdminBranchesReport(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/branches", { query });
+  return useApiOperation<AdminReport>(enabled ? "GET /api/v1/admin/reports/branches" : null, { query });
 }
 
 export function useAdminCustomersReport(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/customers", { query });
+  return useApiOperation<AdminReport>(enabled ? "GET /api/v1/admin/reports/customers" : null, { query });
 }
 
 export function useAdminStaffPerformanceReport(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<AdminReport>("GET /api/v1/admin/reports/staff-performance", { query });
+  return useApiOperation<AdminReport>(enabled ? "GET /api/v1/admin/reports/staff-performance" : null, { query });
 }
 
 export function useAdminReportExport(exportId: string | null) {
@@ -298,7 +306,7 @@ export function useAdminPaymentRefund(
 export function useAdminAuditLogs(
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminAuditLog>>("GET /api/v1/admin/audit-logs", { query });
+  return usePaginatedApiOperation<AdminAuditLog>("GET /api/v1/admin/audit-logs", { query });
 }
 
 export function useAdminAuditLog(logId: string | null) {
@@ -311,7 +319,7 @@ export function useAdminAuditLog(logId: string | null) {
 export function useAdminConversations(
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminConversation>>(
+  return usePaginatedApiOperation<AdminConversation>(
     "GET /api/v1/admin/conversations",
     { query },
     { refreshInterval: 5_000 },
@@ -322,7 +330,7 @@ export function useAdminConversationMessages(
   conversationId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminMessage>>(
+  return usePaginatedApiOperation<AdminMessage>(
     conversationId ? "GET /api/v1/admin/conversations/{conversationId}/messages" : null,
     {
       path: conversationId ? { conversationId } : undefined,
@@ -336,7 +344,7 @@ export function useAdminBranchReviews(
   branchId: string | null,
   query?: Readonly<Record<string, string | number | undefined>>,
 ) {
-  return useApiOperation<BackendList<AdminReview>>(
+  return usePaginatedApiOperation<AdminReview>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/reviews" : null,
     { path: branchId ? { branchId } : undefined, query },
   );
@@ -344,8 +352,9 @@ export function useAdminBranchReviews(
 
 export function useAdminReviews(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query });
+  return usePaginatedApiOperation<AdminReview>(enabled ? "GET /api/v1/admin/reviews" : null, { query });
 }
 
 export function useAdminBranchSettings(branchId: string | null) {
@@ -357,8 +366,9 @@ export function useAdminBranchSettings(branchId: string | null) {
 
 export function useAdminPromotions(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<BackendList<AdminPromotion>>("GET /api/v1/admin/promotions", { query });
+  return usePaginatedApiOperation<AdminPromotion>(enabled ? "GET /api/v1/admin/promotions" : null, { query });
 }
 
 export function useAdminNotificationCampaignMetrics(campaignId: string | null) {
@@ -368,14 +378,14 @@ export function useAdminNotificationCampaignMetrics(campaignId: string | null) {
   );
 }
 
-export function useAdminNotificationCampaigns() {
-  return useApiOperation<BackendList<AdminNotificationCampaign>>(
-    "GET /api/v1/admin/notification-campaigns",
+export function useAdminNotificationCampaigns(enabled = true) {
+  return usePaginatedApiOperation<AdminNotificationCampaign>(
+    enabled ? "GET /api/v1/admin/notification-campaigns" : null,
   );
 }
 
 export function useAdminLeaveRequests(branchId: string | null) {
-  return useApiOperation<BackendList<AdminLeaveRequest>>(
+  return usePaginatedApiOperation<AdminLeaveRequest>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/leave-requests" : null,
     { path: branchId ? { branchId } : undefined },
   );
@@ -383,14 +393,26 @@ export function useAdminLeaveRequests(branchId: string | null) {
 
 export function useAdminNailDesigns(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<BackendList<AdminNailDesign>>("GET /api/v1/admin/nail-designs", { query });
+  return usePaginatedApiOperation<AdminNailDesign>(enabled ? "GET /api/v1/admin/nail-designs" : null, { query });
+}
+
+export function useAdminNailDesignProposals(
+  query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
+) {
+  return usePaginatedApiOperation<AdminNailDesignProposal>(
+    enabled ? "GET /api/v1/admin/nail-design-proposals" : null,
+    { query },
+  );
 }
 
 export function useAdminBranchList(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<BackendList<AdminBranch>>("GET /api/v1/admin/branches", { query });
+  return usePaginatedApiOperation<AdminBranch>(enabled ? "GET /api/v1/admin/branches" : null, { query });
 }
 
 export function useAdminBranchDetail(branchId: string | null) {
@@ -402,8 +424,9 @@ export function useAdminBranchDetail(branchId: string | null) {
 
 export function useAdminAccounts(
   query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
 ) {
-  return useApiOperation<BackendList<AdminAccount>>("GET /api/v1/admin/accounts", { query });
+  return usePaginatedApiOperation<AdminAccount>(enabled ? "GET /api/v1/admin/accounts" : null, { query });
 }
 
 export function useAdminLoyaltyConfig() {

@@ -14,6 +14,7 @@ import {
   useAdminAccounts,
   useAdminLoyaltyConfig,
   useAdminSystemConfig,
+  useAdminPermission,
   type AdminLoyaltyConfig,
   type AdminSystemConfig,
 } from "@/service";
@@ -32,26 +33,33 @@ type Tab = "accounts" | "config";
 
 export function AdminAccountsComponent() {
   const t = useTranslations("admin.accounts");
+  const canWriteAccounts = useAdminPermission("account.write.all");
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const roleLabel = (code: string) =>
     t.has(`role.${code}`) ? t(`role.${code}`) : code;
   const [tab, setTab] = useState<Tab>("accounts");
-  const { data, isLoading, error, mutate } = useAdminAccounts();
+  const [query, setQuery] = useState("");
+  const [role, setRole] = useState("all");
+  const { data, isLoading, error, mutate } = useAdminAccounts({
+    q: query.trim() || undefined,
+    role: role === "all" ? undefined : role,
+  });
 
   const source = useMemo<ReadonlyArray<AccountRow>>(
     () => (data?.items ? data.items.map(adaptAccount) : []),
     [data],
   );
 
-  const [query, setQuery] = useState("");
-  const [role, setRole] = useState("all");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<AccountRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [resetting, setResetting] = useState<AccountRow | null>(null);
 
-  const roles = useMemo(() => accountRoles(source), [source]);
+  const roles = useMemo(
+    () => Array.from(new Set(["CUSTOMER", "MANAGER", "OWNER", "STAFF", ...accountRoles(source)])),
+    [source],
+  );
   const filtered = useMemo(() => filterAccounts(source, role, query), [source, role, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
 
@@ -76,7 +84,7 @@ export function AdminAccountsComponent() {
         <>
           <div className="mb-4 flex min-w-0 flex-col gap-3 pb-1 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-              Vai trò
+              {t("columns.role")}
               <AdminSelectField
                 label={t("filterLabel")}
                 value={role}
@@ -89,8 +97,8 @@ export function AdminAccountsComponent() {
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-              <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-                <PlusIcon className="size-4" />Thêm tài khoản
+              <Button variant="primary" className="rounded-lg" isDisabled={!canWriteAccounts} onPress={() => setCreating(true)}>
+                <PlusIcon className="size-4" />{t("add")}
               </Button>
             </div>
           </div>
@@ -137,8 +145,8 @@ export function AdminAccountsComponent() {
                               <span className="text-xs text-admin-muted">{t("customerAccount")}</span>
                             ) : (
                               <>
-                                <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
-                                <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setResetting(row)}>{t("resetPassword")}</Button>
+                                <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canWriteAccounts} onPress={() => setEditing(row)}>{t("edit")}</Button>
+                                <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={!canWriteAccounts} onPress={() => setResetting(row)}>{t("resetPassword")}</Button>
                               </>
                             )}
                           </div>
@@ -150,7 +158,7 @@ export function AdminAccountsComponent() {
               </table>
             </Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-              <span>Hiển thị {visible.length} trong tổng số {filtered.length} tài khoản</span>
+              <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
               <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
             </Card.Footer>
           </Card>
@@ -159,9 +167,9 @@ export function AdminAccountsComponent() {
         <ConfigPanel />
       )}
 
-      {creating ? <AccountModal account={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
-      {editing ? <AccountModal account={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
-      {resetting ? <ResetPasswordModal accountId={resetting.id} accountName={resetting.displayName} onClose={() => setResetting(null)} onDone={() => void mutate()} /> : null}
+      {canWriteAccounts && creating ? <AccountModal account={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
+      {canWriteAccounts && editing ? <AccountModal account={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canWriteAccounts && resetting ? <ResetPasswordModal accountId={resetting.id} accountName={resetting.displayName} onClose={() => setResetting(null)} onDone={() => void mutate()} /> : null}
     </AdminPageLayout>
   );
 }
@@ -196,6 +204,8 @@ function SystemFeaturesForm({
   onSaved,
 }: Readonly<{ config: AdminSystemConfig; onSaved: () => void }>) {
   const t = useTranslations("admin.accounts");
+  const tc = useTranslations("admin.common");
+  const canWrite = useAdminPermission("system.config.write.all");
   const [features, setFeatures] = useState<Record<string, boolean>>(() => ({ ...(config.features ?? {}) }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +214,7 @@ function SystemFeaturesForm({
     setBusy(true); setError(null);
     try {
       await adminService.updateSystemConfig({ features }, config.version);
-      notifySuccess("Đã lưu cấu hình hệ thống");
+      notifySuccess(tc("systemSaved"));
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("systemSaveFailed"));
@@ -222,13 +232,13 @@ function SystemFeaturesForm({
         Object.entries(features).map(([key, value]) => (
           <label key={key} className="flex items-center justify-between gap-3 text-sm text-admin-ink">
             <span>{key}</span>
-            <input type="checkbox" className="accent-admin-accent" checked={value} onChange={(event) => setFeatures((prev) => ({ ...prev, [key]: event.target.checked }))} />
+            <input type="checkbox" className="accent-admin-accent" checked={value} disabled={!canWrite || busy} onChange={(event) => setFeatures((prev) => ({ ...prev, [key]: event.target.checked }))} />
           </label>
         ))
       )}
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
-        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveFeatures")}</Button>
+        <Button variant="primary" className="rounded-lg" isDisabled={!canWrite || busy} onPress={() => void save()}>{t("saveFeatures")}</Button>
       </div>
     </Card>
   );
@@ -239,6 +249,8 @@ function LoyaltyConfigForm({
   onSaved,
 }: Readonly<{ config: AdminLoyaltyConfig; onSaved: () => void }>) {
   const t = useTranslations("admin.accounts");
+  const tc = useTranslations("admin.common");
+  const canWrite = useAdminPermission("loyalty.config.write.all");
   // Seed the editor with the whole config, minus the fields the server owns.
   // It used to seed { tiers, rules } only — `rules` is not part of the response
   // at all, and dropping pointRate, redemptionCapPercent and redemptionIncrement
@@ -264,7 +276,7 @@ function LoyaltyConfigForm({
     setBusy(true); setError(null);
     try {
       await adminService.updateLoyaltyConfig(parsed, config.version);
-      notifySuccess("Đã lưu cấu hình loyalty");
+      notifySuccess(tc("loyaltySaved"));
       onSaved();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("loyaltySaveFailed"));
@@ -276,10 +288,10 @@ function LoyaltyConfigForm({
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">{t("loyaltyHeading")}</h2>
-      <textarea className="min-h-40 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 font-mono text-xs text-admin-ink" value={text} onChange={(event) => setText(event.target.value)} />
+      <textarea className="min-h-40 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 font-mono text-xs text-admin-ink disabled:bg-admin-canvas disabled:text-admin-muted" value={text} disabled={!canWrite || busy} onChange={(event) => setText(event.target.value)} />
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
-        <Button variant="primary" className="rounded-lg" isDisabled={busy} onPress={() => void save()}>{t("saveLoyalty")}</Button>
+        <Button variant="primary" className="rounded-lg" isDisabled={!canWrite || busy} onPress={() => void save()}>{t("saveLoyalty")}</Button>
       </div>
     </Card>
   );

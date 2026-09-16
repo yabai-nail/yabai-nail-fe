@@ -26,9 +26,9 @@ export type {
   ApiMeta,
 } from "./contracts";
 export { apiRoutes } from "./endpoints";
-export { executeApiOperation } from "./operation-client";
-export type { ExecuteApiOperationOptions } from "./operation-client";
-export { useApiOperation } from "./operation-hooks";
+export { executeApiOperation, executePaginatedApiOperation } from "./operation-client";
+export type { ExecuteApiOperationOptions, QueryValue } from "./operation-client";
+export { useApiOperation, usePaginatedApiOperation } from "./operation-hooks";
 export {
   apiOperations,
   buildOperationPath,

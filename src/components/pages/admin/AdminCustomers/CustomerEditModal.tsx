@@ -38,7 +38,7 @@ export function CustomerEditModal({
             </Modal.Header>
             <Modal.Body className="space-y-3 px-5 py-4 text-sm">
               <label htmlFor="edit-cust-name" className="block text-xs font-semibold text-admin-ink">
-                Họ tên hiển thị
+                {t("edit.name")}
                 <input
                   id="edit-cust-name"
                   value={displayName}
@@ -48,7 +48,7 @@ export function CustomerEditModal({
               </label>
 
               <div className="block text-xs font-semibold text-admin-ink">
-                Ngôn ngữ ưu tiên
+                {t("edit.localeLabel")}
                 <AdminSelectField
                   label={t("edit.localeLabel")}
                   fullWidth
@@ -63,7 +63,7 @@ export function CustomerEditModal({
               </div>
 
               <div className="block text-xs font-semibold text-admin-ink">
-                Trạng thái tài khoản
+                {t("edit.statusLabel")}
                 <AdminSelectField
                   label={t("edit.statusLabel")}
                   fullWidth
@@ -81,7 +81,7 @@ export function CustomerEditModal({
             </Modal.Body>
             <Modal.Footer className="border-t border-admin-border px-5 py-4">
               <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose} isDisabled={submitting}>
-                Đóng
+                {t("edit.close")}
               </Button>
               <Button
                 variant="primary"

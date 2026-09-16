@@ -79,11 +79,11 @@ function ServiceAddonEditor({ serviceId, version, data, onMutate }: Readonly<{ s
           {addons.map((addon) => {
             const draft = drafts[addon.id];
             return <div key={addon.id} className="grid gap-3 rounded-lg bg-admin-soft p-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-admin-ink"><input type="checkbox" checked={draft?.selected ?? false} onChange={(event) => setDrafts((current) => ({ ...current, [addon.id]: { ...current[addon.id], selected: event.target.checked } }))} />{addon.name} · ¥{addon.price}</label>
+              <label className="flex items-center gap-2 text-sm font-semibold text-admin-ink"><input type="checkbox" className="accent-admin-accent" checked={draft?.selected ?? false} onChange={(event) => setDrafts((current) => ({ ...current, [addon.id]: { ...current[addon.id], selected: event.target.checked } }))} />{addon.name} · ¥{addon.price}</label>
               {draft?.selected ? data.branches.map((branch) => {
                 const branchDraft = draft.branches[branch.id];
                 return <div key={branch.id} className="grid items-end gap-2 sm:grid-cols-[1fr_8rem_8rem]">
-                  <label className="flex items-center gap-2 text-xs text-admin-ink"><input type="checkbox" checked={branchDraft?.enabled ?? true} onChange={(event) => updateBranch(addon.id, branch.id, { enabled: event.target.checked })} />{branch.name}</label>
+                  <label className="flex items-center gap-2 text-xs text-admin-ink"><input type="checkbox" className="accent-admin-accent" checked={branchDraft?.enabled ?? true} onChange={(event) => updateBranch(addon.id, branch.id, { enabled: event.target.checked })} />{branch.name}</label>
                   <label className="grid gap-1 text-xs text-admin-muted">{t("priceOverride")}<input inputMode="numeric" className="min-h-9 rounded-lg border border-admin-border bg-admin-surface px-2 text-admin-ink" value={branchDraft?.priceOverride ?? ""} onChange={(event) => updateBranch(addon.id, branch.id, { priceOverride: event.target.value })} /></label>
                   <label className="grid gap-1 text-xs text-admin-muted">{t("durationOverride")}<input type="number" min={0} step={15} className="min-h-9 rounded-lg border border-admin-border bg-admin-surface px-2 text-admin-ink" value={branchDraft?.durationOverride ?? ""} onChange={(event) => updateBranch(addon.id, branch.id, { durationOverride: event.target.value })} /></label>
                 </div>;

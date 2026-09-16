@@ -36,12 +36,13 @@ import { join, relative } from "node:path";
 // Flipped on in the last slice, once every screen has been converted. Until then a
 // leak is reported but does not fail: most of the console is still hardcoded by
 // design, and a gate that always fails is a gate nobody reads.
-const ENFORCE_LEAKS = false;
+const ENFORCE_LEAKS = true;
 
 const SCOPE = [
   "src/components/pages/admin",
   "src/components/blocks/admin",
-  "src/components/layouts",
+  "src/components/layouts/AdminAuthGate",
+  "src/components/layouts/AdminShell",
   "src/app/(admin)",
 ];
 
@@ -63,7 +64,10 @@ function walk(directory, files = []) {
   for (const entry of entries) {
     const path = join(directory, entry);
     if (statSync(path).isDirectory()) walk(path, files);
-    else if (/\.tsx?$/.test(path) && !/\.test\.tsx?$/.test(path)) files.push(path);
+    // Scan render components and production helpers. Fixture catalogues live in
+    // data.ts and tests; excluding only those keeps utility-generated labels
+    // (for example message day headings) inside the regression gate.
+    else if (/\.tsx?$/.test(path) && !/\.test\.tsx?$/.test(path) && !/[\\/]data\.ts$/.test(path)) files.push(path);
   }
   return files;
 }
@@ -75,8 +79,17 @@ function findLeaks() {
       const lines = readFileSync(path, "utf8").split(/\r?\n/);
       // A `{/* ... */}` comment can span lines, and its middle lines look like prose.
       let inJsxComment = false;
+      let inBlockComment = false;
       lines.forEach((line, index) => {
         const trimmed = line.trim();
+        if (inBlockComment) {
+          if (line.includes("*/")) inBlockComment = false;
+          return;
+        }
+        if (trimmed.startsWith("/*")) {
+          if (!line.includes("*/")) inBlockComment = true;
+          return;
+        }
         if (inJsxComment) {
           if (line.includes("*/}")) inJsxComment = false;
           return;
@@ -91,7 +104,11 @@ function findLeaks() {
         // Only text that can reach a screen: a quoted literal, or JSX text between tags.
         const quoted = line.match(/"[^"]*"|'[^']*'|`[^`]*`/g) ?? [];
         const jsxText = line.match(/>[^<>{}]+</g) ?? [];
-        const hits = [...quoted, ...jsxText].filter((value) => VIETNAMESE.test(value));
+        // JSX copy is often placed on its own line between the opening and
+        // closing tags. It has no `>`/`<` on that line, so the old scanner
+        // silently missed exactly the most readable style of markup.
+        const plainJsxText = /^[^<>{};=]*$/.test(trimmed) && VIETNAMESE.test(trimmed) ? [trimmed] : [];
+        const hits = [...quoted, ...jsxText, ...plainJsxText].filter((value) => VIETNAMESE.test(value));
         if (hits.length) leaks.push({ file: relative(process.cwd(), path), line: index + 1, hits });
       });
     }

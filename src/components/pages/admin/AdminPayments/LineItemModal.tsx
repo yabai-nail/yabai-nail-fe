@@ -2,49 +2,36 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
-import { paymentServiceCatalog, type PaymentLineItem, type PaymentServiceSnapshot } from "./data";
+
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import type { PaymentServiceSnapshot } from "./data";
 
-const fieldClassName = "min-h-10 w-full rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink outline-none focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20";
-
-export function LineItemModal({ item, onClose, onSubmit }: Readonly<{
-  item: PaymentLineItem | null;
+export function LineItemModal({ services, onClose, onSubmit }: Readonly<{
+  services: ReadonlyArray<PaymentServiceSnapshot>;
   onClose: () => void;
-  onSubmit: (service: PaymentServiceSnapshot, note: string) => string | null;
+  onSubmit: (service: PaymentServiceSnapshot) => Promise<string | null>;
 }>) {
   const t = useTranslations("admin.payments");
-  const catalog = paymentServiceCatalog.slice(3);
-  const [selectedId, setSelectedId] = useState(item?.source === "catalog" ? item.id : "custom");
-  const [name, setName] = useState(item?.name ?? "");
-  const [price, setPrice] = useState(item ? String(item.price) : "");
-  const [note, setNote] = useState(item?.note ?? "");
-  // Holds a catalogue key, never a sentence: the payment-state transitions answer with keys
-  // and this modal's own validation joins them on the same footing, so one t() renders both.
+  const [selectedId, setSelectedId] = useState("");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const isCustom = item?.source === "custom" || selectedId === "custom";
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const catalogService = catalog.find((service) => service.id === selectedId);
-    const service = isCustom ? { id: item?.id ?? "custom", name, price: Number(price) } : catalogService;
-    if (!service) return setError("state.serviceRequired");
-    const nextError = onSubmit(service, note.trim());
+    const service = services.find((entry) => entry.id === selectedId);
+    if (!service) return setError(t("state.serviceRequired"));
+    setBusy(true);
+    const nextError = await onSubmit(service);
+    setBusy(false);
     if (nextError) setError(nextError);
   }
 
-  return (
-    <Modal isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
-      <Modal.Backdrop><Modal.Container size="md" placement="center"><Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
-        <Modal.CloseTrigger className="rounded-lg" />
-        <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4"><span className="grid size-9 place-items-center rounded-lg bg-admin-soft text-admin-accent"><PlusIcon className="size-5" /></span><Modal.Heading className="text-lg font-bold text-admin-ink">{item ? t("lineItem.editTitle") : t("lineItem.addTitle")}</Modal.Heading></Modal.Header>
-        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col"><Modal.Body className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
-          {!item ? <div className="block text-sm font-semibold text-admin-ink">{t("lineItem.source")}<AdminSelectField label={t("lineItem.source")} fullWidth className="mt-2" value={selectedId} onChange={(value) => { setSelectedId(value); const service = catalog.find((entry) => entry.id === value); if (service) { setName(service.name); setPrice(String(service.price)); } }} options={[{ value: "custom", label: t("lineItem.custom") }, ...catalog.map((service) => ({ value: service.id, label: service.name }))]} /></div> : null}
-          <label className="block text-sm font-semibold text-admin-ink">{t("lineItem.name")}<input className={`${fieldClassName} mt-2`} value={name} onChange={(event) => setName(event.target.value)} disabled={!isCustom} maxLength={80} required /></label>
-          <label className="block text-sm font-semibold text-admin-ink">{t("lineItem.price")}<input className={`${fieldClassName} mt-2`} type="number" min="0" step="1" value={price} onChange={(event) => setPrice(event.target.value)} disabled={!isCustom} required /></label>
-          <label className="block text-sm font-semibold text-admin-ink">{t("lineItem.note")}<textarea className={`${fieldClassName} mt-2 min-h-20 py-2`} value={note} onChange={(event) => setNote(event.target.value)} maxLength={160} /></label>
-          {error ? <p role="alert" className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger">{t(error)}</p> : null}
-        </Modal.Body><Modal.Footer className="border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" className="rounded-lg border-admin-border" onPress={onClose}>{t("lineItem.close")}</Button><Button type="submit" variant="primary" className="rounded-lg">{item ? t("lineItem.save") : t("lineItem.add")}</Button></Modal.Footer></form>
-      </Modal.Dialog></Modal.Container></Modal.Backdrop>
-    </Modal>
-  );
+  return <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}><Modal.Backdrop><Modal.Container size="md" placement="center"><Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
+    <Modal.Header className="flex flex-row items-center gap-3 border-b border-admin-border px-5 py-4"><span className="grid size-9 place-items-center rounded-lg bg-admin-soft text-admin-accent"><PlusIcon className="size-5" /></span><Modal.Heading className="text-lg font-bold text-admin-ink">{t("lineItem.addTitle")}</Modal.Heading></Modal.Header>
+    <form onSubmit={(event) => void submit(event)}><Modal.Body className="space-y-4 px-5 py-5">
+      <div className="text-sm font-semibold text-admin-ink">{t("lineItem.source")}<AdminSelectField label={t("lineItem.source")} fullWidth className="mt-2" value={selectedId} onChange={setSelectedId} options={services.map((service) => ({ value: service.id, label: service.name }))} /></div>
+      <p className="text-xs leading-5 text-admin-muted">{t("lineItem.catalogOnly")}</p>
+      {error ? <p role="alert" className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger">{error}</p> : null}
+    </Modal.Body><Modal.Footer className="border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" className="rounded-lg border-admin-border" isDisabled={busy} onPress={onClose}>{t("lineItem.close")}</Button><Button type="submit" variant="primary" className="rounded-lg" isDisabled={!selectedId || busy}>{busy ? t("summary.saving") : t("lineItem.add")}</Button></Modal.Footer></form>
+  </Modal.Dialog></Modal.Container></Modal.Backdrop></Modal>;
 }

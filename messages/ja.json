@@ -1,5 +1,13 @@
 {
   "admin": {
+    "common": {
+      "accountUpdated": "アカウントを更新しました", "accountCreated": "アカウントを追加しました", "systemSaved": "システム設定を保存しました", "loyaltySaved": "ロイヤルティ設定を保存しました", "passwordReset": "パスワードをリセットしました", "passwordResetBody": "{name} に通知を送信しました。",
+      "appointmentCreated": "予約を作成しました", "appointmentUpdated": "予約を更新しました", "staffAssigned": "スタッフを割り当てました", "actualServicesUpdated": "実施メニューを更新しました", "photoAttached": "予約に写真を添付しました", "appointmentCancelled": "予約をキャンセルしました", "checkInDone": "チェックインしました", "serviceStarted": "施術を開始しました", "serviceCompleted": "施術を完了しました", "noShowDone": "来店なしとして記録しました",
+      "branchUpdated": "店舗を更新しました", "branchCreated": "店舗を追加しました", "customerUpdated": "顧客を更新しました", "customerCreated": "顧客を追加しました", "pointsUpdated": "顧客ポイントを更新しました", "couponIssued": "顧客にクーポンを発行しました", "noteCreated": "メモを追加しました", "noteUpdated": "メモを更新しました",
+      "promotionActivated": "キャンペーンを有効にしました", "promotionPaused": "キャンペーンを一時停止しました", "campaignCreated": "配信キャンペーンを作成しました", "campaignStatus": "ステータス: {status}。", "campaignCancelled": "配信キャンペーンをキャンセルしました", "promotionIssued": "キャンペーンを発行しました", "promotionIssuedBody": "{count}人の顧客に送信しました。", "promotionUpdated": "キャンペーンを更新しました", "promotionCreated": "キャンペーンを追加しました",
+      "conversationArchived": "会話をアーカイブしました", "conversationUpdated": "会話のステータスを更新しました", "membershipFound": "{name} の会員情報を確認しました。", "customersFound": "{count}人の顧客が見つかりました。", "reportExportCreated": "レポートのエクスポートを開始しました", "reviewResolved": "レビューを対応済みにしました", "reviewReopened": "レビューを再開しました", "reviewReplySent": "レビューへの返信を送信しました", "surchargeUpdated": "追加料金を更新しました", "surchargeCreated": "追加料金を追加しました", "settingsSaved": "設定を更新しました", "compensationSaved": "給与と歩合を更新しました", "staffCreated": "スタッフを追加しました", "staffUpdated": "スタッフを更新しました", "leaveApproved": "休暇申請を承認しました", "leaveRejected": "休暇申請を却下しました", "shiftCreated": "シフトを追加しました", "leaveRequested": "休暇申請を送信しました", "skillsSaved": "スタッフのスキルを更新しました"
+    },
+    "pagination": { "label": "ページネーション", "previous": "前のページ", "next": "次のページ", "page": "{page}ページ" },
     "settings": {
       "language": {
         "heading": "表示言語",
@@ -27,6 +35,7 @@
         "salon": "店舗情報",
         "booking": "予約",
         "commission": "スタッフと歩合",
+        "account": "アカウントのセキュリティ",
         "payment": "支払い",
         "automation": "自動メッセージ",
         "notifications": "通知",
@@ -36,6 +45,19 @@
       },
       "tabsLabel": "設定グループ",
       "placeholder": "この設定グループは今後の段階で追加されます。",
+      "account": {
+        "heading": "管理者パスワードを変更",
+        "description": "新しいパスワードは8文字以上で、大文字・小文字・数字を含めてください。",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmation": "新しいパスワードを再入力",
+        "requirements": "パスワードがセキュリティ要件を満たしていません。",
+        "mismatch": "確認用パスワードが一致しません。",
+        "saving": "パスワードを変更しています…",
+        "save": "パスワードを変更",
+        "success": "パスワードを変更しました",
+        "failed": "パスワードを変更できませんでした。"
+      },
       "roles": {
         "OWNER": "オーナー",
         "MANAGER": "店長"
@@ -50,6 +72,8 @@
         "salonShare": "店舗取り分の売上"
       },
       "commission": {
+        "periodDescription": "{period} の率、売上、歩合です。",
+        "periodLoadFailed": "{period} の数値を読み込めません。率、売上、歩合は「{missing}」と表示されます。",
         "heading": "スタッフと歩合の設定",
         "listHeading": "スタッフと歩合率の一覧",
         "addStaff": "スタッフを追加",
@@ -59,7 +83,7 @@
         "generalHeading": "共通設定",
         "generalNote": "以下の 2 つのスイッチはこのブラウザーにのみ適用されます — 店舗ごとの歩合設定 API はまだありません。",
         "autoCalculate": "会計時に歩合を自動計算する",
-        "showRate": "スタッフに歩合率を表示する"
+        "showRate": "スタッフに歩合率を表示する", "loadFailed": "スタッフ一覧を読み込めません。"
       },
       "switchOn": "オン",
       "switchOff": "オフ",
@@ -97,6 +121,17 @@
         "saving": "保存しています…",
         "save": "設定を保存",
         "saveFailed": "予約設定を保存できません。"
+      },
+      "salon": {
+        "heading": "ホーム画面のサロン情報",
+        "openTime": "開店時間",
+        "closeTime": "閉店時間",
+        "lastBookingTime": "最終受付時間",
+        "amenities": "サロン設備",
+        "paymentMethods": "支払い方法",
+        "ownerOnly": "この公開情報を変更できるのはチェーンオーナーだけです。",
+        "amenity": { "WIFI": "Wi-Fi", "REFRESHMENTS": "ドリンク・お菓子", "PHONE_CHARGING": "携帯充電", "LUGGAGE_STORAGE": "荷物預かり" },
+        "payment": { "CASH": "現金", "PAYPAY": "PayPay", "VISA": "Visa", "MASTERCARD": "Mastercard" }
       },
       "aside": {
         "heading": "メモ",
@@ -201,10 +236,12 @@
       "closeNav": "管理メニューを閉じる",
       "navLabel": "管理メニュー",
       "brand": "YABAI Nail Salon — 管理ダッシュボード",
-      "comingSoon": "この機能は今後追加されます"
+      "comingSoon": "この機能は今後追加されます", "skipToContent": "メインコンテンツへ移動"
     },
     "auth": {
-      "restoring": "ログインセッションを復元しています…"
+      "restoring": "ログインセッションを復元しています…",
+      "forbiddenTitle": "この画面を開く権限がありません",
+      "forbiddenDescription": "ナビゲーションから利用可能な項目を選ぶか、チェーンオーナーにお問い合わせください。"
     },
     "recordDetail": {
       "loading": "読み込み中…",
@@ -236,6 +273,8 @@
       }
     },
     "messages": {
+      "call": "電話",
+      "emptyThread": "下の入力欄から {name} さんへの最初のメッセージを書いてください。",
       "inbox": "受信箱",
       "searchLabel": "メッセージを検索",
       "searchPlaceholder": "メッセージを検索…",
@@ -256,9 +295,15 @@
       "threadLabel": "{name} とのメッセージ",
       "composeLabel": "メッセージを入力",
       "composePlaceholder": "メッセージを入力…",
+      "composeTo": "{name} にメッセージ…",
+      "sending": "送信中…",
+      "noMessages": "メッセージはまだありません",
+      "noPhone": "電話番号なし",
       "send": "送信",
       "unnamedCustomer": "名称未設定の顧客",
       "now": "たった今",
+      "today": "今日",
+      "yesterday": "昨日",
       "sendFailed": "メッセージを送信できません。",
       "statusFailed": "会話の状態を更新できません。",
       "loadFailed": "会話を読み込めません。",
@@ -281,6 +326,8 @@
       "searchLabel": "ネイルデザインを検索",
       "searchPlaceholder": "デザイン名…",
       "add": "デザインを追加",
+      "catalogTab": "デザイン一覧",
+      "proposalsTab": "承認待ち",
       "loading": "ネイルデザインを読み込み中…",
       "loadFailed": "ネイルデザイン一覧を読み込めません。",
       "columns": {
@@ -303,6 +350,35 @@
         "save": "保存",
         "add": "追加",
         "saveFailed": "ネイルデザインを保存できません。"
+        ,"image": "ネイルデザイン画像",
+        "imageRequirements": "JPG、PNG、WebP、最大10 MB。",
+        "imagePick": "画像を選択",
+        "imageReplace": "現在の画像を変更",
+        "imageRemove": "選択した画像を削除",
+        "imagePreview": "{name} のプレビュー",
+        "imageUnsupported": "JPG、PNG、WebP画像のみ対応しています。",
+        "imageEmpty": "画像ファイルが空です。",
+        "imageTooLarge": "画像は10 MB以下にしてください。",
+        "updated": "ネイルデザインを更新しました",
+        "created": "ネイルデザインを追加しました"
+      },
+      "proposals": {
+        "loading": "提案を読み込み中…",
+        "loadFailed": "ネイルデザインの提案を読み込めません。",
+        "empty": "承認待ちの提案はありません。",
+        "untitled": "名称未設定のデザイン",
+        "createdAt": "送信日時: {value}",
+        "unknownDate": "日時不明",
+        "approve": "承認",
+        "reject": "却下",
+        "approveTitle": "ネイルデザイン提案を承認",
+        "rejectTitle": "ネイルデザイン提案を却下",
+        "reason": "理由",
+        "approveReasonPlaceholder": "任意のメモ…",
+        "rejectReasonPlaceholder": "却下理由を入力…",
+        "cancel": "キャンセル",
+        "saving": "保存中…",
+        "saveFailed": "提案を更新できません。"
       }
     },
     "branches": {
@@ -547,6 +623,8 @@
       "transfer": "銀行振込"
     },
     "accounts": {
+      "add": "アカウントを追加",
+      "pagination": "全 {total} 件中 {shown} 件を表示",
       "role": {
         "OWNER": "オーナー",
         "MANAGER": "店長",
@@ -608,6 +686,10 @@
         "statusLabel": "アカウントのステータス",
         "tempPassword": "仮パスワード",
         "tempPasswordPlaceholder": "8 文字以上、英字と数字を含む",
+        "branches": "アクセス可能な店舗",
+        "branchesLoading": "店舗を読み込み中…",
+        "branchesLoadFailed": "店舗を読み込めません。",
+        "branchRequired": "店舗を1つ以上選択してください。",
         "cancel": "キャンセル",
         "saving": "保存しています…",
         "save": "保存",
@@ -615,6 +697,7 @@
         "saveFailed": "アカウントを保存できません。"
       },
       "reset": {
+        "title": "パスワードを再設定 — {name}",
         "channel": "通知チャネル",
         "reason": "理由（任意）",
         "reasonPlaceholder": "スタッフがパスワードを忘れたため",
@@ -692,6 +775,15 @@
         "noteHeading": "メモ",
         "noteBody": "予約ページでメニューの表示・非表示を切り替えられます。非表示のメニューはお客様には表示されません。"
       },
+      "categoryTable": {
+        "all": "すべて", "branchCount": "{count}店舗", "allBranches": "全店舗",
+        "reorderSuccess": "カテゴリーの並び順を更新しました", "reorderFailed": "並び順を変更できません。",
+        "enabledSuccess": "カテゴリーを有効にしました", "disabledSuccess": "カテゴリーを無効にしました", "statusFailed": "ステータスを変更できません。",
+        "searchLabel": "カテゴリーを検索", "searchPlaceholder": "名前またはコードで検索...", "add": "カテゴリーを追加", "loadFailed": "カテゴリーを読み込めません。", "caption": "メニューのカテゴリー",
+        "columns": { "order": "順番", "name": "名前", "code": "コード", "japanese": "日本語", "branches": "店舗", "services": "メニュー", "status": "ステータス", "actions": "操作" },
+        "toggleLabel": "カテゴリー {name} の有効・無効を切り替え", "enabled": "オン", "disabled": "オフ", "editLabel": "{name} を編集",
+        "loading": "カテゴリーを読み込み中…", "empty": "カテゴリーがありません。メニューを作成する前に追加してください。", "noResults": "該当するカテゴリーがありません。", "count": "{count}カテゴリー", "reorderHint": " · 並べ替えるには検索をクリアしてください"
+      },
       "categoryEditor": {
         "editTitle": "カテゴリー名を変更",
         "addTitle": "カテゴリーを追加",
@@ -703,7 +795,10 @@
         "saving": "保存しています…",
         "save": "保存",
         "add": "追加",
-        "saveFailed": "カテゴリーを保存できません。"
+        "saveFailed": "カテゴリーを保存できません。", "updated": "カテゴリーを更新しました", "created": "カテゴリーを追加しました",
+        "japaneseName": "日本語名", "branchScope": "表示する店舗", "branchScopeHint": "店舗を選択しない場合も全店舗に表示されます。",
+        "clearAll": "選択解除", "selectAll": "すべて選択", "members": "{count}件のメニュー: {names}。別のカテゴリーを割り当てると移動できます。",
+        "noMembers": "メニューなし", "pickServices": "このカテゴリーへ移動するメニュー:", "allAssigned": "すべてのメニューがすでにここにあります。", "uncategorized": "未分類"
       },
       "create": {
         "title": "メニューを追加",
@@ -776,6 +871,7 @@
         "deleting": "削除しています…",
         "success": "{name} を削除しました",
         "failed": "メニューを削除できません。再読み込みしてもう一度お試しください。",
+        "failedWithDetails": "メニューを削除できません: {details}",
         "hasHistory": "予約履歴があるため削除できません。編集画面で「お客様に公開」をオフにしてください。"
       },
       "surcharge": {
@@ -800,10 +896,12 @@
         "saving": "保存しています…",
         "save": "保存",
         "addAction": "追加",
-        "saveFailed": "追加料金を保存できません。"
+        "saveFailed": "追加料金を保存できません。", "active": "適用中"
       }
     },
     "customers": {
+      "add": "顧客を追加",
+      "pagination": "全 {total} 人中 {first}～{last} 人を表示",
       "unnamed": "名称未設定の顧客",
       "tabsLabel": "顧客のセグメント",
       "segment": {
@@ -814,7 +912,7 @@
       },
       "searchLabel": "顧客を検索",
       "searchPlaceholder": "氏名・電話番号で検索…",
-      "loading": "顧客一覧を読み込み中…",
+      "loading": "顧客一覧を読み込み中…", "loadFailed": "顧客一覧を読み込めません。",
       "emptyHeading": "顧客がいません",
       "retry": "ページを再読み込みしてください。",
       "firstCustomer": "最初の顧客を追加すると、来店履歴とポイントの記録が始まります。",
@@ -823,6 +921,8 @@
       "noSelectionDescription": "キーワードまたはセグメントを変えると詳細が表示されます。",
       "saveFailed": "顧客情報を保存できません。",
       "rank": {
+        "member": "メンバー",
+        "platinum": "プラチナ",
         "gold": "ゴールド",
         "silver": "シルバー",
         "bronze": "ブロンズ",
@@ -831,6 +931,8 @@
       "detail": {
         "heading": "顧客情報",
         "edit": "{name} を編集",
+        "editAction": "情報を編集",
+        "messageAction": "顧客にメッセージ",
         "social": "ソーシャル",
         "preference": "好み",
         "totalSpend": "累計利用額",
@@ -865,12 +967,13 @@
       },
       "edit": {
         "title": "顧客を編集",
+        "name": "表示名",
         "localeLabel": "優先言語",
         "statusLabel": "アカウントのステータス",
         "statusActive": "有効",
         "statusInactive": "停止中",
         "saving": "保存しています…",
-        "save": "保存"
+        "save": "保存", "close": "閉じる"
       },
       "loyalty": {
         "pointsFailed": "ポイントを調整できません。",
@@ -892,7 +995,7 @@
         "historyHeading": "最近のネイル履歴",
         "historyLoading": "履歴を読み込み中…",
         "historyFailed": "履歴を読み込めません。",
-        "historyEmpty": "予約の履歴はありません。"
+        "historyEmpty": "予約の履歴はありません。", "heading": "特典とポイント", "adjustPoints": "ポイントを加算・減算", "issueCoupon": "クーポンを発行"
       },
       "notes": {
         "saveFailed": "メモを保存できません。",
@@ -902,7 +1005,7 @@
         "empty": "メモはまだありません。",
         "saving": "保存しています…",
         "save": "保存",
-        "placeholder": "社内メモを追加（お客様には表示されません）…"
+        "placeholder": "社内メモを追加（お客様には表示されません）…", "heading": "スタッフメモ", "cancel": "キャンセル", "edit": "編集", "add": "メモを追加"
       }
     },
     "dashboard": {
@@ -964,7 +1067,7 @@
         "heading": "本日の予約",
         "loading": "予約を読み込み中…",
         "empty": "本日の予約はまだありません。",
-        "listLabel": "本日の予約一覧"
+        "listLabel": "本日の予約一覧", "viewAll": "予約表を見る", "loadFailed": "本日の予約を読み込めません。", "add": "予約を追加"
       },
       "overviewHeading": "本日の概要",
       "activityRegion": "店舗の活動",
@@ -977,8 +1080,9 @@
         "seriesLabel": "売上"
       },
       "monthly": {
+        "heading": "店舗収入（{year}年{month}月）",
         "loading": "月間サマリーを読み込み中…",
-        "afterCommission": "歩合控除後の残り"
+        "afterCommission": "歩合控除後の残り", "loadFailed": "月次サマリーを読み込めません。", "costUnavailable": "バックエンドに月次コストデータがないため、運営費は差し引かれていません"
       },
       "revenue": {
         "netToday": "店舗の実収入",
@@ -988,13 +1092,16 @@
         "byMethod": "支払い方法別の売上",
         "methodFailed": "支払い方法を読み込めません。",
         "methodLoading": "読み込み中…",
-        "noTransactions": "本日の取引はまだありません。"
+        "noTransactions": "本日の取引はまだありません。", "loadFailed": "売上データを読み込めません。", "todayOnly": "支払い方法別のデータは本日のみ利用できます。"
       },
       "staff": {
+        "heading": "スタッフ（{period}）",
+        "empty": "{period} のスタッフデータはありません。",
+        "revenue": "売上",
         "loading": "スタッフ一覧を読み込み中…",
         "expectedPayout": "支給予定額",
         "working": "勤務中",
-        "off": "休み"
+        "off": "休み", "viewAll": "すべて見る", "loadFailed": "スタッフ実績を読み込めません。"
       },
       "quick": {
         "appointment": "予約を作成",
@@ -1008,10 +1115,14 @@
         "heading": "通知",
         "loading": "通知を読み込み中…",
         "empty": "新しい通知はありません。",
-        "listLabel": "新しい通知"
+        "listLabel": "新しい通知", "loadFailed": "通知を読み込めません。"
       }
     },
     "marketing": {
+      "add": "キャンペーンを追加",
+      "pagination": "全 {total} 件中 {shown} 件を表示",
+      "matchingCustomers": "対象顧客 {count, number} 人",
+      "customerCount": "顧客 {count, number} 人",
       "promotionStatus": {
         "ACTIVE": "実施中",
         "SCHEDULED": "予定",
@@ -1097,6 +1208,8 @@
       "metricsEmpty": "表示できる指標がありません。",
       "cancelCampaign": "キャンペーンをキャンセル",
       "issueModal": {
+        "title": "配布 — {name}",
+        "selected": "顧客 {count} 人を選択中",
         "failed": "発行できません。",
         "pickCustomer": "顧客を選択",
         "searchPlaceholder": "氏名または電話番号で検索…",
@@ -1131,6 +1244,8 @@
       }
     },
     "staff": {
+      "add": "スタッフを追加",
+      "editAction": "編集",
       "unnamed": "名称未設定のスタッフ",
       "metrics": {
         "periodRevenue": "{period} の売上",
@@ -1151,7 +1266,7 @@
         "working": "勤務中",
         "off": "休暇中"
       },
-      "loading": "スタッフ一覧を読み込み中…",
+      "loading": "スタッフ一覧を読み込み中…", "loadingFailed": "スタッフ一覧を読み込めません。",
       "emptyHeading": "スタッフがいません",
       "retry": "ページを再読み込みしてください。",
       "firstStaff": "最初のスタッフを追加すると、売上と歩合の記録が始まります。",
@@ -1160,6 +1275,7 @@
       "statusWorking": "勤務中",
       "statusOff": "休暇中",
       "orders": {
+        "heading": "{name} の最近の予約",
         "multipleServices": "メニュー {count} 件",
         "unnamedService": "名称未設定のメニュー",
         "unnamedCustomer": "名称未設定の顧客",
@@ -1169,7 +1285,7 @@
         "customer": "顧客",
         "service": "メニュー",
         "total": "合計",
-        "status": "ステータス"
+        "status": "ステータス", "loadFailed": "スタッフの予約を読み込めません。"
       },
       "compensation": {
         "saveFailed": "歩合を保存できません。",
@@ -1181,7 +1297,7 @@
         "commissionPercent": "歩合 (%)",
         "effectiveFrom": "適用開始日",
         "saving": "保存しています…",
-        "submit": "歩合を更新"
+        "submit": "歩合を更新", "heading": "歩合設定", "effectiveHint": "現在の設定の適用日より後を指定してください。確定済みの歩合は変更されません。"
       },
       "create": {
         "failed": "スタッフを作成できません。",
@@ -1189,10 +1305,11 @@
         "name": "氏名",
         "cancel": "キャンセル",
         "saving": "保存しています…",
-        "submit": "スタッフを追加"
+        "submit": "スタッフを追加", "afterCreateHint": "スキル、歩合、シフトは作成後に設定できます。"
       },
       "detail": {
         "heading": "スタッフの詳細",
+        "periodRevenue": "{period} の売上",
         "phone": "電話番号",
         "commissionRate": "歩合率",
         "totalRevenue": "総売上",
@@ -1207,9 +1324,12 @@
         "name": "氏名",
         "cancel": "キャンセル",
         "saving": "保存しています…",
-        "save": "保存"
+        "save": "保存", "active": "有効"
       },
       "performance": {
+        "empty": "{period} のデータはありません。",
+        "revenue": "売上",
+        "periodLoadFailed": "{period} の売上を読み込めません。売上と歩合は「{missing}」と表示されます。",
         "heading": "期間ごとの実績",
         "periodLabel": "集計期間",
         "loading": "読み込み中…",
@@ -1266,10 +1386,11 @@
         "reason": "理由",
         "cancel": "キャンセル",
         "saving": "保存しています…",
-        "save": "保存"
+        "save": "保存", "timeValidation": "開始と終了は15分単位（00、15、30、45）で、終了は開始より後にしてください。"
       }
     },
     "auditLogs": {
+      "pagination": "全 {total} 件中 {shown} 件を表示",
       "action": {
         "ACCOUNT_CREATED": "アカウントを作成",
         "ACCOUNT_PASSWORD_RESET": "アカウントのパスワードを再設定",
@@ -1376,7 +1497,7 @@
         "target": "対象",
         "branch": "店舗"
       },
-      "detailTitle": "監査ログの詳細"
+      "detailTitle": "監査ログの詳細", "empty": "該当する監査ログがありません。"
     },
     "appointments": {
       "toolbar": {
@@ -1583,12 +1704,15 @@
       "serverBackedNote": "実際の予約に接続しています。会計を記録する前に payment-quote を呼び出します。",
       "recorded": "記録済みの取引",
       "submitting": "quote を呼び出して取引を記録中…",
+      "paymentRecorded": "支払いを記録しました",
       "step3": "確認と会計",
       "grandTotalLabel": "お客様のお支払い合計",
       "error": {
         "noAppointment": "この伝票は実際の予約に紐づいていないため、取引を記録できません。",
         "amountMismatch": "画面の金額（{screen}）とサーバーが請求する金額（{server}）が違います。会計の前に再読み込みして確認してください。",
-        "record": "取引を記録できませんでした。"
+        "record": "取引を記録できませんでした。",
+        "services": "実施したサービスを保存できません。",
+        "adjustments": "割引と会計メモを保存できません。"
       },
       "customer": {
         "heading": "顧客情報",
@@ -1643,6 +1767,7 @@
         "addTitle": "追加メニューを登録",
         "source": "メニューの取得元",
         "custom": "自由入力の項目",
+        "catalogOnly": "予約に保存できるのはカタログ内のサービスのみです。",
         "name": "メニュー名",
         "price": "料金（¥）",
         "note": "メモ",
@@ -1656,7 +1781,14 @@
         "pending": "会計待ち",
         "subtotal": "メニュー合計",
         "discount": "割引（¥）",
+        "benefitDiscount": "会員特典",
+        "discountReason": "割引理由",
+        "discountReasonPlaceholder": "例：店舗でのご意見対応",
+        "discountReasonRequired": "手動割引の理由を入力してください。",
         "applyDiscount": "割引を適用",
+        "saveAdjustments": "割引とメモを保存",
+        "saving": "保存中…",
+        "adjustmentUnavailable": "割引は施術中または会計待ちの予約でのみ編集できます。",
         "grandTotal": "お客様のお支払い額",
         "orderNote": "注文メモ",
         "orderNotePlaceholder": "必要があればメモを入力...",
@@ -1687,7 +1819,8 @@
         "submit": "確定"
       },
       "methodPicker": {
-        "label": "支払い方法"
+        "label": "支払い方法",
+        "cashOnly": "現在、システムで記録できるのは現金払いのみです。"
       },
       "state": {
         "paidLocked": "支払い済みの伝票のため、金額は変更できません。",

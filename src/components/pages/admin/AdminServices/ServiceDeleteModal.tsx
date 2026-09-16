@@ -9,6 +9,12 @@ import { notifySuccess } from "@/lib/app-toast";
 import { adminService, ApiClientError } from "@/service";
 import type { SalonService } from "./data";
 
+export function serviceDeleteErrorDetails(error: ApiClientError): string {
+  return [error.message, error.code, error.status ? `HTTP ${error.status}` : null, error.requestId ? `requestId: ${error.requestId}` : null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 export function ServiceDeleteModal({
   service,
   onClose,
@@ -35,7 +41,9 @@ export function ServiceDeleteModal({
       setError(
         thrown instanceof ApiClientError && thrown.code === "SERVICE_HAS_BOOKING_HISTORY"
           ? t("delete.hasHistory")
-          : t("delete.failed"),
+          : thrown instanceof ApiClientError
+            ? t("delete.failedWithDetails", { details: serviceDeleteErrorDetails(thrown) })
+            : t("delete.failed"),
       );
     } finally {
       setBusy(false);

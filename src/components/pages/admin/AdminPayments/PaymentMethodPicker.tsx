@@ -1,14 +1,10 @@
-import { BanknotesIcon, BuildingLibraryIcon, CreditCardIcon, EllipsisHorizontalIcon, QrCodeIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { Radio, RadioGroup } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { paymentMethodLabel, type PaymentMethod } from "./data";
 
 const methods = [
   { id: "cash", icon: BanknotesIcon },
-  { id: "card", icon: CreditCardIcon },
-  { id: "paypay", icon: QrCodeIcon },
-  { id: "bank_transfer", icon: BuildingLibraryIcon },
-  { id: "other", icon: EllipsisHorizontalIcon },
 ] as const;
 
 export function PaymentMethodPicker({ value, isDisabled, onChange }: Readonly<{
@@ -31,8 +27,9 @@ export function PaymentMethodPicker({ value, isDisabled, onChange }: Readonly<{
   // it the worst one to break. Controlled means the radio can only ever show
   // what the invoice actually holds.
   return (
-    <RadioGroup aria-label={t("methodPicker.label")} value={value} onChange={(next) => onChange(next as PaymentMethod)} isDisabled={isDisabled} className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+    <RadioGroup aria-label={t("methodPicker.label")} value={value} onChange={(next) => onChange(next as PaymentMethod)} isDisabled={isDisabled} className="grid gap-2">
       {methods.map(({ id, icon: Icon }) => <Radio key={id} value={id} className="rounded-lg border border-admin-border text-admin-muted data-[selected=true]:border-admin-accent data-[selected=true]:bg-admin-soft data-[selected=true]:text-admin-accent"><Radio.Content className="flex w-full cursor-pointer flex-col items-center gap-1 px-2 py-3 text-center text-xs"><Radio.Control className="sr-only"><Radio.Indicator /></Radio.Control><Icon aria-hidden="true" className="size-5" />{paymentMethodLabel(id, tMethod)}</Radio.Content></Radio>)}
+      <p className="text-xs leading-5 text-admin-muted">{t("methodPicker.cashOnly")}</p>
     </RadioGroup>
   );
 }

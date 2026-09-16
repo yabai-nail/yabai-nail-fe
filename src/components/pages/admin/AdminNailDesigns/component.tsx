@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -8,8 +8,10 @@ import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { useAdminNailDesigns } from "@/service";
+import { useAdminNailDesignProposals, useAdminNailDesigns, useAuth, type AdminNailDesignProposal } from "@/service";
 import { DesignModal } from "./DesignModal";
+import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
+import { ProposalReviewModal } from "./ProposalReviewModal";
 import {
   adaptDesign,
   designStatuses,
@@ -24,28 +26,45 @@ export function AdminNailDesignsComponent() {
   const t = useTranslations("admin.nailDesigns");
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
-  const { data, isLoading, error, mutate } = useAdminNailDesigns();
+  const { permissions } = useAuth();
+  const canManageCatalog = permissions?.includes("design.manage.all") ?? false;
+  const canReviewProposals = permissions?.includes("design.propose.branch") ?? false;
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const { data, isLoading, error, mutate } = useAdminNailDesigns({
+    q: query.trim() || undefined,
+    status: status === "all" ? undefined : status,
+  }, canManageCatalog);
+  const proposals = useAdminNailDesignProposals({ status: "PENDING" }, canReviewProposals);
 
   const source = useMemo<ReadonlyArray<DesignRow>>(
     () => (data?.items ? data.items.map(adaptDesign) : []),
     [data],
   );
 
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<DesignRow | null>(null);
   const [creating, setCreating] = useState(false);
+  const [view, setView] = useState<"catalog" | "proposals">(canManageCatalog ? "catalog" : "proposals");
+  const [reviewing, setReviewing] = useState<{ proposal: AdminNailDesignProposal; decision: "APPROVE" | "REJECT" } | null>(null);
 
-  const statuses = useMemo(() => designStatuses(source), [source]);
+  const statuses = useMemo(
+    () => Array.from(new Set(["ACTIVE", "ARCHIVED", "DRAFT", "HIDDEN", "PUBLISHED", ...designStatuses(source)])),
+    [source],
+  );
   const filtered = useMemo(() => filterDesigns(source, status, query), [source, status, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
 
   return (
     <AdminPageLayout>
-      <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex gap-2 border-b border-admin-border pb-3">
+        {canManageCatalog ? <Button variant={view === "catalog" ? "primary" : "outline"} className="rounded-lg" onPress={() => setView("catalog")}>{t("catalogTab")}</Button> : null}
+        {canReviewProposals ? <Button variant={view === "proposals" ? "primary" : "outline"} className="rounded-lg" onPress={() => setView("proposals")}>{t("proposalsTab")} ({proposals.data?.items.length ?? 0})</Button> : null}
+      </div>
+
+      {view === "catalog" ? <><div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          Trạng thái
+          {t("statusLabel")}
           <AdminSelectField
             label={t("filterLabel")}
             value={status}
@@ -58,9 +77,7 @@ export function AdminNailDesignsComponent() {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-          <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-            <PlusIcon className="size-4" />Thêm mẫu
-          </Button>
+          {canManageCatalog ? <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}><PlusIcon className="size-4" />{t("add")}</Button> : null}
         </div>
       </div>
 
@@ -88,13 +105,7 @@ export function AdminNailDesignsComponent() {
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {/*
-                          The endpoint returns mediaIds, not a URL, so a
-                          thumbnail needs the media access-url flow. Until that
-                          is wired, show the placeholder rather than an <img>
-                          bound to a field that never arrives.
-                        */}
-                        <span className="grid size-10 place-items-center rounded-lg bg-admin-soft text-admin-accent">✦</span>
+                        <AdminNailDesignThumbnail mediaId={row.mediaIds[0]} alt={row.title} />
                         <span className="font-medium text-admin-ink">{row.title}</span>
                       </div>
                     </td>
@@ -104,7 +115,7 @@ export function AdminNailDesignsComponent() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
+                      {canManageCatalog ? <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button> : null}
                     </td>
                   </tr>
                 ))
@@ -113,15 +124,32 @@ export function AdminNailDesignsComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>Hiển thị {visible.length} trong tổng số {filtered.length} mẫu</span>
+          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
-      </Card>
+      </Card></> : <ProposalList data={proposals.data?.items ?? []} isLoading={proposals.isLoading} error={proposals.error} canReview={canReviewProposals} onReview={(proposal, decision) => setReviewing({ proposal, decision })} />}
 
-      {creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
-      {editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canManageCatalog && creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
+      {canManageCatalog && editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canReviewProposals && reviewing ? <ProposalReviewModal proposal={reviewing.proposal} decision={reviewing.decision} onClose={() => setReviewing(null)} onSaved={() => { void proposals.mutate(); void mutate(); }} /> : null}
     </AdminPageLayout>
   );
+}
+
+function ProposalList({ data, isLoading, error, canReview, onReview }: Readonly<{ data: ReadonlyArray<AdminNailDesignProposal>; isLoading: boolean; error: unknown; canReview: boolean; onReview: (proposal: AdminNailDesignProposal, decision: "APPROVE" | "REJECT") => void }>) {
+  const tp = useTranslations("admin.nailDesigns.proposals");
+  const format = useFormatter();
+  if (isLoading) return <p className="text-sm text-admin-muted">{tp("loading")}</p>;
+  if (error) return <p role="alert" className="text-sm text-admin-danger">{tp("loadFailed")}</p>;
+  if (data.length === 0) return <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-10 text-center text-sm text-admin-muted">{tp("empty")}</p>;
+  return <div className="grid gap-3 lg:grid-cols-2">{data.map((proposal) => {
+    const raw = proposal as Readonly<Record<string, unknown>>;
+    const payload = proposal.payload ?? {};
+    const title = [payload.title, payload.nameVi, raw.title, raw.nameVi].find((value): value is string => typeof value === "string") ?? tp("untitled");
+    const mediaValue = Array.isArray(payload.mediaIds) ? payload.mediaIds : raw.mediaIds;
+    const mediaId = Array.isArray(mediaValue) && typeof mediaValue[0] === "string" ? mediaValue[0] : undefined;
+    return <Card key={proposal.proposalId} className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none"><Card.Content className="flex gap-3 p-4"><AdminNailDesignThumbnail mediaId={mediaId} alt={title} /><div className="min-w-0 flex-1"><p className="truncate font-semibold text-admin-ink">{title}</p><p className="mt-1 text-xs text-admin-muted">{tp("createdAt", { value: proposal.createdAt ? format.dateTime(new Date(proposal.createdAt), { dateStyle: "short", timeStyle: "short" }) : tp("unknownDate") })}</p>{canReview ? <div className="mt-3 flex gap-2"><Button size="sm" variant="primary" onPress={() => onReview(proposal, "APPROVE")}>{tp("approve")}</Button><Button size="sm" variant="outline" className="border-admin-danger text-admin-danger" onPress={() => onReview(proposal, "REJECT")}>{tp("reject")}</Button></div> : null}</div></Card.Content></Card>;
+  })}</div>;
 }
 
 export const meta = { world: "connected", domain: "admin-nail-designs" } as const;

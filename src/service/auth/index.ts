@@ -1,4 +1,4 @@
-export { AuthProvider, useAuth } from "./context";
+export { AuthProvider, useAdminPermission, useAuth } from "./context";
 export type { AuthStatus } from "./context";
 export { CustomerAuthProvider, useCustomerAuth } from "./customer-context";
 export type { CustomerAuthStatus } from "./customer-context";

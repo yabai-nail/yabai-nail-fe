@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Card } from "@heroui/react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
@@ -11,6 +11,7 @@ import {
   adminService,
   useAdminConversations,
   useAdminConversationMessages,
+  useAdminPermission,
   type AdminConversation as ServerConversation,
   type AdminMessage as ServerMessage,
 } from "@/service";
@@ -21,6 +22,7 @@ import {
   appendConversationMessage,
   type ConversationMessages,
 } from "./state";
+import { sortThreadChronologically } from "./thread";
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -29,9 +31,9 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-function formatTimeLabel(iso: string): string {
+function formatTimeLabel(iso: string, format: (value: Date) => string): string {
   try {
-    return new Date(iso).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
+    return format(new Date(iso));
   } catch {
     return "";
   }
@@ -47,7 +49,7 @@ function toFixtureCustomer(server: ServerConversation, unnamed: string): Message
   };
 }
 
-function toFixtureConversation(server: ServerConversation, unnamed: string): Conversation {
+function toFixtureConversation(server: ServerConversation, unnamed: string, formatTime: (value: Date) => string): Conversation {
   const status = server.status.toLowerCase();
   const normalizedStatus =
     status === "unread" || status === "read" || status === "archived" ? status : "read";
@@ -55,7 +57,7 @@ function toFixtureConversation(server: ServerConversation, unnamed: string): Con
     id: server.id,
     customer: toFixtureCustomer(server, unnamed),
     preview: server.lastMessage?.content ?? "",
-    timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt) : "",
+    timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt, formatTime) : "",
     unreadCount: server.unreadCount,
     status: normalizedStatus,
     messages: [],
@@ -63,42 +65,53 @@ function toFixtureConversation(server: ServerConversation, unnamed: string): Con
   };
 }
 
-function toChatMessage(server: ServerMessage): ChatMessage {
+function toChatMessage(server: ServerMessage, formatTime: (value: Date) => string): ChatMessage {
   const sender = server.senderType.toLowerCase().includes("customer") ? "customer" : "salon";
   return {
     id: server.id,
     sender,
     content: server.content,
-    time: formatTimeLabel(server.createdAt),
+    time: formatTimeLabel(server.createdAt, formatTime),
     sentAt: server.createdAt,
   };
 }
 
 export function AdminMessagesComponent() {
   const t = useTranslations("admin.messages");
+  const tc = useTranslations("admin.common");
+  const format = useFormatter();
+  const locale = useLocale();
+  const formatTime = useCallback(
+    (value: Date) => format.dateTime(value, { hour: "2-digit", minute: "2-digit", hour12: false }),
+    [format],
+  );
+  const canWrite = useAdminPermission("message.write.branch");
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
   const [draft, setDraft] = useState("");
   const [localMessages, setLocalMessages] = useState<ConversationMessages>({});
 
-  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations();
+  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations({
+    q: query.trim() || undefined,
+    status: filter === "all" ? undefined : filter.toUpperCase(),
+  });
   const [sendPending, setSendPending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
-    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"))) ?? [];
-  }, [conversationsData, t]);
+    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime)) ?? [];
+  }, [conversationsData, formatTime, t]);
 
   const visibleConversations = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase("vi");
+    const normalized = query.trim().toLocaleLowerCase(locale);
     return source.filter(
       (item) =>
         (filter === "all" || item.status === filter) &&
-        (!normalized || `${item.customer.name} ${item.preview}`.toLocaleLowerCase("vi").includes(normalized)),
+        (!normalized || `${item.customer.name} ${item.preview}`.toLocaleLowerCase(locale).includes(normalized)),
     );
-  }, [source, filter, query]);
+  }, [source, filter, locale, query]);
   const selected = resolveVisibleSelection(visibleConversations, selectedId || visibleConversations[0]?.id || "");
 
   const shouldFetchThread = Boolean(selected);
@@ -108,9 +121,9 @@ export function AdminMessagesComponent() {
 
   const messages = useMemo(() => {
     if (!selected) return [];
-    const serverThread = threadData?.items ? threadData.items.map(toChatMessage) : selected.messages;
-    return [...serverThread, ...(localMessages[selected.id] ?? [])];
-  }, [selected, threadData, localMessages]);
+    const serverThread = threadData?.items ? threadData.items.map((message) => toChatMessage(message, formatTime)) : selected.messages;
+    return sortThreadChronologically([...serverThread, ...(localMessages[selected.id] ?? [])]);
+  }, [formatTime, selected, threadData, localMessages]);
 
   const sendMessage = () => {
     const content = draft.trim();
@@ -167,7 +180,7 @@ export function AdminMessagesComponent() {
         { status: next },
         selected.version,
       );
-      notifySuccess(next === "ARCHIVED" ? "Đã lưu trữ hội thoại" : "Đã cập nhật trạng thái hội thoại");
+      notifySuccess(next === "ARCHIVED" ? tc("conversationArchived") : tc("conversationUpdated"));
       void mutateConversations();
     } catch (thrown) {
       setStatusError(
@@ -217,17 +230,18 @@ export function AdminMessagesComponent() {
             draft={draft}
             onDraftChange={setDraft}
             onSend={sendMessage}
+            canWrite={canWrite}
             statusPending={statusPending}
             statusError={threadError ? t("threadLoadFailed") : statusError}
             sendPending={sendPending}
             sendError={sendError}
             onMarkRead={
-              selected.version !== undefined
+              canWrite && selected.version !== undefined
                 ? () => void changeStatus("READ")
                 : undefined
             }
             onArchive={
-              selected.version !== undefined
+              canWrite && selected.version !== undefined
                 ? () => void changeStatus("ARCHIVED")
                 : undefined
             }

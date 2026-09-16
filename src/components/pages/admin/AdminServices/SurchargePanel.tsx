@@ -99,6 +99,7 @@ function SurchargeEditor({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.services");
+  const tc = useTranslations("admin.common");
   const isEdit = surcharge !== null;
   const [code, setCode] = useState(
     typeof surcharge?.code === "string" ? surcharge.code : "",
@@ -146,7 +147,7 @@ function SurchargeEditor({
       } else {
         await adminService.createSurcharge(payload);
       }
-      notifySuccess(isEdit ? "Đã cập nhật phụ thu" : "Đã thêm phụ thu");
+      notifySuccess(isEdit ? tc("surchargeUpdated") : tc("surchargeCreated"));
       onSaved();
       onClose();
     } catch (thrown) {
@@ -230,7 +231,7 @@ function SurchargeEditor({
                   checked={active}
                   onChange={(event) => setActive(event.target.checked)}
                 />
-                Đang áp dụng
+                {t("surcharge.active")}
               </label>
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>

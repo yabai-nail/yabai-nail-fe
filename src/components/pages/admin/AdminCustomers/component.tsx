@@ -12,7 +12,7 @@ import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, useAdminBranch, useAdminCustomer, useAdminCustomers, type AdminCustomer } from "@/service";
+import { adminService, useAdminBranch, useAdminCustomer, useAdminCustomers, useAdminPermission, type AdminCustomer } from "@/service";
 import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerEditModal } from "./CustomerEditModal";
@@ -82,8 +82,15 @@ const pageSize = 8;
 
 export function AdminCustomersComponent() {
   const t = useTranslations("admin.customers");
+  const tc = useTranslations("admin.common");
   const { branchId } = useAdminBranch();
-  const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId);
+  const canWriteCustomer = useAdminPermission("customer.update.branch");
+  const [filter, setFilter] = useState<CustomerFilter>("all");
+  const [query, setQuery] = useState("");
+  const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId, {
+    q: query.trim() || undefined,
+    segment: filter === "all" ? undefined : filter.toUpperCase(),
+  });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -96,8 +103,6 @@ export function AdminCustomersComponent() {
     [data, t],
   );
 
-  const [filter, setFilter] = useState<CustomerFilter>("all");
-  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
   const [page, setPage] = useState(1);
   const filteredCustomers = useMemo(() => {
@@ -159,16 +164,16 @@ export function AdminCustomersComponent() {
           <Button
             variant="primary"
             className="rounded-lg"
-            isDisabled={!branchId}
+            isDisabled={!branchId || !canWriteCustomer}
             onPress={() => setIsCreateOpen(true)}
           >
-            <PlusIcon className="size-4" />Thêm khách hàng
+            <PlusIcon className="size-4" />{t("add")}
           </Button>
         </div>
       </div>
       {error ? (
         <p role="alert" className="mb-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-          Không tải được danh sách khách hàng.
+          {t("loadFailed")}
         </p>
       ) : null}
       {isLoading ? (
@@ -194,7 +199,7 @@ export function AdminCustomersComponent() {
                 customer={detailedCustomer}
                 branchId={branchId}
                 onEdit={
-                  branchId && detailedCustomer.version !== undefined
+                  canWriteCustomer && branchId && detailedCustomer.version !== undefined
                     ? () => {
                         setEditError(null);
                         setIsEditOpen(true);
@@ -216,18 +221,18 @@ export function AdminCustomersComponent() {
               selectedId={selectedCustomer?.id ?? null}
               onSelect={setSelectedId}
             /></Card.Content>
-            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>Hiển thị {firstShown} - {firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1} trong tổng số {filteredCustomers.length} khách hàng</span><AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} /></Card.Footer>
+            <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted"><span>{t("pagination", { first: firstShown, last: firstShown === 0 ? 0 : firstShown + visibleCustomers.length - 1, total: filteredCustomers.length })}</span><AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} /></Card.Footer>
           </Card>
         </AdminSplitLayout>
       )}
-      {isCreateOpen && branchId ? (
+      {canWriteCustomer && isCreateOpen && branchId ? (
         <CustomerCreateModal
           branchId={branchId}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateCustomers()}
         />
       ) : null}
-      {isEditOpen && branchId && detailedCustomer ? (
+      {canWriteCustomer && isEditOpen && branchId && detailedCustomer ? (
         <CustomerEditModal
           customer={detailedCustomer}
           submitting={editSubmitting}
@@ -243,7 +248,7 @@ export function AdminCustomersComponent() {
                 patch,
                 detailedCustomer.version,
               );
-              notifySuccess("Đã cập nhật khách hàng");
+      notifySuccess(tc("customerUpdated"));
               setIsEditOpen(false);
               void mutateCustomers();
             } catch (thrown) {

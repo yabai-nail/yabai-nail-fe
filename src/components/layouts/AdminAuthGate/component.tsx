@@ -12,7 +12,7 @@ import { useAuth } from "@/service";
  * session that expires on `/admin/payments` comes back to `/admin/payments`.
  */
 export function AdminAuthGate({ children }: Readonly<{ children: ReactNode }>) {
-  const { status } = useAuth();
+  const { status, permissions } = useAuth();
   const t = useTranslations("admin.auth");
 
   if (status === "restoring") {
@@ -28,6 +28,14 @@ export function AdminAuthGate({ children }: Readonly<{ children: ReactNode }>) {
   }
 
   if (status === "anonymous") return <AdminLogin />;
+
+  if (permissions === null) {
+    return (
+      <div role="status" className="admin-shell grid min-h-screen place-items-center bg-admin-canvas text-sm text-admin-muted">
+        {t("restoring")}
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

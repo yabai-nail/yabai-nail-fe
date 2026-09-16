@@ -19,6 +19,7 @@ export function StaffEditModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
   const [displayName, setDisplayName] = useState(member.name);
   const [active, setActive] = useState(member.status === "working");
   const [busy, setBusy] = useState(false);
@@ -36,7 +37,7 @@ export function StaffEditModal({
         { displayName: displayName.trim(), status: active ? "ACTIVE" : "INACTIVE" },
         member.version,
       );
-      notifySuccess("Đã cập nhật nhân viên");
+      notifySuccess(tc("staffUpdated"));
       onSaved();
       onClose();
     } catch (thrown) {
@@ -69,7 +70,7 @@ export function StaffEditModal({
                   checked={active}
                   onChange={(event) => setActive(event.target.checked)}
                 />
-                Đang hoạt động
+                {t("edit.active")}
               </label>
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>

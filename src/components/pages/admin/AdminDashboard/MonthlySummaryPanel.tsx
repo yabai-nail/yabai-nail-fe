@@ -40,13 +40,13 @@ export function MonthlySummaryPanel() {
     <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-4">
       <Card.Header className="px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">
-          Thu nhập của quán <span className="font-normal text-admin-muted">(tháng {month}/{year})</span>
+          {t("monthly.heading", { month, year })}
         </h2>
       </Card.Header>
       <Card.Content className="flex flex-1 flex-col px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
         {hasError ? (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
-            Không tải được tổng kết tháng.
+            {t("monthly.loadFailed")}
           </p>
         ) : isLoading ? (
           <p className="py-3 text-center text-xs text-admin-muted">{t("monthly.loading")}</p>
@@ -68,7 +68,7 @@ export function MonthlySummaryPanel() {
             </p>
           </div>
           <p className="mt-2 text-right text-xs text-admin-muted">
-            Chưa trừ chi phí vận hành — backend chưa có chi phí theo tháng
+            {t("monthly.costUnavailable")}
           </p>
         </div>
       </Card.Content>

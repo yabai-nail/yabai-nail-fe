@@ -114,20 +114,20 @@ export function RecentOrdersTable({
   return (
     <Card className="mt-4 min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="px-4 pt-4">
-        <h2 className="font-bold">Lịch hẹn gần đây của {staffName}</h2>
+        <h2 className="font-bold">{t("orders.heading", { name: staffName })}</h2>
       </Card.Header>
       <Card.Content className="min-w-0 overflow-x-auto p-0 pt-2">
         {appointments.isLoading ? (
           <p className="px-4 pb-4 text-xs text-admin-muted">{t("orders.loading")}</p>
         ) : appointments.error ? (
           <p role="alert" className="mx-4 mb-4 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-            Không tải được lịch hẹn của nhân viên.
+            {t("orders.loadFailed")}
           </p>
         ) : rows.length === 0 ? (
           <p className="px-4 pb-4 text-xs text-admin-muted">{t("orders.empty")}</p>
         ) : (
           <table className="w-full min-w-[560px] text-left text-sm">
-            <caption className="sr-only">Lịch hẹn gần đây của {staffName}</caption>
+            <caption className="sr-only">{t("orders.heading", { name: staffName })}</caption>
             <thead className="border-b border-admin-border text-xs text-admin-muted">
               <tr>
                 <th scope="col" className="px-4 py-3">{t("orders.time")}</th>

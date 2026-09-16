@@ -15,6 +15,7 @@ const ADMIN_AUTH_OPERATION_IDS = [
   "POST /api/v1/admin/auth/password-changes",
   "POST /api/v1/admin/auth/password-reset-requests",
   "POST /api/v1/admin/auth/password-resets",
+  "DELETE /api/v1/auth/sessions/current",
 ] as const;
 
 describe("admin auth surface", () => {
@@ -32,6 +33,7 @@ describe("admin auth surface", () => {
       authService.changeAdminPassword,
       authService.requestAdminPasswordReset,
       authService.resetAdminPassword,
+      authService.revokeCurrentSession,
     ]) {
       expect(typeof fn).toBe("function");
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
@@ -9,7 +9,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPromotions } from "@/service";
+import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPermission, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
 import { PromotionModal } from "./PromotionModal";
 import {
@@ -29,20 +29,28 @@ type ManagedCampaign = { readonly id: string; readonly name: string };
 
 export function AdminMarketingComponent() {
   const t = useTranslations("admin.marketing");
+  const tc = useTranslations("admin.common");
+  const canReadPromotions = useAdminPermission("promotion.read.all");
+  const canWritePromotions = useAdminPermission("promotion.write.all");
+  const canPreviewCampaigns = useAdminPermission("campaign.preview.all");
+  const canSendCampaigns = useAdminPermission("campaign.send.all");
   const statusLabel = (code: string) =>
     t.has(`promotionStatus.${code}`) ? t(`promotionStatus.${code}`) : code;
   const kindLabel = (code: string) =>
     t.has(`promotionKind.${code}`) ? t(`promotionKind.${code}`) : code;
-  const [tab, setTab] = useState<Tab>("promotions");
-  const { data, isLoading, error, mutate } = useAdminPromotions();
+  const [tab, setTab] = useState<Tab>(canReadPromotions ? "promotions" : "campaigns");
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const { data, isLoading, error, mutate } = useAdminPromotions({
+    q: query.trim() || undefined,
+    status: status === "all" ? undefined : status,
+  }, canReadPromotions);
 
   const source = useMemo<ReadonlyArray<PromotionRow>>(
     () => (data?.items ? data.items.map(adaptPromotion) : []),
     [data],
   );
 
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<PromotionRow | null>(null);
   const [creating, setCreating] = useState(false);
@@ -50,7 +58,7 @@ export function AdminMarketingComponent() {
   const [statusPending, setStatusPending] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [managedCampaign, setManagedCampaign] = useState<ManagedCampaign | null>(null);
-  const campaigns = useAdminNotificationCampaigns();
+  const campaigns = useAdminNotificationCampaigns(canSendCampaigns);
   const persistedCampaigns = (campaigns.data?.items ?? []).map((campaign) => ({
     id: campaign.campaignId,
     name: campaign.title ?? t("unnamedCampaign"),
@@ -69,7 +77,7 @@ export function AdminMarketingComponent() {
     setStatusError(null);
     try {
       await adminService.updatePromotion(row.id, { status: next }, row.version);
-      notifySuccess(next === "ACTIVE" ? "Đã kích hoạt khuyến mãi" : "Đã tạm ngưng khuyến mãi");
+      notifySuccess(next === "ACTIVE" ? tc("promotionActivated") : tc("promotionPaused"));
       void mutate();
     } catch (thrown) {
       setStatusError(thrown instanceof Error ? thrown.message : t("statusChangeFailed"));
@@ -78,14 +86,17 @@ export function AdminMarketingComponent() {
     }
   }
 
-  const statuses = useMemo(() => promotionStatuses(source), [source]);
+  const statuses = useMemo(
+    () => Array.from(new Set(["ACTIVE", "DISABLED", "DRAFT", "EXPIRED", "INACTIVE", "PUBLISHED", "SCHEDULED", ...promotionStatuses(source)])),
+    [source],
+  );
   const filtered = useMemo(() => filterPromotions(source, status, query), [source, status, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
 
   return (
     <AdminPageLayout>
       <div className="mb-4 flex gap-1 border-b border-admin-border">
-        {(["promotions", "campaigns"] as const).map((value) => (
+        {(["promotions", "campaigns"] as const).filter((value) => value === "promotions" ? canReadPromotions : canSendCampaigns).map((value) => (
           <button
             key={value}
             type="button"
@@ -103,7 +114,7 @@ export function AdminMarketingComponent() {
         <>
           <div className="mb-4 flex min-w-0 flex-col gap-3 pb-1 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-              Trạng thái
+              {t("columns.status")}
               <AdminSelectField
                 label={t("filterLabel")}
                 value={status}
@@ -116,8 +127,8 @@ export function AdminMarketingComponent() {
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-              <Button variant="primary" className="rounded-lg" onPress={() => setCreating(true)}>
-                <PlusIcon className="size-4" />Thêm khuyến mãi
+              <Button variant="primary" className="rounded-lg" isDisabled={!canWritePromotions} onPress={() => setCreating(true)}>
+                <PlusIcon className="size-4" />{t("add")}
               </Button>
             </div>
           </div>
@@ -162,11 +173,11 @@ export function AdminMarketingComponent() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
-                            <Button size="sm" variant="outline" className="rounded-lg" isDisabled={statusPending === row.id} onPress={() => void toggleStatus(row)}>
+                            <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canWritePromotions} onPress={() => setEditing(row)}>{t("edit")}</Button>
+                            <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canWritePromotions || statusPending === row.id} onPress={() => void toggleStatus(row)}>
                               {row.status === "ACTIVE" ? t("promotionStatus.INACTIVE") : t("activate")}
                             </Button>
-                            <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>{t("issue")}</Button>
+                            <Button size="sm" variant="ghost" className="rounded-lg" isDisabled={!canWritePromotions || row.status !== "ACTIVE"} onPress={() => setIssuing(row)}>{t("issue")}</Button>
                           </div>
                         </td>
                       </tr>
@@ -176,7 +187,7 @@ export function AdminMarketingComponent() {
               </table>
             </Card.Content>
             <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-              <span>Hiển thị {visible.length} trong tổng số {filtered.length} khuyến mãi</span>
+              <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
               <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
             </Card.Footer>
           </Card>
@@ -192,21 +203,22 @@ export function AdminMarketingComponent() {
             />
           ) : null}
           <div className="grid gap-4 lg:grid-cols-2">
-            <CampaignPanel onCreated={(campaign) => { setManagedCampaign(campaign); void campaigns.mutate(); }} />
-            <CampaignManagePanel campaign={currentCampaign} />
+            <CampaignPanel canPreview={canPreviewCampaigns} canSend={canSendCampaigns} onCreated={(campaign) => { setManagedCampaign(campaign); void campaigns.mutate(); }} />
+            <CampaignManagePanel campaign={currentCampaign} canPreview={canPreviewCampaigns} canSend={canSendCampaigns} />
           </div>
         </div>
       )}
 
-      {creating ? <PromotionModal promotion={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
-      {editing ? <PromotionModal promotion={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
-      {issuing ? <IssueModal promotionId={issuing.id} promotionName={issuing.title} onClose={() => setIssuing(null)} onIssued={() => void mutate()} /> : null}
+      {canWritePromotions && creating ? <PromotionModal promotion={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
+      {canWritePromotions && editing ? <PromotionModal promotion={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canWritePromotions && issuing ? <IssueModal promotionId={issuing.id} promotionName={issuing.title} onClose={() => setIssuing(null)} onIssued={() => void mutate()} /> : null}
     </AdminPageLayout>
   );
 }
 
-function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCampaign) => void }>) {
+function CampaignPanel({ canPreview, canSend, onCreated }: Readonly<{ canPreview: boolean; canSend: boolean; onCreated: (campaign: ManagedCampaign) => void }>) {
   const t = useTranslations("admin.marketing");
+  const tc = useTranslations("admin.common");
   const [name, setName] = useState("");
   const [channel, setChannel] = useState("PUSH");
   const [template, setTemplate] = useState("");
@@ -236,7 +248,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
         message: template.trim(),
       });
       onCreated({ id: campaign.campaignId, name: campaignName });
-      notifySuccess("Đã tạo chiến dịch", `Trạng thái: ${campaignStatusLabel(campaign.status, t)}.`);
+      notifySuccess(tc("campaignCreated"), tc("campaignStatus", { status: campaignStatusLabel(campaign.status, t) }));
       setName("");
       setTemplate("");
     } catch (err) {
@@ -253,7 +265,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
       <h2 className="text-sm font-bold text-admin-ink">{t("createHeading")}</h2>
       <label className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">{t("campaignName")}</span>
-        <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("campaignNamePlaceholder")} />
+        <input disabled={!canSend} className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("campaignNamePlaceholder")} />
       </label>
       <div className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">{t("channel")}</span>
@@ -261,6 +273,7 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
           label={t("channelLabel")}
           fullWidth
           value={channel}
+          isDisabled={!canSend}
           onChange={setChannel}
           options={[
             { value: "PUSH", label: "Push" },
@@ -271,15 +284,15 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
       </div>
       <label className="flex flex-col gap-2 text-sm">
         <span className="font-semibold text-admin-ink">{t("template")}</span>
-        <textarea className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder="Chào {{name}}, ưu đãi tháng 9..." />
+        <textarea disabled={!canSend} className="min-h-24 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink" value={template} onChange={(event) => setTemplate(event.target.value)} placeholder={t("templatePlaceholder")} />
       </label>
       <div className="flex items-center gap-3">
-        <Button variant="outline" className="rounded-lg" onPress={() => void runPreview()}>{t("previewAudience")}</Button>
-        {preview !== null ? <span className="text-sm text-admin-muted">{preview.toLocaleString("vi-VN")} khách phù hợp</span> : null}
+        <Button variant="outline" className="rounded-lg" isDisabled={!canPreview} onPress={() => void runPreview()}>{t("previewAudience")}</Button>
+        {preview !== null ? <span className="text-sm text-admin-muted">{t("matchingCustomers", { count: preview })}</span> : null}
       </div>
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
       <div>
-        <Button variant="primary" className="rounded-lg" isDisabled={busy || name.trim().length < 2 || template.trim().length < 2} onPress={() => void createCampaign()}>
+        <Button variant="primary" className="rounded-lg" isDisabled={!canSend || busy || name.trim().length < 2 || template.trim().length < 2} onPress={() => void createCampaign()}>
           {busy ? t("creating") : t("createCampaign")}
         </Button>
       </div>
@@ -287,8 +300,10 @@ function CampaignPanel({ onCreated }: Readonly<{ onCreated: (campaign: ManagedCa
   );
 }
 
-function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign | null }>) {
+function CampaignManagePanel({ campaign, canPreview, canSend }: Readonly<{ campaign: ManagedCampaign | null; canPreview: boolean; canSend: boolean }>) {
   const t = useTranslations("admin.marketing");
+  const tc = useTranslations("admin.common");
+  const format = useFormatter();
   const metrics = useAdminNotificationCampaignMetrics(campaign?.id ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -299,7 +314,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
     setBusy(true); setError(null);
     try {
       await adminService.cancelNotificationCampaign(campaign.id, undefined, metrics.data?.version);
-      notifySuccess("Đã hủy chiến dịch");
+      notifySuccess(tc("campaignCancelled"));
       void metrics.mutate();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("campaignCancelFailed"));
@@ -336,7 +351,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
   return (
     <Card className="gap-3 rounded-lg border-admin-border bg-admin-surface p-5 shadow-none">
       <h2 className="text-sm font-bold text-admin-ink">
-        {campaign ? `Chiến dịch — ${campaign.name}` : t("trackerEmptyTitle")}
+        {campaign ? t("trackerTitle", { name: campaign.name }) : t("trackerEmptyTitle")}
       </h2>
       {!campaign ? <p className="text-xs text-admin-muted">{t("trackerEmptyBody")}</p> : null}
       {campaign ? (
@@ -349,7 +364,7 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
             {metricRows.map(([key, value]) => (
               <div key={key} className="flex justify-between gap-2 rounded-lg bg-admin-soft/50 px-3 py-1.5">
                 <dt className="text-admin-muted">{metricLabels[key]}</dt>
-                <dd className="font-semibold text-admin-ink">{key === "status" ? campaignStatusLabel(String(value), t) : Number(value).toLocaleString("vi-VN")}</dd>
+                <dd className="font-semibold text-admin-ink">{key === "status" ? campaignStatusLabel(String(value), t) : format.number(Number(value))}</dd>
               </div>
             ))}
           </dl>
@@ -358,10 +373,10 @@ function CampaignManagePanel({ campaign }: Readonly<{ campaign: ManagedCampaign 
         )
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" className="rounded-lg" onPress={() => void previewAudience()}>{t("previewAudience")}</Button>
-        {audience !== null ? <span className="text-sm text-admin-muted">{audience.toLocaleString("vi-VN")} khách</span> : null}
+        <Button variant="outline" className="rounded-lg" isDisabled={!canPreview} onPress={() => void previewAudience()}>{t("previewAudience")}</Button>
+        {audience !== null ? <span className="text-sm text-admin-muted">{t("customerCount", { count: audience })}</span> : null}
         {campaignCanCancel(metrics.data?.status) ? (
-          <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>{t("cancelCampaign")}</Button>
+          <Button variant="ghost" className="rounded-lg text-admin-danger" isDisabled={!canSend || !campaign || !metrics.data?.version || busy} onPress={() => void cancel()}>{t("cancelCampaign")}</Button>
         ) : null}
       </div>
       {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}

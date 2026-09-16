@@ -42,11 +42,11 @@ export function StaffPerformancePanel({
       ) : query.error ? (
         <p role="alert" className="text-xs text-admin-danger">{t("performance.loadFailed")}</p>
       ) : !row ? (
-        <p className="text-xs text-admin-muted">Không có dữ liệu kỳ {period}.</p>
+        <p className="text-xs text-admin-muted">{t("performance.empty", { period })}</p>
       ) : (
         <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
-            <dt className="text-admin-muted">Doanh thu</dt>
+            <dt className="text-admin-muted">{t("performance.revenue")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">
               {typeof row.revenue === "number" ? formatMoney(row.revenue) : MISSING}
             </dd>

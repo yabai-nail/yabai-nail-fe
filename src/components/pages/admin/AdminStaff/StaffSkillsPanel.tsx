@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
+  useAdminPermission,
   useAdminServices,
   useStaffSkills,
 } from "@/service";
@@ -17,6 +18,8 @@ export function StaffSkillsPanel({
   staffVersion,
 }: Readonly<{ staffId: string; staffVersion?: number }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
+  const canWrite = useAdminPermission("staff.skill.write.branch");
   const services = useAdminServices();
   const skills = useStaffSkills(staffId);
   const grantedIds = useMemo<Set<string>>(
@@ -53,7 +56,7 @@ export function StaffSkillsPanel({
         // different resource and would fail the optimistic check.
         skills.data?.version ?? staffVersion,
       );
-      notifySuccess("Đã cập nhật kỹ năng nhân viên");
+      notifySuccess(tc("skillsSaved"));
       setSelected(null);
       void skills.mutate();
     } catch (thrown) {
@@ -79,6 +82,7 @@ export function StaffSkillsPanel({
                 <input
                   type="checkbox" className="accent-admin-accent"
                   checked={currentSet.has(service.id)}
+                  disabled={!canWrite}
                   onChange={() => toggle(service.id)}
                 />
                 <span className="flex-1 truncate text-admin-ink">{service.name}</span>
@@ -97,7 +101,7 @@ export function StaffSkillsPanel({
           variant="primary"
           className="rounded-lg"
           onPress={() => void submit()}
-          isDisabled={!dirty || busy}
+          isDisabled={!canWrite || !dirty || busy}
         >
           {busy ? t("compensation.saving") : t("skills.submit")}
         </Button>

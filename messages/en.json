@@ -1,5 +1,13 @@
 {
   "admin": {
+    "common": {
+      "accountUpdated": "Account updated", "accountCreated": "Account added", "systemSaved": "System settings saved", "loyaltySaved": "Loyalty settings saved", "passwordReset": "Password reset", "passwordResetBody": "A notice was sent to {name}.",
+      "appointmentCreated": "Appointment created", "appointmentUpdated": "Appointment updated", "staffAssigned": "Staff assigned", "actualServicesUpdated": "Actual services updated", "photoAttached": "Photo attached to appointment", "appointmentCancelled": "Appointment cancelled", "checkInDone": "Appointment checked in", "serviceStarted": "Service started", "serviceCompleted": "Service completed", "noShowDone": "Customer marked as no-show",
+      "branchUpdated": "Branch updated", "branchCreated": "Branch added", "customerUpdated": "Customer updated", "customerCreated": "Customer added", "pointsUpdated": "Customer points updated", "couponIssued": "Coupon issued to customer", "noteCreated": "Note added", "noteUpdated": "Note updated",
+      "promotionActivated": "Promotion activated", "promotionPaused": "Promotion paused", "campaignCreated": "Campaign created", "campaignStatus": "Status: {status}.", "campaignCancelled": "Campaign cancelled", "promotionIssued": "Promotion issued", "promotionIssuedBody": "Sent to {count} customers.", "promotionUpdated": "Promotion updated", "promotionCreated": "Promotion added",
+      "conversationArchived": "Conversation archived", "conversationUpdated": "Conversation status updated", "membershipFound": "Membership found for {name}.", "customersFound": "Found {count} customers.", "reportExportCreated": "Report export requested", "reviewResolved": "Review resolved", "reviewReopened": "Review reopened", "reviewReplySent": "Review reply sent", "surchargeUpdated": "Surcharge updated", "surchargeCreated": "Surcharge added", "settingsSaved": "Settings updated", "compensationSaved": "Salary and commission updated", "staffCreated": "Staff member added", "staffUpdated": "Staff member updated", "leaveApproved": "Leave request approved", "leaveRejected": "Leave request rejected", "shiftCreated": "Shift added", "leaveRequested": "Leave request submitted", "skillsSaved": "Staff skills updated"
+    },
+    "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
     "settings": {
       "language": {
         "heading": "Display language",
@@ -27,6 +35,7 @@
         "salon": "Salon details",
         "booking": "Booking",
         "commission": "Staff & commission",
+        "account": "Account security",
         "payment": "Payments",
         "automation": "Automated messages",
         "notifications": "Notifications",
@@ -36,6 +45,19 @@
       },
       "tabsLabel": "Settings groups",
       "placeholder": "This settings group is coming in a later phase.",
+      "account": {
+        "heading": "Change admin password",
+        "description": "The new password must include lowercase, uppercase and a number, with at least 8 characters.",
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmation": "Confirm new password",
+        "requirements": "The password does not meet the security requirements.",
+        "mismatch": "The confirmation does not match.",
+        "saving": "Changing password…",
+        "save": "Change password",
+        "success": "Password changed",
+        "failed": "Could not change the password."
+      },
       "roles": {
         "OWNER": "Owner",
         "MANAGER": "Manager"
@@ -50,6 +72,8 @@
         "salonShare": "Salon's share of revenue"
       },
       "commission": {
+        "periodDescription": "Rates, revenue, and commission for {period}.",
+        "periodLoadFailed": "Could not load figures for {period}; rate, revenue, and commission show “{missing}”.",
         "heading": "Staff & commission settings",
         "listHeading": "Staff and commission rates",
         "addStaff": "Add staff",
@@ -59,7 +83,7 @@
         "generalHeading": "General settings",
         "generalNote": "The two switches below apply to this browser only — there is no per-branch commission configuration API yet.",
         "autoCalculate": "Calculate commission automatically at payment",
-        "showRate": "Show the commission rate to staff"
+        "showRate": "Show the commission rate to staff", "loadFailed": "Could not load staff."
       },
       "switchOn": "On",
       "switchOff": "Off",
@@ -97,6 +121,17 @@
         "saving": "Saving…",
         "save": "Save settings",
         "saveFailed": "Could not save the booking settings."
+      },
+      "salon": {
+        "heading": "Home page salon information",
+        "openTime": "Opening time",
+        "closeTime": "Closing time",
+        "lastBookingTime": "Last booking time",
+        "amenities": "Salon amenities",
+        "paymentMethods": "Payment methods",
+        "ownerOnly": "Only the chain owner can change this public information.",
+        "amenity": { "WIFI": "Wi-Fi", "REFRESHMENTS": "Drinks & snacks", "PHONE_CHARGING": "Phone charging", "LUGGAGE_STORAGE": "Luggage storage" },
+        "payment": { "CASH": "Cash", "PAYPAY": "PayPay", "VISA": "Visa", "MASTERCARD": "Mastercard" }
       },
       "aside": {
         "heading": "Notes",
@@ -201,10 +236,12 @@
       "closeNav": "Close admin navigation",
       "navLabel": "Admin navigation",
       "brand": "YABAI Nail Salon — admin overview",
-      "comingSoon": "This feature is coming later"
+      "comingSoon": "This feature is coming later", "skipToContent": "Skip to main content"
     },
     "auth": {
-      "restoring": "Restoring your session…"
+      "restoring": "Restoring your session…",
+      "forbiddenTitle": "You do not have access to this page",
+      "forbiddenDescription": "Choose an available item from the navigation or contact the chain owner."
     },
     "recordDetail": {
       "loading": "Loading…",
@@ -236,6 +273,8 @@
       }
     },
     "messages": {
+      "call": "Call",
+      "emptyThread": "Write the first message to {name} below.",
       "inbox": "Inbox",
       "searchLabel": "Search messages",
       "searchPlaceholder": "Search messages…",
@@ -256,9 +295,15 @@
       "threadLabel": "Messages with {name}",
       "composeLabel": "Write a message",
       "composePlaceholder": "Write a message…",
+      "composeTo": "Message {name}…",
+      "sending": "Sending…",
+      "noMessages": "No messages yet",
+      "noPhone": "No phone number",
       "send": "Send",
       "unnamedCustomer": "Unnamed customer",
       "now": "Just now",
+      "today": "Today",
+      "yesterday": "Yesterday",
       "sendFailed": "Could not send the message.",
       "statusFailed": "Could not update the conversation status.",
       "loadFailed": "Could not load conversations.",
@@ -281,6 +326,8 @@
       "searchLabel": "Search nail designs",
       "searchPlaceholder": "Design name…",
       "add": "Add design",
+      "catalogTab": "Design catalog",
+      "proposalsTab": "Pending proposals",
       "loading": "Loading nail designs…",
       "loadFailed": "Could not load the nail designs.",
       "columns": {
@@ -303,6 +350,35 @@
         "save": "Save",
         "add": "Add",
         "saveFailed": "Could not save the nail design."
+        ,"image": "Nail design image",
+        "imageRequirements": "JPG, PNG or WebP, up to 10 MB.",
+        "imagePick": "Choose image",
+        "imageReplace": "Replace current image",
+        "imageRemove": "Remove selected image",
+        "imagePreview": "Preview of {name}",
+        "imageUnsupported": "Only JPG, PNG or WebP images are supported.",
+        "imageEmpty": "The image file is empty.",
+        "imageTooLarge": "The image must not exceed 10 MB.",
+        "updated": "Nail design updated",
+        "created": "Nail design added"
+      },
+      "proposals": {
+        "loading": "Loading proposals…",
+        "loadFailed": "Could not load nail design proposals.",
+        "empty": "No proposals are waiting for review.",
+        "untitled": "Untitled design",
+        "createdAt": "Submitted {value}",
+        "unknownDate": "at an unknown time",
+        "approve": "Approve",
+        "reject": "Reject",
+        "approveTitle": "Approve nail design proposal",
+        "rejectTitle": "Reject nail design proposal",
+        "reason": "Reason",
+        "approveReasonPlaceholder": "Optional note…",
+        "rejectReasonPlaceholder": "Enter a rejection reason…",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "saveFailed": "Could not update the proposal."
       }
     },
     "branches": {
@@ -547,6 +623,8 @@
       "transfer": "Bank transfer"
     },
     "accounts": {
+      "add": "Add account",
+      "pagination": "Showing {shown} of {total} accounts",
       "role": {
         "OWNER": "Owner",
         "MANAGER": "Manager",
@@ -608,6 +686,10 @@
         "statusLabel": "Account status",
         "tempPassword": "Temporary password",
         "tempPasswordPlaceholder": "At least 8 characters, with letters and numbers",
+        "branches": "Accessible branches",
+        "branchesLoading": "Loading branches…",
+        "branchesLoadFailed": "Could not load branches.",
+        "branchRequired": "Select at least one branch.",
         "cancel": "Cancel",
         "saving": "Saving…",
         "save": "Save",
@@ -615,6 +697,7 @@
         "saveFailed": "Could not save the account."
       },
       "reset": {
+        "title": "Reset password — {name}",
         "channel": "Notification channel",
         "reason": "Reason (optional)",
         "reasonPlaceholder": "Staff member forgot their password",
@@ -692,6 +775,15 @@
         "noteHeading": "Notes",
         "noteBody": "You can show or hide a service on the booking page. Hidden services are not shown to customers."
       },
+      "categoryTable": {
+        "all": "All", "branchCount": "{count} branches", "allBranches": "All branches",
+        "reorderSuccess": "Category order updated", "reorderFailed": "Could not change the order.",
+        "enabledSuccess": "Category enabled", "disabledSuccess": "Category disabled", "statusFailed": "Could not change the status.",
+        "searchLabel": "Search categories", "searchPlaceholder": "Search by name or code...", "add": "Add category", "loadFailed": "Could not load categories.", "caption": "Service categories",
+        "columns": { "order": "Order", "name": "Name", "code": "Code", "japanese": "Japanese", "branches": "Branches", "services": "Services", "status": "Status", "actions": "Actions" },
+        "toggleLabel": "Enable or disable category {name}", "enabled": "On", "disabled": "Off", "editLabel": "Edit {name}",
+        "loading": "Loading categories…", "empty": "No categories yet. Add one before creating a service.", "noResults": "No matching categories.", "count": "{count} categories", "reorderHint": " · clear the search to reorder"
+      },
       "categoryEditor": {
         "editTitle": "Rename category",
         "addTitle": "Add category",
@@ -703,7 +795,10 @@
         "saving": "Saving…",
         "save": "Save",
         "add": "Add",
-        "saveFailed": "Could not save the category."
+        "saveFailed": "Could not save the category.", "updated": "Category updated", "created": "Category added",
+        "japaneseName": "Japanese name", "branchScope": "Visible branches", "branchScopeHint": "Selecting no branches also means visible at all branches.",
+        "clearAll": "Clear all", "selectAll": "Select all", "members": "Contains {count} services: {names}. Assign a service to another category to move it out.",
+        "noMembers": "no services", "pickServices": "Choose services to move into this category:", "allAssigned": "Every service is already assigned here.", "uncategorized": "uncategorized"
       },
       "create": {
         "title": "Add service",
@@ -776,6 +871,7 @@
         "deleting": "Deleting…",
         "success": "Deleted {name}",
         "failed": "Could not delete the service. Reload and try again.",
+        "failedWithDetails": "Could not delete the service: {details}",
         "hasHistory": "This service has booking history and cannot be deleted. Edit it and turn off “Public to customers” instead."
       },
       "surcharge": {
@@ -800,10 +896,12 @@
         "saving": "Saving…",
         "save": "Save",
         "addAction": "Add",
-        "saveFailed": "Could not save the surcharge."
+        "saveFailed": "Could not save the surcharge.", "active": "Active"
       }
     },
     "customers": {
+      "add": "Add customer",
+      "pagination": "Showing {first}–{last} of {total} customers",
       "unnamed": "Unnamed customer",
       "tabsLabel": "Customer segments",
       "segment": {
@@ -814,7 +912,7 @@
       },
       "searchLabel": "Search customers",
       "searchPlaceholder": "Search name or phone…",
-      "loading": "Loading the customers…",
+      "loading": "Loading the customers…", "loadFailed": "Could not load customers.",
       "emptyHeading": "No customers yet",
       "retry": "Try reloading the page.",
       "firstCustomer": "Add your first customer to start tracking history and points.",
@@ -823,6 +921,8 @@
       "noSelectionDescription": "Change the search or segment to see details.",
       "saveFailed": "Could not save the customer.",
       "rank": {
+        "member": "Member",
+        "platinum": "Platinum",
         "gold": "Gold",
         "silver": "Silver",
         "bronze": "Bronze",
@@ -831,6 +931,8 @@
       "detail": {
         "heading": "Customer details",
         "edit": "Edit {name}",
+        "editAction": "Edit information",
+        "messageAction": "Message customer",
         "social": "Social",
         "preference": "Preferences",
         "totalSpend": "Total spend",
@@ -865,12 +967,14 @@
       },
       "edit": {
         "title": "Edit customer",
+        "name": "Display name",
         "localeLabel": "Preferred language",
         "statusLabel": "Account status",
         "statusActive": "Active",
         "statusInactive": "Inactive",
         "saving": "Saving…",
-        "save": "Save"
+        "save": "Save",
+        "close": "Close"
       },
       "loyalty": {
         "pointsFailed": "Could not adjust the points.",
@@ -892,7 +996,7 @@
         "historyHeading": "Recent nail history",
         "historyLoading": "Loading the history…",
         "historyFailed": "Could not load the history.",
-        "historyEmpty": "No appointments yet."
+        "historyEmpty": "No appointments yet.", "heading": "Benefits and loyalty points", "adjustPoints": "Add or remove points", "issueCoupon": "Issue coupon"
       },
       "notes": {
         "saveFailed": "Could not save the note.",
@@ -902,7 +1006,7 @@
         "empty": "No notes yet.",
         "saving": "Saving…",
         "save": "Save",
-        "placeholder": "Add an internal note (not shown to the customer)…"
+        "placeholder": "Add an internal note (not shown to the customer)…", "heading": "Staff notes", "cancel": "Cancel", "edit": "Edit", "add": "Add note"
       }
     },
     "dashboard": {
@@ -964,7 +1068,7 @@
         "heading": "Today's appointments",
         "loading": "Loading appointments…",
         "empty": "No appointments today yet.",
-        "listLabel": "Today's appointment list"
+        "listLabel": "Today's appointment list", "viewAll": "View calendar", "loadFailed": "Could not load today's appointments.", "add": "Add appointment"
       },
       "overviewHeading": "Today at a glance",
       "activityRegion": "Salon activity",
@@ -977,8 +1081,9 @@
         "seriesLabel": "Revenue"
       },
       "monthly": {
+        "heading": "Salon income ({month}/{year})",
         "loading": "Loading the monthly summary…",
-        "afterCommission": "Left after commission"
+        "afterCommission": "Left after commission", "loadFailed": "Could not load the monthly summary.", "costUnavailable": "Operating costs are not deducted because the backend has no monthly cost data"
       },
       "revenue": {
         "netToday": "Salon takes home",
@@ -988,13 +1093,16 @@
         "byMethod": "Revenue by payment method",
         "methodFailed": "Could not load the payment methods.",
         "methodLoading": "Loading…",
-        "noTransactions": "No transactions today yet."
+        "noTransactions": "No transactions today yet.", "loadFailed": "Could not load revenue data.", "todayOnly": "Payment method data is available for today only."
       },
       "staff": {
+        "heading": "Staff ({period})",
+        "empty": "No staff data for {period}.",
+        "revenue": "Revenue",
         "loading": "Loading the staff list…",
         "expectedPayout": "Expected payout",
         "working": "Working",
-        "off": "Off"
+        "off": "Off", "viewAll": "View all", "loadFailed": "Could not load staff performance."
       },
       "quick": {
         "appointment": "Create appointment",
@@ -1008,10 +1116,14 @@
         "heading": "Notifications",
         "loading": "Loading notifications…",
         "empty": "No new notifications.",
-        "listLabel": "New notifications"
+        "listLabel": "New notifications", "loadFailed": "Could not load notifications."
       }
     },
     "marketing": {
+      "add": "Add promotion",
+      "pagination": "Showing {shown} of {total} promotions",
+      "matchingCustomers": "{count, number} matching customers",
+      "customerCount": "{count, number} customers",
       "promotionStatus": {
         "ACTIVE": "Running",
         "SCHEDULED": "Scheduled",
@@ -1097,6 +1209,8 @@
       "metricsEmpty": "No metrics to show.",
       "cancelCampaign": "Cancel campaign",
       "issueModal": {
+        "title": "Issue — {name}",
+        "selected": "{count} customers selected",
         "failed": "Could not issue it.",
         "pickCustomer": "Choose a customer",
         "searchPlaceholder": "Search by name or phone…",
@@ -1131,6 +1245,8 @@
       }
     },
     "staff": {
+      "add": "Add staff member",
+      "editAction": "Edit",
       "unnamed": "Unnamed staff member",
       "metrics": {
         "periodRevenue": "Revenue for {period}",
@@ -1152,6 +1268,7 @@
         "off": "On leave"
       },
       "loading": "Loading the staff list…",
+      "loadingFailed": "Could not load staff.",
       "emptyHeading": "No staff yet",
       "retry": "Try reloading the page.",
       "firstStaff": "Add your first staff member to start tracking revenue and commission.",
@@ -1160,6 +1277,7 @@
       "statusWorking": "Working",
       "statusOff": "On leave",
       "orders": {
+        "heading": "Recent appointments for {name}",
         "multipleServices": "{count} services",
         "unnamedService": "Unnamed service",
         "unnamedCustomer": "Unnamed customer",
@@ -1169,7 +1287,8 @@
         "customer": "Customer",
         "service": "Service",
         "total": "Total",
-        "status": "Status"
+        "status": "Status",
+        "loadFailed": "Could not load this staff member's appointments."
       },
       "compensation": {
         "saveFailed": "Could not save the commission.",
@@ -1181,7 +1300,9 @@
         "commissionPercent": "Commission (%)",
         "effectiveFrom": "Effective from",
         "saving": "Saving…",
-        "submit": "Update commission"
+        "submit": "Update commission",
+        "heading": "Commission settings",
+        "effectiveHint": "Must be after the current setting's effective date. Previously finalized commissions stay unchanged."
       },
       "create": {
         "failed": "Could not create the staff member.",
@@ -1189,10 +1310,12 @@
         "name": "Full name",
         "cancel": "Cancel",
         "saving": "Saving…",
-        "submit": "Add staff member"
+        "submit": "Add staff member",
+        "afterCreateHint": "Skills, commission and shifts can be configured after creation."
       },
       "detail": {
         "heading": "Staff details",
+        "periodRevenue": "Revenue for {period}",
         "phone": "Phone number",
         "commissionRate": "Commission rate",
         "totalRevenue": "Total revenue",
@@ -1207,9 +1330,13 @@
         "name": "Name",
         "cancel": "Cancel",
         "saving": "Saving…",
-        "save": "Save"
+        "save": "Save",
+        "active": "Active"
       },
       "performance": {
+        "empty": "No data for {period}.",
+        "revenue": "Revenue",
+        "periodLoadFailed": "Could not load revenue for {period}; revenue and commission show “{missing}”.",
         "heading": "Performance by period",
         "periodLabel": "Reporting period",
         "loading": "Loading…",
@@ -1266,10 +1393,12 @@
         "reason": "Reason",
         "cancel": "Cancel",
         "saving": "Saving…",
-        "save": "Save"
+        "save": "Save",
+        "timeValidation": "Start and end must be on a 15-minute boundary (00, 15, 30, 45), and end must be after start."
       }
     },
     "auditLogs": {
+      "pagination": "Showing {shown} of {total} records",
       "action": {
         "ACCOUNT_CREATED": "Account created",
         "ACCOUNT_PASSWORD_RESET": "Account password reset",
@@ -1376,7 +1505,7 @@
         "target": "Target",
         "branch": "Branch"
       },
-      "detailTitle": "Audit log entry"
+      "detailTitle": "Audit log entry", "empty": "No matching audit logs."
     },
     "appointments": {
       "toolbar": {
@@ -1583,12 +1712,15 @@
       "serverBackedNote": "Connected to a real appointment — payment-quote is called before the payment is recorded.",
       "recorded": "Recorded transactions",
       "submitting": "Calling quote and recording the transaction…",
+      "paymentRecorded": "Payment recorded",
       "step3": "Confirm and take payment",
       "grandTotalLabel": "Total the customer pays",
       "error": {
         "noAppointment": "This invoice is not tied to a real appointment, so no transaction can be recorded.",
         "amountMismatch": "The amount on screen ({screen}) differs from what the server will charge ({server}). Reload and check before taking the money.",
-        "record": "The transaction could not be recorded."
+        "record": "The transaction could not be recorded.",
+        "services": "The actual services could not be saved.",
+        "adjustments": "The discount and checkout note could not be saved."
       },
       "customer": {
         "heading": "Customer details",
@@ -1643,6 +1775,7 @@
         "addTitle": "Add an extra service",
         "source": "Where the service comes from",
         "custom": "Custom item",
+        "catalogOnly": "Only catalog services can be persisted on the appointment.",
         "name": "Service name",
         "price": "Price (¥)",
         "note": "Note",
@@ -1656,7 +1789,14 @@
         "pending": "Awaiting payment",
         "subtotal": "Services total",
         "discount": "Discount (¥)",
+        "benefitDiscount": "Member benefit",
+        "discountReason": "Discount reason",
+        "discountReasonPlaceholder": "For example: salon complaint resolution",
+        "discountReasonRequired": "Enter a reason for a manual discount.",
         "applyDiscount": "Apply the discount",
+        "saveAdjustments": "Save discount & note",
+        "saving": "Saving…",
+        "adjustmentUnavailable": "Discounts can only be edited while the appointment is in service or awaiting payment.",
         "grandTotal": "The customer owes",
         "orderNote": "Order note",
         "orderNotePlaceholder": "Add a note if there is one...",
@@ -1687,7 +1827,8 @@
         "submit": "Confirm"
       },
       "methodPicker": {
-        "label": "Payment method"
+        "label": "Payment method",
+        "cashOnly": "The system currently records cash payments only."
       },
       "state": {
         "paidLocked": "The invoice is already paid, so the amounts cannot change.",

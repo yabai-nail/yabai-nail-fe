@@ -22,6 +22,7 @@ export function PromotionModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.marketing");
+  const tc = useTranslations("admin.common");
   const isEdit = promotion !== null;
   const [code, setCode] = useState(promotion?.code ?? "");
   const [name, setName] = useState(promotion?.title ?? "");
@@ -68,7 +69,7 @@ export function PromotionModal({
           issuanceLimit: numericIssuanceLimit,
         });
       }
-      notifySuccess(isEdit ? "Đã cập nhật khuyến mãi" : "Đã thêm khuyến mãi");
+      notifySuccess(isEdit ? tc("promotionUpdated") : tc("promotionCreated"));
       onSaved();
       onClose();
     } catch (err) {

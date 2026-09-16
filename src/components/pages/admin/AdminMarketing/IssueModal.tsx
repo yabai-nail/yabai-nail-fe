@@ -19,6 +19,7 @@ export function IssueModal({
   onIssued: () => void;
 }>) {
   const t = useTranslations("admin.marketing");
+  const tc = useTranslations("admin.common");
   const { branchId } = useAdminBranch();
   const { data, isLoading } = useAdminCustomers(branchId);
   const [selected, setSelected] = useState<ReadonlyArray<string>>([]);
@@ -53,7 +54,7 @@ export function IssueModal({
         customerIds: [...selected],
         note: note.trim() || undefined,
       });
-      notifySuccess("Đã phát hành khuyến mãi", `Đã gửi cho ${selected.length} khách hàng.`);
+      notifySuccess(tc("promotionIssued"), tc("promotionIssuedBody", { count: selected.length }));
       onIssued();
       onClose();
     } catch (err) {
@@ -70,7 +71,7 @@ export function IssueModal({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
-                Phát hành — {promotionName}
+                {t("issueModal.title", { name: promotionName })}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-4 px-5 py-5">
@@ -106,7 +107,7 @@ export function IssueModal({
                   ))
                 )}
               </div>
-              <span className="text-xs text-admin-muted">{selected.length} khách được chọn</span>
+              <span className="text-xs text-admin-muted">{t("issueModal.selected", { count: selected.length })}</span>
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("issueModal.note")}</span>
                 <input

@@ -14,6 +14,7 @@ import {
   useAdminServiceCategories,
   useAdminBranch,
   useAdminServices,
+  useAdminPermission,
   type AdminServiceItem as ServerService,
 } from "@/service";
 import { CategoryTable } from "./CategoryTable";
@@ -55,11 +56,16 @@ function toScreenService(server: ServerService): SalonService {
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
   const { branchId } = useAdminBranch();
+  const canWrite = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const popularityWindow = useMemo(() => getPopularityWindow(), []);
+  const [filter, setFilter] = useState<ServiceFilter>("all");
+  const [query, setQuery] = useState("");
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices({
     branchId: branchId ?? undefined,
+    categoryId: filter === "all" ? undefined : filter,
     from: popularityWindow.from,
     limit: 100,
+    q: query.trim() || undefined,
     to: popularityWindow.to,
   });
   const categories = useAdminServiceCategories();
@@ -75,8 +81,6 @@ export function AdminServicesComponent() {
     [data],
   );
 
-  const [filter, setFilter] = useState<ServiceFilter>("all");
-  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const filtered = useMemo(
     () => filterServices(source, filter, query),
@@ -112,7 +116,7 @@ export function AdminServicesComponent() {
       </Tabs>
 
       {view === "categories" ? (
-        <CategoryTable services={source} />
+        <CategoryTable services={source} canWrite={canWrite} />
       ) : (
         <>
           <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
@@ -180,6 +184,7 @@ export function AdminServicesComponent() {
               <Button
                 variant="primary"
                 className="rounded-lg"
+                isDisabled={!canWrite}
                 onPress={() => setIsCreateOpen(true)}
               >
                 <PlusIcon className="size-4" />{t("create.submit")}
@@ -199,7 +204,7 @@ export function AdminServicesComponent() {
           <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
               <Card.Content className="min-w-0 p-0">
-                <ServiceTable services={visible} onEdit={setEditing} onDelete={setDeleting} />
+                <ServiceTable services={visible} onEdit={canWrite ? setEditing : undefined} onDelete={canWrite ? setDeleting : undefined} />
               </Card.Content>
               <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
                 <span>{t("showing", { visible: visible.length, total: filtered.length })}</span>
@@ -210,20 +215,20 @@ export function AdminServicesComponent() {
         </>
       )}
 
-      {isCreateOpen ? (
+      {canWrite && isCreateOpen ? (
         <ServiceCreateModal
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateServices()}
         />
       ) : null}
-      {editing ? (
+      {canWrite && editing ? (
         <ServiceEditModal
           service={editing}
           onClose={() => setEditing(null)}
           onSaved={() => void mutateServices()}
         />
       ) : null}
-      {deleting ? (
+      {canWrite && deleting ? (
         <ServiceDeleteModal
           service={deleting}
           onClose={() => setDeleting(null)}

@@ -21,6 +21,7 @@ import {
   useAdminStaff,
   useAdminStaffMember,
   useAdminStaffPerformance,
+  useAdminPermission,
   type AdminStaffMember as ServerStaff,
 } from "@/service";
 import { RecentOrdersTable } from "./RecentOrdersTable";
@@ -72,8 +73,13 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
 export function AdminStaffComponent() {
   const t = useTranslations("admin.staff");
   const { branchId } = useAdminBranch();
+  const canWriteStaff = useAdminPermission("staff.write.branch");
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
-  const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff();
+  const [filter, setFilter] = useState<StaffFilter>("all");
+  const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff({
+    branchId: branchId ?? undefined,
+    status: filter === "all" ? undefined : filter === "working" ? "ACTIVE" : "INACTIVE",
+  });
   const performance = useAdminStaffPerformance(branchId, { period });
   // The roster is org-level, so a row needs to say which salon it belongs to.
   // The roster carries only `branchId`; the names come from the branch list the
@@ -95,7 +101,6 @@ export function AdminStaffComponent() {
     [data, performanceById, t, branchNameById],
   );
 
-  const [filter, setFilter] = useState<StaffFilter>("all");
   const [selectedId, setSelectedId] = useState<string>("");
   const visibleStaff = useMemo(
     () => source.filter((member) => filter === "all" || member.status === filter),
@@ -117,9 +122,9 @@ export function AdminStaffComponent() {
   const metrics = [
     {
       id: "revenue",
-      label: `Doanh thu kỳ ${period}`,
+      label: t("metrics.periodRevenue", { period }),
       value: formatOptionalMoney(revenue),
-      detail: typeof kpi?.orderCount === "number" ? `${kpi.orderCount} đơn hàng` : t("metrics.noOrders"),
+      detail: typeof kpi?.orderCount === "number" ? t("metrics.orderCount", { count: kpi.orderCount }) : t("metrics.noOrders"),
       icon: BanknotesIcon,
       tone: "text-admin-accent bg-admin-soft",
     },
@@ -127,7 +132,7 @@ export function AdminStaffComponent() {
       id: "commission",
       label: t("metrics.commissionDue"),
       value: formatOptionalMoney(commission),
-      detail: averageRate === null ? t("metrics.noRate") : `${averageRate}% / Trung bình`,
+      detail: averageRate === null ? t("metrics.noRate") : t("metrics.rateDetail", { rate: averageRate }),
       icon: WalletIcon,
       tone: "text-admin-success bg-admin-success/10",
     },
@@ -135,7 +140,7 @@ export function AdminStaffComponent() {
       id: "shop",
       label: t("metrics.salonShare"),
       value: formatOptionalMoney(salonShare),
-      detail: `Kỳ ${period}`,
+      detail: t("metrics.period", { period }),
       icon: BuildingStorefrontIcon,
       tone: "text-admin-info bg-admin-info/10",
     },
@@ -143,7 +148,7 @@ export function AdminStaffComponent() {
       id: "working",
       label: t("metrics.working"),
       value: source.length === 0 ? MISSING : `${workingCount} / ${source.length}`,
-      detail: `${source.length - workingCount} nghỉ phép`,
+      detail: t("metrics.offCount", { count: source.length - workingCount }),
       icon: UserGroupIcon,
       tone: "text-admin-violet bg-admin-violet/10",
     },
@@ -183,19 +188,19 @@ export function AdminStaffComponent() {
         <Button
           variant="primary"
           className="rounded-lg"
-          isDisabled={!branchId}
+          isDisabled={!branchId || !canWriteStaff}
           onPress={() => setIsCreateOpen(true)}
         >
-          <PlusIcon className="size-4" />Thêm nhân viên
+          <PlusIcon className="size-4" />{t("add")}
         </Button>
       </div>
       {error ? (
         <p role="alert" className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-          Không tải được danh sách nhân viên.
+          {t("loadingFailed")}
         </p>
       ) : performance.error ? (
         <p role="alert" className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-          Không tải được doanh thu kỳ {period} — cột doanh thu và hoa hồng hiển thị “{MISSING}”.
+          {t("performance.periodLoadFailed", { period, missing: MISSING })}
         </p>
       ) : null}
       <div className="mt-4 min-w-0">
@@ -224,7 +229,7 @@ export function AdminStaffComponent() {
                 member={detailedStaff}
                 branchId={branchId}
                 period={period}
-                onEdit={() => setEditing(detailedStaff)}
+                onEdit={canWriteStaff ? () => setEditing(detailedStaff) : undefined}
               />
             ) : (
               <AdminEmptySelection
@@ -238,14 +243,14 @@ export function AdminStaffComponent() {
           </div>
         )}
       </div>
-      {isCreateOpen && branchId ? (
+      {canWriteStaff && isCreateOpen && branchId ? (
         <StaffCreateModal
           branchId={branchId}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateStaff()}
         />
       ) : null}
-      {editing ? (
+      {canWriteStaff && editing ? (
         <StaffEditModal
           member={editing}
           onClose={() => setEditing(null)}

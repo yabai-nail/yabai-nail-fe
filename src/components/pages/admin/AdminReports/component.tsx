@@ -7,6 +7,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
+  useAdminPermission,
   useAdminAccounts,
   useAdminBranchList,
   useAdminBranchesReport,
@@ -33,16 +34,34 @@ const kinds: ReadonlyArray<ReportKind> = ["revenue", "branches", "customers", "s
 
 export function AdminReportsComponent() {
   const t = useTranslations("admin.reports");
-  const revenue = useRevenueReport();
-  const branches = useAdminBranchesReport();
-  const customers = useAdminCustomersReport();
-  const staff = useAdminStaffPerformanceReport();
-  const branchesList = useAdminBranchList();
-  const accountsList = useAdminAccounts();
-  const servicesList = useAdminServices();
-  const staffList = useAdminStaff();
+  const tc = useTranslations("admin.common");
+  const canReadRevenue = useAdminPermission("report.revenue.read.all");
+  const canReadCustomers = useAdminPermission("report.customer.read.all");
+  const canReadStaff = useAdminPermission("report.staff.read.all");
+  const canExport = useAdminPermission("report.export.all");
+  const visibleKinds = useMemo<ReadonlyArray<ReportKind>>(
+    () => kinds.filter((value) => {
+      if (value === "customers") return canReadCustomers;
+      if (value === "staff") return canReadStaff;
+      return canReadRevenue;
+    }),
+    [canReadCustomers, canReadRevenue, canReadStaff],
+  );
+  const [requestedKind, setRequestedKind] = useState<ReportKind>(() => visibleKinds[0] ?? "revenue");
+  const kind = visibleKinds.includes(requestedKind) ? requestedKind : visibleKinds[0] ?? "revenue";
+  const revenue = useRevenueReport(undefined, undefined, canReadRevenue);
+  const branches = useAdminBranchesReport(undefined, canReadRevenue);
+  const customers = useAdminCustomersReport(undefined, canReadCustomers);
+  const staff = useAdminStaffPerformanceReport(undefined, canReadStaff);
+  const needsBranchLookup = kind === "branches";
+  const needsCustomerLookup = kind === "customers";
+  const needsStaffLookup = kind === "staff";
+  const needsServiceLookup = kind === "revenue";
+  const branchesList = useAdminBranchList(undefined, needsBranchLookup);
+  const accountsList = useAdminAccounts(undefined, needsCustomerLookup);
+  const servicesList = useAdminServices(undefined, needsServiceLookup);
+  const staffList = useAdminStaff(undefined, needsStaffLookup);
 
-  const [kind, setKind] = useState<ReportKind>("revenue");
   const [exportInfo, setExportInfo] = useState<AdminReportExport | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -73,7 +92,7 @@ export function AdminReportsComponent() {
   const columns = useMemo(() => tableColumns(rows), [rows]);
 
   const changeKind = (next: ReportKind) => {
-    setKind(next);
+    setRequestedKind(next);
     setExportInfo(null);
     setDownloadUrl(null);
     setExportError(null);
@@ -85,7 +104,7 @@ export function AdminReportsComponent() {
     setDownloadUrl(null);
     try {
       const info = await adminService.createReportExport({ reportType: exportKindOf[kind] });
-      notifySuccess("Đã tạo yêu cầu xuất báo cáo");
+      notifySuccess(tc("reportExportCreated"));
       setExportInfo(info);
     } catch (err) {
       setExportError(err instanceof Error && err.message ? err.message : t("createFailed"));
@@ -109,7 +128,7 @@ export function AdminReportsComponent() {
     <AdminPageLayout>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-1">
-          {kinds.map((value) => (
+          {visibleKinds.map((value) => (
             <Button
               key={value}
               size="sm"
@@ -122,13 +141,13 @@ export function AdminReportsComponent() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {exportInfo ? (
+          {canExport && exportInfo ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
               {t("exportLine", { status: exportStatusLabel((exportStatus.data?.status as string | undefined) ?? exportInfo.status, t) })}
               <button type="button" className="underline" onClick={() => void exportStatus.mutate()}>{t("refresh")}</button>
             </span>
           ) : null}
-          {downloadUrl ? (
+          {canExport && downloadUrl ? (
             <a
               href={downloadUrl}
               target="_blank"
@@ -146,7 +165,7 @@ export function AdminReportsComponent() {
             size="sm"
             variant="primary"
             className="rounded-lg"
-            isDisabled={exportBusy}
+            isDisabled={!canExport || exportBusy}
             onPress={() => void createExport()}
           >
             {exportBusy ? t("creating") : t("createExport")}

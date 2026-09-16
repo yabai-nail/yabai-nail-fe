@@ -8,6 +8,7 @@ import { todayAtSalon } from "@/lib/salon-date";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
+  useAdminPermission,
   useAdminLeaveRequests,
   useAdminStaffShifts,
   type AdminStaffShift,
@@ -24,6 +25,10 @@ export function StaffShiftsPanel({
   staffId,
 }: Readonly<{ branchId: string; staffId: string }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
+  const canWriteSchedule = useAdminPermission("staff.schedule.write.branch");
+  const canRequestLeave = useAdminPermission("staff.schedule.request.own");
+  const canApproveLeave = useAdminPermission("staff.schedule.approve.branch");
   const approvalLabel = (code: string) =>
     t.has(`shifts.approval.${code}`) ? t(`shifts.approval.${code}`) : code;
   const requestStatusLabel = (code: string) =>
@@ -51,7 +56,7 @@ export function StaffShiftsPanel({
           ? { decision, resolution: { action: "CANCEL" } }
           : { decision },
       );
-      notifySuccess(decision === "APPROVE" ? "Đã duyệt yêu cầu nghỉ" : "Đã từ chối yêu cầu nghỉ");
+      notifySuccess(decision === "APPROVE" ? tc("leaveApproved") : tc("leaveRejected"));
       await Promise.all([leaveRequests.mutate(), shifts.mutate()]);
     } catch (thrown) {
       setDecisionError(thrown instanceof Error ? thrown.message : t("shifts.decisionFailed"));
@@ -65,11 +70,11 @@ export function StaffShiftsPanel({
       <div className="flex items-center justify-between">
         <h3 id="staff-shifts-heading" className="text-sm font-bold text-admin-ink">{t("shifts.heading")}</h3>
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" onPress={() => setOpenMode("shift")}>
-            <PlusIcon className="size-3.5" />Thêm ca
+          <Button size="sm" variant="ghost" isDisabled={!canWriteSchedule} onPress={() => setOpenMode("shift")}>
+            <PlusIcon className="size-3.5" />{t("shifts.addShift")}
           </Button>
-          <Button size="sm" variant="ghost" onPress={() => setOpenMode("leave")}>
-            <CalendarDaysIcon className="size-3.5" />Xin nghỉ
+          <Button size="sm" variant="ghost" isDisabled={!canRequestLeave} onPress={() => setOpenMode("leave")}>
+            <CalendarDaysIcon className="size-3.5" />{t("shifts.requestLeave")}
           </Button>
         </div>
       </div>
@@ -101,7 +106,7 @@ export function StaffShiftsPanel({
               <li key={request.id} className="rounded-lg border border-admin-border p-2 text-xs">
                 <p className="text-admin-ink">{request.from?.split("-").reverse().join("/")} → {request.to?.split("-").reverse().join("/")}</p>
                 <p className="text-admin-muted">{request.reason || t("shifts.noReason")} · {requestStatusLabel(request.status)}</p>
-                {request.status === "PENDING" ? (
+                {canApproveLeave && request.status === "PENDING" ? (
                   <div className="mt-2 flex gap-2">
                     <Button size="sm" variant="primary" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "APPROVE")}>{t("shifts.approve")}</Button>
                     <Button size="sm" variant="outline" isDisabled={decisionPending === request.id} onPress={() => void decide(request.id, "REJECT")}>{t("shifts.reject")}</Button>
@@ -114,7 +119,7 @@ export function StaffShiftsPanel({
         {decisionError ? <p role="alert" className="text-xs text-admin-danger">{decisionError}</p> : null}
       </div>
 
-      {openMode ? (
+      {openMode && ((openMode === "shift" && canWriteSchedule) || (openMode === "leave" && canRequestLeave)) ? (
         <ShiftOrLeaveDialog
           branchId={branchId}
           staffId={staffId}
@@ -141,6 +146,7 @@ function ShiftOrLeaveDialog({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
   const today = todayAtSalon();
   const [date, setDate] = useState(today);
   const [start, setStart] = useState("09:00");
@@ -186,7 +192,7 @@ function ShiftOrLeaveDialog({
           reason: reason.trim(),
         });
       }
-      notifySuccess(mode === "shift" ? "Đã thêm ca làm việc" : "Đã gửi yêu cầu nghỉ");
+      notifySuccess(mode === "shift" ? tc("shiftCreated") : tc("leaveRequested"));
       onSaved();
       onClose();
     } catch (thrown) {
@@ -238,7 +244,7 @@ function ShiftOrLeaveDialog({
               </div>
               {mode === "shift" && !timesValid ? (
                 <p className="text-xs text-admin-muted">
-                  Giờ bắt đầu và kết thúc phải rơi vào mốc 15 phút (00, 15, 30, 45), và giờ kết thúc phải sau giờ bắt đầu.
+                  {t("shifts.timeValidation")}
                 </p>
               ) : null}
               {mode === "leave" ? (

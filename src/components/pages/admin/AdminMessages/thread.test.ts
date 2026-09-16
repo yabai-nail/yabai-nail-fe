@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import type { ChatMessage } from "./data";
-import { groupThread } from "./thread";
+import { groupThread, sortThreadChronologically } from "./thread";
 
 const NOW = new Date("2026-09-02T10:00:00+07:00");
+const DATE_LABELS = {
+  today: "Hôm nay",
+  yesterday: "Hôm qua",
+  formatDate: (date: Date) => `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+};
+
+const group = (messages: ReadonlyArray<ChatMessage>, now: Date = NOW) =>
+  groupThread(messages, now, DATE_LABELS);
 
 function msg(
   id: string,
@@ -16,11 +24,11 @@ function msg(
 
 describe("groupThread", () => {
   it("returns nothing for an empty thread", () => {
-    expect(groupThread([], NOW)).toEqual([]);
+    expect(group([])).toEqual([]);
   });
 
   it("gathers consecutive messages from one sender into a single run", () => {
-    const days = groupThread(
+    const days = group(
       [
         msg("a", "customer", "2026-09-02T08:00:00+07:00"),
         msg("b", "customer", "2026-09-02T08:01:00+07:00"),
@@ -34,7 +42,7 @@ describe("groupThread", () => {
   });
 
   it("breaks the run where the sender changes", () => {
-    const days = groupThread(
+    const days = group(
       [
         msg("a", "customer", "2026-09-02T08:00:00+07:00"),
         msg("b", "salon", "2026-09-02T08:01:00+07:00"),
@@ -46,7 +54,7 @@ describe("groupThread", () => {
   });
 
   it("labels today, yesterday and anything older by its date", () => {
-    const days = groupThread(
+    const days = group(
       [
         msg("old", "customer", "2026-08-28T09:00:00+07:00"),
         msg("yst", "customer", "2026-09-01T09:00:00+07:00"),
@@ -59,7 +67,7 @@ describe("groupThread", () => {
 
   it("never merges a run across a day boundary", () => {
     // Same sender either side of midnight: one run would hide the date change.
-    const days = groupThread(
+    const days = group(
       [
         msg("a", "customer", "2026-09-01T23:59:00+07:00"),
         msg("b", "customer", "2026-09-02T00:01:00+07:00"),
@@ -77,14 +85,14 @@ describe("groupThread", () => {
       msg("c", "salon", "2026-09-02T08:01:00+07:00"),
       msg("d", "customer", "2026-09-02T08:02:00+07:00"),
     ];
-    const flat = groupThread(input, NOW).flatMap((d) => d.runs.flatMap((r) => r.messages));
+    const flat = group(input).flatMap((d) => d.runs.flatMap((r) => r.messages));
     expect(flat.map((m) => m.id)).toEqual(["a", "b", "c", "d"]);
   });
 
   it("carries a message with an unreadable timestamp instead of dropping it", () => {
     // The adapter can only pass through what the API sent. A message we cannot
     // date is still a message the admin needs to read.
-    const days = groupThread(
+    const days = group(
       [
         msg("a", "customer", "2026-09-02T08:00:00+07:00"),
         msg("broken", "customer", "not-a-date"),
@@ -96,7 +104,27 @@ describe("groupThread", () => {
   });
 
   it("shows no date separator for a thread it cannot date at all", () => {
-    const days = groupThread([msg("broken", "customer", "not-a-date")], NOW);
+    const days = group([msg("broken", "customer", "not-a-date")]);
     expect(days.map((d) => d.label)).toEqual([""]);
+  });
+});
+
+describe("sortThreadChronologically", () => {
+  it("restores chronological order after more than one newest-first API page", () => {
+    const all = Array.from({ length: 200 }, (_, index) => {
+      const sequence = index + 1;
+      return msg(
+        String(sequence).padStart(3, "0"),
+        sequence % 2 ? "customer" : "salon",
+        new Date(Date.UTC(2026, 8, 1, 0, sequence)).toISOString(),
+      );
+    });
+    // Each backend page is chronological, while the page containing the newest
+    // 100 messages arrives before the page containing the oldest 100.
+    const mergedPages = [...all.slice(100), ...all.slice(0, 100)];
+
+    expect(sortThreadChronologically(mergedPages).map((message) => message.id)).toEqual(
+      all.map((message) => message.id),
+    );
   });
 });

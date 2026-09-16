@@ -70,7 +70,7 @@ export function CategoryEditor({
       } else {
         await adminService.createServiceCategory(body);
       }
-      notifySuccess(isEdit ? "Đã cập nhật danh mục" : "Đã thêm danh mục");
+      notifySuccess(isEdit ? t("categoryEditor.updated") : t("categoryEditor.created"));
       onSaved();
       onClose();
     } catch (thrown) {
@@ -87,7 +87,7 @@ export function CategoryEditor({
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-6 py-5">
               <Modal.Heading className="text-lg font-bold text-admin-ink">
-                {isEdit ? "Sửa danh mục" : t("categoryEditor.addTitle")}
+                {isEdit ? t("categoryEditor.editTitle") : t("categoryEditor.addTitle")}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-5 px-6 py-5">
@@ -105,23 +105,23 @@ export function CategoryEditor({
                   <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Gel manicure" className={fieldClass} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>Nhật ngữ</span>
+                  <span className={labelClass}>{t("categoryEditor.japaneseName")}</span>
                   <input value={nameJa} onChange={(event) => setNameJa(event.target.value)} placeholder="ジェルネイル" className={fieldClass} />
                 </label>
               </div>
 
               <fieldset className="rounded-lg border border-admin-border p-4">
-                <legend className={`px-1 ${labelClass}`}>Chi nhánh hiển thị</legend>
+                <legend className={`px-1 ${labelClass}`}>{t("categoryEditor.branchScope")}</legend>
                 <div className="mb-3 flex items-center justify-between gap-2">
                   {/* Ticking every branch and ticking none mean the same thing to the API; the note
                       says so, and the button is here because ticking four boxes by hand is tedious. */}
-                  <p className="text-xs text-admin-muted">Không chọn chi nhánh nào cũng có nghĩa là hiện ở tất cả.</p>
+                  <p className="text-xs text-admin-muted">{t("categoryEditor.branchScopeHint")}</p>
                   <button
                     type="button"
                     className={`${pickAllClass} shrink-0`}
                     onClick={() => setBranchIds(allBranches ? [] : branchItems.map((branch) => branch.id))}
                   >
-                    {allBranches ? "Bỏ chọn" : "Chọn tất cả"}
+                    {allBranches ? t("categoryEditor.clearAll") : t("categoryEditor.selectAll")}
                   </button>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -143,26 +143,24 @@ export function CategoryEditor({
                 <legend className={`px-1 ${labelClass}`}>{t("table.service")}</legend>
                 {isEdit ? (
                   <p className="mb-3 text-xs text-admin-muted">
-                    Đang có <strong className="text-admin-ink">{members.length}</strong> dịch vụ:{" "}
-                    {members.length ? members.map((service) => service.name).join(", ") : "chưa có dịch vụ nào"}.
-                    Muốn chuyển một dịch vụ đi, hãy gán nó vào danh mục khác.
+                    {t("categoryEditor.members", { count: members.length, names: members.length ? members.map((service) => service.name).join(", ") : t("categoryEditor.noMembers") })}
                   </p>
                 ) : null}
                 <div className="mb-3 flex items-center justify-between gap-2">
-                  <p className="text-xs text-admin-muted">Chọn dịch vụ để chuyển vào danh mục này:</p>
+                  <p className="text-xs text-admin-muted">{t("categoryEditor.pickServices")}</p>
                   {outsiders.length > 0 ? (
                     <button
                       type="button"
                       className={`${pickAllClass} shrink-0`}
                       onClick={() => setMoving(allServices ? [] : outsiders.map((service) => service.id))}
                     >
-                      {allServices ? "Bỏ chọn" : "Chọn tất cả"}
+                      {allServices ? t("categoryEditor.clearAll") : t("categoryEditor.selectAll")}
                     </button>
                   ) : null}
                 </div>
                 <div className="grid max-h-56 gap-2 overflow-y-auto">
                   {outsiders.length === 0 ? (
-                    <span className="text-sm text-admin-muted">Mọi dịch vụ đều đã ở đây.</span>
+                    <span className="text-sm text-admin-muted">{t("categoryEditor.allAssigned")}</span>
                   ) : (
                     outsiders.map((service) => (
                       <label key={service.id} className="flex items-center gap-2.5 text-sm text-admin-ink">
@@ -173,7 +171,7 @@ export function CategoryEditor({
                           onChange={() => setMoving((current) => toggle(current, service.id))}
                         />
                         <span className="min-w-0 flex-1 truncate">{service.name}</span>
-                        <span className="shrink-0 text-xs text-admin-muted">{service.category?.name ?? "chưa phân loại"}</span>
+                        <span className="shrink-0 text-xs text-admin-muted">{service.category?.name ?? t("categoryEditor.uncategorized")}</span>
                       </label>
                     ))
                   )}

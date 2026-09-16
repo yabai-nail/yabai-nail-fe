@@ -84,7 +84,7 @@ export function UtilityPanel() {
         <Card.Content className="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
           {error ? (
             <p role="alert" className="rounded-lg bg-danger/10 px-3 py-3 text-center text-xs text-danger">
-              Không tải được thông báo.
+              {t("notifications.loadFailed")}
             </p>
           ) : !branchId || isLoading ? (
             <p className="py-3 text-center text-xs text-admin-muted">{t("notifications.loading")}</p>

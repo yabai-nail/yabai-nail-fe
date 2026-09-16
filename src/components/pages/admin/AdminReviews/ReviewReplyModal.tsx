@@ -23,6 +23,7 @@ export function ReviewReplyModal({
   onReplied: () => void;
 }>) {
   const t = useTranslations("admin.reviews");
+  const tc = useTranslations("admin.common");
   const [content, setContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,7 @@ export function ReviewReplyModal({
     setError(null);
     try {
       await adminService.replyToBranchReview(branchId, reviewId, { content: content.trim() }, version);
-      notifySuccess("Đã gửi phản hồi đánh giá");
+      notifySuccess(tc("reviewReplySent"));
       onReplied();
       onClose();
     } catch (err) {

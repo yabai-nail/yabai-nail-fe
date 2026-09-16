@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminCustomerNotes,
+  useAdminPermission,
   type AdminCustomerNote,
 } from "@/service";
 
@@ -19,7 +20,10 @@ export function CustomerNotesPanel({
   customerId,
 }: Readonly<{ branchId: string; customerId: string }>) {
   const t = useTranslations("admin.customers");
+  const tc = useTranslations("admin.common");
+  const format = useFormatter();
   const { data, isLoading, error, mutate } = useAdminCustomerNotes(branchId, customerId);
+  const canWrite = useAdminPermission("customer.note.write.branch", "customer.note.write.assigned");
   const notes = data?.items ?? [];
 
   const [draft, setDraft] = useState("");
@@ -35,7 +39,7 @@ export function CustomerNotesPanel({
     setSubmitError(null);
     try {
       await adminService.createCustomerNote(branchId, customerId, { content: trimmed });
-      notifySuccess("Đã thêm ghi chú");
+      notifySuccess(tc("noteCreated"));
       setDraft("");
       void mutate();
     } catch (thrown) {
@@ -60,7 +64,7 @@ export function CustomerNotesPanel({
         { content: trimmed },
         note.version,
       );
-      notifySuccess("Đã cập nhật ghi chú");
+      notifySuccess(tc("noteUpdated"));
       setEditingId(null);
       setEditingContent("");
       void mutate();
@@ -77,7 +81,7 @@ export function CustomerNotesPanel({
     <section aria-labelledby="customer-notes-heading" className="space-y-3 border-t border-admin-border pt-3">
       <div className="flex items-center justify-between">
         <h3 id="customer-notes-heading" className="text-sm font-bold text-admin-ink">
-          Ghi chú nhân viên
+          {t("notes.heading")}
         </h3>
       </div>
 
@@ -97,18 +101,19 @@ export function CustomerNotesPanel({
                     value={editingContent}
                     onChange={(event) => setEditingContent(event.target.value)}
                     rows={2}
+                    disabled={!canWrite}
                     className="block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-xs text-admin-ink"
                   />
                   <div className="flex justify-end gap-2">
                     <Button size="sm" variant="ghost" onPress={() => setEditingId(null)} isDisabled={pending}>
-                      Huỷ
+                      {t("notes.cancel")}
                     </Button>
                     <Button
                       size="sm"
                       variant="primary"
                       className="rounded-lg"
                       onPress={() => void submitEdit(note)}
-                      isDisabled={pending || editingContent.trim().length === 0}
+                      isDisabled={!canWrite || pending || editingContent.trim().length === 0}
                     >
                       {pending ? t("notes.saving") : t("notes.save")}
                     </Button>
@@ -119,18 +124,19 @@ export function CustomerNotesPanel({
                   <div className="min-w-0 flex-1">
                     <p className="whitespace-pre-line leading-4 text-admin-ink">{note.content}</p>
                     <p className="mt-1 text-[0.65rem] text-admin-muted">
-                      {new Date(note.updatedAt ?? note.createdAt).toLocaleString("vi-VN")}
+                      {format.dateTime(new Date(note.updatedAt ?? note.createdAt), { dateStyle: "short", timeStyle: "short" })}
                     </p>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
+                    isDisabled={!canWrite}
                     onPress={() => {
                       setEditingId(note.id);
                       setEditingContent(note.content);
                     }}
                   >
-                    Sửa
+                    {t("notes.edit")}
                   </Button>
                 </div>
               )}
@@ -144,6 +150,7 @@ export function CustomerNotesPanel({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           rows={2}
+          disabled={!canWrite}
           placeholder={t("notes.placeholder")}
           className="block w-full rounded-lg border border-admin-border bg-admin-surface p-2 text-xs text-admin-ink"
         />
@@ -153,10 +160,10 @@ export function CustomerNotesPanel({
             variant="primary"
             className="rounded-lg"
             onPress={() => void submitCreate()}
-            isDisabled={pending || draft.trim().length === 0}
+            isDisabled={!canWrite || pending || draft.trim().length === 0}
           >
             <PlusIcon className="size-3.5" />
-            Thêm ghi chú
+            {t("notes.add")}
           </Button>
         </div>
         {submitError ? <p role="alert" className="text-xs text-admin-danger">{submitError}</p> : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { pageWindow } from "@/lib/admin-pagination";
 
 type AdminPaginationProps = {
@@ -17,16 +18,17 @@ type AdminPaginationProps = {
  * produced dozens. This shows a fixed seven slots and puts the rest behind an ellipsis, and
  * carries the prev/next controls and the `<nav>` semantics the hand-rolled rows never had.
  */
-export function AdminPagination({ page, pageCount, onPageChange, label = "Phân trang" }: AdminPaginationProps) {
+export function AdminPagination({ page, pageCount, onPageChange, label }: AdminPaginationProps) {
+  const t = useTranslations("admin.pagination");
   if (pageCount <= 1) return null;
   const slots = pageWindow(page, pageCount);
 
   return (
-    <Pagination aria-label={label} className="w-auto shrink-0">
+    <Pagination aria-label={label ?? t("label")} className="w-auto shrink-0">
       <Pagination.Content>
         <Pagination.Item>
           <Pagination.Previous
-            aria-label="Trang trước"
+            aria-label={t("previous")}
             isDisabled={page <= 1}
             onPress={() => onPageChange(page - 1)}
           >
@@ -42,7 +44,7 @@ export function AdminPagination({ page, pageCount, onPageChange, label = "Phân 
             <Pagination.Item key={slot}>
               <Pagination.Link
                 isActive={slot === page}
-                aria-label={`Trang ${slot}`}
+                aria-label={t("page", { page: slot })}
                 onPress={() => onPageChange(slot)}
               >
                 {slot}
@@ -52,7 +54,7 @@ export function AdminPagination({ page, pageCount, onPageChange, label = "Phân 
         )}
         <Pagination.Item>
           <Pagination.Next
-            aria-label="Trang sau"
+            aria-label={t("next")}
             isDisabled={page >= pageCount}
             onPress={() => onPageChange(page + 1)}
           >

@@ -40,7 +40,7 @@ export function StaffDetailPanel({
       : null;
 
   return (
-    <section aria-label={`Chi tiết nhân viên ${member.name}`} className="space-y-3">
+    <section aria-label={`${t("detail.heading")}: ${member.name}`} className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold">{t("detail.heading")}</h2>
         <Button
@@ -50,7 +50,7 @@ export function StaffDetailPanel({
           isDisabled={!onEdit}
           onPress={onEdit}
         >
-          <PencilSquareIcon className="size-4" />Chỉnh sửa
+          <PencilSquareIcon className="size-4" />{t("editAction")}
         </Button>
       </div>
 
@@ -80,7 +80,7 @@ export function StaffDetailPanel({
               </div>
             </dl>
             <div className="border-t border-admin-border pt-4">
-              <h3 className="font-bold">Doanh thu kỳ {period}</h3>
+              <h3 className="font-bold">{t("detail.periodRevenue", { period })}</h3>
               <dl className="mt-3 space-y-2 text-sm">
                 <div className="flex justify-between"><dt className="text-admin-muted">{t("detail.totalRevenue")}</dt><dd className="font-semibold">{formatOptionalMoney(member.revenue)}</dd></div>
                 <div className="flex justify-between"><dt className="text-admin-muted">{t("compensation.commission")}</dt><dd className="font-semibold text-admin-accent">{formatOptionalMoney(member.commissionAmount)}</dd></div>

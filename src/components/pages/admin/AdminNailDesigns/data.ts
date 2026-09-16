@@ -6,6 +6,7 @@ export type DesignRow = {
   readonly title: string;
   readonly status: string;
   readonly version: number;
+  readonly mediaIds: ReadonlyArray<string>;
 };
 
 export function adaptDesign(design: AdminNailDesign): DesignRow {
@@ -14,14 +15,15 @@ export function adaptDesign(design: AdminNailDesign): DesignRow {
     title: design.title,
     status: design.status,
     version: design.version,
+    mediaIds: design.mediaIds ?? [],
   };
 }
 
 export const designFixtures: ReadonlyArray<DesignRow> = [
-  { id: "nd1", title: "Gradient hồng pastel", status: "PUBLISHED", version: 1 },
-  { id: "nd2", title: "Mèo mắt xanh", status: "PUBLISHED", version: 2 },
-  { id: "nd3", title: "French classic", status: "DRAFT", version: 1 },
-  { id: "nd4", title: "Đính đá Swarovski", status: "ARCHIVED", version: 3 },
+  { id: "nd1", title: "Gradient hồng pastel", status: "PUBLISHED", version: 1, mediaIds: [] },
+  { id: "nd2", title: "Mèo mắt xanh", status: "PUBLISHED", version: 2, mediaIds: [] },
+  { id: "nd3", title: "French classic", status: "DRAFT", version: 1, mediaIds: [] },
+  { id: "nd4", title: "Đính đá Swarovski", status: "ARCHIVED", version: 3, mediaIds: [] },
 ];
 
 export function designStatuses(rows: ReadonlyArray<DesignRow>): ReadonlyArray<string> {

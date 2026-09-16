@@ -40,6 +40,9 @@ export type CheckoutInvoice = {
   readonly currentService: PaymentServiceSnapshot;
   readonly additionalItems: ReadonlyArray<PaymentLineItem>;
   readonly discount: number;
+  readonly benefitDiscount: number;
+  readonly manualDiscount: number;
+  readonly discountReason: string;
   readonly paymentMethod: PaymentMethod | null;
   readonly orderNote: string;
   readonly status: InvoiceStatus;
@@ -84,6 +87,9 @@ export const initialCheckoutInvoice: CheckoutInvoice = {
     { ...reinforceService, note: "Móng cái tay phải", source: "catalog" },
   ],
   discount: 0,
+  benefitDiscount: 0,
+  manualDiscount: 0,
+  discountReason: "",
   paymentMethod: "cash",
   orderNote: "",
   status: "draft",

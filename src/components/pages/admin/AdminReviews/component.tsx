@@ -8,7 +8,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminReviews } from "@/service";
+import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminPermission, useAdminReviews, useAuth } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
   adaptReview,
@@ -23,15 +23,26 @@ const pageSize = 8;
 
 export function AdminReviewsComponent() {
   const t = useTranslations("admin.reviews");
+  const tc = useTranslations("admin.common");
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const { branchId } = useAdminBranch();
+  const { user } = useAuth();
+  const isOwner = user?.role === "OWNER";
+  const canReply = useAdminPermission("review.reply.branch");
+  const canModerate = useAdminPermission("review.moderate.branch");
   const [scope, setScope] = useState<"branch" | "org">("branch");
-  const branchReviews = useAdminBranchReviews(scope === "branch" ? branchId : null);
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const reviewQuery = {
+    q: query.trim() || undefined,
+    status: status === "all" ? undefined : status,
+  };
+  const branchReviews = useAdminBranchReviews(scope === "branch" ? branchId : null, reviewQuery);
   // The table printed the raw customer UUID. Every other list resolves ids to
   // names the same way, from the branch's own customer list.
   const { data: customersData } = useAdminCustomers(branchId);
-  const orgReviews = useAdminReviews();
+  const orgReviews = useAdminReviews(reviewQuery, isOwner);
   // Org scope is a read-only overview: replies/handling need a per-review branch id,
   // so those actions stay on the branch scope where the active branch is authoritative.
   const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
@@ -46,13 +57,14 @@ export function AdminReviewsComponent() {
     [data, customerNames, t],
   );
 
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [replyTo, setReplyTo] = useState<ReviewRow | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const statuses = useMemo(() => handlingStatuses(source), [source]);
+  const statuses = useMemo(
+    () => Array.from(new Set(["IN_PROGRESS", "NEW", "RESOLVED", ...handlingStatuses(source)])),
+    [source],
+  );
   const filtered = useMemo(() => filterReviews(source, status, query), [source, status, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
 
@@ -64,7 +76,7 @@ export function AdminReviewsComponent() {
     const next = row.handlingStatus === "RESOLVED" ? "NEW" : "RESOLVED";
     try {
       await adminService.updateBranchReviewHandling(branchId, row.id, { status: next }, row.version);
-      notifySuccess(next === "RESOLVED" ? "Đã xử lý đánh giá" : "Đã mở lại đánh giá");
+      notifySuccess(next === "RESOLVED" ? tc("reviewResolved") : tc("reviewReopened"));
       void mutate();
     } catch (err) {
       setActionError(err instanceof Error && err.message ? err.message : t("updateFailed"));
@@ -74,7 +86,7 @@ export function AdminReviewsComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex gap-1 border-b border-admin-border">
-        {(["branch", "org"] as const).map((value) => (
+        {(["branch", "org"] as const).filter((value) => value === "branch" || isOwner).map((value) => (
           <button
             key={value}
             type="button"
@@ -89,7 +101,7 @@ export function AdminReviewsComponent() {
       </div>
       <div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          Trạng thái xử lý
+          {t("handlingLabel")}
           <AdminSelectField
             label={t("filterLabel")}
             value={status}
@@ -132,7 +144,7 @@ export function AdminReviewsComponent() {
               {visible.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">
-                    Không có đánh giá phù hợp.
+                    {t("empty")}
                   </td>
                 </tr>
               ) : (
@@ -140,7 +152,7 @@ export function AdminReviewsComponent() {
                   <tr key={row.id} className="border-b border-admin-border align-top last:border-0">
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.customerName}</td>
                     {/* The API scores service and staff separately; one column showed neither. */}
-                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={`Dịch vụ ${row.serviceRating} sao, nhân viên ${row.staffRating} sao`}>
+                      <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={t("ratingLabel", { service: row.serviceRating, staff: row.staffRating })}>
                       <span className="block">{ratingStars(row.serviceRating)} <span className="text-xs text-admin-muted">{t("ratingService")}</span></span>
                       <span className="block">{ratingStars(row.staffRating)} <span className="text-xs text-admin-muted">{t("ratingStaff")}</span></span>
                     </td>
@@ -154,14 +166,14 @@ export function AdminReviewsComponent() {
                     <td className="px-4 py-3">
                       {scope === "branch" ? (
                         <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setReplyTo(row)}>
-                            Trả lời
+                          <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canReply} onPress={() => setReplyTo(row)}>
+                            {t("reply")}
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
                             className="rounded-lg"
-                            isDisabled={!branchId}
+                            isDisabled={!branchId || !canModerate}
                             onPress={() => void toggleResolved(row)}
                           >
                             {row.handlingStatus === "RESOLVED" ? t("reopen") : t("status.RESOLVED")}
@@ -178,12 +190,12 @@ export function AdminReviewsComponent() {
           </table>
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-          <span>Hiển thị {visible.length} trong tổng số {filtered.length} đánh giá</span>
+          <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
       </Card>
 
-      {replyTo && branchId ? (
+      {canReply && replyTo && branchId ? (
         <ReviewReplyModal
           branchId={branchId}
           reviewId={replyTo.id}
