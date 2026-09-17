@@ -76,8 +76,13 @@ export function AdminStaffComponent() {
   const canWriteStaff = useAdminPermission("staff.write.branch");
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const [filter, setFilter] = useState<StaffFilter>("all");
+  // No `branchId` here on purpose. The roster is the org-level list its branch column says
+  // it is, and the backend already scopes it by role when no branch is asked for: an owner
+  // sees every branch, a manager only the ones they are assigned. Asking for the console's
+  // active branch instead made a transfer look like a deletion — the member dropped out of
+  // the list the moment they were moved, and with the branch switcher hidden there was no
+  // way left to reach them.
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff({
-    branchId: branchId ?? undefined,
     status: filter === "all" ? undefined : filter === "working" ? "ACTIVE" : "INACTIVE",
   });
   const performance = useAdminStaffPerformance(branchId, { period });
@@ -225,9 +230,13 @@ export function AdminStaffComponent() {
               /></Card.Content>
             </Card>
             {detailedStaff ? (
+              // The member's own branch, not the console's active one. Shifts and leave are
+              // written against whichever branch this panel is handed, so on an org-level
+              // roster the active branch would book a technician a shift at a salon they do
+              // not work at.
               <StaffDetailPanel
                 member={detailedStaff}
-                branchId={branchId}
+                branchId={detailedStaff.branchId}
                 period={period}
                 onEdit={canWriteStaff ? () => setEditing(detailedStaff) : undefined}
               />
@@ -237,8 +246,8 @@ export function AdminStaffComponent() {
                 description={t("noSelectionDescription")}
               />
             )}
-            {detailedStaff && branchId ? (
-              <RecentOrdersTable branchId={branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
+            {detailedStaff ? (
+              <RecentOrdersTable branchId={detailedStaff.branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
             ) : null}
           </div>
         )}
