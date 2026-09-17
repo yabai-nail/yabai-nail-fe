@@ -158,7 +158,18 @@ export function ServiceAddonFields({
           {addons.map((addon) => {
             const draft = drafts[addon.id];
             return <div key={addon.id} className="grid gap-3 rounded-lg bg-admin-soft p-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-admin-ink"><input type="checkbox" className="accent-admin-accent" checked={draft?.selected ?? false} onChange={(event) => onToggleAddon(addon.id, event.target.checked)} />{addon.name} · ¥{addon.price}</label>
+              <label className="flex items-center gap-3 text-sm font-semibold text-admin-ink">
+                <input type="checkbox" className="accent-admin-accent" checked={draft?.selected ?? false} onChange={(event) => onToggleAddon(addon.id, event.target.checked)} />
+                {/* The add-on's own photo, so the row is recognised by sight and matches what the
+                    customer will be shown for it; the tab and the app draw the same image. */}
+                {addon.imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={addon.imageUrl} alt="" className="size-9 shrink-0 rounded-lg border border-admin-border object-cover" />
+                ) : (
+                  <span aria-hidden="true" className="size-9 shrink-0 rounded-lg border border-admin-border bg-admin-surface" />
+                )}
+                <span>{addon.name} · ¥{addon.price}</span>
+              </label>
               {draft?.selected ? (
                 <div className="grid max-w-2xl gap-2">
                   {/* One header for the whole branch list. The two field captions used to sit

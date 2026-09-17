@@ -1020,6 +1020,9 @@ export interface AdminNailDesign {
   readonly title: string;
   readonly nameVi?: string;
   readonly mediaIds?: ReadonlyArray<string>;
+  /** Stable public URLs for the photos, derived by the API from mediaIds; the first is the cover. */
+  readonly images?: ReadonlyArray<string>;
+  readonly thumbnailUrl?: string | null;
   readonly tags?: ReadonlyArray<string>;
   readonly visibility?: string;
   readonly consentToPublish?: boolean;
