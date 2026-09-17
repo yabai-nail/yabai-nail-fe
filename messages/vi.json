@@ -1358,6 +1358,9 @@
         "payout": "Nhận được"
       },
       "edit": {
+        "branch": "Chi nhánh",
+        "branchHint": "Chuyển nhân viên sang chi nhánh khác. Không chuyển được khi còn lịch hẹn chưa hoàn tất.",
+        "openAppointments": "Nhân viên còn lịch hẹn chưa hoàn tất nên chưa chuyển chi nhánh được. Hoàn tất hoặc huỷ những lịch đó rồi thử lại.",
         "failed": "Không lưu được nhân viên.",
         "title": "Chỉnh sửa nhân viên",
         "name": "Họ tên",

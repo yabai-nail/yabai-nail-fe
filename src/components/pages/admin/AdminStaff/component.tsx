@@ -252,9 +252,15 @@ export function AdminStaffComponent() {
       ) : null}
       {canWriteStaff && editing ? (
         <StaffEditModal
+          branches={branches.data?.items ?? []}
           member={editing}
           onClose={() => setEditing(null)}
-          onSaved={() => void mutateStaff()}
+          onSaved={() => {
+            // The roster carries the branch the table prints, and the member read is what the
+            // detail panel renders. A transfer changes both, so both have to be refetched.
+            void mutateStaff();
+            void staffDetail.mutate();
+          }}
         />
       ) : null}
     </AdminPageLayout>

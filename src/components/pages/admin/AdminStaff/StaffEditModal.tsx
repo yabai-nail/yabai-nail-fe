@@ -5,22 +5,27 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { adminService } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
-import type { StaffMember } from "./data";
+import { StaffBranchField, type StaffBranchOption } from "./StaffBranchField";
+import { staffSaveErrorKey, type StaffMember } from "./data";
 
-// Small modal for the base staff row: displayName + active. Skills / shifts /
-// compensation each have their own surface.
+// Small modal for the base staff row: displayName, branch and active. Skills /
+// shifts / compensation each have their own surface.
 export function StaffEditModal({
   member,
+  branches,
   onClose,
   onSaved,
 }: Readonly<{
   member: StaffMember;
+  /** The org branch list the screen already reads to name the roster's branch column. */
+  branches: ReadonlyArray<StaffBranchOption>;
   onClose: () => void;
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.staff");
   const tc = useTranslations("admin.common");
   const [displayName, setDisplayName] = useState(member.name);
+  const [branchId, setBranchId] = useState(member.branchId);
   const [active, setActive] = useState(member.status === "working");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,14 +39,22 @@ export function StaffEditModal({
     try {
       await adminService.updateStaff(
         member.id,
-        { displayName: displayName.trim(), status: active ? "ACTIVE" : "INACTIVE" },
+        {
+          displayName: displayName.trim(),
+          branchId,
+          status: active ? "ACTIVE" : "INACTIVE",
+        },
         member.version,
       );
       notifySuccess(tc("staffUpdated"));
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : t("edit.failed"));
+      if (staffSaveErrorKey(thrown) === "openAppointments") {
+        setError(t("edit.openAppointments"));
+      } else {
+        setError(thrown instanceof Error ? thrown.message : t("edit.failed"));
+      }
     } finally {
       setBusy(false);
     }
@@ -64,6 +77,12 @@ export function StaffEditModal({
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                 />
               </label>
+              <StaffBranchField
+                branches={branches}
+                disabled={busy}
+                onChange={setBranchId}
+                value={branchId}
+              />
               <label className="flex items-center gap-2 text-xs text-admin-ink">
                 <input
                   type="checkbox" className="accent-admin-accent"

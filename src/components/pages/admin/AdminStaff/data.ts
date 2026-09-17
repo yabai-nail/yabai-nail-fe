@@ -28,3 +28,21 @@ export type StaffMember = {
    */
   readonly branchName: string | null;
 };
+
+/** The code the backend rejects a transfer with while the member still has work booked. */
+export const OPEN_APPOINTMENTS_CODE = "RESOURCE_HAS_OPEN_APPOINTMENTS";
+
+/**
+ * The one save failure this form explains in its own words.
+ *
+ * Everything else keeps showing `error.message`, which the backend writes in Vietnamese. This
+ * case does not: its message comes back unaccented ("Khong the ngung hoac chuyen nhan vien
+ * khi con lich hen chua hoan tat."), and it is also the only failure the admin can act on —
+ * finish or cancel those appointments, then move the technician.
+ */
+export function staffSaveErrorKey(error: unknown): "openAppointments" | null {
+  const code = typeof error === "object" && error !== null && "code" in error
+    ? (error as { readonly code?: unknown }).code
+    : null;
+  return code === OPEN_APPOINTMENTS_CODE ? "openAppointments" : null;
+}

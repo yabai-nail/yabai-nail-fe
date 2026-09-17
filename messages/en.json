@@ -1348,6 +1348,9 @@
         "payout": "Payout"
       },
       "edit": {
+        "branch": "Branch",
+        "branchHint": "Move this technician to another branch. Not possible while they still have unfinished appointments.",
+        "openAppointments": "This technician still has unfinished appointments, so the branch cannot be changed. Finish or cancel them, then try again.",
         "failed": "Could not save the staff member.",
         "title": "Edit staff member",
         "name": "Name",
