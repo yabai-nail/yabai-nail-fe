@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { authService, useAuth } from "../auth";
+import { useAdminBranchList } from "./hooks";
 
 interface AdminBranchContextValue {
   /** Currently selected branch id, or null if no branch is available yet. */
@@ -37,6 +38,27 @@ const STORAGE_KEY = ADMIN_BRANCH_STORAGE_KEY;
  * - Stored id still accessible → keep it.
  * - No branches at all → null.
  */
+/**
+ * The branches an admin may act on, by the same rule the API applies.
+ *
+ * An owner may act anywhere in the chain and is stored with an empty `branchIds` on purpose,
+ * so for them the scope is the branch list itself; while that list is still loading, the
+ * stored ids keep the console usable rather than blank. A manager's scope is exactly their
+ * stored ids, however much of the chain the list happens to know.
+ */
+export function scopedBranchIds({
+  isOwner,
+  ownBranchIds,
+  allBranchIds,
+}: {
+  readonly isOwner: boolean;
+  readonly ownBranchIds: ReadonlyArray<string>;
+  readonly allBranchIds: ReadonlyArray<string>;
+}): ReadonlyArray<string> {
+  if (isOwner && allBranchIds.length > 0) return allBranchIds;
+  return ownBranchIds;
+}
+
 export function resolveActiveBranchId(
   storedId: string | null,
   branchIds: ReadonlyArray<string>,
@@ -69,7 +91,20 @@ function writeStoredBranchId(branchId: string | null): void {
 
 export function AdminBranchProvider({ children }: Readonly<{ children: ReactNode }>) {
   const { user, sessionId, activeBranchId } = useAuth();
-  const branchIds = useMemo(() => user?.branchIds ?? [], [user]);
+  const isOwner = user?.role === "OWNER";
+  // Only an owner needs the whole list to know their scope; everyone else already carries it.
+  const branchList = useAdminBranchList(undefined, isOwner);
+  const branchIds = useMemo(
+    () =>
+      scopedBranchIds({
+        isOwner,
+        ownBranchIds: user?.branchIds ?? [],
+        allBranchIds: (branchList.data?.items ?? [])
+          .filter((branch) => branch.active !== false)
+          .map((branch) => branch.id),
+      }),
+    [isOwner, user, branchList.data],
+  );
   // "userSelection" is what the admin explicitly picked (or what survived
   // reload via localStorage). The effective branchId is derived — that keeps
   // the reconciliation rule out of a useEffect that would have to setState

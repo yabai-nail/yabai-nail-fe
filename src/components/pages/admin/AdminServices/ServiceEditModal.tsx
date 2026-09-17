@@ -3,12 +3,12 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import { API_BASE_URL, adminMediaService, adminService, useAdminServiceCategories } from "@/service";
+import { useEffect, useMemo, useState } from "react";
+import { API_BASE_URL, adminMediaService, adminService, useAdminServiceAddons, useAdminServiceCategories, type AdminServiceItem } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { SalonService } from "./data";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
-import { ServiceAddonConfiguration } from "./ServiceAddonConfiguration";
+import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
 import {
   serviceImagePatch,
   serviceMediaIdFromUrl,
@@ -29,10 +29,12 @@ export function ServiceEditModal({
   onSaved: () => void;
 }>) {
   const t = useTranslations("admin.services");
+  const tAddons = useTranslations("admin.services.addons");
   const locale = useLocale();
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   const [name, setName] = useState(service.name);
+  const [nameJa, setNameJa] = useState(service.nameJa ?? "");
   const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(service.serviceType ?? "BASE");
   const [addonGroup, setAddonGroup] = useState(service.addonGroup ?? "NAIL_REMOVAL");
   const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
@@ -48,6 +50,17 @@ export function ServiceEditModal({
   const [isFeatured, setIsFeatured] = useState(Boolean(service.isFeatured));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The add-on mapping is saved by the same Save button as the rest of the form. It used to
+  // have a button of its own inside the section, and pressing the footer's Save — the natural
+  // "I'm done" — closed the modal and discarded every tick made below it without a word.
+  const addonQuery = useAdminServiceAddons(serviceType === "BASE" ? service.id : null);
+  const addonCatalog = useMemo(() => addonQuery.data?.addonCatalog ?? [], [addonQuery.data]);
+  const addonBranches = useMemo(() => addonQuery.data?.branches ?? [], [addonQuery.data]);
+  const addonGroups = useMemo(() => addonQuery.data?.groups ?? NO_ADDON_GROUPS, [addonQuery.data]);
+  const addons = useAddonDrafts({ addonCatalog, branches: addonBranches, groups: addonGroups });
+  // Set when the service itself saved but its add-ons did not: the version has moved on, so
+  // the form freezes and the button retries only the add-on step against the saved service.
+  const [saved, setSaved] = useState<AdminServiceItem | null>(null);
 
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
@@ -72,9 +85,11 @@ export function ServiceEditModal({
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
-    durationNum % 15 === 0 &&
     !imageError &&
     (imageMode !== "replace" || imageFile !== null) &&
+    // A branch override the backend would refuse stops the whole save here, before the
+    // service has already been written and the refusal would arrive half way through.
+    addons.overrideProblems.length === 0 &&
     !busy;
 
   const submit = async () => {
@@ -89,10 +104,11 @@ export function ServiceEditModal({
       const imageChange: ServiceImageChange = imageMode === "replace"
         ? { kind: "replace", mediaId: uploadedMediaId! }
         : { kind: imageMode };
-      await adminService.updateService(
+      const updated = await adminService.updateService(
         service.id,
         {
           name: name.trim(),
+          nameJa: nameJa.trim(),
           description: description.trim(),
           bookableStandalone: serviceType === "ADD_ON" && bookableStandalone,
           serviceType,
@@ -117,8 +133,25 @@ export function ServiceEditModal({
           }
         }
       }
-      notifySuccess(t("edit.success"));
+      // The service is saved from here on; the list behind the modal must say so even if the
+      // add-on step below fails.
       onSaved();
+      // Only PUT once the add-on data has actually loaded: sending the drafts before then would
+      // send an empty mapping and wipe whatever the service already had.
+      if (serviceType === "BASE" && addonQuery.data) {
+        try {
+          const configuration = await adminService.updateServiceAddons(service.id, { groups: addons.groups }, updated.version);
+          // The PUT answers with the read model as written, so it goes straight into SWR's
+          // cache for this service. Without this the next open of the modal seeded its drafts
+          // from the pre-save response and showed stale add-ons until a full reload.
+          await addonQuery.mutate(configuration, { revalidate: false });
+        } catch (addonError) {
+          setSaved(updated);
+          setError(addonError instanceof Error && addonError.message ? addonError.message : t("edit.addonsFailed"));
+          return;
+        }
+      }
+      notifySuccess(t("edit.success"));
       onClose();
     } catch (err) {
       if (uploadedMediaId) {
@@ -134,12 +167,29 @@ export function ServiceEditModal({
     }
   };
 
+  const retryAddons = async () => {
+    if (!saved) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const configuration = await adminService.updateServiceAddons(service.id, { groups: addons.groups }, saved.version);
+      await addonQuery.mutate(configuration, { revalidate: false });
+      notifySuccess(t("edit.success"));
+      onSaved();
+      onClose();
+    } catch (cause) {
+      setError(cause instanceof Error && cause.message ? cause.message : t("edit.addonsFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center" scroll="inside">
           {/* HeroUI's largest named size is --container-lg, 32rem. This dialog also hosts
-              ServiceAddonConfiguration, whose per-branch row is a name plus two number
+              the add-on section, whose per-branch row is a name plus two number
               inputs, and at 32rem the name column collapsed to about a hundred pixels.
               The utilities layer wins over HeroUI's components layer, so the class
               widens the dialog without giving up the size variant's other rules. */}
@@ -148,6 +198,10 @@ export function ServiceEditModal({
               <Modal.Heading className="text-base font-bold text-admin-ink">{t("edit.title")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="grid gap-5 px-6 py-5">
+              {/* Once the service has saved and only its add-ons are still pending, these fields
+                  have nowhere left to save to, so a native disabled fieldset freezes them in one
+                  place. `contents` leaves the body grid exactly as it was. */}
+              <fieldset disabled={Boolean(saved)} className="contents">
               <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("form.serviceType")}</span>
@@ -195,14 +249,22 @@ export function ServiceEditModal({
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
-                    min={15}
-                    step={15}
+                    min={1}
+                    step={1}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={duration}
                     onChange={(event) => setDuration(event.target.value)}
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("form.nameJa")}</span>
+                <input
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={nameJa}
+                  onChange={(event) => setNameJa(event.target.value)}
+                />
+              </label>
               <label className="flex flex-col gap-2 text-sm sm:col-span-2">
                 <span className="font-semibold text-admin-ink">{t("form.description")}</span>
                 <textarea
@@ -341,18 +403,44 @@ export function ServiceEditModal({
                 onFeaturedChange={setIsFeatured}
                 onVisibleChange={setIsVisible}
               />
-              {serviceType === "BASE" && service.version !== undefined ? <ServiceAddonConfiguration serviceId={service.id} version={service.version} /> : null}
+              </fieldset>
+              {serviceType === "BASE" ? (
+                <section className="grid gap-4 rounded-xl border border-admin-border p-4">
+                  <div><h3 className="font-bold text-admin-ink">{tAddons("title")}</h3><p className="mt-1 text-xs text-admin-muted">{tAddons("description")}</p></div>
+                  {addonQuery.isLoading ? (
+                    <p className="text-sm text-admin-muted">{tAddons("loading")}</p>
+                  ) : addonQuery.error ? (
+                    <p role="alert" className="text-sm text-admin-danger">{tAddons("loadFailed")}</p>
+                  ) : addonCatalog.length === 0 ? (
+                    <p className="rounded-xl border border-admin-border p-4 text-sm text-admin-muted">{tAddons("empty")}</p>
+                  ) : (
+                    <ServiceAddonFields
+                      addonCatalog={addonCatalog}
+                      branches={addonBranches}
+                      drafts={addons.drafts}
+                      groupDrafts={addons.groupDrafts}
+                      overrideProblems={addons.overrideProblems}
+                      onToggleAddon={addons.toggleAddon}
+                      onUpdateBranch={addons.updateBranch}
+                      onUpdateGroupRule={addons.updateGroupRule}
+                    />
+                  )}
+                </section>
+              ) : null}
+              {addons.overrideProblems.length ? <p className="text-sm text-admin-danger" role="alert">{tAddons("overridesInvalid")}</p> : null}
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{t("edit.cancel")}</Button>
+              <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{saved ? t("create.close") : t("edit.cancel")}</Button>
               <Button
                 variant="primary"
                 className="rounded-lg"
-                isDisabled={!canSubmit}
-                onPress={() => void submit()}
+                isDisabled={saved ? busy : !canSubmit}
+                onPress={() => void (saved ? retryAddons() : submit())}
               >
-                {busy ? (imageMode === "replace" ? t("image.uploading") : t("edit.saving")) : t("edit.save")}
+                {busy
+                  ? (imageMode === "replace" && !saved ? t("image.uploading") : t("edit.saving"))
+                  : saved ? tAddons("save") : t("edit.save")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

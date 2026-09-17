@@ -54,7 +54,21 @@ export function AddonTable({
               <tbody className="divide-y divide-admin-border">
                 {addons.map((addon) => (
                   <tr key={addon.id}>
-                    <td className="px-4 py-2"><strong>{addon.name}</strong></td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-3">
+                        {addon.imageUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={addon.imageUrl}
+                            alt=""
+                            className="size-11 shrink-0 rounded-lg border border-admin-border object-cover"
+                          />
+                        ) : (
+                          <span aria-hidden="true" className="size-11 shrink-0 rounded-lg border border-admin-border bg-admin-soft" />
+                        )}
+                        <strong>{addon.name}</strong>
+                      </div>
+                    </td>
                     <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(addon.price)}</td>
                     <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: addon.durationMinutes })}</td>
                     {/* Same one-line rule as ServiceTable: this table is narrower today, but the

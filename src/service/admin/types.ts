@@ -608,6 +608,9 @@ export interface AdminServiceAddonRuleItem {
 
 export interface AdminServiceAddonGroup {
   readonly code: string;
+  /** Display name for the group; null until a salon names it, and the code stands in. */
+  readonly nameVi?: string | null;
+  readonly nameJa?: string | null;
   readonly selectionMode: "SINGLE" | "MULTIPLE";
   readonly required: boolean;
   readonly minSelections: number;
@@ -626,6 +629,8 @@ export interface AdminServiceAddonConfiguration {
 export interface AdminServiceAddonConfigurationInput {
   readonly groups: ReadonlyArray<{
     readonly code: string;
+    readonly nameVi?: string;
+    readonly nameJa?: string;
     readonly selectionMode: "SINGLE" | "MULTIPLE";
     readonly required: boolean;
     readonly minSelections: number;
@@ -1015,6 +1020,9 @@ export interface AdminNailDesign {
   readonly title: string;
   readonly nameVi?: string;
   readonly mediaIds?: ReadonlyArray<string>;
+  /** Stable public URLs for the photos, derived by the API from mediaIds; the first is the cover. */
+  readonly images?: ReadonlyArray<string>;
+  readonly thumbnailUrl?: string | null;
   readonly tags?: ReadonlyArray<string>;
   readonly visibility?: string;
   readonly consentToPublish?: boolean;

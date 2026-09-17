@@ -42,6 +42,7 @@ function toScreenService(server: ServerService): SalonService {
   return {
     id: server.id,
     name: server.name,
+    nameJa: server.nameJa ?? null,
     description: server.description ?? "",
     category: server.categoryId ? { id: server.categoryId, name: server.categoryName ?? "" } : null,
     imageUrl: server.imageUrl ?? null,

@@ -27,3 +27,22 @@ describe("nail design derivation", () => {
     expect(() => paginate(designFixtures, 1, 0)).toThrow(RangeError);
   });
 });
+
+describe("design cover photo", () => {
+  const base = { id: "nd9", title: "Ombre", status: "DRAFT", version: 1 };
+
+  it("uses the stable public cover URL the API derived", () => {
+    expect(adaptDesign({ ...base, thumbnailUrl: "https://api/media/m1/public-content" }).thumbnailUrl)
+      .toBe("https://api/media/m1/public-content");
+  });
+
+  it("falls back to the first public image when no cover is named", () => {
+    expect(adaptDesign({ ...base, images: ["https://api/media/m2/public-content"] }).thumbnailUrl)
+      .toBe("https://api/media/m2/public-content");
+  });
+
+  it("has no cover for a row written before the API derived one", () => {
+    // Such rows carry only mediaIds; those are private ids, not something an <img> can load.
+    expect(adaptDesign({ ...base, mediaIds: ["m3"] }).thumbnailUrl).toBeNull();
+  });
+});

@@ -105,7 +105,7 @@ export function AdminNailDesignsComponent() {
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <AdminNailDesignThumbnail mediaId={row.mediaIds[0]} alt={row.title} />
+                        <AdminNailDesignThumbnail imageUrl={row.thumbnailUrl} mediaId={row.mediaIds[0]} alt={row.title} />
                         <span className="font-medium text-admin-ink">{row.title}</span>
                       </div>
                     </td>

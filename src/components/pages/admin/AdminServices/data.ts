@@ -9,6 +9,7 @@ export type ServiceFilter = string;
 export type SalonService = {
   readonly id: string;
   readonly name: string;
+  readonly nameJa?: string | null;
   readonly description?: string;
   // Null only for a row written before the backend made the category mandatory. The tabs
   // leave such a service out rather than filing it somewhere it does not belong.

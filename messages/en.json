@@ -824,6 +824,7 @@
         "saving": "Saving…",
         "save": "Save",
         "success": "Service updated",
+        "addonsFailed": "The service was saved but its add-ons were not. Try saving them again.",
         "failed": "Could not update the service."
       },
       "image": {
@@ -878,11 +879,10 @@
         "required": "Required",
         "requiredHint": "The customer must choose from this group to book.",
         "optionalHint": "The customer may skip this group.",
+        "overridesInvalid": "A branch price or duration is invalid. Both must be whole, non-negative numbers.",
         "priceOverride": "Price override (¥)",
         "durationOverride": "Minutes override",
         "save": "Save add-ons",
-        "saving": "Saving…",
-        "success": "Add-ons saved",
         "failed": "Could not save add-ons."
       },
       "delete": {
@@ -1347,8 +1347,15 @@
         "completedOrders": "Completed orders",
         "payout": "Payout"
       },
+      "branchFilter": {
+        "label": "Branch",
+        "all": "All branches"
+      },
       "edit": {
         "failed": "Could not save the staff member.",
+        "movedTo": "Moved to {branch}. Switch branch in the header to see them there.",
+        "branch": "Branch",
+        "branchHint": "A branch move is only possible while the staff member has no open appointments.",
         "title": "Edit staff member",
         "name": "Name",
         "cancel": "Cancel",
@@ -1391,14 +1398,14 @@
         "heading": "Shifts and leave",
         "loading": "Loading shifts…",
         "loadFailed": "Could not load the shifts.",
-        "empty": "No shifts for this staff member yet.",
+        "empty": "No shifts yet. Add one so this staff member can take appointments.",
         "approval": {
           "APPROVED": "Approved",
           "PENDING": "Pending",
           "REJECTED": "Rejected"
         },
         "requestsHeading": "Leave requests",
-        "noRequests": "No leave requests yet.",
+        "noRequests": "No leave requests.",
         "noReason": "No reason given",
         "requestStatus": {
           "PENDING": "Pending",

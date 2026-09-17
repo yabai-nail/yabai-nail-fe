@@ -9,11 +9,13 @@ import {
   buildAddonGroups,
   createAddonDrafts,
   createAddonGroupDrafts,
+  findInvalidAddonOverrides,
   groupAddonCatalog,
   shouldSeedAddonDrafts,
   type AddonBranchDraft,
   type AddonDraft,
   type AddonGroupDraft,
+  type AddonOverrideProblem,
   type AddonSource,
 } from "./addon-groups";
 
@@ -66,18 +68,29 @@ export function useAddonDrafts(source: AddonSource) {
   );
 
   const updateGroupRule = useCallback((code: string, patch: Partial<AddonGroupDraft>) => {
-    setGroupDrafts((current) => ({
-      ...current,
-      [code]: { selectionMode: "SINGLE", required: false, ...current[code], ...patch },
-    }));
+    setGroupDrafts((current) => {
+      // A group the seed has not reached yet still has to be editable, so it falls back to the
+      // same permissive default the builder uses.
+      const base: AddonGroupDraft = current[code] ?? { selectionMode: "SINGLE", required: false };
+      return { ...current, [code]: { ...base, ...patch } };
+    });
   }, []);
 
   const builtGroups = useMemo(
     () => buildAddonGroups({ addonCatalog, branches, groups, drafts, groupDrafts }),
     [addonCatalog, branches, groups, drafts, groupDrafts],
   );
+  const overrideProblems = useMemo(() => findInvalidAddonOverrides(drafts), [drafts]);
 
-  return { drafts, groupDrafts, toggleAddon, updateBranch, updateGroupRule, groups: builtGroups };
+  return {
+    drafts,
+    groupDrafts,
+    overrideProblems,
+    toggleAddon,
+    updateBranch,
+    updateGroupRule,
+    groups: builtGroups,
+  };
 }
 
 type ServiceAddonFieldsProps = Readonly<{
@@ -85,6 +98,7 @@ type ServiceAddonFieldsProps = Readonly<{
   branches: ReadonlyArray<AdminBranch>;
   drafts: Record<string, AddonDraft>;
   groupDrafts: Record<string, AddonGroupDraft>;
+  overrideProblems: ReadonlyArray<AddonOverrideProblem>;
   onToggleAddon: (addonId: string, selected: boolean) => void;
   onUpdateBranch: (addonId: string, branchId: string, patch: Partial<AddonBranchDraft>) => void;
   onUpdateGroupRule: (code: string, patch: Partial<AddonGroupDraft>) => void;
@@ -96,18 +110,25 @@ export function ServiceAddonFields({
   branches,
   drafts,
   groupDrafts,
+  overrideProblems,
   onToggleAddon,
   onUpdateBranch,
   onUpdateGroupRule,
 }: ServiceAddonFieldsProps) {
   const t = useTranslations("admin.services.addons");
   const grouped = useMemo(() => groupAddonCatalog(addonCatalog), [addonCatalog]);
+  const isInvalid = (addonId: string, branchId: string, field: AddonOverrideProblem["field"]) =>
+    overrideProblems.some(
+      (problem) => problem.addonId === addonId && problem.branchId === branchId && problem.field === field,
+    );
+  const fieldClass = (invalid: boolean) =>
+    `min-h-9 w-full rounded-lg border bg-admin-surface px-2 text-admin-ink ${invalid ? "border-admin-danger" : "border-admin-border"}`;
 
   return (
     <>
       {grouped.map(([code, addons]) => (
         <fieldset key={code} className="grid gap-3 rounded-lg border border-admin-border p-3">
-          <legend className="px-1 text-sm font-semibold text-admin-ink">{code}</legend>
+          <legend className="px-1 font-mono text-xs font-semibold text-admin-muted">{code}</legend>
           {/* How the customer answers this group. The two controls stand in for four stored
               numbers: the request body's min/max are derived from them, so an admin cannot
               save a combination the backend refuses. */}
@@ -137,7 +158,18 @@ export function ServiceAddonFields({
           {addons.map((addon) => {
             const draft = drafts[addon.id];
             return <div key={addon.id} className="grid gap-3 rounded-lg bg-admin-soft p-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-admin-ink"><input type="checkbox" className="accent-admin-accent" checked={draft?.selected ?? false} onChange={(event) => onToggleAddon(addon.id, event.target.checked)} />{addon.name} · ¥{addon.price}</label>
+              <label className="flex items-center gap-3 text-sm font-semibold text-admin-ink">
+                <input type="checkbox" className="accent-admin-accent" checked={draft?.selected ?? false} onChange={(event) => onToggleAddon(addon.id, event.target.checked)} />
+                {/* The add-on's own photo, so the row is recognised by sight and matches what the
+                    customer will be shown for it; the tab and the app draw the same image. */}
+                {addon.imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={addon.imageUrl} alt="" className="size-9 shrink-0 rounded-lg border border-admin-border object-cover" />
+                ) : (
+                  <span aria-hidden="true" className="size-9 shrink-0 rounded-lg border border-admin-border bg-admin-surface" />
+                )}
+                <span>{addon.name} · ¥{addon.price}</span>
+              </label>
               {draft?.selected ? (
                 <div className="grid max-w-2xl gap-2">
                   {/* One header for the whole branch list. The two field captions used to sit
@@ -157,8 +189,8 @@ export function ServiceAddonFields({
                           of squeezing. `sm:contents` drops this wrapper at desktop width so the
                           input lands in the row grid under its header; below sm the caption
                           returns above the field, where there is no header to read. */}
-                      <label className="grid gap-1 text-xs text-admin-muted sm:contents"><span className="sm:hidden">{t("priceOverride")}</span><input inputMode="numeric" aria-label={`${t("priceOverride")} - ${branch.name}`} className="min-h-9 w-full rounded-lg border border-admin-border bg-admin-surface px-2 text-admin-ink" value={branchDraft?.priceOverride ?? ""} onChange={(event) => onUpdateBranch(addon.id, branch.id, { priceOverride: event.target.value })} /></label>
-                      <label className="grid gap-1 text-xs text-admin-muted sm:contents"><span className="sm:hidden">{t("durationOverride")}</span><input type="number" min={0} step={15} aria-label={`${t("durationOverride")} - ${branch.name}`} className="min-h-9 w-full rounded-lg border border-admin-border bg-admin-surface px-2 text-admin-ink" value={branchDraft?.durationOverride ?? ""} onChange={(event) => onUpdateBranch(addon.id, branch.id, { durationOverride: event.target.value })} /></label>
+                      <label className="grid gap-1 text-xs text-admin-muted sm:contents"><span className="sm:hidden">{t("priceOverride")}</span><input inputMode="numeric" aria-label={`${t("priceOverride")} - ${branch.name}`} aria-invalid={isInvalid(addon.id, branch.id, "priceOverride")} className={fieldClass(isInvalid(addon.id, branch.id, "priceOverride"))} value={branchDraft?.priceOverride ?? ""} onChange={(event) => onUpdateBranch(addon.id, branch.id, { priceOverride: event.target.value })} /></label>
+                      <label className="grid gap-1 text-xs text-admin-muted sm:contents"><span className="sm:hidden">{t("durationOverride")}</span><input type="number" min={0} step={1} aria-label={`${t("durationOverride")} - ${branch.name}`} aria-invalid={isInvalid(addon.id, branch.id, "durationOverride")} className={fieldClass(isInvalid(addon.id, branch.id, "durationOverride"))} value={branchDraft?.durationOverride ?? ""} onChange={(event) => onUpdateBranch(addon.id, branch.id, { durationOverride: event.target.value })} /></label>
                     </div>;
                   })}
                 </div>

@@ -76,8 +76,10 @@ export function ServiceCreateModal({
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
-    durationNum % 15 === 0 &&
     !imageError &&
+    // A branch override the backend would refuse must stop the submit here: past this point
+    // the service is already created, so the refusal would arrive too late to undo.
+    addons.overrideProblems.length === 0 &&
     !busy;
 
   const submit = async () => {
@@ -149,7 +151,10 @@ export function ServiceCreateModal({
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center" scroll="inside">
-          <Modal.Dialog>
+          {/* Same width as the edit modal, and for the same reason: HeroUI's largest named
+              size is --container-lg, 32rem, and the add-on section below needs more than
+              that before its per-branch columns stop being unreadable. */}
+          <Modal.Dialog className="max-w-4xl">
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">{lockedServiceType ? t("addonsTab.createTitle") : t("create.title")}</Modal.Heading>
             </Modal.Header>
@@ -227,8 +232,8 @@ export function ServiceCreateModal({
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
-                    min={15}
-                    step={15}
+                    min={1}
+                    step={1}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={duration}
                     onChange={(event) => setDuration(event.target.value)}
@@ -343,6 +348,7 @@ export function ServiceCreateModal({
                       branches={branches}
                       drafts={addons.drafts}
                       groupDrafts={addons.groupDrafts}
+                      overrideProblems={addons.overrideProblems}
                       onToggleAddon={addons.toggleAddon}
                       onUpdateBranch={addons.updateBranch}
                       onUpdateGroupRule={addons.updateGroupRule}
@@ -350,6 +356,7 @@ export function ServiceCreateModal({
                   )}
                 </section>
               ) : null}
+              {addons.overrideProblems.length ? <p className="text-sm text-admin-danger" role="alert">{tAddons("overridesInvalid")}</p> : null}
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
