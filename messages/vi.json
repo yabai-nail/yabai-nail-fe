@@ -730,6 +730,9 @@
       "loadFailed": "Không tải được danh sách dịch vụ.",
       "form": {
         "category": "Danh mục",
+        "description": "Mô tả",
+        "bookableStandalone": "Cho đặt độc lập",
+        "bookableStandaloneHint": "Khách có thể đặt riêng tùy chọn này, không cần chọn kèm dịch vụ gốc.",
         "serviceType": "Loại dịch vụ",
         "baseService": "Dịch vụ chính",
         "addonService": "Dịch vụ bổ sung",
@@ -801,6 +804,9 @@
         "noMembers": "chưa có dịch vụ nào", "pickServices": "Chọn dịch vụ để chuyển vào danh mục này:", "allAssigned": "Mọi dịch vụ đều đã ở đây.", "uncategorized": "chưa phân loại"
       },
       "create": {
+        "addonsFailed": "Đã tạo dịch vụ nhưng chưa lưu được tùy chọn bổ sung. Hãy thử lưu lại.",
+        "saveAddons": "Lưu tùy chọn",
+        "close": "Đóng",
         "title": "Thêm dịch vụ",
         "name": "Tên dịch vụ",
         "namePlaceholder": "Sơn gel đơn sắc",
@@ -849,12 +855,29 @@
         "featuredDescription": "Chỉ một dịch vụ được chọn; lựa chọn mới sẽ thay thế dịch vụ hiện tại.",
         "featuredRequiresPublic": "Bật công khai trước khi chọn dịch vụ nổi bật."
       },
+      "addonsTab": {
+        "label": "Tùy chọn bổ sung",
+        "description": "Các tùy chọn khách có thể thêm vào một dịch vụ, nhóm theo mã nhóm. Việc gán tùy chọn cho từng dịch vụ nằm trong màn chỉnh sửa dịch vụ đó.",
+        "create": "Tạo tùy chọn",
+        "createTitle": "Tạo tùy chọn bổ sung",
+        "empty": "Chưa có tùy chọn bổ sung nào.",
+        "name": "Tùy chọn",
+        "caption": "Tùy chọn bổ sung thuộc nhóm {group}",
+        "groupCount": "{count} tùy chọn"
+      },
       "addons": {
         "title": "Tùy chọn bổ sung cho dịch vụ",
         "description": "Chọn các tùy chọn khách có thể thêm, rồi bật hoặc ghi đè giá và thời lượng theo từng chi nhánh.",
         "loading": "Đang tải tùy chọn bổ sung…",
         "loadFailed": "Không tải được cấu hình tùy chọn bổ sung.",
         "empty": "Chưa có dịch vụ bổ sung. Hãy tạo dịch vụ loại “Dịch vụ bổ sung” trước.",
+        "branchColumn": "Chi nhánh",
+        "selectionMode": "Cách chọn",
+        "selectionSingle": "Chọn một",
+        "selectionMultiple": "Chọn nhiều",
+        "required": "Bắt buộc chọn",
+        "requiredHint": "Khách phải chọn trong nhóm này mới đặt được.",
+        "optionalHint": "Khách có thể bỏ qua nhóm này.",
         "priceOverride": "Giá riêng (¥)",
         "durationOverride": "Phút riêng",
         "save": "Lưu tùy chọn",

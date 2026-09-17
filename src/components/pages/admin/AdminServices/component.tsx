@@ -17,6 +17,7 @@ import {
   useAdminPermission,
   type AdminServiceItem as ServerService,
 } from "@/service";
+import { AddonTable } from "./AddonTable";
 import { CategoryTable } from "./CategoryTable";
 import { ServiceCreateModal } from "./ServiceCreateModal";
 import { ServiceDeleteModal } from "./ServiceDeleteModal";
@@ -27,6 +28,8 @@ import {
   filterServices,
   getPopularityWindow,
   paginate,
+  selectAddonServices,
+  selectBaseServices,
   type SalonService,
   type ServiceFilter,
 } from "./data";
@@ -39,6 +42,7 @@ function toScreenService(server: ServerService): SalonService {
   return {
     id: server.id,
     name: server.name,
+    description: server.description ?? "",
     category: server.categoryId ? { id: server.categoryId, name: server.categoryName ?? "" } : null,
     imageUrl: server.imageUrl ?? null,
     price: server.price,
@@ -72,7 +76,7 @@ export function AdminServicesComponent() {
   const categoryItems = categories.data?.items ?? [];
   // Two jobs, two surfaces: browsing the catalogue, and maintaining the categories it is filed
   // under. Sharing one screen keeps the counts honest without cramming both into one layout.
-  const [view, setView] = useState<"services" | "categories">("services");
+  const [view, setView] = useState<"services" | "categories" | "addons">("services");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
   const [deleting, setDeleting] = useState<SalonService | null>(null);
@@ -80,11 +84,23 @@ export function AdminServicesComponent() {
     () => (data?.items ?? []).map(toScreenService),
     [data],
   );
+  // Deliberately unfiltered: the list above narrows by category, and an add-on has no
+  // category, so any active filter would empty this tab. Loaded up front rather than on tab
+  // open, because the tab carries a count badge and a badge reading 0 until you click it is
+  // worse than one extra list read. The key matches the create modal's own catalogue read,
+  // so those two share a response.
+  const addonQuery = useAdminServices();
+  const addonServices = useMemo(
+    () => selectAddonServices((addonQuery.data?.items ?? []).map(toScreenService)),
+    [addonQuery.data],
+  );
+  // Add-ons have their own tab, so they are not rows of the service catalogue any more.
+  const baseServices = useMemo(() => selectBaseServices(source), [source]);
 
   const [page, setPage] = useState(1);
   const filtered = useMemo(
-    () => filterServices(source, filter, query),
-    [source, filter, query],
+    () => filterServices(baseServices, filter, query),
+    [baseServices, filter, query],
   );
   const {
     items: visible,
@@ -95,20 +111,29 @@ export function AdminServicesComponent() {
     setFilter(value);
     setPage(1);
   };
-  const unfiledCount = source.filter((service) => service.serviceType !== "ADD_ON" && service.category === null).length;
-  const countIn = (categoryId: string) => source.filter((service) => service.category?.id === categoryId).length;
+  const unfiledCount = baseServices.filter((service) => service.category === null).length;
+  const countIn = (categoryId: string) => baseServices.filter((service) => service.category?.id === categoryId).length;
+  // Both reads show the same rows through different filters, so a write has to refresh each.
+  const refreshCatalogue = () => {
+    void mutateServices();
+    void addonQuery.mutate();
+  };
 
   return (
     <AdminPageLayout>
-      <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as "services" | "categories")} variant="secondary">
+      <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as "services" | "categories" | "addons")} variant="secondary">
         <Tabs.ListContainer className="mb-4 w-fit max-w-full overflow-x-auto">
           <Tabs.List aria-label={t("viewLabel")}>
             <Tabs.Tab id="services">
-              <AdminTabLabel count={source.length}>{t("table.service")}</AdminTabLabel>
+              <AdminTabLabel count={baseServices.length}>{t("table.service")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="categories">
               <AdminTabLabel count={categoryItems.length}>{t("categoriesTab")}</AdminTabLabel>
+              <Tabs.Indicator />
+            </Tabs.Tab>
+            <Tabs.Tab id="addons">
+              <AdminTabLabel count={addonServices.length}>{t("addonsTab.label")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
           </Tabs.List>
@@ -116,7 +141,31 @@ export function AdminServicesComponent() {
       </Tabs>
 
       {view === "categories" ? (
-        <CategoryTable services={source} canWrite={canWrite} />
+        <CategoryTable services={baseServices} canWrite={canWrite} />
+      ) : view === "addons" ? (
+        <>
+          <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-admin-muted">{t("addonsTab.description")}</p>
+            <Button
+              variant="primary"
+              className="rounded-lg"
+              isDisabled={!canWrite}
+              onPress={() => setIsCreateOpen(true)}
+            >
+              <PlusIcon className="size-4" />{t("addonsTab.create")}
+            </Button>
+          </div>
+          {addonQuery.isLoading ? (
+            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
+          ) : addonQuery.error ? (
+            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
+          ) : null}
+          <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+            <Card.Content className="min-w-0 p-4">
+              <AddonTable services={addonServices} onEdit={canWrite ? setEditing : undefined} onDelete={canWrite ? setDeleting : undefined} />
+            </Card.Content>
+          </Card>
+        </>
       ) : (
         <>
           <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
@@ -201,7 +250,7 @@ export function AdminServicesComponent() {
               {t("uncategorizedWarning", { count: unfiledCount })}
             </p>
           ) : null}
-          <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={source} />}>
+          <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={baseServices} />}>
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
               <Card.Content className="min-w-0 p-0">
                 <ServiceTable services={visible} onEdit={canWrite ? setEditing : undefined} onDelete={canWrite ? setDeleting : undefined} />
@@ -217,22 +266,23 @@ export function AdminServicesComponent() {
 
       {canWrite && isCreateOpen ? (
         <ServiceCreateModal
+          lockedServiceType={view === "addons" ? "ADD_ON" : undefined}
           onClose={() => setIsCreateOpen(false)}
-          onCreated={() => void mutateServices()}
+          onCreated={refreshCatalogue}
         />
       ) : null}
       {canWrite && editing ? (
         <ServiceEditModal
           service={editing}
           onClose={() => setEditing(null)}
-          onSaved={() => void mutateServices()}
+          onSaved={refreshCatalogue}
         />
       ) : null}
       {canWrite && deleting ? (
         <ServiceDeleteModal
           service={deleting}
           onClose={() => setDeleting(null)}
-          onDeleted={() => void mutateServices()}
+          onDeleted={refreshCatalogue}
         />
       ) : null}
     </AdminPageLayout>

@@ -730,6 +730,9 @@
       "loadFailed": "Could not load the services.",
       "form": {
         "category": "Category",
+        "description": "Description",
+        "bookableStandalone": "Bookable on its own",
+        "bookableStandaloneHint": "A customer can book this add-on without picking a base service.",
         "serviceType": "Service type",
         "baseService": "Base service",
         "addonService": "Add-on service",
@@ -801,6 +804,9 @@
         "noMembers": "no services", "pickServices": "Choose services to move into this category:", "allAssigned": "Every service is already assigned here.", "uncategorized": "uncategorized"
       },
       "create": {
+        "addonsFailed": "The service was created but its add-ons were not saved. Try saving them again.",
+        "saveAddons": "Save add-ons",
+        "close": "Close",
         "title": "Add service",
         "name": "Service name",
         "namePlaceholder": "Single-colour gel",
@@ -849,12 +855,29 @@
         "featuredDescription": "Only one service can be selected; a new selection replaces the current one.",
         "featuredRequiresPublic": "Make the service public before featuring it."
       },
+      "addonsTab": {
+        "label": "Add-ons",
+        "description": "Options a customer can add to a service, grouped by group code. Assigning them to a service happens while editing that service.",
+        "create": "New add-on",
+        "createTitle": "New add-on",
+        "empty": "No add-ons yet.",
+        "name": "Add-on",
+        "caption": "Add-ons in group {group}",
+        "groupCount": "{count} add-ons"
+      },
       "addons": {
         "title": "Service add-ons",
         "description": "Choose customer add-ons, then enable or override their price and duration for each branch.",
         "loading": "Loading add-ons…",
         "loadFailed": "Could not load add-on settings.",
         "empty": "No add-ons exist yet. Create an “Add-on service” first.",
+        "branchColumn": "Branch",
+        "selectionMode": "Choice",
+        "selectionSingle": "Pick one",
+        "selectionMultiple": "Pick several",
+        "required": "Required",
+        "requiredHint": "The customer must choose from this group to book.",
+        "optionalHint": "The customer may skip this group.",
         "priceOverride": "Price override (¥)",
         "durationOverride": "Minutes override",
         "save": "Save add-ons",
