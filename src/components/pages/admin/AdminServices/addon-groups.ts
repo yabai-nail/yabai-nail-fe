@@ -100,6 +100,42 @@ export function createAddonDrafts({
   );
 }
 
+export type AddonOverrideProblem = {
+  readonly addonId: string;
+  readonly branchId: string;
+  readonly field: "priceOverride" | "durationOverride";
+};
+
+/**
+ * The branch overrides the backend would refuse, checked before anything is sent.
+ *
+ * It mirrors the server's own rules — both numbers whole and non-negative — because the
+ * alternative is a 422 that arrives after the service has been created and names neither the
+ * branch nor the field. There is deliberately no grid: how long a treatment takes is the
+ * salon's call, and nothing downstream needs the minutes to land on a multiple.
+ *
+ * Blank stays blank: an empty override means the add-on keeps its own numbers.
+ */
+export function findInvalidAddonOverrides(
+  drafts: Record<string, AddonDraft>,
+): ReadonlyArray<AddonOverrideProblem> {
+  const problems: AddonOverrideProblem[] = [];
+  for (const [addonId, draft] of Object.entries(drafts)) {
+    if (!draft?.selected) continue;
+    for (const [branchId, branch] of Object.entries(draft.branches ?? {})) {
+      const price = branch.priceOverride.trim();
+      if (price !== "" && (!Number.isInteger(Number(price)) || Number(price) < 0)) {
+        problems.push({ addonId, branchId, field: "priceOverride" });
+      }
+      const duration = branch.durationOverride.trim();
+      if (duration !== "" && (!Number.isInteger(Number(duration)) || Number(duration) < 0)) {
+        problems.push({ addonId, branchId, field: "durationOverride" });
+      }
+    }
+  }
+  return problems;
+}
+
 /**
  * Whether the editable drafts still have to be seeded from the server payload.
  *
@@ -201,6 +237,8 @@ export function buildAddonGroups({
             };
           }),
         }));
+      // No group name is sent: nothing in the console edits one, and an omitted field leaves
+      // whatever the server already stores instead of clearing it.
       return {
         code,
         selectionMode: rule.selectionMode,

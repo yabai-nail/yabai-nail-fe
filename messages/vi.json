@@ -824,6 +824,7 @@
         "saving": "Đang lưu…",
         "save": "Lưu",
         "success": "Đã cập nhật dịch vụ",
+        "addonsFailed": "Đã lưu dịch vụ nhưng chưa lưu được tùy chọn bổ sung. Hãy thử lưu lại.",
         "failed": "Không cập nhật được dịch vụ."
       },
       "image": {
@@ -878,11 +879,10 @@
         "required": "Bắt buộc chọn",
         "requiredHint": "Khách phải chọn trong nhóm này mới đặt được.",
         "optionalHint": "Khách có thể bỏ qua nhóm này.",
+        "overridesInvalid": "Có ô giá hoặc phút riêng không hợp lệ. Cả hai phải là số nguyên không âm.",
         "priceOverride": "Giá riêng (¥)",
         "durationOverride": "Phút riêng",
         "save": "Lưu tùy chọn",
-        "saving": "Đang lưu…",
-        "success": "Đã lưu tùy chọn bổ sung",
         "failed": "Không lưu được tùy chọn bổ sung."
       },
       "delete": {
@@ -1357,8 +1357,15 @@
         "completedOrders": "Số đơn hoàn thành",
         "payout": "Nhận được"
       },
+      "branchFilter": {
+        "label": "Chi nhánh",
+        "all": "Mọi chi nhánh"
+      },
       "edit": {
         "failed": "Không lưu được nhân viên.",
+        "movedTo": "Đã chuyển nhân viên sang {branch}. Đổi chi nhánh ở góc trên để xem.",
+        "branch": "Chi nhánh",
+        "branchHint": "Chuyển chi nhánh chỉ được khi nhân viên không còn lịch hẹn chưa hoàn tất.",
         "title": "Chỉnh sửa nhân viên",
         "name": "Họ tên",
         "cancel": "Huỷ",
@@ -1401,14 +1408,14 @@
         "heading": "Ca làm và ngày nghỉ",
         "loading": "Đang tải ca…",
         "loadFailed": "Không tải được ca làm.",
-        "empty": "Chưa có ca nào cho nhân viên này.",
+        "empty": "Chưa có ca làm nào. Thêm ca để nhân viên nhận lịch hẹn.",
         "approval": {
           "APPROVED": "Đã duyệt",
           "PENDING": "Chờ duyệt",
           "REJECTED": "Từ chối"
         },
         "requestsHeading": "Yêu cầu nghỉ",
-        "noRequests": "Chưa có yêu cầu nghỉ.",
+        "noRequests": "Không có yêu cầu nghỉ nào.",
         "noReason": "Không có lý do",
         "requestStatus": {
           "PENDING": "Chờ duyệt",

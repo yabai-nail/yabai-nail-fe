@@ -824,6 +824,7 @@
         "saving": "保存しています…",
         "save": "保存",
         "success": "メニューを更新しました",
+        "addonsFailed": "メニューは保存しましたが、追加オプションを保存できませんでした。もう一度保存してください。",
         "failed": "メニューを更新できません。"
       },
       "image": {
@@ -878,11 +879,10 @@
         "required": "必須",
         "requiredHint": "このグループから選ばないと予約できません。",
         "optionalHint": "このグループは選ばなくても構いません。",
+        "overridesInvalid": "店舗ごとの料金または所要時間が不正です。いずれも0以上の整数で入力してください。",
         "priceOverride": "店舗料金 (¥)",
         "durationOverride": "店舗所要時間",
         "save": "オプションを保存",
-        "saving": "保存中…",
-        "success": "追加オプションを保存しました",
         "failed": "追加オプションを保存できません。"
       },
       "delete": {
@@ -1341,8 +1341,15 @@
         "completedOrders": "完了件数",
         "payout": "受取額"
       },
+      "branchFilter": {
+        "label": "店舗",
+        "all": "すべての店舗"
+      },
       "edit": {
         "failed": "スタッフを保存できません。",
+        "movedTo": "{branch} に異動しました。上部で店舗を切り替えると確認できます。",
+        "branch": "店舗",
+        "branchHint": "未完了の予約がない場合のみ、店舗を変更できます。",
         "title": "スタッフを編集",
         "name": "氏名",
         "cancel": "キャンセル",
@@ -1384,14 +1391,14 @@
         "heading": "シフトと休暇",
         "loading": "シフトを読み込み中…",
         "loadFailed": "シフトを読み込めません。",
-        "empty": "このスタッフのシフトはまだありません。",
+        "empty": "シフトがまだありません。追加すると予約を受けられます。",
         "approval": {
           "APPROVED": "承認済み",
           "PENDING": "承認待ち",
           "REJECTED": "却下"
         },
         "requestsHeading": "休暇申請",
-        "noRequests": "休暇申請はまだありません。",
+        "noRequests": "休暇申請はありません。",
         "noReason": "理由なし",
         "requestStatus": {
           "PENDING": "承認待ち",

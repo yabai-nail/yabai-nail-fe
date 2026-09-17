@@ -6,6 +6,7 @@ import { Button, Card, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -72,15 +73,21 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
 
 export function AdminStaffComponent() {
   const t = useTranslations("admin.staff");
-  const { branchId } = useAdminBranch();
+  const { branchId, branchIds } = useAdminBranch();
   const canWriteStaff = useAdminPermission("staff.write.branch");
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const [filter, setFilter] = useState<StaffFilter>("all");
+  // The roster opens on every branch this admin may see and narrows from there. It used to
+  // open on the header's branch alone, which hid a staff member the moment they were moved —
+  // the API already scopes an unfiltered read to the admin's own branches, so "all" is safe.
+  const [branchFilter, setBranchFilter] = useState<string>("");
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff({
-    branchId: branchId ?? undefined,
+    branchId: branchFilter || undefined,
     status: filter === "all" ? undefined : filter === "working" ? "ACTIVE" : "INACTIVE",
   });
-  const performance = useAdminStaffPerformance(branchId, { period });
+  // The period figures are per branch, so they follow the filter and otherwise the header.
+  const kpiBranchId = branchFilter || branchId;
+  const performance = useAdminStaffPerformance(kpiBranchId, { period });
   // The roster is org-level, so a row needs to say which salon it belongs to.
   // The roster carries only `branchId`; the names come from the branch list the
   // header selector already reads.
@@ -88,6 +95,13 @@ export function AdminStaffComponent() {
   const branchNameById = useMemo(
     () => new Map((branches.data?.items ?? []).map((branch) => [branch.id, branch.name] as const)),
     [branches.data],
+  );
+  const branchFilterOptions = useMemo(
+    () => [
+      { value: "", label: t("branchFilter.all") },
+      ...branchIds.map((id) => ({ value: id, label: branchNameById.get(id) ?? t("unnamed") })),
+    ],
+    [branchIds, branchNameById, t],
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
@@ -167,6 +181,7 @@ export function AdminStaffComponent() {
         ))}
       </section>
       <div className="mt-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(String(key) as StaffFilter)} variant="secondary">
           <Tabs.ListContainer className="max-w-full overflow-x-auto">
             <Tabs.List aria-label={t("tabsLabel")}>
@@ -185,10 +200,19 @@ export function AdminStaffComponent() {
             </Tabs.List>
           </Tabs.ListContainer>
         </Tabs>
+        {branchIds.length > 1 ? (
+          <AdminSelectField
+            label={t("branchFilter.label")}
+            value={branchFilter}
+            onChange={setBranchFilter}
+            options={branchFilterOptions}
+          />
+        ) : null}
+        </div>
         <Button
           variant="primary"
           className="rounded-lg"
-          isDisabled={!branchId || !canWriteStaff}
+          isDisabled={!(branchFilter || branchId) || !canWriteStaff}
           onPress={() => setIsCreateOpen(true)}
         >
           <PlusIcon className="size-4" />{t("add")}
@@ -227,7 +251,7 @@ export function AdminStaffComponent() {
             {detailedStaff ? (
               <StaffDetailPanel
                 member={detailedStaff}
-                branchId={branchId}
+                branchId={detailedStaff.branchId}
                 period={period}
                 onEdit={canWriteStaff ? () => setEditing(detailedStaff) : undefined}
               />
@@ -237,15 +261,15 @@ export function AdminStaffComponent() {
                 description={t("noSelectionDescription")}
               />
             )}
-            {detailedStaff && branchId ? (
-              <RecentOrdersTable branchId={branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
+            {detailedStaff ? (
+              <RecentOrdersTable branchId={detailedStaff.branchId} staffId={detailedStaff.id} staffName={detailedStaff.name} />
             ) : null}
           </div>
         )}
       </div>
-      {canWriteStaff && isCreateOpen && branchId ? (
+      {canWriteStaff && isCreateOpen && (branchFilter || branchId) ? (
         <StaffCreateModal
-          branchId={branchId}
+          branchId={branchFilter || branchId!}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateStaff()}
         />
@@ -253,6 +277,7 @@ export function AdminStaffComponent() {
       {canWriteStaff && editing ? (
         <StaffEditModal
           member={editing}
+          branches={branches.data?.items ?? []}
           onClose={() => setEditing(null)}
           onSaved={() => void mutateStaff()}
         />

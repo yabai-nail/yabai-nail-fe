@@ -608,6 +608,9 @@ export interface AdminServiceAddonRuleItem {
 
 export interface AdminServiceAddonGroup {
   readonly code: string;
+  /** Display name for the group; null until a salon names it, and the code stands in. */
+  readonly nameVi?: string | null;
+  readonly nameJa?: string | null;
   readonly selectionMode: "SINGLE" | "MULTIPLE";
   readonly required: boolean;
   readonly minSelections: number;
@@ -626,6 +629,8 @@ export interface AdminServiceAddonConfiguration {
 export interface AdminServiceAddonConfigurationInput {
   readonly groups: ReadonlyArray<{
     readonly code: string;
+    readonly nameVi?: string;
+    readonly nameJa?: string;
     readonly selectionMode: "SINGLE" | "MULTIPLE";
     readonly required: boolean;
     readonly minSelections: number;
