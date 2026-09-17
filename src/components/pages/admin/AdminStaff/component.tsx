@@ -255,6 +255,7 @@ export function AdminStaffComponent() {
       {canWriteStaff && isCreateOpen && branchId ? (
         <StaffCreateModal
           branchId={branchId}
+          branches={branches.data?.items ?? []}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateStaff()}
         />

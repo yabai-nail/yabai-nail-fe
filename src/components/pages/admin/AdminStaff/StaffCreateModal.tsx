@@ -6,24 +6,29 @@ import { useState } from "react";
 
 import { adminService, useAdminPermission } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
+import { StaffBranchField, type StaffBranchOption } from "./StaffBranchField";
 import { canCreateStaff } from "./data";
 
-// Staff creation carries a `branchId` because staff records are branch-
-// scoped even though the admin `staff` list is org-level. Adding a
-// technician always attaches them to the branch the admin is currently
-// operating on.
+// A staff record is branch-scoped even though the roster that lists it is org-level, so this
+// form has to name a branch. It opens on the one the console is working in and lets that be
+// changed, because the header's branch switcher hides itself for an admin assigned a single
+// branch — and without a choice here, every technician a chain owner added landed in the same
+// salon whatever the intent.
 export function StaffCreateModal({
   branchId,
+  branches,
   onClose,
   onCreated,
 }: Readonly<{
   branchId: string;
+  branches: ReadonlyArray<StaffBranchOption>;
   onClose: () => void;
   onCreated: () => void;
 }>) {
   const t = useTranslations("admin.staff");
   const tc = useTranslations("admin.common");
   const [name, setName] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState(branchId);
   // Issuing a login is owner-only: `POST /admin/accounts` requires `account.write.all`, which
   // the manager template does not carry, while `staff.write.branch` — the permission that
   // opened this form — does. Offering the checkbox to a manager would 403 on the first of the
@@ -60,7 +65,7 @@ export function StaffCreateModal({
           // Least privilege: a technician gets a technician's account. Promoting one to
           // manager is a deliberate act, and it lives on the accounts screen.
           role: "STAFF",
-          branchIds: [branchId],
+          branchIds: [selectedBranchId],
           temporaryPassword: password.trim(),
         });
         issuedAccountId = account.id;
@@ -68,7 +73,7 @@ export function StaffCreateModal({
       }
       await adminService.createStaff({
         displayName: name.trim(),
-        branchId,
+        branchId: selectedBranchId,
         ...(issuedAccountId === null ? {} : { accountId: issuedAccountId }),
       });
       notifySuccess(tc("staffCreated"));
@@ -107,6 +112,18 @@ export function StaffCreateModal({
                   autoFocus
                 />
               </label>
+
+              {/* Locked once an account exists: its own `branchIds` was written with the branch
+                  selected at the time, so letting a retry file the technician somewhere else
+                  would leave the login assigned to a salon they do not work at. */}
+              <StaffBranchField
+                branches={branches}
+                disabled={busy || accountId !== null}
+                hint={t("create.branchHint")}
+                label={t("create.branch")}
+                onChange={setSelectedBranchId}
+                value={selectedBranchId}
+              />
 
               {canIssueLogin ? (
               <div className="grid gap-3 rounded-lg border border-admin-border p-3">

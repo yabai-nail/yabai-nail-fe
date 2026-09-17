@@ -1334,6 +1334,8 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "submit": "Add staff member",
+        "branch": "Branch",
+        "branchHint": "The new technician is filed at this branch.",
         "withAccount": "Create a login for this technician",
         "withAccountHint": "They sign in with this phone number and password to see their own shifts. Leave it unchecked if they do not need one yet.",
         "phone": "Phone number",

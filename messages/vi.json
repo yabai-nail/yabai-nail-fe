@@ -1344,6 +1344,8 @@
         "cancel": "Hủy",
         "saving": "Đang lưu…",
         "submit": "Thêm nhân viên",
+        "branch": "Chi nhánh",
+        "branchHint": "Nhân viên mới sẽ thuộc chi nhánh này.",
         "withAccount": "Tạo tài khoản đăng nhập cho nhân viên này",
         "withAccountHint": "Nhân viên dùng số điện thoại và mật khẩu này để đăng nhập xem ca làm của mình. Bỏ chọn nếu chưa cần.",
         "phone": "Số điện thoại",

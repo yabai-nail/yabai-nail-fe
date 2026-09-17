@@ -80,6 +80,8 @@ export function StaffEditModal({
               <StaffBranchField
                 branches={branches}
                 disabled={busy}
+                hint={t("edit.branchHint")}
+                label={t("edit.branch")}
                 onChange={setBranchId}
                 value={branchId}
               />
