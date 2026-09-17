@@ -730,6 +730,9 @@
       "loadFailed": "メニュー一覧を読み込めません。",
       "form": {
         "category": "カテゴリー",
+        "description": "説明",
+        "bookableStandalone": "単独予約を許可",
+        "bookableStandaloneHint": "ベースメニューを選ばずに、このオプションだけを予約できます。",
         "serviceType": "メニュー種別",
         "baseService": "基本メニュー",
         "addonService": "追加オプション",
@@ -801,6 +804,9 @@
         "noMembers": "メニューなし", "pickServices": "このカテゴリーへ移動するメニュー:", "allAssigned": "すべてのメニューがすでにここにあります。", "uncategorized": "未分類"
       },
       "create": {
+        "addonsFailed": "メニューは作成しましたが、追加オプションを保存できませんでした。もう一度保存してください。",
+        "saveAddons": "オプションを保存",
+        "close": "閉じる",
         "title": "メニューを追加",
         "name": "メニュー名",
         "namePlaceholder": "単色ジェルネイル",
@@ -849,12 +855,29 @@
         "featuredDescription": "選択できるメニューは1件のみです。新しい選択が現在のメニューに置き換わります。",
         "featuredRequiresPublic": "人気メニューに設定する前に公開を有効にしてください。"
       },
+      "addonsTab": {
+        "label": "追加オプション",
+        "description": "メニューに追加できるオプションを、グループコードごとに表示します。どのメニューに付けるかは、そのメニューの編集画面で設定します。",
+        "create": "オプションを作成",
+        "createTitle": "追加オプションを作成",
+        "empty": "追加オプションはまだありません。",
+        "name": "オプション",
+        "caption": "グループ {group} の追加オプション",
+        "groupCount": "{count} 件"
+      },
       "addons": {
         "title": "追加オプション設定",
         "description": "追加できるオプションを選び、店舗ごとの提供可否・料金・所要時間を設定します。",
         "loading": "追加オプションを読み込み中…",
         "loadFailed": "追加オプション設定を読み込めません。",
         "empty": "追加オプションがありません。先に「追加オプション」を作成してください。",
+        "branchColumn": "店舗",
+        "selectionMode": "選択方法",
+        "selectionSingle": "1つ選ぶ",
+        "selectionMultiple": "複数選べる",
+        "required": "必須",
+        "requiredHint": "このグループから選ばないと予約できません。",
+        "optionalHint": "このグループは選ばなくても構いません。",
         "priceOverride": "店舗料金 (¥)",
         "durationOverride": "店舗所要時間",
         "save": "オプションを保存",

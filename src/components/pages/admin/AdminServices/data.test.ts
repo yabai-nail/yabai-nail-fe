@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   filterServices,
+  selectAddonServices,
+  selectBaseServices,
   getPopularServices,
   getPopularityWindow,
   paginate,
@@ -63,5 +65,22 @@ describe("service list derivation", () => {
     ];
 
     expect(getPopularServices(pool).map((service) => service.id)).toEqual(["popular", "second"]);
+  });
+});
+
+describe("splitting the catalogue by service type", () => {
+  const rows = [
+    { ...salonServices[0], id: "base-1", serviceType: "BASE" as const },
+    { ...salonServices[0], id: "addon-1", serviceType: "ADD_ON" as const },
+    // A row from before the column existed reads as a base service, never as an add-on.
+    { ...salonServices[0], id: "legacy", serviceType: undefined },
+  ];
+
+  it("keeps add-ons out of the service list", () => {
+    expect(selectBaseServices(rows).map((service) => service.id)).toEqual(["base-1", "legacy"]);
+  });
+
+  it("returns only add-ons for their own tab", () => {
+    expect(selectAddonServices(rows).map((service) => service.id)).toEqual(["addon-1"]);
   });
 });

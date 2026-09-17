@@ -61,15 +61,20 @@ export function ServiceTable({
                   <Chip.Label>{service.serviceType === "ADD_ON" ? t("table.addon") : service.category?.name || t("table.uncategorized")}</Chip.Label>
                 </Chip>
               </td>
-              <td className="px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
-              <td className="px-3 py-2">{t("table.durationValue", { minutes: service.durationMinutes })}</td>
-              <td className="px-3 py-2 font-semibold tabular-nums">{service.soldCount}</td>
-              <td className="px-3 py-2">
+              <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
+              <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: service.durationMinutes })}</td>
+              <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums">{service.soldCount}</td>
+              {/* Seven columns inside a ~720px panel left this one about 88px while the chip
+                  needs ~110, so "Đang hiển thị" broke mid-phrase across two lines and "30 phút"
+                  split with it. Pinning the short value cells to one line makes the browser take
+                  the width out of the service name instead — the only column that reads fine
+                  wrapped. Same idiom as CategoryTable in this folder. */}
+              <td className="whitespace-nowrap px-3 py-2">
                 <Chip size="sm" variant="soft" color={service.isVisible ? "success" : "default"}>
                   <Chip.Label>{service.isVisible ? t("table.visible") : t("table.hidden")}</Chip.Label>
                 </Chip>
               </td>
-              <td className="px-3 py-2">
+              <td className="whitespace-nowrap px-3 py-2">
                 <div className="flex gap-1">
                   <Button
                     isIconOnly

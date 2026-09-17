@@ -38,6 +38,8 @@ export function ServiceEditModal({
   const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
+  const [description, setDescription] = useState(service.description ?? "");
+  const [bookableStandalone, setBookableStandalone] = useState(Boolean(service.bookableStandalone));
   const [imageMode, setImageMode] = useState<"keep" | "remove" | "replace">("keep");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -91,6 +93,8 @@ export function ServiceEditModal({
         service.id,
         {
           name: name.trim(),
+          description: description.trim(),
+          bookableStandalone: serviceType === "ADD_ON" && bookableStandalone,
           serviceType,
           addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
           ...(serviceType === "BASE" ? { categoryId } : {}),
@@ -134,7 +138,12 @@ export function ServiceEditModal({
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center" scroll="inside">
-          <Modal.Dialog>
+          {/* HeroUI's largest named size is --container-lg, 32rem. This dialog also hosts
+              ServiceAddonConfiguration, whose per-branch row is a name plus two number
+              inputs, and at 32rem the name column collapsed to about a hundred pixels.
+              The utilities layer wins over HeroUI's components layer, so the class
+              widens the dialog without giving up the size variant's other rules. */}
+          <Modal.Dialog className="max-w-4xl">
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">{t("edit.title")}</Modal.Heading>
             </Modal.Header>
@@ -194,6 +203,30 @@ export function ServiceEditModal({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-2 text-sm sm:col-span-2">
+                <span className="font-semibold text-admin-ink">{t("form.description")}</span>
+                <textarea
+                  className="min-h-20 rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-admin-ink"
+                  maxLength={500}
+                  rows={3}
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                />
+              </label>
+              {serviceType === "ADD_ON" ? (
+                <label className="flex items-start gap-2 text-sm sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    className="mt-1 accent-admin-accent"
+                    checked={bookableStandalone}
+                    onChange={(event) => setBookableStandalone(event.target.checked)}
+                  />
+                  <span>
+                    <span className="font-semibold text-admin-ink">{t("form.bookableStandalone")}</span>
+                    <span className="mt-1 block text-xs text-admin-muted">{t("form.bookableStandaloneHint")}</span>
+                  </span>
+                </label>
+              ) : null}
               </div>
               <section className="flex flex-col gap-3 rounded-xl border border-admin-border bg-admin-soft p-4 text-sm">
                 <h3 className="font-semibold text-admin-ink">{t("image.title")} <span className="font-normal text-admin-muted">{t("image.optional")}</span></h3>

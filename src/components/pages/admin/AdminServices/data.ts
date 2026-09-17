@@ -9,6 +9,7 @@ export type ServiceFilter = string;
 export type SalonService = {
   readonly id: string;
   readonly name: string;
+  readonly description?: string;
   // Null only for a row written before the backend made the category mandatory. The tabs
   // leave such a service out rather than filing it somewhere it does not belong.
   readonly category: ServiceCategoryRef | null;
@@ -47,6 +48,25 @@ export const salonServices: ReadonlyArray<SalonService> = [
   { id: "sv13", name: "Combo chăm sóc tay", category: combo, imageUrl: null, price: 1450000, durationMinutes: 150, isVisible: true, soldCount: 10 },
   { id: "sv14", name: "Combo gel cao cấp", category: combo, imageUrl: null, price: 1750000, durationMinutes: 180, isVisible: false, soldCount: 6 },
 ];
+
+/**
+ * Splits the one catalogue the API returns into the two things the screen shows separately.
+ *
+ * `GET /admin/services` has no serviceType filter, so both kinds arrive together and the tabs
+ * narrow them here. A row with no serviceType predates the column and counts as a base
+ * service: an add-on is only ever an add-on because something said so.
+ */
+export function selectBaseServices<T extends { readonly serviceType?: string }>(
+  services: ReadonlyArray<T>,
+): ReadonlyArray<T> {
+  return services.filter((service) => service.serviceType !== "ADD_ON");
+}
+
+export function selectAddonServices<T extends { readonly serviceType?: string }>(
+  services: ReadonlyArray<T>,
+): ReadonlyArray<T> {
+  return services.filter((service) => service.serviceType === "ADD_ON");
+}
 
 export function filterServices(
   services: ReadonlyArray<SalonService>,
