@@ -1,3 +1,5 @@
+import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
+
 export type StaffStatus = "working" | "leave";
 
 /**
@@ -45,4 +47,22 @@ export function staffSaveErrorKey(error: unknown): "openAppointments" | null {
     ? (error as { readonly code?: unknown }).code
     : null;
   return code === OPEN_APPOINTMENTS_CODE ? "openAppointments" : null;
+}
+
+/**
+ * Whether the create form is worth submitting yet.
+ *
+ * The account half is validated here rather than left to the server because the form sends
+ * two requests: a 422 on the password would arrive after the account call, with the roster
+ * record still missing and nothing on screen saying which of the two failed.
+ */
+export function canCreateStaff(draft: {
+  readonly name: string;
+  readonly withAccount: boolean;
+  readonly phone: string;
+  readonly password: string;
+}): boolean {
+  if (draft.name.trim().length < 2) return false;
+  if (!draft.withAccount) return true;
+  return isAdminPhone(draft.phone) && isStrongTemporaryPassword(draft.password);
 }

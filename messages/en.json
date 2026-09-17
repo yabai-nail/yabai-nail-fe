@@ -1334,6 +1334,12 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "submit": "Add staff member",
+        "withAccount": "Create a login for this technician",
+        "withAccountHint": "They sign in with this phone number and password to see their own shifts. Leave it unchecked if they do not need one yet.",
+        "phone": "Phone number",
+        "password": "Temporary password",
+        "passwordHint": "At least 8 characters, with upper case, lower case and a digit.",
+        "accountKept": "The account {phone} already exists. Press again to retry the roster record; that account is reused rather than duplicated.",
         "afterCreateHint": "Skills, commission and shifts can be configured after creation."
       },
       "detail": {

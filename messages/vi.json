@@ -1344,6 +1344,12 @@
         "cancel": "Hủy",
         "saving": "Đang lưu…",
         "submit": "Thêm nhân viên",
+        "withAccount": "Tạo tài khoản đăng nhập cho nhân viên này",
+        "withAccountHint": "Nhân viên dùng số điện thoại và mật khẩu này để đăng nhập xem ca làm của mình. Bỏ chọn nếu chưa cần.",
+        "phone": "Số điện thoại",
+        "password": "Mật khẩu tạm",
+        "passwordHint": "Ít nhất 8 ký tự, có chữ hoa, chữ thường và số.",
+        "accountKept": "Đã tạo tài khoản {phone}. Bấm lại để thử tạo hồ sơ nhân viên, tài khoản này sẽ được dùng lại chứ không tạo trùng.",
         "afterCreateHint": "Kỹ năng, mức hoa hồng và ca làm việc có thể cấu hình sau khi tạo."
       },
       "detail": {
