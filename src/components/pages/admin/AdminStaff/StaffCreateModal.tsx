@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
-import { adminService } from "@/service";
+import { adminService, useAdminPermission } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import { canCreateStaff } from "./data";
 
@@ -24,10 +24,16 @@ export function StaffCreateModal({
   const t = useTranslations("admin.staff");
   const tc = useTranslations("admin.common");
   const [name, setName] = useState("");
+  // Issuing a login is owner-only: `POST /admin/accounts` requires `account.write.all`, which
+  // the manager template does not carry, while `staff.write.branch` — the permission that
+  // opened this form — does. Offering the checkbox to a manager would 403 on the first of the
+  // two calls and leave them with no technician at all.
+  const canIssueLogin = useAdminPermission("account.write.all");
   // A roster record and a login are two different things in the backend, and a technician who
   // never opens the console does not need the second. Checked by default because the common
   // case is a new hire who does: they have to see their own shifts.
-  const [withAccount, setWithAccount] = useState(true);
+  const [wantsAccount, setWantsAccount] = useState(true);
+  const withAccount = canIssueLogin && wantsAccount;
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   // The account has to exist before the roster record, because `accountId` is only read when
@@ -102,6 +108,7 @@ export function StaffCreateModal({
                 />
               </label>
 
+              {canIssueLogin ? (
               <div className="grid gap-3 rounded-lg border border-admin-border p-3">
                 <label className="flex items-start gap-2 text-sm">
                   <input
@@ -109,7 +116,7 @@ export function StaffCreateModal({
                     className="mt-0.5 accent-admin-accent"
                     checked={withAccount}
                     disabled={accountId !== null}
-                    onChange={(event) => setWithAccount(event.target.checked)}
+                    onChange={(event) => setWantsAccount(event.target.checked)}
                   />
                   <span>
                     <span className="font-semibold text-admin-ink">{t("create.withAccount")}</span>
@@ -144,6 +151,7 @@ export function StaffCreateModal({
                   </>
                 ) : null}
               </div>
+              ) : null}
 
               <p className="text-xs text-admin-muted">
                 {t("create.afterCreateHint")}
