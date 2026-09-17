@@ -1334,6 +1334,14 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "submit": "Add staff member",
+        "branch": "Branch",
+        "branchHint": "The new technician is filed at this branch.",
+        "withAccount": "Create a login for this technician",
+        "withAccountHint": "They sign in with this phone number and password to see their own shifts. Leave it unchecked if they do not need one yet.",
+        "phone": "Phone number",
+        "password": "Temporary password",
+        "passwordHint": "At least 8 characters, with upper case, lower case and a digit.",
+        "accountKept": "The account {phone} already exists. Press again to retry the roster record; that account is reused rather than duplicated.",
         "afterCreateHint": "Skills, commission and shifts can be configured after creation."
       },
       "detail": {
@@ -1352,10 +1360,11 @@
         "all": "All branches"
       },
       "edit": {
+        "branch": "Branch",
+        "branchHint": "Move this technician to another branch. Not possible while they still have unfinished appointments.",
+        "openAppointments": "This technician still has unfinished appointments, so the branch cannot be changed. Finish or cancel them, then try again.",
         "failed": "Could not save the staff member.",
         "movedTo": "Moved to {branch}. Switch branch in the header to see them there.",
-        "branch": "Branch",
-        "branchHint": "A branch move is only possible while the staff member has no open appointments.",
         "title": "Edit staff member",
         "name": "Name",
         "cancel": "Cancel",

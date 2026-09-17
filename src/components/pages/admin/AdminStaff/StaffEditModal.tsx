@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
-import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { adminService, useAdminBranch, useAuth, type AdminBranch } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
-import type { StaffMember } from "./data";
+import { StaffBranchField } from "./StaffBranchField";
+import { staffSaveErrorKey, type StaffMember } from "./data";
 
 // Small modal for the base staff row: displayName, branch and active. Skills /
 // shifts / compensation each have their own surface.
@@ -36,11 +36,11 @@ export function StaffEditModal({
   // list must not be used as their scope), while a manager's scope is exactly branchIds. The
   // API refuses anything else with a 403, so nobody is offered a branch only to be told no.
   const isOwner = user?.role === "OWNER";
-  const branchOptions = useMemo(
+  const assignableBranches = useMemo(
     () =>
       branches
         .filter((branch) => branch.active !== false && (isOwner || branchIds.includes(branch.id)))
-        .map((branch) => ({ value: branch.id, label: branch.name })),
+        .map((branch) => ({ id: branch.id, name: branch.name })),
     [branches, branchIds, isOwner],
   );
 
@@ -67,13 +67,17 @@ export function StaffEditModal({
       // vanishes from it the moment this succeeds. Say where they went, or the move reads as
       // a deletion.
       const movedTo = branchId !== member.branchId
-        ? branchOptions.find((option) => option.value === branchId)?.label
+        ? assignableBranches.find((branch) => branch.id === branchId)?.name
         : undefined;
       notifySuccess(movedTo ? t("edit.movedTo", { branch: movedTo }) : tc("staffUpdated"));
       onSaved();
       onClose();
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : t("edit.failed"));
+      if (staffSaveErrorKey(thrown) === "openAppointments") {
+        setError(t("edit.openAppointments"));
+      } else {
+        setError(thrown instanceof Error ? thrown.message : t("edit.failed"));
+      }
     } finally {
       setBusy(false);
     }
@@ -96,22 +100,17 @@ export function StaffEditModal({
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                 />
               </label>
-              <div className="flex flex-col gap-1">
-                <span id="staff-edit-branch-label" className="text-xs font-semibold text-admin-ink">{t("edit.branch")}</span>
-                <AdminSelectField
-                  id="staff-edit-branch"
-                  label={t("edit.branch")}
-                  fullWidth
-                  value={branchId}
-                  onChange={setBranchId}
-                  options={branchOptions}
-                  isDisabled={busy || branchOptions.length === 0}
-                  describedBy="staff-edit-branch-hint"
-                />
-                {/* Said up front rather than as a 409 after the fact: moving someone is a
-                    transfer, and the API keeps their open appointments where they are. */}
-                <span id="staff-edit-branch-hint" className="text-xs text-admin-muted">{t("edit.branchHint")}</span>
-              </div>
+              {/* The shared field, fed only the branches this admin may assign to: an owner the
+                  whole chain, a manager exactly their own. The API refuses anything else with
+                  a 403, so nobody is offered a branch only to be told no. */}
+              <StaffBranchField
+                branches={assignableBranches}
+                disabled={busy}
+                hint={t("edit.branchHint")}
+                label={t("edit.branch")}
+                onChange={setBranchId}
+                value={branchId}
+              />
               <label className="flex items-center gap-2 text-xs text-admin-ink">
                 <input
                   type="checkbox" className="accent-admin-accent"

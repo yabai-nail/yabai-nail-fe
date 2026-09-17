@@ -1344,6 +1344,14 @@
         "cancel": "Hủy",
         "saving": "Đang lưu…",
         "submit": "Thêm nhân viên",
+        "branch": "Chi nhánh",
+        "branchHint": "Nhân viên mới sẽ thuộc chi nhánh này.",
+        "withAccount": "Tạo tài khoản đăng nhập cho nhân viên này",
+        "withAccountHint": "Nhân viên dùng số điện thoại và mật khẩu này để đăng nhập xem ca làm của mình. Bỏ chọn nếu chưa cần.",
+        "phone": "Số điện thoại",
+        "password": "Mật khẩu tạm",
+        "passwordHint": "Ít nhất 8 ký tự, có chữ hoa, chữ thường và số.",
+        "accountKept": "Đã tạo tài khoản {phone}. Bấm lại để thử tạo hồ sơ nhân viên, tài khoản này sẽ được dùng lại chứ không tạo trùng.",
         "afterCreateHint": "Kỹ năng, mức hoa hồng và ca làm việc có thể cấu hình sau khi tạo."
       },
       "detail": {
@@ -1362,10 +1370,11 @@
         "all": "Mọi chi nhánh"
       },
       "edit": {
+        "branch": "Chi nhánh",
+        "branchHint": "Chuyển nhân viên sang chi nhánh khác. Không chuyển được khi còn lịch hẹn chưa hoàn tất.",
+        "openAppointments": "Nhân viên còn lịch hẹn chưa hoàn tất nên chưa chuyển chi nhánh được. Hoàn tất hoặc huỷ những lịch đó rồi thử lại.",
         "failed": "Không lưu được nhân viên.",
         "movedTo": "Đã chuyển nhân viên sang {branch}. Đổi chi nhánh ở góc trên để xem.",
-        "branch": "Chi nhánh",
-        "branchHint": "Chuyển chi nhánh chỉ được khi nhân viên không còn lịch hẹn chưa hoàn tất.",
         "title": "Chỉnh sửa nhân viên",
         "name": "Họ tên",
         "cancel": "Huỷ",

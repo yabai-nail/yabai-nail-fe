@@ -1,3 +1,5 @@
+import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
+
 export type StaffStatus = "working" | "leave";
 
 /**
@@ -28,3 +30,39 @@ export type StaffMember = {
    */
   readonly branchName: string | null;
 };
+
+/** The code the backend rejects a transfer with while the member still has work booked. */
+export const OPEN_APPOINTMENTS_CODE = "RESOURCE_HAS_OPEN_APPOINTMENTS";
+
+/**
+ * The one save failure this form explains in its own words.
+ *
+ * Everything else keeps showing `error.message`, which the backend writes in Vietnamese. This
+ * case does not: its message comes back unaccented ("Khong the ngung hoac chuyen nhan vien
+ * khi con lich hen chua hoan tat."), and it is also the only failure the admin can act on —
+ * finish or cancel those appointments, then move the technician.
+ */
+export function staffSaveErrorKey(error: unknown): "openAppointments" | null {
+  const code = typeof error === "object" && error !== null && "code" in error
+    ? (error as { readonly code?: unknown }).code
+    : null;
+  return code === OPEN_APPOINTMENTS_CODE ? "openAppointments" : null;
+}
+
+/**
+ * Whether the create form is worth submitting yet.
+ *
+ * The account half is validated here rather than left to the server because the form sends
+ * two requests: a 422 on the password would arrive after the account call, with the roster
+ * record still missing and nothing on screen saying which of the two failed.
+ */
+export function canCreateStaff(draft: {
+  readonly name: string;
+  readonly withAccount: boolean;
+  readonly phone: string;
+  readonly password: string;
+}): boolean {
+  if (draft.name.trim().length < 2) return false;
+  if (!draft.withAccount) return true;
+  return isAdminPhone(draft.phone) && isStrongTemporaryPassword(draft.password);
+}
