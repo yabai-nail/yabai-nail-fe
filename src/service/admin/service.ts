@@ -74,6 +74,17 @@ import type {
   AdminBranchSettingsPatch,
   AdminHomeBannerInput,
   AdminHomeBanners,
+  AdminMyPayroll,
+  AdminPayrollRow,
+  AdminPayrollSheet,
+  AdminPayrollUnlockResult,
+  AdminSalesReport,
+  AdminSalesReportDecisionInput,
+  AdminSalesReportInput,
+  AdminSalesReportPatch,
+  AdminSalesReportPreview,
+  AdminSalesReportsBatchDecisionInput,
+  AdminSalesReportsBatchDecisionResult,
   AdminConversation,
   AdminConversationPatch,
   AdminMessage,
@@ -832,4 +843,42 @@ export const adminService = {
       "POST /api/v1/admin/branches/{branchId}/membership-card-resolutions",
       { path: { branchId }, body: input, idempotencyKey },
     ),
+
+  // -- Sales reports and payroll --------------------------------------------------------
+  salesReports: (query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminSalesReport>>("GET /api/v1/admin/sales-reports", { query }),
+  salesReportPreview: (query: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<AdminSalesReportPreview>("GET /api/v1/admin/sales-reports/preview", { query }),
+  createSalesReport: (input: AdminSalesReportInput, idempotencyKey?: string) =>
+    executeApiOperation<AdminSalesReport>("POST /api/v1/admin/sales-reports", { body: input, idempotencyKey }),
+  updateSalesReport: (reportId: string, patch: AdminSalesReportPatch, version?: string | number) =>
+    executeApiOperation<AdminSalesReport>("PATCH /api/v1/admin/sales-reports/{reportId}", {
+      path: { reportId },
+      body: patch,
+      version,
+    }),
+  deleteSalesReport: (reportId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/sales-reports/{reportId}", { path: { reportId }, version }),
+  decideSalesReport: (reportId: string, input: AdminSalesReportDecisionInput, version?: string | number) =>
+    executeApiOperation<AdminSalesReport>("POST /api/v1/admin/sales-reports/{reportId}/decision", {
+      path: { reportId },
+      body: input,
+      version,
+    }),
+  decideSalesReports: (input: AdminSalesReportsBatchDecisionInput) =>
+    executeApiOperation<AdminSalesReportsBatchDecisionResult>("POST /api/v1/admin/sales-reports/decisions", { body: input }),
+  payroll: (query: { readonly branchId: string; readonly period: string }) =>
+    executeApiOperation<AdminPayrollSheet>("GET /api/v1/admin/payroll", { query }),
+  markPayrollPaid: (branchId: string, staffId: string, period: string) =>
+    executeApiOperation<AdminPayrollRow>("POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/payments", {
+      path: { branchId, staffId, period },
+      body: {},
+    }),
+  unlockPayroll: (branchId: string, staffId: string, period: string) =>
+    executeApiOperation<AdminPayrollUnlockResult>("POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/unlock", {
+      path: { branchId, staffId, period },
+      body: {},
+    }),
+  myPayroll: (period?: string) =>
+    executeApiOperation<AdminMyPayroll>("GET /api/v1/admin/me/payroll", { query: period ? { period } : undefined }),
 };

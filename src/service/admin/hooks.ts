@@ -42,6 +42,10 @@ import type {
   BackendList,
   RevenueReport,
   StaffCompensation,
+  AdminMyPayroll,
+  AdminPayrollSheet,
+  AdminSalesReport,
+  AdminSalesReportPreview,
 } from "./types";
 
 export function useAdminDashboard(branchId: string | null, localDate?: string) {
@@ -440,4 +444,28 @@ export function useAdminLoyaltyConfig() {
 
 export function useAdminSystemConfig() {
   return useApiOperation<AdminSystemConfig>("GET /api/v1/admin/system-config");
+}
+
+// -- Sales reports and payroll ----------------------------------------------------------
+
+export function useAdminSalesReports(
+  query?: Readonly<Record<string, string | number | undefined>>,
+  enabled = true,
+) {
+  return usePaginatedApiOperation<AdminSalesReport>(enabled ? "GET /api/v1/admin/sales-reports" : null, { query });
+}
+
+/** Prices a draft without saving it; pass null while the form is incomplete. */
+export function useAdminSalesReportPreview(query: Readonly<Record<string, string | number | undefined>> | null) {
+  return useApiOperation<AdminSalesReportPreview>(query ? "GET /api/v1/admin/sales-reports/preview" : null, {
+    query: query ?? undefined,
+  });
+}
+
+export function useAdminPayroll(query: { readonly branchId: string; readonly period: string } | null) {
+  return useApiOperation<AdminPayrollSheet>(query ? "GET /api/v1/admin/payroll" : null, { query: query ?? undefined });
+}
+
+export function useAdminMyPayroll(period: string | null) {
+  return useApiOperation<AdminMyPayroll>("GET /api/v1/admin/me/payroll", { query: period ? { period } : undefined });
 }
