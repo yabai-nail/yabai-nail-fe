@@ -647,6 +647,54 @@
       "transfer": "Bank transfer"
     },
     "accounts": {
+      "overview": {
+        "heading": "Account overview",
+        "active": "{count} active",
+        "noConsole": "Customer app only, no console access.",
+        "loadFailed": "Could not load the role overview."
+      },
+      "areas": {
+        "salesReports": "Sales reports",
+        "payroll": "Payroll",
+        "appointments": "Appointments",
+        "customers": "Customers",
+        "catalog": "Services",
+        "staff": "Staff",
+        "reports": "Reports",
+        "reviews": "Reviews",
+        "designs": "Nail designs",
+        "marketing": "Marketing",
+        "accounts": "Accounts",
+        "branches": "Branches",
+        "messages": "Messages",
+        "payments": "Payments",
+        "config": "Configuration",
+        "audit": "Audit log",
+        "profile": "Own profile"
+      },
+      "staffProfile": {
+        "column": "Staff profile",
+        "notApplicable": "—",
+        "missing": "Not linked",
+        "missingBlocksLogin": "Not linked – cannot sign in",
+        "link": "Link",
+        "unlink": "Unlink"
+      },
+      "linkModal": {
+        "title": "Staff profile of {name}",
+        "currentlyLinked": "Linked to the profile {staff}.",
+        "unlinkHint": "Unlinking stops this login from reporting customers or seeing payroll; a STAFF login will no longer be able to sign in.",
+        "noneAvailable": "Every staff profile is already linked. Create one on the Staff screen first.",
+        "staff": "Choose a profile",
+        "linkHint": "Only profiles no login points at are listed.",
+        "cancel": "Close",
+        "link": "Link",
+        "unlink": "Unlink",
+        "working": "Saving…",
+        "linked": "Linked {name} to the profile {staff}",
+        "unlinked": "Unlinked the profile of {name}",
+        "failed": "Could not save the link."
+      },
       "add": "Add account",
       "pagination": "Showing {shown} of {total} accounts",
       "role": {

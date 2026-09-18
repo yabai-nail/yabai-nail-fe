@@ -130,6 +130,8 @@ export interface AdminStaffMember {
   readonly id: string;
   readonly displayName: string;
   readonly branchId: string;
+  /** The login this profile belongs to; null until linked. A STAFF login without a profile cannot sign in. */
+  readonly accountId?: string | null;
   readonly serviceIds: ReadonlyArray<string>;
   readonly active: boolean;
   readonly version: number;
@@ -429,6 +431,8 @@ export interface AdminStaffDraft {
 
 export interface AdminStaffPatch {
   readonly displayName?: string;
+  /** Owner only: link the profile to a login, or null to unlink it. */
+  readonly accountId?: string | null;
   readonly branchId?: string;
   readonly serviceIds?: ReadonlyArray<string>;
   readonly status?: "ACTIVE" | "INACTIVE";
@@ -1361,6 +1365,18 @@ export interface AdminPayrollSheet {
 export interface AdminMyPayroll extends AdminPayrollRow {
   readonly branchId: string;
   readonly period: string;
+}
+
+/** Logins per role and the grants the role's template carries (from GET /admin/accounts/roles). */
+export interface AdminAccountRoleSummary {
+  readonly role: string;
+  readonly accountCount: number;
+  readonly activeCount: number;
+  readonly permissions: ReadonlyArray<string>;
+}
+
+export interface AdminAccountRoles {
+  readonly roles: ReadonlyArray<AdminAccountRoleSummary>;
 }
 
 export interface AdminPayrollUnlockResult {

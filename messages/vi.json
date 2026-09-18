@@ -647,6 +647,54 @@
       "transfer": "Chuyển khoản"
     },
     "accounts": {
+      "overview": {
+        "heading": "Tổng quan tài khoản",
+        "active": "{count} đang hoạt động",
+        "noConsole": "Chỉ dùng app khách, không vào bảng điều khiển.",
+        "loadFailed": "Không tải được tổng quan vai."
+      },
+      "areas": {
+        "salesReports": "Báo cáo doanh thu",
+        "payroll": "Lương",
+        "appointments": "Lịch hẹn",
+        "customers": "Khách hàng",
+        "catalog": "Dịch vụ",
+        "staff": "Nhân viên",
+        "reports": "Báo cáo",
+        "reviews": "Đánh giá",
+        "designs": "Mẫu nail",
+        "marketing": "Marketing",
+        "accounts": "Tài khoản",
+        "branches": "Chi nhánh",
+        "messages": "Tin nhắn",
+        "payments": "Thanh toán",
+        "config": "Cấu hình",
+        "audit": "Nhật ký",
+        "profile": "Hồ sơ cá nhân"
+      },
+      "staffProfile": {
+        "column": "Hồ sơ nhân viên",
+        "notApplicable": "—",
+        "missing": "Chưa liên kết",
+        "missingBlocksLogin": "Chưa liên kết – không đăng nhập được",
+        "link": "Liên kết",
+        "unlink": "Bỏ liên kết"
+      },
+      "linkModal": {
+        "title": "Hồ sơ nhân viên của {name}",
+        "currentlyLinked": "Đang liên kết với hồ sơ {staff}.",
+        "unlinkHint": "Bỏ liên kết thì tài khoản không còn báo cáo khách, xem lương; tài khoản vai Nhân viên sẽ không đăng nhập được.",
+        "noneAvailable": "Không còn hồ sơ nhân viên nào chưa liên kết. Tạo hồ sơ ở màn Nhân viên trước.",
+        "staff": "Chọn hồ sơ",
+        "linkHint": "Chỉ hiện hồ sơ chưa gắn với tài khoản nào.",
+        "cancel": "Đóng",
+        "link": "Liên kết",
+        "unlink": "Bỏ liên kết",
+        "working": "Đang lưu…",
+        "linked": "Đã liên kết {name} với hồ sơ {staff}",
+        "unlinked": "Đã bỏ liên kết hồ sơ của {name}",
+        "failed": "Không lưu được liên kết."
+      },
       "add": "Thêm tài khoản",
       "pagination": "Hiển thị {shown} trong tổng số {total} tài khoản",
       "role": {

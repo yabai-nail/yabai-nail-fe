@@ -647,6 +647,54 @@
       "transfer": "銀行振込"
     },
     "accounts": {
+      "overview": {
+        "heading": "アカウント概要",
+        "active": "{count} 件有効",
+        "noConsole": "お客様アプリのみ。管理画面には入れません。",
+        "loadFailed": "役割の概要を読み込めませんでした。"
+      },
+      "areas": {
+        "salesReports": "売上報告",
+        "payroll": "給与",
+        "appointments": "予約",
+        "customers": "お客様",
+        "catalog": "メニュー",
+        "staff": "スタッフ",
+        "reports": "レポート",
+        "reviews": "レビュー",
+        "designs": "ネイルデザイン",
+        "marketing": "マーケティング",
+        "accounts": "アカウント",
+        "branches": "店舗",
+        "messages": "メッセージ",
+        "payments": "決済",
+        "config": "設定",
+        "audit": "監査ログ",
+        "profile": "自分のプロフィール"
+      },
+      "staffProfile": {
+        "column": "スタッフ情報",
+        "notApplicable": "—",
+        "missing": "未連携",
+        "missingBlocksLogin": "未連携 – ログインできません",
+        "link": "連携",
+        "unlink": "連携解除"
+      },
+      "linkModal": {
+        "title": "{name} のスタッフ情報",
+        "currentlyLinked": "スタッフ情報 {staff} と連携中です。",
+        "unlinkHint": "連携を解除すると売上報告や給与が使えなくなり、スタッフ権限のログインはサインインできなくなります。",
+        "noneAvailable": "未連携のスタッフ情報がありません。先にスタッフ画面で作成してください。",
+        "staff": "スタッフ情報を選択",
+        "linkHint": "どのログインとも連携していない情報のみ表示します。",
+        "cancel": "閉じる",
+        "link": "連携する",
+        "unlink": "連携解除",
+        "working": "保存中…",
+        "linked": "{name} を {staff} と連携しました",
+        "unlinked": "{name} の連携を解除しました",
+        "failed": "連携を保存できませんでした。"
+      },
       "add": "アカウントを追加",
       "pagination": "全 {total} 件中 {shown} 件を表示",
       "role": {

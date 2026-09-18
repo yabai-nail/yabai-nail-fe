@@ -71,6 +71,7 @@ import type {
   AdminMembershipCardResolution,
   AdminMembershipCardResolutionInput,
   AdminSystemConfig,
+  AdminAccountRoles,
   AdminBranchSettingsPatch,
   AdminHomeBannerInput,
   AdminHomeBanners,
@@ -879,6 +880,7 @@ export const adminService = {
       path: { branchId, staffId, period },
       body: {},
     }),
+  accountRoles: () => executeApiOperation<AdminAccountRoles>("GET /api/v1/admin/accounts/roles"),
   myPayroll: (period?: string) =>
     executeApiOperation<AdminMyPayroll>("GET /api/v1/admin/me/payroll", { query: period ? { period } : undefined }),
 };

@@ -210,6 +210,7 @@ GET /api/v1/admin/payroll
 POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/payments
 POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/unlock
 GET /api/v1/admin/me/payroll
+GET /api/v1/admin/accounts/roles
 `;
 
 // Concrete NestJS controller routes present in runtime Swagger but absent from
