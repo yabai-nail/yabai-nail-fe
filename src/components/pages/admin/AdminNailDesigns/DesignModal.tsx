@@ -9,6 +9,7 @@ import { adminMediaService, adminService } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED", "HIDDEN"];
@@ -133,10 +134,18 @@ export function DesignModal({
                     <Button isIconOnly size="sm" variant="ghost" aria-label={t("modal.imageRemove")} onPress={() => { setImageFile(null); setImagePreviewUrl(null); setImageError(null); }}><XMarkIcon className="size-4" /></Button>
                   </div>
                 ) : (
+                  <>
+                    {design && (design.thumbnailUrl || design.mediaIds.length) ? (
+                      <div className="flex items-center gap-3 rounded-lg border border-admin-border bg-admin-surface p-3">
+                        <AdminNailDesignThumbnail imageUrl={design.thumbnailUrl} mediaId={design.mediaIds[0]} alt={t("modal.imageCurrent")} />
+                        <p className="min-w-0 flex-1 text-sm text-admin-muted">{t("modal.imageCurrent")}</p>
+                      </div>
+                    ) : null}
                   <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-admin-border bg-admin-surface text-sm font-semibold text-admin-accent focus-within:ring-2 focus-within:ring-admin-accent">
                     <ArrowUpTrayIcon aria-hidden className="size-5" />{design?.mediaIds.length ? t("modal.imageReplace") : t("modal.imagePick")}
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy} onChange={(event) => { selectImage(event.target.files?.[0] ?? null); event.target.value = ""; }} />
                   </label>
+                  </>
                 )}
                 {imageError ? <p role="alert" className="text-xs text-admin-danger">{imageError}</p> : null}
               </section>
