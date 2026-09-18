@@ -4,6 +4,7 @@ import {
   CalendarDaysIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
+  ClipboardDocumentCheckIcon,
   ClipboardDocumentListIcon,
   Cog6ToothIcon,
   CurrencyYenIcon,
@@ -16,6 +17,7 @@ import {
   SwatchIcon,
   UserGroupIcon,
   UsersIcon,
+  WalletIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
@@ -151,6 +153,20 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     icon: CurrencyYenIcon,
     isAvailable: true,
     requiredAnyPermission: ["payroll.read.branch"],
+  },
+  {
+    id: "report",
+    href: "/admin/report",
+    icon: ClipboardDocumentCheckIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["sales.report.write.own"],
+  },
+  {
+    id: "my-payroll",
+    href: "/admin/my-payroll",
+    icon: WalletIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["payroll.read.own"],
   },
   {
     id: "branches",

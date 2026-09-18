@@ -231,6 +231,16 @@
         "label": "給与",
         "title": "月次給与",
         "description": "スタッフごとの承認済み歩合を集計し、支払済みにしてExcelへ出力します。"
+      },
+      "report": {
+        "label": "お客様報告",
+        "title": "お客様報告",
+        "description": "施術したお客様ごとに報告します。承認後に給与へ反映されます。"
+      },
+      "my-payroll": {
+        "label": "自分の給与",
+        "title": "自分の給与",
+        "description": "承認済みの歩合と月の給与。"
       }
     },
     "shell": {
@@ -1400,6 +1410,54 @@
       "getLink": "ダウンロードリンク",
       "download": "ダウンロード"
     },
+    "staffReport": {
+      "newReport": "施術したお客様を報告",
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "summary": "{count} 件 · 取り分 {mine}",
+      "dayTotal": "{count} 名 · {mine}",
+      "gross": "売上",
+      "fee": "手数料",
+      "mine": "取り分 ({rate}%)",
+      "loading": "読み込み中…",
+      "loadFailed": "報告を読み込めませんでした。",
+      "noProfile": "ログインがスタッフ情報と連携されていません。オーナーにアカウント画面で連携してもらってください。",
+      "empty": "{period} の報告はまだありません。",
+      "edit": "編集",
+      "delete": "削除",
+      "deleted": "報告を削除しました",
+      "deleteFailed": "報告を削除できませんでした。",
+      "rejectedBecause": "却下: {reason}",
+      "confirmDelete": {
+        "title": "報告を削除",
+        "body": "{date} の報告（{amount}）を削除しますか？取り消せません。",
+        "cancel": "キャンセル",
+        "action": "削除"
+      }
+    },
+    "myPayroll": {
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "heading": "{period} の給与",
+      "status": {
+        "OPEN": "集計中",
+        "PAID": "支払済み",
+        "UNLOCKED": "ロック解除"
+      },
+      "paidOn": "{date} 支払",
+      "approvedCount": "承認済み件数",
+      "gross": "お客様支払合計",
+      "fee": "手数料合計",
+      "commission": "歩合",
+      "baseSalary": "基本給",
+      "salon": "店舗取り分",
+      "hint": "承認済みの報告のみ集計されます。承認待ちはお客様報告画面で確認できます。",
+      "loading": "読み込み中…",
+      "loadFailed": "給与を読み込めませんでした。",
+      "noProfile": "ログインがスタッフ情報と連携されていません。オーナーにアカウント画面で連携してもらってください。"
+    },
     "marketing": {
       "add": "キャンペーンを追加",
       "pagination": "全 {total} 件中 {shown} 件を表示",
@@ -1677,6 +1735,9 @@
         "revenue": "売上",
         "periodLoadFailed": "{period} の売上を読み込めません。売上と歩合は「{missing}」と表示されます。",
         "heading": "期間ごとの実績",
+        "approved": "承認済み件数",
+        "payable": "支給額",
+        "payrollStatus": { "OPEN": "集計中", "PAID": "支払済み", "UNLOCKED": "ロック解除" },
         "periodLabel": "集計期間",
         "loading": "読み込み中…",
         "loadFailed": "実績を読み込めません。",

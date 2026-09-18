@@ -231,6 +231,16 @@
         "label": "Payroll",
         "title": "Monthly payroll",
         "description": "Approved commission per technician, mark paid and export to Excel."
+      },
+      "report": {
+        "label": "Customer reports",
+        "title": "Customer reports",
+        "description": "Report each customer you served; once approved it counts towards your pay."
+      },
+      "my-payroll": {
+        "label": "My pay",
+        "title": "My pay",
+        "description": "Your approved commission and monthly pay."
       }
     },
     "shell": {
@@ -1401,6 +1411,54 @@
       "getLink": "Get download link",
       "download": "Download"
     },
+    "staffReport": {
+      "newReport": "Report the customer just served",
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "summary": "{count} reports · you earn {mine}",
+      "dayTotal": "{count} customers · {mine}",
+      "gross": "Gross",
+      "fee": "App fee",
+      "mine": "your share ({rate}%)",
+      "loading": "Loading…",
+      "loadFailed": "Could not load your reports.",
+      "noProfile": "Your login is not linked to a staff profile yet. Ask the owner to link it on the Accounts screen.",
+      "empty": "No reports in {period} yet.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleted": "Report deleted",
+      "deleteFailed": "Could not delete the report.",
+      "rejectedBecause": "Rejected: {reason}",
+      "confirmDelete": {
+        "title": "Delete report",
+        "body": "Delete the report of {date} ({amount})? This cannot be undone.",
+        "cancel": "Cancel",
+        "action": "Delete"
+      }
+    },
+    "myPayroll": {
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "heading": "Pay for {period}",
+      "status": {
+        "OPEN": "In review",
+        "PAID": "Paid",
+        "UNLOCKED": "Unlocked"
+      },
+      "paidOn": "paid on {date}",
+      "approvedCount": "Approved customers",
+      "gross": "Customers paid",
+      "fee": "App fees",
+      "commission": "Commission",
+      "baseSalary": "Base salary",
+      "salon": "Salon share",
+      "hint": "Only approved reports count here. Pending ones are on the Customer reports screen.",
+      "loading": "Loading…",
+      "loadFailed": "Could not load your pay.",
+      "noProfile": "Your login is not linked to a staff profile yet. Ask the owner to link it on the Accounts screen."
+    },
     "marketing": {
       "add": "Add promotion",
       "pagination": "Showing {shown} of {total} promotions",
@@ -1684,6 +1742,9 @@
         "revenue": "Revenue",
         "periodLoadFailed": "Could not load revenue for {period}; revenue and commission show “{missing}”.",
         "heading": "Performance by period",
+        "approved": "Approved customers",
+        "payable": "Payable",
+        "payrollStatus": { "OPEN": "In review", "PAID": "Paid", "UNLOCKED": "Unlocked" },
         "periodLabel": "Reporting period",
         "loading": "Loading…",
         "loadFailed": "Could not load the performance data.",

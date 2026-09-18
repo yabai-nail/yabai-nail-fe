@@ -231,6 +231,16 @@
         "label": "Lương",
         "title": "Bảng lương tháng",
         "description": "Tổng hợp hoa hồng đã duyệt theo từng nhân viên, đánh dấu đã trả và xuất Excel."
+      },
+      "report": {
+        "label": "Báo cáo khách",
+        "title": "Báo cáo khách",
+        "description": "Nhập báo cáo cho từng khách bạn vừa làm; quản lý duyệt xong sẽ vào lương."
+      },
+      "my-payroll": {
+        "label": "Thu nhập của tôi",
+        "title": "Thu nhập của tôi",
+        "description": "Hoa hồng đã duyệt và lương tháng của bạn."
       }
     },
     "shell": {
@@ -1411,6 +1421,54 @@
       "getLink": "Lấy link tải",
       "download": "Tải file"
     },
+    "staffReport": {
+      "newReport": "Báo cáo khách vừa làm",
+      "month": "Tháng",
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "summary": "{count} báo cáo · bạn nhận {mine}",
+      "dayTotal": "{count} khách · {mine}",
+      "gross": "Tổng thu",
+      "fee": "Phí app",
+      "mine": "bạn nhận ({rate}%)",
+      "loading": "Đang tải…",
+      "loadFailed": "Không tải được báo cáo.",
+      "noProfile": "Tài khoản của bạn chưa liên kết hồ sơ nhân viên. Nhờ chủ tiệm liên kết ở màn Tài khoản.",
+      "empty": "Chưa có báo cáo nào trong tháng {period}.",
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "deleted": "Đã xoá báo cáo",
+      "deleteFailed": "Không xoá được báo cáo.",
+      "rejectedBecause": "Bị từ chối: {reason}",
+      "confirmDelete": {
+        "title": "Xoá báo cáo",
+        "body": "Xoá báo cáo ngày {date} ({amount})? Thao tác này không thể hoàn tác.",
+        "cancel": "Hủy",
+        "action": "Xoá"
+      }
+    },
+    "myPayroll": {
+      "month": "Tháng",
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "heading": "Lương tháng {period}",
+      "status": {
+        "OPEN": "Đang duyệt",
+        "PAID": "Đã thanh toán",
+        "UNLOCKED": "Đã mở khoá"
+      },
+      "paidOn": "trả ngày {date}",
+      "approvedCount": "Khách đã duyệt",
+      "gross": "Tổng khách trả",
+      "fee": "Tổng phí app",
+      "commission": "Hoa hồng",
+      "baseSalary": "Lương cơ bản",
+      "salon": "Phần quán",
+      "hint": "Chỉ báo cáo đã duyệt mới tính vào đây. Báo cáo chờ duyệt xem ở màn Báo cáo khách.",
+      "loading": "Đang tải…",
+      "loadFailed": "Không tải được thu nhập.",
+      "noProfile": "Tài khoản của bạn chưa liên kết hồ sơ nhân viên. Nhờ chủ tiệm liên kết ở màn Tài khoản."
+    },
     "marketing": {
       "add": "Thêm khuyến mãi",
       "pagination": "Hiển thị {shown} trong tổng số {total} khuyến mãi",
@@ -1694,6 +1752,9 @@
         "revenue": "Doanh thu",
         "periodLoadFailed": "Không tải được doanh thu kỳ {period} — cột doanh thu và hoa hồng hiển thị “{missing}”.",
         "heading": "Hiệu suất theo kỳ",
+        "approved": "Khách đã duyệt",
+        "payable": "Phải trả",
+        "payrollStatus": { "OPEN": "Đang duyệt", "PAID": "Đã thanh toán", "UNLOCKED": "Đã mở khoá" },
         "periodLabel": "Kỳ thống kê",
         "loading": "Đang tải…",
         "loadFailed": "Không tải được hiệu suất.",
