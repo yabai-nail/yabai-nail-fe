@@ -6,6 +6,7 @@ import {
   ChatBubbleLeftRightIcon,
   ClipboardDocumentListIcon,
   Cog6ToothIcon,
+  CurrencyYenIcon,
   HomeIcon,
   MegaphoneIcon,
   PaintBrushIcon,
@@ -143,6 +144,13 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     icon: ReceiptPercentIcon,
     isAvailable: true,
     requiredAnyPermission: ["sales.report.read.branch", "sales.report.approve.branch"],
+  },
+  {
+    id: "payroll",
+    href: "/admin/payroll",
+    icon: CurrencyYenIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["payroll.read.branch"],
   },
   {
     id: "branches",

@@ -225,6 +225,11 @@
         "label": "売上報告",
         "title": "お客様ごとの売上報告",
         "description": "スタッフのお客様ごとの報告を承認します。承認済みのみ給与に反映されます。"
+      },
+      "payroll": {
+        "label": "給与",
+        "title": "月次給与",
+        "description": "スタッフごとの承認済み歩合を集計し、支払済みにしてExcelへ出力します。"
       }
     },
     "shell": {
@@ -1280,6 +1285,71 @@
         "save": "保存",
         "submit": "報告を送信"
       }
+    },
+    "payroll": {
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "heading": "{period} の給与",
+      "headingHint": "承認済み報告から算出。支給額 = 歩合 + 基本給。",
+      "columns": {
+        "staff": "スタッフ",
+        "approvedCount": "件数",
+        "gross": "売上",
+        "fee": "手数料",
+        "staffTotal": "歩合",
+        "salonTotal": "店舗取り分",
+        "baseSalary": "基本給",
+        "payable": "支給額",
+        "status": "状態",
+        "actions": "操作"
+      },
+      "status": {
+        "OPEN": "集計中",
+        "PAID": "支払済み",
+        "UNLOCKED": "ロック解除"
+      },
+      "paidOn": "{date} 支払",
+      "inactive": "退職",
+      "totals": "店舗合計",
+      "empty": "この店舗にスタッフがいません。",
+      "loading": "給与を読み込み中…",
+      "loadFailed": "給与を読み込めませんでした。",
+      "actionFailed": "処理できませんでした。もう一度お試しください。",
+      "actions": {
+        "pay": "支払済みにする",
+        "unlock": "ロック解除"
+      },
+      "paid": "{name} を支払済みにしました",
+      "unlocked": "{name} の月をロック解除しました",
+      "confirm": {
+        "pay": {
+          "title": "支払の確認",
+          "body": "{period} 分として {name} に {payable} を支払済みにしますか？",
+          "hint": "この月のスタッフの報告はロックされ、追加・編集・承認できなくなります。解除はオーナーのみ。",
+          "action": "支払済みにする"
+        },
+        "unlock": {
+          "title": "月のロック解除",
+          "body": "{name} の {period} をロック解除しますか？",
+          "hint": "この月の報告が再び編集可能になります。再度支払済みにすると記録が上書きされます。",
+          "action": "ロック解除"
+        },
+        "cancel": "キャンセル"
+      },
+      "errors": {
+        "alreadyPaid": "この月はすでに支払済みです。",
+        "notPaid": "この月は未払いのため解除するものがありません。",
+        "forbidden": "この操作の権限がありません。",
+        "conflict": "データが変更されました。再読み込みしてやり直してください。"
+      },
+      "exportSheet": "給与表を出力 (Excel)",
+      "exportDetails": "報告明細を出力 (Excel)",
+      "exportQueued": "出力を受け付けました",
+      "exportLine": "出力: {status}",
+      "refresh": "更新",
+      "getLink": "ダウンロードリンク",
+      "download": "ダウンロード"
     },
     "marketing": {
       "add": "キャンペーンを追加",

@@ -225,6 +225,11 @@
         "label": "Sales reports",
         "title": "Per-customer sales reports",
         "description": "Review each technician's customer reports; only approved reports reach payroll."
+      },
+      "payroll": {
+        "label": "Payroll",
+        "title": "Monthly payroll",
+        "description": "Approved commission per technician, mark paid and export to Excel."
       }
     },
     "shell": {
@@ -1281,6 +1286,71 @@
         "save": "Save",
         "submit": "Send report"
       }
+    },
+    "payroll": {
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "heading": "Payroll {period}",
+      "headingHint": "Computed live from approved reports; payable = commission + base salary.",
+      "columns": {
+        "staff": "Technician",
+        "approvedCount": "Customers",
+        "gross": "Gross",
+        "fee": "App fees",
+        "staffTotal": "Commission",
+        "salonTotal": "Salon share",
+        "baseSalary": "Base salary",
+        "payable": "Payable",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "OPEN": "In review",
+        "PAID": "Paid",
+        "UNLOCKED": "Unlocked"
+      },
+      "paidOn": "Paid on {date}",
+      "inactive": "Inactive",
+      "totals": "Branch total",
+      "empty": "This branch has no technicians.",
+      "loading": "Loading payroll…",
+      "loadFailed": "Could not load payroll.",
+      "actionFailed": "That did not go through. Please try again.",
+      "actions": {
+        "pay": "Mark paid",
+        "unlock": "Unlock"
+      },
+      "paid": "Marked {name} as paid",
+      "unlocked": "Unlocked {name}'s month",
+      "confirm": {
+        "pay": {
+          "title": "Confirm payout",
+          "body": "Mark {payable} as paid to {name} for {period}?",
+          "hint": "The technician's reports for this month lock: nothing can be added, edited or decided. Only the owner can unlock.",
+          "action": "Mark paid"
+        },
+        "unlock": {
+          "title": "Unlock the month",
+          "body": "Unlock {period} for {name}?",
+          "hint": "The month's reports become editable again. Marking paid again overwrites the recorded figures.",
+          "action": "Unlock"
+        },
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "alreadyPaid": "This month is already marked paid.",
+        "notPaid": "This month has not been paid, so there is nothing to unlock.",
+        "forbidden": "You are not allowed to do this.",
+        "conflict": "The data just changed. Reload and try again."
+      },
+      "exportSheet": "Export payroll (Excel)",
+      "exportDetails": "Export report details (Excel)",
+      "exportQueued": "Export requested",
+      "exportLine": "Export: {status}",
+      "refresh": "Refresh",
+      "getLink": "Get download link",
+      "download": "Download"
     },
     "marketing": {
       "add": "Add promotion",

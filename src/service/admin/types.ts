@@ -756,7 +756,7 @@ export interface AdminReportExport {
 }
 
 export interface AdminReportExportInput {
-  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE";
+  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE" | "PAYROLL_MONTHLY" | "SALES_REPORTS_MONTHLY";
   readonly format?: "CSV" | "XLSX";
   readonly locale?: "vi" | "ja";
   readonly filters?: Readonly<Record<string, unknown>>;

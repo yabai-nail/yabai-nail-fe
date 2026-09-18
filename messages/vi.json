@@ -225,6 +225,11 @@
         "label": "Báo cáo doanh thu",
         "title": "Báo cáo doanh thu theo khách",
         "description": "Duyệt báo cáo từng khách của nhân viên; chỉ báo cáo đã duyệt mới vào lương."
+      },
+      "payroll": {
+        "label": "Lương",
+        "title": "Bảng lương tháng",
+        "description": "Tổng hợp hoa hồng đã duyệt theo từng nhân viên, đánh dấu đã trả và xuất Excel."
       }
     },
     "shell": {
@@ -1291,6 +1296,71 @@
         "save": "Lưu",
         "submit": "Gửi báo cáo"
       }
+    },
+    "payroll": {
+      "month": "Tháng",
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "heading": "Bảng lương {period}",
+      "headingHint": "Tính trực tiếp từ báo cáo đã duyệt; lương phải trả = hoa hồng + lương cơ bản.",
+      "columns": {
+        "staff": "Nhân viên",
+        "approvedCount": "Số khách",
+        "gross": "Tổng thu",
+        "fee": "Tổng phí app",
+        "staffTotal": "Hoa hồng",
+        "salonTotal": "Phần quán",
+        "baseSalary": "Lương cơ bản",
+        "payable": "Phải trả",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "status": {
+        "OPEN": "Đang duyệt",
+        "PAID": "Đã thanh toán",
+        "UNLOCKED": "Đã mở khoá"
+      },
+      "paidOn": "Trả ngày {date}",
+      "inactive": "Đã nghỉ",
+      "totals": "Tổng chi nhánh",
+      "empty": "Chi nhánh chưa có nhân viên.",
+      "loading": "Đang tải bảng lương…",
+      "loadFailed": "Không tải được bảng lương.",
+      "actionFailed": "Thao tác không thành công. Vui lòng thử lại.",
+      "actions": {
+        "pay": "Đã thanh toán",
+        "unlock": "Mở khoá"
+      },
+      "paid": "Đã đánh dấu trả lương cho {name}",
+      "unlocked": "Đã mở khoá kỳ lương của {name}",
+      "confirm": {
+        "pay": {
+          "title": "Xác nhận đã trả lương",
+          "body": "Đánh dấu đã trả {payable} cho {name}, tháng {period}?",
+          "hint": "Sau khi đánh dấu, báo cáo tháng này của nhân viên bị khoá: không thêm, sửa, duyệt được nữa. Chỉ chủ tiệm mở khoá.",
+          "action": "Đã thanh toán"
+        },
+        "unlock": {
+          "title": "Mở khoá kỳ lương",
+          "body": "Mở khoá tháng {period} của {name}?",
+          "hint": "Báo cáo của tháng sẽ sửa được lại. Khi bấm Đã thanh toán lần nữa, số mới sẽ ghi đè số đã chốt.",
+          "action": "Mở khoá"
+        },
+        "cancel": "Hủy"
+      },
+      "errors": {
+        "alreadyPaid": "Kỳ lương này đã được đánh dấu thanh toán.",
+        "notPaid": "Kỳ lương này chưa thanh toán nên không có gì để mở khoá.",
+        "forbidden": "Bạn không có quyền với thao tác này.",
+        "conflict": "Dữ liệu vừa thay đổi. Tải lại rồi thử lại."
+      },
+      "exportSheet": "Xuất bảng lương (Excel)",
+      "exportDetails": "Xuất chi tiết báo cáo (Excel)",
+      "exportQueued": "Đã tạo yêu cầu xuất file",
+      "exportLine": "Xuất file: {status}",
+      "refresh": "Làm mới",
+      "getLink": "Lấy link tải",
+      "download": "Tải file"
     },
     "marketing": {
       "add": "Thêm khuyến mãi",
