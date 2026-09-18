@@ -77,9 +77,10 @@ export function AdminStaffComponent() {
   const canWriteStaff = useAdminPermission("staff.write.branch");
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const [filter, setFilter] = useState<StaffFilter>("all");
-  // The roster opens on every branch this admin may see and narrows from there. It used to
-  // open on the header's branch alone, which hid a staff member the moment they were moved —
-  // the API already scopes an unfiltered read to the admin's own branches, so "all" is safe.
+  // The roster opens on every branch this admin may see and narrows from there. Asking for
+  // the header's branch by default made a transfer look like a deletion — the member dropped
+  // out of the list the moment they were moved — and the API already scopes an unfiltered
+  // read by role (an owner sees every branch, a manager only their own), so "all" is safe.
   const [branchFilter, setBranchFilter] = useState<string>("");
   const { data, isLoading, error, mutate: mutateStaff } = useAdminStaff({
     branchId: branchFilter || undefined,
@@ -249,6 +250,10 @@ export function AdminStaffComponent() {
               /></Card.Content>
             </Card>
             {detailedStaff ? (
+              // The member's own branch, not the console's active one. Shifts and leave are
+              // written against whichever branch this panel is handed, so on an org-level
+              // roster the active branch would book a technician a shift at a salon they do
+              // not work at.
               <StaffDetailPanel
                 member={detailedStaff}
                 branchId={detailedStaff.branchId}
@@ -270,6 +275,7 @@ export function AdminStaffComponent() {
       {canWriteStaff && isCreateOpen && (branchFilter || branchId) ? (
         <StaffCreateModal
           branchId={branchFilter || branchId!}
+          branches={branches.data?.items ?? []}
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => void mutateStaff()}
         />
@@ -279,7 +285,12 @@ export function AdminStaffComponent() {
           member={editing}
           branches={branches.data?.items ?? []}
           onClose={() => setEditing(null)}
-          onSaved={() => void mutateStaff()}
+          onSaved={() => {
+            // The roster carries the branch the table prints, and the member read is what the
+            // detail panel renders. A transfer changes both, so both have to be refetched.
+            void mutateStaff();
+            void staffDetail.mutate();
+          }}
         />
       ) : null}
     </AdminPageLayout>

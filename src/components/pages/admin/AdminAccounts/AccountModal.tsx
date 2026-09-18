@@ -5,6 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
 import { adminService, useAdminBranchList } from "@/service";
+import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
 import { notifySuccess } from "@/lib/app-toast";
 import type { AccountRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
@@ -39,13 +40,12 @@ export function AccountModal({
   const [error, setError] = useState<string | null>(null);
 
   const temporaryPassword = password.trim();
-  const validTemporaryPassword = /[a-z]/.test(temporaryPassword) && /[A-Z]/.test(temporaryPassword) && /\d/.test(temporaryPassword) && temporaryPassword.length >= 8 && temporaryPassword.length <= 128;
   const branches = useAdminBranchList();
   const requiresBranch = role === "STAFF" || role === "MANAGER";
   const canSubmit =
     displayName.trim().length >= 2 &&
     (!requiresBranch || branchIds.length > 0) &&
-    (isEdit || /^0\d{9}$/.test(phone.trim()) && validTemporaryPassword) &&
+    (isEdit || (isAdminPhone(phone) && isStrongTemporaryPassword(password))) &&
     !busy;
 
   const toggleBranch = (branchId: string) => {

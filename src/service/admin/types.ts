@@ -1150,6 +1150,33 @@ export interface AdminLoyaltyConfig {
   readonly [field: string]: unknown;
 }
 
+/** One slide of the customer app's home carousel. */
+export interface AdminHomeBanner {
+  readonly id: string;
+  readonly mediaId: string;
+  /** Stable public URL derived by the API from mediaId. */
+  readonly imageUrl: string;
+  readonly title: string | null;
+  /** An https URL or an in-app path; null when the slide is not tappable. */
+  readonly link: string | null;
+  readonly sortOrder: number;
+  readonly active: boolean;
+}
+
+export interface AdminHomeBanners {
+  readonly items: ReadonlyArray<AdminHomeBanner>;
+  readonly version: number;
+  readonly updatedAt: string | null;
+}
+
+/** What the console sends: order is the array order, ids and urls are the API's to assign. */
+export interface AdminHomeBannerInput {
+  readonly mediaId: string;
+  readonly title?: string | null;
+  readonly link?: string | null;
+  readonly active?: boolean;
+}
+
 export interface AdminSystemConfig {
   readonly version: number;
   readonly features?: Readonly<Record<string, boolean>>;

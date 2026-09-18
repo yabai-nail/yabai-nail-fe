@@ -15,6 +15,7 @@ import type {
   AdminServiceCategory,
   AdminServiceItem,
   AdminServiceAddonConfiguration,
+  AdminHomeBanners,
   AdminSurcharge,
   AdminStaffMember,
   AdminStaffPerformance,
@@ -362,6 +363,10 @@ export function useAdminBranchSettings(branchId: string | null) {
     branchId ? "GET /api/v1/admin/branches/{branchId}/settings" : null,
     { path: branchId ? { branchId } : undefined },
   );
+}
+
+export function useAdminHomeBanners() {
+  return useApiOperation<AdminHomeBanners>("GET /api/v1/admin/home-banners");
 }
 
 export function useAdminPromotions(
