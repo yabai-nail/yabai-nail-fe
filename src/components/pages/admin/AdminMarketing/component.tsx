@@ -11,6 +11,7 @@ import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminNotificationCampaignMetrics, useAdminNotificationCampaigns, useAdminPermission, useAdminPromotions } from "@/service";
 import { IssueModal } from "./IssueModal";
+import { HomeBannersPanel } from "./HomeBannersPanel";
 import { PromotionModal } from "./PromotionModal";
 import {
   adaptPromotion,
@@ -24,7 +25,7 @@ import {
 } from "./data";
 
 const pageSize = 8;
-type Tab = "promotions" | "campaigns";
+type Tab = "promotions" | "banners" | "campaigns";
 type ManagedCampaign = { readonly id: string; readonly name: string };
 
 export function AdminMarketingComponent() {
@@ -96,7 +97,7 @@ export function AdminMarketingComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 flex gap-1 border-b border-admin-border">
-        {(["promotions", "campaigns"] as const).filter((value) => value === "promotions" ? canReadPromotions : canSendCampaigns).map((value) => (
+        {(["promotions", "banners", "campaigns"] as const).filter((value) => value === "campaigns" ? canSendCampaigns : canReadPromotions).map((value) => (
           <button
             key={value}
             type="button"
@@ -105,7 +106,7 @@ export function AdminMarketingComponent() {
               tab === value ? "border-b-2 border-admin-accent text-admin-accent" : "text-admin-muted"
             }`}
           >
-            {value === "promotions" ? t("tabs.promotions") : t("tabs.campaigns")}
+            {t(`tabs.${value}`)}
           </button>
         ))}
       </div>
@@ -192,6 +193,8 @@ export function AdminMarketingComponent() {
             </Card.Footer>
           </Card>
         </>
+      ) : tab === "banners" ? (
+        <HomeBannersPanel canWrite={canWritePromotions} />
       ) : (
         <div className="space-y-4">
           {persistedCampaigns.length > 0 ? (
