@@ -42,6 +42,7 @@ export function HomeBannerModal({
   const t = useTranslations("admin.marketing.banners.modal");
   const [title, setTitle] = useState(banner?.title ?? "");
   const [link, setLink] = useState(banner?.link ?? "");
+  const [active, setActive] = useState(banner?.active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export function HomeBannerModal({
         imageUrl,
         title: title.trim() || null,
         link: link.trim() || null,
-        active: banner?.active ?? true,
+        active,
       });
       onClose();
     } catch (thrown) {
@@ -166,6 +167,19 @@ export function HomeBannerModal({
                   className={`min-h-10 rounded-lg border bg-admin-surface px-3 text-admin-ink ${linkValid ? "border-admin-border" : "border-admin-danger"}`}
                 />
                 <span className={`text-xs ${linkValid ? "text-admin-muted" : "text-admin-danger"}`}>{linkValid ? t("linkHint") : t("linkInvalid")}</span>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="flex items-center gap-2 text-xs font-semibold text-admin-ink">
+                  <input
+                    type="checkbox"
+                    className="accent-admin-accent"
+                    checked={active}
+                    disabled={busy}
+                    onChange={(event) => setActive(event.target.checked)}
+                  />
+                  {t("active")}
+                </span>
+                <span className="text-xs text-admin-muted">{t("activeHint")}</span>
               </label>
               {!hasImage ? <p className="text-xs text-admin-muted">{t("imageRequired")}</p> : null}
               {error ? <p role="alert" className="text-sm text-admin-danger">{error}</p> : null}

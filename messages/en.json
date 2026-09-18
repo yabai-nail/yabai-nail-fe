@@ -1269,6 +1269,8 @@
           "link": "Link when tapped",
           "linkHint": "Optional. An https:// URL or an in-app path such as /services.",
           "linkInvalid": "The link must start with https:// or /.",
+          "active": "Show in the app",
+          "activeHint": "Untick to keep the banner in the list but hide it from customers.",
           "uploading": "Uploading image…",
           "confirm": "Done",
           "cancel": "Cancel",

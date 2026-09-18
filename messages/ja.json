@@ -1268,6 +1268,8 @@
           "link": "タップ時のリンク",
           "linkHint": "任意。https:// の URL、または /services のようなアプリ内パス。",
           "linkInvalid": "リンクは https:// または / で始めてください。",
+          "active": "アプリに表示する",
+          "activeHint": "チェックを外すと一覧には残りますが、お客様のアプリには表示されません。",
           "uploading": "画像をアップロード中…",
           "confirm": "完了",
           "cancel": "キャンセル",

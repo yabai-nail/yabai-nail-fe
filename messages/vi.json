@@ -1279,6 +1279,8 @@
           "link": "Liên kết khi bấm",
           "linkHint": "Không bắt buộc. Dán URL https:// hoặc đường dẫn trong app như /services.",
           "linkInvalid": "Liên kết phải bắt đầu bằng https:// hoặc /.",
+          "active": "Hiển thị trên app",
+          "activeHint": "Bỏ tick để giữ banner trong danh sách nhưng ẩn khỏi app khách.",
           "uploading": "Đang tải ảnh…",
           "confirm": "Xong",
           "cancel": "Huỷ",
