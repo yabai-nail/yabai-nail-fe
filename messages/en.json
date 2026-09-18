@@ -354,6 +354,7 @@
         "imageRequirements": "JPG, PNG or WebP, up to 10 MB.",
         "imagePick": "Choose image",
         "imageReplace": "Replace current image",
+        "imageCurrent": "Current photo",
         "imageRemove": "Remove selected image",
         "imagePreview": "Preview of {name}",
         "imageUnsupported": "Only JPG, PNG or WebP images are supported.",

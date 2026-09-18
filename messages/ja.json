@@ -354,6 +354,7 @@
         "imageRequirements": "JPG、PNG、WebP、最大10 MB。",
         "imagePick": "画像を選択",
         "imageReplace": "現在の画像を変更",
+        "imageCurrent": "現在の写真",
         "imageRemove": "選択した画像を削除",
         "imagePreview": "{name} のプレビュー",
         "imageUnsupported": "JPG、PNG、WebP画像のみ対応しています。",

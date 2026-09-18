@@ -354,6 +354,7 @@
         "imageRequirements": "JPG, PNG hoặc WebP, tối đa 10 MB.",
         "imagePick": "Chọn ảnh",
         "imageReplace": "Thay ảnh hiện tại",
+        "imageCurrent": "Ảnh hiện tại",
         "imageRemove": "Bỏ ảnh đã chọn",
         "imagePreview": "Xem trước {name}",
         "imageUnsupported": "Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.",
