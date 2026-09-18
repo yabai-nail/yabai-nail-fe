@@ -742,6 +742,11 @@ export const adminService = {
       body: patch,
       version,
     }),
+  deleteNailDesign: (designId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/nail-designs/{designId}", {
+      path: { designId },
+      version,
+    }),
   decideNailDesignProposal: (
     proposalId: string,
     input: AdminNailDesignProposalDecisionInput,

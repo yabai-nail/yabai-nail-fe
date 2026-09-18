@@ -326,6 +326,18 @@
       "searchLabel": "Tìm mẫu nail",
       "searchPlaceholder": "Tên mẫu...",
       "add": "Thêm mẫu",
+      "deleteDesign": "Xóa {name}",
+      "delete": {
+        "title": "Xóa mẫu nail",
+        "confirm": "Bạn có chắc muốn xóa “{name}”? Thao tác này không thể hoàn tác.",
+        "hint": "Mẫu sẽ biến mất khỏi app khách và khỏi mục yêu thích của khách đã lưu. Nếu chỉ muốn tạm giấu, hãy sửa và chuyển trạng thái sang Ẩn.",
+        "cancel": "Hủy",
+        "action": "Xóa mẫu",
+        "deleting": "Đang xóa…",
+        "success": "Đã xóa {name}",
+        "failed": "Không xóa được mẫu nail. Vui lòng tải lại và thử lại.",
+        "failedWithDetails": "Không xóa được mẫu nail: {details}"
+      },
       "catalogTab": "Kho mẫu",
       "proposalsTab": "Đề xuất chờ duyệt",
       "loading": "Đang tải mẫu nail…",
