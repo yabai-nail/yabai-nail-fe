@@ -220,6 +220,11 @@
         "label": "Cài đặt",
         "title": "Cài đặt",
         "description": "Quản lý và thiết lập cho tiệm nail của bạn."
+      },
+      "sales-reports": {
+        "label": "Báo cáo doanh thu",
+        "title": "Báo cáo doanh thu theo khách",
+        "description": "Duyệt báo cáo từng khách của nhân viên; chỉ báo cáo đã duyệt mới vào lương."
       }
     },
     "shell": {
@@ -1163,6 +1168,128 @@
         "empty": "Chưa có thông báo mới.",
         "listLabel": "Thông báo mới",
         "loadFailed": "Không tải được thông báo."
+      }
+    },
+    "salesReports": {
+      "filters": {
+        "month": "Tháng",
+        "staff": "Nhân viên",
+        "allStaff": "Tất cả nhân viên",
+        "platform": "Nền tảng",
+        "allPlatforms": "Tất cả nền tảng",
+        "status": "Trạng thái",
+        "allStatuses": "Tất cả trạng thái",
+        "paymentMethod": "Thanh toán",
+        "allPaymentMethods": "Tất cả"
+      },
+      "platform": {
+        "NAILIE_NEW": "NAILIE – Khách mới",
+        "NAILIE_RETURNING": "NAILIE – Khách quay lại",
+        "MINIMO": "MINIMO",
+        "HOT_PEPPER": "HOT PEPPER",
+        "APP": "APP YABAI NAIL"
+      },
+      "status": {
+        "PENDING": "Chờ duyệt",
+        "APPROVED": "Đã duyệt",
+        "REJECTED": "Từ chối"
+      },
+      "paymentMethod": {
+        "CASH": "Tiền mặt",
+        "PAYPAY": "PayPay",
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard"
+      },
+      "actions": {
+        "add": "Nhập hộ",
+        "approveSelected": "Duyệt đã chọn ({count})",
+        "rejectSelected": "Từ chối đã chọn ({count})",
+        "dayLabel": "Duyệt cả ngày",
+        "approveDay": "Duyệt tất cả chờ duyệt",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "reopen": "Trả về chờ duyệt",
+        "edit": "Sửa",
+        "loadMore": "Tải thêm"
+      },
+      "decided": {
+        "APPROVE": "Đã duyệt báo cáo",
+        "REJECT": "Đã từ chối báo cáo",
+        "PENDING": "Đã trả báo cáo về chờ duyệt"
+      },
+      "batchDone": "Đã xử lý {decided} báo cáo",
+      "batchPartial": "Đã xử lý {decided} báo cáo, bỏ qua {skipped} (đã duyệt, đã khoá hoặc ngoài phạm vi)",
+      "summary": {
+        "count": "{count} báo cáo",
+        "gross": "Tổng thu",
+        "fee": "Phí app",
+        "staff": "Hoa hồng NV",
+        "salon": "Phần quán"
+      },
+      "columns": {
+        "selectAll": "Chọn tất cả trên trang",
+        "select": "Chọn báo cáo",
+        "date": "Ngày",
+        "staff": "Nhân viên",
+        "platform": "Nền tảng / %",
+        "gross": "Tổng thu",
+        "fee": "Phí app",
+        "staffAmount": "NV nhận",
+        "salonAmount": "Quán",
+        "paymentMethod": "Thanh toán",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "loading": "Đang tải báo cáo…",
+      "loadFailed": "Không tải được báo cáo.",
+      "empty": "Không có báo cáo nào trong bộ lọc này.",
+      "locked": "Tháng đã thanh toán lương, đã khoá",
+      "unknownStaff": "Nhân viên khác",
+      "actionFailed": "Thao tác không thành công. Vui lòng thử lại.",
+      "pagination": "Hiển thị {shown} / {total}",
+      "errors": {
+        "locked": "Tháng này đã thanh toán lương nên bị khoá. Chủ tiệm cần mở khoá ở màn Lương trước.",
+        "conflict": "Báo cáo vừa được người khác thay đổi. Tải lại rồi thử lại.",
+        "forbidden": "Bạn không có quyền với báo cáo này.",
+        "dateOutOfRange": "Nhân viên chỉ được báo cáo trong 3 ngày gần nhất; ngày cũ hơn nhờ quản lý nhập."
+      },
+      "reject": {
+        "title": "Từ chối {count} báo cáo",
+        "reason": "Lý do từ chối",
+        "reasonHint": "Nhân viên sẽ thấy lý do này. Tối đa 500 ký tự.",
+        "cancel": "Hủy",
+        "confirm": "Từ chối",
+        "rejecting": "Đang từ chối…"
+      },
+      "modal": {
+        "addTitle": "Nhập báo cáo khách",
+        "editTitle": "Sửa báo cáo khách",
+        "staff": "Nhân viên",
+        "me": "Chính tôi",
+        "date": "Ngày",
+        "time": "Giờ làm",
+        "platform": "Nền tảng",
+        "coursePrice": "Giá course (¥)",
+        "accessoryAmount": "Phụ kiện (¥)",
+        "paymentMethod": "Thanh toán",
+        "note": "Ghi chú",
+        "preview": {
+          "heading": "Hệ thống tính",
+          "incomplete": "Nhập giá course để xem số.",
+          "failed": "Chưa tính được.",
+          "loading": "Đang tính…",
+          "gross": "Tổng thu",
+          "fee": "Phí app",
+          "staff": "NV nhận ({rate}%)",
+          "salon": "Quán"
+        },
+        "created": "Đã gửi báo cáo, chờ duyệt",
+        "updated": "Đã cập nhật báo cáo",
+        "saveFailed": "Không lưu được báo cáo.",
+        "cancel": "Hủy",
+        "saving": "Đang lưu…",
+        "save": "Lưu",
+        "submit": "Gửi báo cáo"
       }
     },
     "marketing": {

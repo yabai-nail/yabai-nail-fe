@@ -9,6 +9,7 @@ import {
   HomeIcon,
   MegaphoneIcon,
   PaintBrushIcon,
+  ReceiptPercentIcon,
   ShieldCheckIcon,
   StarIcon,
   SwatchIcon,
@@ -42,6 +43,10 @@ export type AdminRoute = {
     | "accounts"
     | "operations"
     | "audit-logs"
+    | "sales-reports"
+    | "payroll"
+    | "report"
+    | "my-payroll"
     | "settings";
   readonly href: string;
   readonly icon: AdminNavigationIcon;
@@ -131,6 +136,13 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
       "report.staff.read.all",
       "report.export.all",
     ],
+  },
+  {
+    id: "sales-reports",
+    href: "/admin/sales-reports",
+    icon: ReceiptPercentIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["sales.report.read.branch", "sales.report.approve.branch"],
   },
   {
     id: "branches",

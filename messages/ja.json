@@ -220,6 +220,11 @@
         "label": "設定",
         "title": "設定",
         "description": "ネイルサロンの各種設定を行います。"
+      },
+      "sales-reports": {
+        "label": "売上報告",
+        "title": "お客様ごとの売上報告",
+        "description": "スタッフのお客様ごとの報告を承認します。承認済みのみ給与に反映されます。"
       }
     },
     "shell": {
@@ -1152,6 +1157,128 @@
         "loading": "通知を読み込み中…",
         "empty": "新しい通知はありません。",
         "listLabel": "新しい通知", "loadFailed": "通知を読み込めません。"
+      }
+    },
+    "salesReports": {
+      "filters": {
+        "month": "月",
+        "staff": "スタッフ",
+        "allStaff": "全スタッフ",
+        "platform": "媒体",
+        "allPlatforms": "全媒体",
+        "status": "状態",
+        "allStatuses": "全状態",
+        "paymentMethod": "支払方法",
+        "allPaymentMethods": "すべて"
+      },
+      "platform": {
+        "NAILIE_NEW": "NAILIE 新規",
+        "NAILIE_RETURNING": "NAILIE リピート",
+        "MINIMO": "MINIMO",
+        "HOT_PEPPER": "HOT PEPPER",
+        "APP": "YABAI NAIL アプリ"
+      },
+      "status": {
+        "PENDING": "承認待ち",
+        "APPROVED": "承認済み",
+        "REJECTED": "却下"
+      },
+      "paymentMethod": {
+        "CASH": "現金",
+        "PAYPAY": "PayPay",
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard"
+      },
+      "actions": {
+        "add": "代理入力",
+        "approveSelected": "選択を承認 ({count})",
+        "rejectSelected": "選択を却下 ({count})",
+        "dayLabel": "一日まとめて承認",
+        "approveDay": "承認待ちをすべて承認",
+        "approve": "承認",
+        "reject": "却下",
+        "reopen": "承認待ちに戻す",
+        "edit": "編集",
+        "loadMore": "さらに読み込む"
+      },
+      "decided": {
+        "APPROVE": "報告を承認しました",
+        "REJECT": "報告を却下しました",
+        "PENDING": "報告を承認待ちに戻しました"
+      },
+      "batchDone": "{decided} 件を処理しました",
+      "batchPartial": "{decided} 件を処理、{skipped} 件はスキップ（処理済み・ロック中・権限外）",
+      "summary": {
+        "count": "{count} 件",
+        "gross": "売上合計",
+        "fee": "アプリ手数料",
+        "staff": "スタッフ歩合",
+        "salon": "店舗取り分"
+      },
+      "columns": {
+        "selectAll": "このページをすべて選択",
+        "select": "報告を選択",
+        "date": "日付",
+        "staff": "スタッフ",
+        "platform": "媒体 / 率",
+        "gross": "売上",
+        "fee": "手数料",
+        "staffAmount": "スタッフ",
+        "salonAmount": "店舗",
+        "paymentMethod": "支払",
+        "status": "状態",
+        "actions": "操作"
+      },
+      "loading": "報告を読み込み中…",
+      "loadFailed": "報告を読み込めませんでした。",
+      "empty": "この条件の報告はありません。",
+      "locked": "給与支払済みのためロック中",
+      "unknownStaff": "他のスタッフ",
+      "actionFailed": "処理できませんでした。もう一度お試しください。",
+      "pagination": "{shown} / {total} 件を表示",
+      "errors": {
+        "locked": "この月は給与支払済みでロックされています。先にオーナーが給与画面でロック解除してください。",
+        "conflict": "この報告は他の人が変更しました。再読み込みしてやり直してください。",
+        "forbidden": "この報告を操作する権限がありません。",
+        "dateOutOfRange": "スタッフが報告できるのは直近3日までです。それ以前は管理者が入力してください。"
+      },
+      "reject": {
+        "title": "{count} 件を却下",
+        "reason": "却下理由",
+        "reasonHint": "スタッフに表示されます。500文字まで。",
+        "cancel": "キャンセル",
+        "confirm": "却下する",
+        "rejecting": "却下中…"
+      },
+      "modal": {
+        "addTitle": "お客様報告を入力",
+        "editTitle": "お客様報告を編集",
+        "staff": "スタッフ",
+        "me": "自分",
+        "date": "日付",
+        "time": "時刻",
+        "platform": "媒体",
+        "coursePrice": "コース料金 (¥)",
+        "accessoryAmount": "オプション (¥)",
+        "paymentMethod": "支払方法",
+        "note": "メモ",
+        "preview": {
+          "heading": "システム計算",
+          "incomplete": "コース料金を入力すると金額が表示されます。",
+          "failed": "計算できませんでした。",
+          "loading": "計算中…",
+          "gross": "売上",
+          "fee": "手数料",
+          "staff": "スタッフ ({rate}%)",
+          "salon": "店舗"
+        },
+        "created": "報告を送信しました（承認待ち）",
+        "updated": "報告を更新しました",
+        "saveFailed": "報告を保存できませんでした。",
+        "cancel": "キャンセル",
+        "saving": "保存中…",
+        "save": "保存",
+        "submit": "報告を送信"
       }
     },
     "marketing": {

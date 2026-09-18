@@ -220,6 +220,11 @@
         "label": "Settings",
         "title": "Settings",
         "description": "Manage the settings for your nail salon."
+      },
+      "sales-reports": {
+        "label": "Sales reports",
+        "title": "Per-customer sales reports",
+        "description": "Review each technician's customer reports; only approved reports reach payroll."
       }
     },
     "shell": {
@@ -1153,6 +1158,128 @@
         "loading": "Loading notifications…",
         "empty": "No new notifications.",
         "listLabel": "New notifications", "loadFailed": "Could not load notifications."
+      }
+    },
+    "salesReports": {
+      "filters": {
+        "month": "Month",
+        "staff": "Technician",
+        "allStaff": "All technicians",
+        "platform": "Platform",
+        "allPlatforms": "All platforms",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "paymentMethod": "Payment",
+        "allPaymentMethods": "All"
+      },
+      "platform": {
+        "NAILIE_NEW": "NAILIE – new customer",
+        "NAILIE_RETURNING": "NAILIE – returning",
+        "MINIMO": "MINIMO",
+        "HOT_PEPPER": "HOT PEPPER",
+        "APP": "YABAI NAIL app"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "paymentMethod": {
+        "CASH": "Cash",
+        "PAYPAY": "PayPay",
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard"
+      },
+      "actions": {
+        "add": "Report on behalf",
+        "approveSelected": "Approve selected ({count})",
+        "rejectSelected": "Reject selected ({count})",
+        "dayLabel": "Approve a whole day",
+        "approveDay": "Approve all pending",
+        "approve": "Approve",
+        "reject": "Reject",
+        "reopen": "Back to pending",
+        "edit": "Edit",
+        "loadMore": "Load more"
+      },
+      "decided": {
+        "APPROVE": "Report approved",
+        "REJECT": "Report rejected",
+        "PENDING": "Report reopened"
+      },
+      "batchDone": "{decided} reports processed",
+      "batchPartial": "{decided} reports processed, {skipped} skipped (already decided, locked or out of scope)",
+      "summary": {
+        "count": "{count} reports",
+        "gross": "Gross",
+        "fee": "App fees",
+        "staff": "Technician share",
+        "salon": "Salon share"
+      },
+      "columns": {
+        "selectAll": "Select all on this page",
+        "select": "Select report",
+        "date": "Date",
+        "staff": "Technician",
+        "platform": "Platform / rate",
+        "gross": "Gross",
+        "fee": "Fee",
+        "staffAmount": "Technician",
+        "salonAmount": "Salon",
+        "paymentMethod": "Payment",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "loading": "Loading reports…",
+      "loadFailed": "Could not load reports.",
+      "empty": "No reports match these filters.",
+      "locked": "Month paid out, locked",
+      "unknownStaff": "Other technician",
+      "actionFailed": "That did not go through. Please try again.",
+      "pagination": "Showing {shown} / {total}",
+      "errors": {
+        "locked": "This month has been paid out and is locked. The owner must unlock it on the Payroll screen first.",
+        "conflict": "Someone else just changed this report. Reload and try again.",
+        "forbidden": "You are not allowed to act on this report.",
+        "dateOutOfRange": "Technicians may only report the last 3 days; older days need a manager."
+      },
+      "reject": {
+        "title": "Reject {count} report(s)",
+        "reason": "Reason",
+        "reasonHint": "The technician will see this. Up to 500 characters.",
+        "cancel": "Cancel",
+        "confirm": "Reject",
+        "rejecting": "Rejecting…"
+      },
+      "modal": {
+        "addTitle": "New customer report",
+        "editTitle": "Edit customer report",
+        "staff": "Technician",
+        "me": "Myself",
+        "date": "Date",
+        "time": "Time",
+        "platform": "Platform",
+        "coursePrice": "Course price (¥)",
+        "accessoryAmount": "Accessories (¥)",
+        "paymentMethod": "Payment",
+        "note": "Note",
+        "preview": {
+          "heading": "Computed by the system",
+          "incomplete": "Enter the course price to see the split.",
+          "failed": "Could not compute.",
+          "loading": "Computing…",
+          "gross": "Gross",
+          "fee": "App fee",
+          "staff": "Technician ({rate}%)",
+          "salon": "Salon"
+        },
+        "created": "Report sent, pending approval",
+        "updated": "Report updated",
+        "saveFailed": "Could not save the report.",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "submit": "Send report"
       }
     },
     "marketing": {
