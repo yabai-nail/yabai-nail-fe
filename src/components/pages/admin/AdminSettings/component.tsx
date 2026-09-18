@@ -93,6 +93,7 @@ export function AdminSettingsComponent() {
         })(),
         status: member.active ? "working" : "leave",
         rate: row?.commissionRate ?? null,
+        appRate: row?.appCommissionRate ?? null,
         personalRevenue: row?.revenue ?? null,
         payout: row?.commissionAmount ?? null,
       } satisfies CommissionPolicy;

@@ -22,6 +22,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
 
   const [baseSalary, setBaseSalary] = useState<string>("");
   const [rate, setRate] = useState<string>("");
+  const [appRate, setAppRate] = useState<string>("");
   // The backend requires effectiveFrom and rejects the request outright without
   // it. The form never had this field, so saving a commission rate failed with
   // 422 every time and no staff member could ever be configured.
@@ -31,12 +32,16 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
 
   const initialBase = compensation?.baseSalary ?? 0;
   const initialRate = compensation?.commissionRate ?? 60;
+  // APP jobs pay their own rate; until the salon sets one the API applies the base rate.
+  const initialAppRate = compensation?.appCommissionRate ?? initialRate;
   const effectiveBase = baseSalary === "" ? initialBase : Number(baseSalary.replace(/\D/g, ""));
   const effectiveRate = rate === "" ? initialRate : Number(rate);
+  const effectiveAppRate = appRate === "" ? initialAppRate : Number(appRate);
   const canSubmit =
     !busy &&
     Number.isFinite(effectiveBase) &&
     Number.isFinite(effectiveRate) &&
+    Number.isFinite(effectiveAppRate) &&
     effectiveFrom !== "";
 
   async function submit() {
@@ -49,6 +54,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
         {
           baseSalary: effectiveBase,
           commissionRate: effectiveRate,
+          appCommissionRate: effectiveAppRate,
           effectiveFrom,
         },
         // The endpoint is version-checked; without If-Match it answers
@@ -59,6 +65,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       notifySuccess(tc("compensationSaved"));
       setBaseSalary("");
       setRate("");
+      setAppRate("");
       void query.mutate();
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : t("compensation.saveFailed"));
@@ -78,7 +85,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
       ) : query.error ? (
         <p role="alert" className="text-xs text-admin-danger">{t("compensation.loadFailed")}</p>
       ) : (
-        <dl className="grid grid-cols-2 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
+        <dl className="grid grid-cols-3 gap-2 rounded-lg bg-admin-soft p-3 text-center text-xs">
           <div>
             <dt className="text-admin-muted">{t("compensation.baseSalary")}</dt>
             <dd className="mt-1 font-bold text-admin-ink">{formatMoney(initialBase)}</dd>
@@ -87,10 +94,14 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
             <dt className="text-admin-muted">{t("compensation.commission")}</dt>
             <dd className="mt-1 font-bold text-admin-accent">{initialRate}%</dd>
           </div>
+          <div>
+            <dt className="text-admin-muted">{t("compensation.appCommission")}</dt>
+            <dd className="mt-1 font-bold text-admin-ink">{initialAppRate}%</dd>
+          </div>
         </dl>
       )}
 
-      <div className="grid grid-cols-[1fr_5rem] gap-2 text-xs">
+      <div className="grid grid-cols-[1fr_5rem_5rem] gap-2 text-xs">
         <label htmlFor={`${staffId}-base-salary`} className="flex flex-col gap-1">
           <span className="font-semibold text-admin-ink">{t("compensation.newBaseSalary")}</span>
           <input
@@ -112,6 +123,19 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
             value={rate}
             onChange={(event) => setRate(event.target.value)}
             placeholder={`${initialRate}`}
+            className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
+          />
+        </label>
+        <label htmlFor={`${staffId}-app-commission-rate`} className="flex flex-col gap-1">
+          <span className="font-semibold text-admin-ink">{t("compensation.appCommissionPercent")}</span>
+          <input
+            id={`${staffId}-app-commission-rate`}
+            type="number"
+            min={0}
+            max={100}
+            value={appRate}
+            onChange={(event) => setAppRate(event.target.value)}
+            placeholder={`${initialAppRate}`}
             className="rounded-lg border border-admin-border bg-admin-surface p-2 text-admin-ink"
           />
         </label>

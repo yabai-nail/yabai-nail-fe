@@ -16,6 +16,8 @@ export type StaffPerformanceRow = {
   readonly revenue: number | null;
   readonly orderCount: number | null;
   readonly commissionRate: number | null;
+  /** The rate for app-booked jobs; the read model reports it next to the base rate. */
+  readonly appCommissionRate: number | null;
   readonly commissionAmount: number | null;
 };
 
@@ -69,6 +71,7 @@ export function readStaffPerformanceRows(
       revenue: readNumber(row, ["revenue", "revenue"]),
       orderCount: readNumber(row, ["orderCount", "count"]),
       commissionRate: readNumber(row, ["commissionRate", "rate"]),
+      appCommissionRate: readNumber(row, ["appCommissionRate"]),
       commissionAmount: readNumber(row, ["commissionAmount", "commission", "commission"]),
     });
   }

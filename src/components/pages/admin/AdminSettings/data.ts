@@ -16,6 +16,8 @@ export type CommissionPolicy = {
   readonly roleLabel: string | null;
   readonly status: "working" | "leave";
   readonly rate: number | null;
+  /** The rate for app-booked jobs, when the read model reports one. */
+  readonly appRate: number | null;
   readonly personalRevenue: number | null;
   readonly payout: number | null;
 };

@@ -103,6 +103,7 @@
         "staff": "スタッフ",
         "status": "ステータス",
         "rate": "歩合率",
+        "appRate": "アプリ歩合率",
         "personalRevenue": "個人売上",
         "staffPayout": "スタッフの受取額",
         "salonShare": "店舗の取り分",
@@ -1574,6 +1575,8 @@
         "commission": "歩合",
         "newBaseSalary": "新しい固定給 (¥)",
         "commissionPercent": "歩合 (%)",
+        "appCommission": "アプリ歩合",
+        "appCommissionPercent": "アプリ歩合 (%)",
         "effectiveFrom": "適用開始日",
         "saving": "保存しています…",
         "submit": "歩合を更新", "heading": "歩合設定", "effectiveHint": "現在の設定の適用日より後を指定してください。確定済みの歩合は変更されません。"
