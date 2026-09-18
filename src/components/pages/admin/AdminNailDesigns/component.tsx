@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
@@ -10,6 +10,7 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { useAdminNailDesignProposals, useAdminNailDesigns, useAuth, type AdminNailDesignProposal } from "@/service";
 import { DesignModal } from "./DesignModal";
+import { DesignDeleteModal } from "./DesignDeleteModal";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
 import { ProposalReviewModal } from "./ProposalReviewModal";
 import {
@@ -45,6 +46,7 @@ export function AdminNailDesignsComponent() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<DesignRow | null>(null);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<DesignRow | null>(null);
   const [view, setView] = useState<"catalog" | "proposals">(canManageCatalog ? "catalog" : "proposals");
   const [reviewing, setReviewing] = useState<{ proposal: AdminNailDesignProposal; decision: "APPROVE" | "REJECT" } | null>(null);
 
@@ -115,7 +117,14 @@ export function AdminNailDesignsComponent() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {canManageCatalog ? <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button> : null}
+                      {canManageCatalog ? (
+                        <div className="flex justify-end gap-1">
+                          <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
+                          <Button isIconOnly size="sm" variant="ghost" className="rounded-lg text-admin-danger" aria-label={t("deleteDesign", { name: row.title })} onPress={() => setDeleting(row)}>
+                            <TrashIcon className="size-4" />
+                          </Button>
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 ))
@@ -131,6 +140,7 @@ export function AdminNailDesignsComponent() {
 
       {canManageCatalog && creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
       {canManageCatalog && editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canManageCatalog && deleting ? <DesignDeleteModal design={deleting} onClose={() => setDeleting(null)} onDeleted={() => void mutate()} /> : null}
       {canReviewProposals && reviewing ? <ProposalReviewModal proposal={reviewing.proposal} decision={reviewing.decision} onClose={() => setReviewing(null)} onSaved={() => { void proposals.mutate(); void mutate(); }} /> : null}
     </AdminPageLayout>
   );

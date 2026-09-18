@@ -29,6 +29,7 @@ const expectedFeatureOperationIds = [
   "PUT /api/v1/admin/services/{serviceId}/add-ons",
   "GET /api/v1/admin/home-banners",
   "PUT /api/v1/admin/home-banners",
+  "DELETE /api/v1/admin/nail-designs/{designId}",
 ] as const;
 
 describe("backend API operation catalog", () => {
@@ -54,11 +55,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(202);
+    expect(runtimeApiOperations).toHaveLength(203);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(202);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(193);
+    ).toBe(203);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(194);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);

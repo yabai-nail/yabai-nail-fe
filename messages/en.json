@@ -326,6 +326,18 @@
       "searchLabel": "Search nail designs",
       "searchPlaceholder": "Design name…",
       "add": "Add design",
+      "deleteDesign": "Delete {name}",
+      "delete": {
+        "title": "Delete nail design",
+        "confirm": "Delete “{name}”? This cannot be undone.",
+        "hint": "The design disappears from the customer app and from every customer's favourites. To hide it for a while instead, edit it and set its status to Hidden.",
+        "cancel": "Cancel",
+        "action": "Delete design",
+        "deleting": "Deleting…",
+        "success": "Deleted {name}",
+        "failed": "Could not delete the design. Reload and try again.",
+        "failedWithDetails": "Could not delete the design: {details}"
+      },
       "catalogTab": "Design catalog",
       "proposalsTab": "Pending proposals",
       "loading": "Loading nail designs…",

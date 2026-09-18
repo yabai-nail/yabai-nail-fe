@@ -326,6 +326,18 @@
       "searchLabel": "ネイルデザインを検索",
       "searchPlaceholder": "デザイン名…",
       "add": "デザインを追加",
+      "deleteDesign": "{name} を削除",
+      "delete": {
+        "title": "ネイルデザインを削除",
+        "confirm": "「{name}」を削除しますか？この操作は取り消せません。",
+        "hint": "削除するとお客様のアプリとお気に入りから消えます。一時的に隠すだけなら、編集で状態を「非表示」にしてください。",
+        "cancel": "キャンセル",
+        "action": "削除する",
+        "deleting": "削除中…",
+        "success": "{name} を削除しました",
+        "failed": "デザインを削除できませんでした。再読み込みしてもう一度お試しください。",
+        "failedWithDetails": "デザインを削除できませんでした: {details}"
+      },
       "catalogTab": "デザイン一覧",
       "proposalsTab": "承認待ち",
       "loading": "ネイルデザインを読み込み中…",
