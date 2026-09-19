@@ -1277,6 +1277,10 @@
         "REJECT": "報告を却下しました",
         "PENDING": "報告を承認待ちに戻しました"
       },
+      "actionDelete": "削除",
+      "deleted": "レポートを削除しました。",
+      "confirmDeleteTitle": "レポートを削除しますか？",
+      "confirmDeleteBody": "{date}（{amount}）のレポートを削除しますか？元に戻せません。",
       "batchDone": "{decided} 件を処理しました",
       "batchPartial": "{decided} 件を処理、{skipped} 件はスキップ（処理済み・ロック中・権限外）",
       "summary": {

@@ -1288,6 +1288,10 @@
         "REJECT": "Đã từ chối báo cáo",
         "PENDING": "Đã trả báo cáo về chờ duyệt"
       },
+      "actionDelete": "Xoá",
+      "deleted": "Đã xoá báo cáo.",
+      "confirmDeleteTitle": "Xoá báo cáo?",
+      "confirmDeleteBody": "Xoá báo cáo ngày {date} ({amount})? Không thể hoàn tác.",
       "batchDone": "Đã xử lý {decided} báo cáo",
       "batchPartial": "Đã xử lý {decided} báo cáo, bỏ qua {skipped} (đã duyệt, đã khoá hoặc ngoài phạm vi)",
       "summary": {

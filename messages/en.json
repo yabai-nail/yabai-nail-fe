@@ -1278,6 +1278,10 @@
         "REJECT": "Report rejected",
         "PENDING": "Report reopened"
       },
+      "actionDelete": "Delete",
+      "deleted": "Report deleted.",
+      "confirmDeleteTitle": "Delete report?",
+      "confirmDeleteBody": "Delete the report for {date} ({amount})? This cannot be undone.",
       "batchDone": "{decided} reports processed",
       "batchPartial": "{decided} reports processed, {skipped} skipped (already decided, locked or out of scope)",
       "summary": {
