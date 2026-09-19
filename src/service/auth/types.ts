@@ -12,6 +12,8 @@ export interface AuthenticatedAdmin {
   readonly role: AdminRole;
   readonly locale: string;
   readonly branchIds: string[];
+  /** Public URL of the account photo; null when none is set. */
+  readonly avatarUrl?: string | null;
 }
 
 export interface AdminSession {
@@ -145,6 +147,17 @@ export interface AdminBranchSwitchResult {
 export interface AdminPasswordChangeInput {
   readonly currentPassword: string;
   readonly newPassword: string;
+  readonly [field: string]: unknown;
+}
+
+/**
+ * Self-service profile edit for the signed-in admin. Only the display name and avatar are
+ * editable here; `avatarMediaId` follows the media contract (omit = keep, null/"" = clear,
+ * a media id = replace).
+ */
+export interface AdminProfileUpdateInput {
+  readonly displayName?: string;
+  readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 

@@ -11,6 +11,7 @@ import {
 
 const expectedFeatureOperationIds = [
   "GET /api/v1/admin/auth/session",
+  "PATCH /api/v1/admin/auth/profile",
   "GET /api/v1/admin/conversations",
   "GET /api/v1/admin/conversations/{conversationId}/messages",
   "POST /api/v1/admin/conversations/{conversationId}/messages",
@@ -67,11 +68,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(215);
+    expect(runtimeApiOperations).toHaveLength(216);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(215);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(206);
+    ).toBe(216);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(207);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);

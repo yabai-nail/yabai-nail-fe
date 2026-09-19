@@ -40,6 +40,7 @@ function OwnerMenu() {
           controls read as the same kind of thing. */}
       <Dropdown.Trigger className="flex min-h-11 items-center gap-3 rounded-lg border border-admin-border px-3 text-left outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
         <Avatar size="sm" color="accent">
+          {user?.avatarUrl ? <Avatar.Image src={user.avatarUrl} alt={displayName} className="object-cover" /> : null}
           <Avatar.Fallback>{initialsOf(displayName)}</Avatar.Fallback>
         </Avatar>
         <span className="hidden leading-tight sm:block">

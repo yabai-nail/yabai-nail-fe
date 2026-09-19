@@ -38,6 +38,8 @@ interface AuthContextValue {
   readonly capabilities: ReadonlyArray<string> | null;
   readonly login: (input: AdminLoginInput) => Promise<AdminSession>;
   readonly logout: () => Promise<void>;
+  /** Merge a self-service profile edit (name/avatar) into the cached user so the shell updates now. */
+  readonly applyProfileUpdate: (patch: Partial<AuthenticatedAdmin>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -119,6 +121,10 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     [adoptSession],
   );
 
+  const applyProfileUpdate = useCallback((patch: Partial<AuthenticatedAdmin>) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.revokeCurrentSession();
@@ -188,8 +194,9 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       capabilities,
       login,
       logout,
+      applyProfileUpdate,
     }),
-    [activeBranchId, capabilities, login, logout, permissions, sessionId, status, user],
+    [activeBranchId, applyProfileUpdate, capabilities, login, logout, permissions, sessionId, status, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

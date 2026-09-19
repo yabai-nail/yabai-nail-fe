@@ -20,6 +20,7 @@ import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { CommissionTable } from "./CommissionTable";
 import { SettingsAside } from "./SettingsAside";
+import { AccountProfileSettings } from "./AccountProfileSettings";
 import { AccountSecuritySettings } from "./AccountSecuritySettings";
 import type { CommissionPolicy } from "./data";
 
@@ -162,7 +163,10 @@ export function AdminSettingsComponent() {
       ) : activeTab === "appearance" ? (
         <AppearanceSettings />
       ) : activeTab === "account" ? (
-        <AccountSecuritySettings />
+        <>
+          <AccountProfileSettings />
+          <AccountSecuritySettings />
+        </>
       ) : activeTab === "booking" && canReadBooking && branchId ? (
         <BranchSettingsForm branchId={branchId} />
       ) : (
