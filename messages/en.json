@@ -279,7 +279,7 @@
     "login": {
       "heading": "Admin sign-in",
       "subheading": "For YABAI managers and owners.",
-      "phone": "Phone number",
+      "phone": "Phone number or email",
       "password": "Password",
       "passwordPlaceholder": "Enter your password",
       "hidePassword": "Hide password",
