@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { BanknotesIcon, BuildingStorefrontIcon, PlusIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
-import { Button, Card, Tabs } from "@heroui/react";
+import { Button, Card, Modal, Tabs } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -11,6 +11,7 @@ import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
+import { notifySuccess } from "@/lib/app-toast";
 import {
   averageCommissionRate,
   currentMonthPeriod,
@@ -18,6 +19,7 @@ import {
   type StaffPerformanceRow,
 } from "@/lib/admin-staff-performance";
 import {
+  adminService,
   useAdminBranch,
   useAdminBranchList,
   useAdminStaff,
@@ -75,6 +77,7 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
 
 export function AdminStaffComponent() {
   const t = useTranslations("admin.staff");
+  const tc = useTranslations("admin.common");
   const { branchId, branchIds } = useAdminBranch();
   const canWriteStaff = useAdminPermission("staff.write.branch");
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
@@ -112,6 +115,9 @@ export function AdminStaffComponent() {
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  // The member awaiting a deactivate confirmation (reactivation is applied without a prompt).
+  const [confirmDeactivate, setConfirmDeactivate] = useState<StaffMember | null>(null);
 
   const performanceById = useMemo(
     () => indexStaffPerformance(performance.data?.rows),
@@ -133,6 +139,28 @@ export function AdminStaffComponent() {
   const detailedStaff = staffDetail.data
     ? toStaffMember(staffDetail.data, performanceById.get(staffDetail.data.id), t("unnamed"), branchNameById.get(staffDetail.data.branchId) ?? null)
     : selected;
+
+  // Soft delete: staff have appointment/payroll history, so "remove" is a status flip. Deactivating
+  // asks first; reactivating applies straight away. Failures (e.g. open appointments) surface via
+  // the global mutation-error toast.
+  async function runToggleActive(member: StaffMember, nextActive: boolean) {
+    setBusyId(member.id);
+    try {
+      await adminService.updateStaff(member.id, { status: nextActive ? "ACTIVE" : "INACTIVE" }, member.version);
+      notifySuccess(tc("staffUpdated"));
+      setConfirmDeactivate(null);
+      void mutateStaff();
+      void staffDetail.mutate();
+    } catch {
+      // Message already shown by the global toast.
+    } finally {
+      setBusyId(null);
+    }
+  }
+  function handleToggleActive(member: StaffMember) {
+    if (member.status === "working") setConfirmDeactivate(member);
+    else void runToggleActive(member, true);
+  }
 
   const kpi = performance.data?.kpi;
   const revenue = kpi?.revenue ?? null;
@@ -254,6 +282,10 @@ export function AdminStaffComponent() {
                 staff={pagedStaff}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
+                canWrite={canWriteStaff}
+                busyId={busyId}
+                onEdit={setEditing}
+                onToggleActive={handleToggleActive}
               /></Card.Content>
             </Card>
             <div className="flex justify-end">
@@ -302,6 +334,33 @@ export function AdminStaffComponent() {
             void staffDetail.mutate();
           }}
         />
+      ) : null}
+      {confirmDeactivate ? (
+        <Modal isOpen onOpenChange={(open) => { if (!open && busyId === null) setConfirmDeactivate(null); }}>
+          <Modal.Backdrop>
+            <Modal.Container size="sm" placement="center">
+              <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
+                <Modal.Header className="border-b border-admin-border px-5 py-4">
+                  <Modal.Heading className="text-base font-bold text-admin-ink">{t("actionDeactivate")}</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="px-5 py-4 text-sm text-admin-ink">
+                  {t("deactivateConfirm", { name: confirmDeactivate.name })}
+                </Modal.Body>
+                <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
+                  <Button variant="ghost" className="rounded-lg" isDisabled={busyId !== null} onPress={() => setConfirmDeactivate(null)}>{t("create.cancel")}</Button>
+                  <Button
+                    variant="ghost"
+                    className="rounded-lg bg-admin-danger text-white hover:bg-admin-danger/90"
+                    isDisabled={busyId !== null}
+                    onPress={() => void runToggleActive(confirmDeactivate, false)}
+                  >
+                    {busyId !== null ? t("compensation.saving") : t("actionDeactivate")}
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
       ) : null}
     </AdminPageLayout>
   );
