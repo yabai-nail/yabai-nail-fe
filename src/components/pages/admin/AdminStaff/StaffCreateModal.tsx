@@ -4,8 +4,9 @@ import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
-import { adminService, useAdminPermission } from "@/service";
+import { adminMediaService, adminService, useAdminPermission } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
+import { AdminAvatarField, useAvatarField } from "@/components/blocks/admin/AdminAvatarField";
 import { StaffBranchField, type StaffBranchOption } from "./StaffBranchField";
 import { canCreateStaff } from "./data";
 
@@ -46,23 +47,29 @@ export function StaffCreateModal({
   // call would leave an account behind, and a retry that created a second one would leave two.
   // Holding the id here means the retry reuses the account it already made.
   const [accountId, setAccountId] = useState<string | null>(null);
+  const avatar = useAvatarField(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
-  const canSubmit = canCreateStaff({ name, withAccount, phone, password }) && !busy;
+  const canSubmit = canCreateStaff({ name, withAccount, phone, password }) && !avatar.blocked && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
     setBusy(true);
     setError(null);
     let issuedAccountId = accountId;
+    // Uploaded before the create call and deleted again if that call fails, so a rejected save
+    // never leaves an orphan image behind.
+    let uploadedMediaId: string | null = null;
     try {
       if (withAccount) {
         // Creating a STAFF account now provisions and links its roster profile on the backend
         // (mutateAccount), so this single call is the whole job. A separate createStaff would
         // link the same account again and leave two profiles on it.
         if (issuedAccountId === null) {
+          const resolved = await avatar.resolve();
+          uploadedMediaId = resolved.uploadedMediaId;
           const account = await adminService.createAccount({
             phone: phone.trim(),
             displayName: name.trim(),
@@ -71,21 +78,33 @@ export function StaffCreateModal({
             role: "STAFF",
             branchIds: [selectedBranchId],
             temporaryPassword: password.trim(),
+            // Sets the account photo; the backend seeds the provisioned roster profile with it too.
+            ...resolved.patch,
           });
           issuedAccountId = account.id;
           setAccountId(account.id);
         }
       } else {
         // A roster-only technician who never signs in: create the profile with no linked login.
+        const resolved = await avatar.resolve();
+        uploadedMediaId = resolved.uploadedMediaId;
         await adminService.createStaff({
           displayName: name.trim(),
           branchId: selectedBranchId,
+          ...resolved.patch,
         });
       }
       notifySuccess(tc("staffCreated"));
       onCreated();
       onClose();
     } catch (err) {
+      if (uploadedMediaId) {
+        try {
+          await adminMediaService.deleteMedia(uploadedMediaId);
+        } catch {
+          // Keep the actionable create error; the orphan upload can be swept up later.
+        }
+      }
       const message = err instanceof Error && err.message ? err.message : t("create.failed");
       // Naming the half that did land is the difference between a retry and a hunt through
       // the accounts screen for a login nobody remembers issuing.
@@ -118,6 +137,8 @@ export function StaffCreateModal({
                   autoFocus
                 />
               </label>
+
+              <AdminAvatarField field={avatar} name={name} busy={busy} />
 
               {/* Locked once an account exists: its own `branchIds` was written with the branch
                   selected at the time, so letting a retry file the technician somewhere else

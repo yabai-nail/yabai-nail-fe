@@ -8,6 +8,7 @@
       "conversationArchived": "Đã lưu trữ hội thoại", "conversationUpdated": "Đã cập nhật trạng thái hội thoại", "membershipFound": "Đã tra cứu thẻ của {name}.", "customersFound": "Tìm thấy {count} khách.", "reportExportCreated": "Đã tạo yêu cầu xuất báo cáo", "reviewResolved": "Đã xử lý đánh giá", "reviewReopened": "Đã mở lại đánh giá", "reviewReplySent": "Đã gửi phản hồi đánh giá", "surchargeUpdated": "Đã cập nhật phụ thu", "surchargeCreated": "Đã thêm phụ thu", "settingsSaved": "Đã cập nhật cài đặt", "compensationSaved": "Đã cập nhật lương và hoa hồng", "staffCreated": "Đã thêm nhân viên", "staffUpdated": "Đã cập nhật nhân viên", "leaveApproved": "Đã duyệt yêu cầu nghỉ", "leaveRejected": "Đã từ chối yêu cầu nghỉ", "shiftCreated": "Đã thêm ca làm việc", "leaveRequested": "Đã gửi yêu cầu nghỉ", "skillsSaved": "Đã cập nhật kỹ năng nhân viên"
     },
     "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
+    "avatar": {"title":"Ảnh đại diện","requirements":"JPG, PNG hoặc WebP · tối đa 5 MB","pick":"Chọn ảnh từ máy","replace":"Đổi ảnh","remove":"Xóa ảnh","cancel":"Bỏ ảnh đã chọn","undo":"Hoàn tác","removalPending":"Ảnh sẽ bị xóa khi lưu.","alt":"Ảnh đại diện của {name}","zoomOpen":"Phóng to ảnh của {name}","close":"Đóng","errors":{"unsupportedType":"Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.","empty":"Tệp ảnh đang trống.","tooLarge":"Ảnh không được vượt quá 5 MB."}},
     "settings": {
       "language": {
         "heading": "Ngôn ngữ hiển thị",

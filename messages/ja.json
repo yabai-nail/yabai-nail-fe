@@ -8,6 +8,7 @@
       "conversationArchived": "会話をアーカイブしました", "conversationUpdated": "会話のステータスを更新しました", "membershipFound": "{name} の会員情報を確認しました。", "customersFound": "{count}人の顧客が見つかりました。", "reportExportCreated": "レポートのエクスポートを開始しました", "reviewResolved": "レビューを対応済みにしました", "reviewReopened": "レビューを再開しました", "reviewReplySent": "レビューへの返信を送信しました", "surchargeUpdated": "追加料金を更新しました", "surchargeCreated": "追加料金を追加しました", "settingsSaved": "設定を更新しました", "compensationSaved": "給与と歩合を更新しました", "staffCreated": "スタッフを追加しました", "staffUpdated": "スタッフを更新しました", "leaveApproved": "休暇申請を承認しました", "leaveRejected": "休暇申請を却下しました", "shiftCreated": "シフトを追加しました", "leaveRequested": "休暇申請を送信しました", "skillsSaved": "スタッフのスキルを更新しました"
     },
     "pagination": { "label": "ページネーション", "previous": "前のページ", "next": "次のページ", "page": "{page}ページ" },
+    "avatar": {"title":"プロフィール画像","requirements":"JPG・PNG・WebP・最大5MB","pick":"画像を選択","replace":"画像を変更","remove":"画像を削除","cancel":"選択を取り消す","undo":"元に戻す","removalPending":"保存時に画像を削除します。","alt":"{name}のプロフィール画像","zoomOpen":"{name}の画像を拡大","close":"閉じる","errors":{"unsupportedType":"JPG・PNG・WebP形式のみ対応しています。","empty":"画像ファイルが空です。","tooLarge":"画像は5MBを超えられません。"}},
     "settings": {
       "language": {
         "heading": "表示言語",

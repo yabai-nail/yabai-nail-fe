@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { NoSymbolIcon, CheckCircleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import { Avatar, Button, Chip } from "@heroui/react";
+import { Button, Chip } from "@heroui/react";
+import { AdminAvatarZoom } from "@/components/blocks/admin/AdminAvatarField";
 import { formatMoney } from "@/lib/admin-format";
 import type { StaffMember } from "./data";
 
@@ -48,13 +49,15 @@ export function StaffTable({ staff, selectedId, onSelect, canWrite, busyId, onEd
               onClick={() => onSelect(member.id)}
             >
               <td className="px-3 py-2">
-                <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
-                  <Avatar size="sm" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
-                  <span className="flex flex-col items-start leading-tight">
-                    <strong>{member.name}</strong>
-                    {member.phone ? <span className="text-xs font-normal tabular-nums text-admin-muted">{member.phone}</span> : null}
-                  </span>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <AdminAvatarZoom src={member.avatarUrl} name={member.name} size="sm" />
+                  <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
+                    <span className="flex flex-col items-start leading-tight">
+                      <strong>{member.name}</strong>
+                      {member.phone ? <span className="text-xs font-normal tabular-nums text-admin-muted">{member.phone}</span> : null}
+                    </span>
+                  </Button>
+                </div>
               </td>
               <td className="px-3 py-2">
                 <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>

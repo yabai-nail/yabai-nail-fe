@@ -4,10 +4,11 @@ import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 
-import { adminService, useAdminBranchList } from "@/service";
+import { API_BASE_URL, adminMediaService, adminService, useAdminBranchList } from "@/service";
 import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
 import { notifySuccess } from "@/lib/app-toast";
 import type { AccountRow } from "./data";
+import { AdminAvatarField, mediaIdFromPublicUrl, useAvatarField } from "@/components/blocks/admin/AdminAvatarField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
@@ -36,6 +37,7 @@ export function AccountModal({
   const [status, setStatus] = useState(account?.status ?? "ACTIVE");
   const [password, setPassword] = useState("");
   const [branchIds, setBranchIds] = useState<ReadonlyArray<string>>(account?.branchIds ?? []);
+  const avatar = useAvatarField(account?.avatarUrl ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +48,7 @@ export function AccountModal({
     displayName.trim().length >= 2 &&
     (!requiresBranch || branchIds.length > 0) &&
     (isEdit || (isAdminPhone(phone) && isStrongTemporaryPassword(password))) &&
+    !avatar.blocked &&
     !busy;
 
   const toggleBranch = (branchId: string) => {
@@ -60,13 +63,28 @@ export function AccountModal({
     if (!canSubmit) return;
     setBusy(true);
     setError(null);
+    let uploadedMediaId: string | null = null;
     try {
+      const resolved = await avatar.resolve();
+      uploadedMediaId = resolved.uploadedMediaId;
       if (isEdit && account) {
         await adminService.updateAccount(
           account.id,
-          { displayName: displayName.trim(), role, status, branchIds: role === "OWNER" ? [] : branchIds },
+          { displayName: displayName.trim(), role, status, branchIds: role === "OWNER" ? [] : branchIds, ...resolved.patch },
           account.version,
         );
+        // The old photo is now unreferenced when it was replaced or removed. Best-effort cleanup;
+        // the account save has already landed.
+        if (avatar.mode !== "keep") {
+          const previous = mediaIdFromPublicUrl(account.avatarUrl, API_BASE_URL);
+          if (previous) {
+            try {
+              await adminMediaService.deleteMedia(previous);
+            } catch {
+              // Cleanup is best-effort; the sweep can catch it later.
+            }
+          }
+        }
       } else {
         await adminService.createAccount({
           phone: phone.trim(),
@@ -74,12 +92,20 @@ export function AccountModal({
           role,
           branchIds: role === "OWNER" ? [] : branchIds,
           temporaryPassword,
+          ...resolved.patch,
         });
       }
       notifySuccess(isEdit ? tc("accountUpdated") : tc("accountCreated"));
       onSaved();
       onClose();
     } catch (err) {
+      if (uploadedMediaId) {
+        try {
+          await adminMediaService.deleteMedia(uploadedMediaId);
+        } catch {
+          // Keep the actionable save error; the orphan upload can be swept up later.
+        }
+      }
       setError(err instanceof Error && err.message ? err.message : t("modal.saveFailed"));
     } finally {
       setBusy(false);
@@ -109,6 +135,7 @@ export function AccountModal({
                   <input className={inputClass} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={t("modal.displayNamePlaceholder")} autoFocus />
                 </label>
               </div>
+              <AdminAvatarField field={avatar} name={displayName} busy={busy} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("columns.role")}</span>

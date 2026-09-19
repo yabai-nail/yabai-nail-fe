@@ -8,6 +8,8 @@ export type AccountRow = {
   readonly role: string;
   readonly status: string;
   readonly branchIds?: ReadonlyArray<string>;
+  /** Public URL of the account photo, or null when none is set. */
+  readonly avatarUrl: string | null;
   readonly version: number;
 };
 
@@ -19,15 +21,16 @@ export function adaptAccount(account: AdminAccount): AccountRow {
     role: account.role,
     status: account.accountStatus,
     branchIds: account.branchIds,
+    avatarUrl: account.avatarUrl ?? null,
     version: account.version,
   };
 }
 
 export const accountFixtures: ReadonlyArray<AccountRow> = [
-  { id: "ac1", phone: "0900000003", displayName: "Chủ tiệm", role: "OWNER", status: "ACTIVE", version: 1 },
-  { id: "ac2", phone: "0900000002", displayName: "Thảo (Quản lý)", role: "MANAGER", status: "ACTIVE", version: 2 },
-  { id: "ac3", phone: "0900000010", displayName: "Yuki", role: "STAFF", status: "ACTIVE", version: 1 },
-  { id: "ac4", phone: "0900000011", displayName: "Mai", role: "STAFF", status: "SUSPENDED", version: 3 },
+  { id: "ac1", phone: "0900000003", displayName: "Chủ tiệm", role: "OWNER", status: "ACTIVE", avatarUrl: null, version: 1 },
+  { id: "ac2", phone: "0900000002", displayName: "Thảo (Quản lý)", role: "MANAGER", status: "ACTIVE", avatarUrl: null, version: 2 },
+  { id: "ac3", phone: "0900000010", displayName: "Yuki", role: "STAFF", status: "ACTIVE", avatarUrl: null, version: 1 },
+  { id: "ac4", phone: "0900000011", displayName: "Mai", role: "STAFF", status: "SUSPENDED", avatarUrl: null, version: 3 },
 ];
 
 export function accountRoles(rows: ReadonlyArray<AccountRow>): ReadonlyArray<string> {

@@ -64,6 +64,7 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
     name,
     initials: deriveInitials(name),
     phone: server.account?.phone ?? "",
+    avatarUrl: server.avatarUrl ?? null,
     status: server.active ? "working" : "leave",
     revenue: performance?.revenue ?? null,
     commissionRate: performance?.commissionRate ?? null,

@@ -11,6 +11,7 @@ const member: StaffMember = {
   name: "Yuki",
   initials: "YU",
   phone: "0900000001",
+  avatarUrl: null,
   status: "working" as const,
   revenue: 10_000,
   commissionRate: 10,

@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
-import { adminService, useAdminBranch, useAuth, type AdminBranch } from "@/service";
+import { API_BASE_URL, adminMediaService, adminService, useAdminBranch, useAuth, type AdminBranch } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
+import { AdminAvatarField, mediaIdFromPublicUrl, useAvatarField } from "@/components/blocks/admin/AdminAvatarField";
 import { StaffBranchField } from "./StaffBranchField";
 import { staffSaveErrorKey, type StaffMember } from "./data";
 
@@ -29,6 +30,7 @@ export function StaffEditModal({
   const [displayName, setDisplayName] = useState(member.name);
   const [branchId, setBranchId] = useState(member.branchId);
   const [active, setActive] = useState(member.status === "working");
+  const avatar = useAvatarField(member.avatarUrl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Only branches this admin may assign to, mirroring the API's own scope rule: an owner may
@@ -44,13 +46,16 @@ export function StaffEditModal({
     [branches, branchIds, isOwner],
   );
 
-  const canSubmit = displayName.trim().length > 0 && branchId !== "" && !busy;
+  const canSubmit = displayName.trim().length > 0 && branchId !== "" && !avatar.blocked && !busy;
 
   async function submit() {
     if (!canSubmit) return;
     setBusy(true);
     setError(null);
+    let uploadedMediaId: string | null = null;
     try {
+      const resolved = await avatar.resolve();
+      uploadedMediaId = resolved.uploadedMediaId;
       await adminService.updateStaff(
         member.id,
         {
@@ -60,9 +65,22 @@ export function StaffEditModal({
           // it while the staff member still has open appointments, and that refusal must not
           // fire on a save that only renamed someone.
           ...(branchId !== member.branchId ? { branchId } : {}),
+          ...resolved.patch,
         },
         member.version,
       );
+      // The photo the row had before is replaced or cleared here, so its media record is now an
+      // orphan. Best-effort: the save has already succeeded regardless.
+      if (avatar.mode !== "keep") {
+        const previous = mediaIdFromPublicUrl(member.avatarUrl, API_BASE_URL);
+        if (previous) {
+          try {
+            await adminMediaService.deleteMedia(previous);
+          } catch {
+            // Cleanup is best-effort; the sweep can catch it later.
+          }
+        }
+      }
       // The list behind the modal is filtered to the current branch, so a moved staff member
       // vanishes from it the moment this succeeds. Say where they went, or the move reads as
       // a deletion.
@@ -73,6 +91,13 @@ export function StaffEditModal({
       onSaved();
       onClose();
     } catch (thrown) {
+      if (uploadedMediaId) {
+        try {
+          await adminMediaService.deleteMedia(uploadedMediaId);
+        } catch {
+          // Keep the actionable save error; the orphan upload can be swept up later.
+        }
+      }
       if (staffSaveErrorKey(thrown) === "openAppointments") {
         setError(t("edit.openAppointments"));
       } else {
@@ -100,6 +125,7 @@ export function StaffEditModal({
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                 />
               </label>
+              <AdminAvatarField field={avatar} name={displayName} busy={busy} />
               {/* The shared field, fed only the branches this admin may assign to: an owner the
                   whole chain, a manager exactly their own. The API refuses anything else with
                   a 403, so nobody is offered a branch only to be told no. */}

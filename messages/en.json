@@ -8,6 +8,7 @@
       "conversationArchived": "Conversation archived", "conversationUpdated": "Conversation status updated", "membershipFound": "Membership found for {name}.", "customersFound": "Found {count} customers.", "reportExportCreated": "Report export requested", "reviewResolved": "Review resolved", "reviewReopened": "Review reopened", "reviewReplySent": "Review reply sent", "surchargeUpdated": "Surcharge updated", "surchargeCreated": "Surcharge added", "settingsSaved": "Settings updated", "compensationSaved": "Salary and commission updated", "staffCreated": "Staff member added", "staffUpdated": "Staff member updated", "leaveApproved": "Leave request approved", "leaveRejected": "Leave request rejected", "shiftCreated": "Shift added", "leaveRequested": "Leave request submitted", "skillsSaved": "Staff skills updated"
     },
     "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
+    "avatar": {"title":"Profile photo","requirements":"JPG, PNG or WebP · up to 5 MB","pick":"Choose a file","replace":"Replace photo","remove":"Remove photo","cancel":"Discard selection","undo":"Undo","removalPending":"The photo will be removed when you save.","alt":"{name}'s profile photo","zoomOpen":"Enlarge {name}'s photo","close":"Close","errors":{"unsupportedType":"Only JPG, PNG or WebP images are supported.","empty":"The image file is empty.","tooLarge":"The image must not exceed 5 MB."}},
     "settings": {
       "language": {
         "heading": "Display language",

@@ -130,6 +130,8 @@ export interface AdminStaffMember {
   readonly id: string;
   readonly displayName: string;
   readonly branchId: string;
+  /** Public media URL of the profile photo; null when none is set. */
+  readonly avatarUrl?: string | null;
   /** The login this profile belongs to; null until linked. A STAFF login without a profile cannot sign in. */
   readonly accountId?: string | null;
   readonly serviceIds: ReadonlyArray<string>;
@@ -426,6 +428,8 @@ export interface AdminStaffDraft {
   readonly branchId: string;
   readonly serviceIds?: ReadonlyArray<string>;
   readonly status?: "ACTIVE" | "INACTIVE";
+  /** A freshly uploaded media id to store as the profile photo; null/"" clears it, omit to keep. */
+  readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
@@ -436,6 +440,8 @@ export interface AdminStaffPatch {
   readonly branchId?: string;
   readonly serviceIds?: ReadonlyArray<string>;
   readonly status?: "ACTIVE" | "INACTIVE";
+  /** A freshly uploaded media id to store as the profile photo; null/"" clears it, omit to keep. */
+  readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
@@ -1108,6 +1114,8 @@ export interface AdminAccount {
   readonly displayName: string;
   readonly role: string;
   readonly branchIds?: ReadonlyArray<string>;
+  /** Public media URL of the account photo; null when none is set. */
+  readonly avatarUrl?: string | null;
   /** Backend trả về `accountStatus` (ACTIVE/INACTIVE/DISABLED/...), không phải `status`. */
   readonly accountStatus: string;
   readonly version: number;
@@ -1120,6 +1128,8 @@ export interface AdminAccountDraft {
   readonly role: string;
   readonly branchIds?: ReadonlyArray<string>;
   readonly temporaryPassword?: string;
+  /** A freshly uploaded media id to store as the account photo; null/"" clears it, omit to keep. */
+  readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
@@ -1128,6 +1138,8 @@ export interface AdminAccountPatch {
   readonly role?: string;
   readonly branchIds?: ReadonlyArray<string>;
   readonly status?: string;
+  /** A freshly uploaded media id to store as the account photo; null/"" clears it, omit to keep. */
+  readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }
 
