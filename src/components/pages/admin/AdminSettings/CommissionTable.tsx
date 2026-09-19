@@ -25,6 +25,7 @@ export function CommissionTable({
             <th scope="col" className="px-4 py-3">{t("table.staff")}</th>
             <th scope="col" className="px-3 py-3">{t("table.status")}</th>
             <th scope="col" className="px-3 py-3">{t("table.rate")}</th>
+            <th scope="col" className="px-3 py-3">{t("table.appRate")}</th>
             <th scope="col" className="px-3 py-3">{t("table.personalRevenue")}</th>
             <th scope="col" className="px-3 py-3">{t("table.staffPayout")}</th>
             <th scope="col" className="px-3 py-3">{t("table.salonShare")}</th>
@@ -57,6 +58,11 @@ export function CommissionTable({
                 <td className="px-3 py-3">
                   <strong className="text-lg text-admin-accent">
                     {typeof policy.rate === "number" ? `${policy.rate}%` : MISSING}
+                  </strong>
+                </td>
+                <td className="px-3 py-3">
+                  <strong className="text-admin-ink">
+                    {typeof policy.appRate === "number" ? `${policy.appRate}%` : MISSING}
                   </strong>
                 </td>
                 <td className="px-3 py-3 font-semibold">{formatOptionalMoney(policy.personalRevenue)}</td>

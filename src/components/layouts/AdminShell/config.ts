@@ -4,16 +4,20 @@ import {
   CalendarDaysIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
+  ClipboardDocumentCheckIcon,
   ClipboardDocumentListIcon,
   Cog6ToothIcon,
+  CurrencyYenIcon,
   HomeIcon,
   MegaphoneIcon,
   PaintBrushIcon,
+  ReceiptPercentIcon,
   ShieldCheckIcon,
   StarIcon,
   SwatchIcon,
   UserGroupIcon,
   UsersIcon,
+  WalletIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
@@ -42,6 +46,10 @@ export type AdminRoute = {
     | "accounts"
     | "operations"
     | "audit-logs"
+    | "sales-reports"
+    | "payroll"
+    | "report"
+    | "my-payroll"
     | "settings";
   readonly href: string;
   readonly icon: AdminNavigationIcon;
@@ -131,6 +139,34 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
       "report.staff.read.all",
       "report.export.all",
     ],
+  },
+  {
+    id: "sales-reports",
+    href: "/admin/sales-reports",
+    icon: ReceiptPercentIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["sales.report.read.branch", "sales.report.approve.branch"],
+  },
+  {
+    id: "payroll",
+    href: "/admin/payroll",
+    icon: CurrencyYenIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["payroll.read.branch"],
+  },
+  {
+    id: "report",
+    href: "/admin/report",
+    icon: ClipboardDocumentCheckIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["sales.report.write.own"],
+  },
+  {
+    id: "my-payroll",
+    href: "/admin/my-payroll",
+    icon: WalletIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["payroll.read.own"],
   },
   {
     id: "branches",

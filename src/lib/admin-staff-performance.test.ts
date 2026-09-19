@@ -12,6 +12,7 @@ const verifiedRow = {
   revenue: 2840000,
   orderCount: 4,
   commissionRate: 60,
+  appCommissionRate: 50,
   commissionAmount: 1704000,
   version: 3,
 };
@@ -33,6 +34,7 @@ describe("readStaffPerformanceRows", () => {
         revenue: 2840000,
         orderCount: 4,
         commissionRate: 60,
+        appCommissionRate: 50,
         commissionAmount: 1704000,
       },
     ]);
@@ -51,6 +53,7 @@ describe("readStaffPerformanceRows", () => {
       revenue: null,
       orderCount: null,
       commissionRate: null,
+      appCommissionRate: null,
       commissionAmount: null,
     });
   });

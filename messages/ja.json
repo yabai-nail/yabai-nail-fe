@@ -103,6 +103,7 @@
         "staff": "スタッフ",
         "status": "ステータス",
         "rate": "歩合率",
+        "appRate": "アプリ歩合率",
         "personalRevenue": "個人売上",
         "staffPayout": "スタッフの受取額",
         "salonShare": "店舗の取り分",
@@ -220,6 +221,26 @@
         "label": "設定",
         "title": "設定",
         "description": "ネイルサロンの各種設定を行います。"
+      },
+      "sales-reports": {
+        "label": "売上報告",
+        "title": "お客様ごとの売上報告",
+        "description": "スタッフのお客様ごとの報告を承認します。承認済みのみ給与に反映されます。"
+      },
+      "payroll": {
+        "label": "給与",
+        "title": "月次給与",
+        "description": "スタッフごとの承認済み歩合を集計し、支払済みにしてExcelへ出力します。"
+      },
+      "report": {
+        "label": "お客様報告",
+        "title": "お客様報告",
+        "description": "施術したお客様ごとに報告します。承認後に給与へ反映されます。"
+      },
+      "my-payroll": {
+        "label": "自分の給与",
+        "title": "自分の給与",
+        "description": "承認済みの歩合と月の給与。"
       }
     },
     "shell": {
@@ -636,6 +657,54 @@
       "transfer": "銀行振込"
     },
     "accounts": {
+      "overview": {
+        "heading": "アカウント概要",
+        "active": "{count} 件有効",
+        "noConsole": "お客様アプリのみ。管理画面には入れません。",
+        "loadFailed": "役割の概要を読み込めませんでした。"
+      },
+      "areas": {
+        "salesReports": "売上報告",
+        "payroll": "給与",
+        "appointments": "予約",
+        "customers": "お客様",
+        "catalog": "メニュー",
+        "staff": "スタッフ",
+        "reports": "レポート",
+        "reviews": "レビュー",
+        "designs": "ネイルデザイン",
+        "marketing": "マーケティング",
+        "accounts": "アカウント",
+        "branches": "店舗",
+        "messages": "メッセージ",
+        "payments": "決済",
+        "config": "設定",
+        "audit": "監査ログ",
+        "profile": "自分のプロフィール"
+      },
+      "staffProfile": {
+        "column": "スタッフ情報",
+        "notApplicable": "—",
+        "missing": "未連携",
+        "missingBlocksLogin": "未連携 – ログインできません",
+        "link": "連携",
+        "unlink": "連携解除"
+      },
+      "linkModal": {
+        "title": "{name} のスタッフ情報",
+        "currentlyLinked": "スタッフ情報 {staff} と連携中です。",
+        "unlinkHint": "連携を解除すると売上報告や給与が使えなくなり、スタッフ権限のログインはサインインできなくなります。",
+        "noneAvailable": "未連携のスタッフ情報がありません。先にスタッフ画面で作成してください。",
+        "staff": "スタッフ情報を選択",
+        "linkHint": "どのログインとも連携していない情報のみ表示します。",
+        "cancel": "閉じる",
+        "link": "連携する",
+        "unlink": "連携解除",
+        "working": "保存中…",
+        "linked": "{name} を {staff} と連携しました",
+        "unlinked": "{name} の連携を解除しました",
+        "failed": "連携を保存できませんでした。"
+      },
       "add": "アカウントを追加",
       "pagination": "全 {total} 件中 {shown} 件を表示",
       "role": {
@@ -1154,6 +1223,241 @@
         "listLabel": "新しい通知", "loadFailed": "通知を読み込めません。"
       }
     },
+    "salesReports": {
+      "filters": {
+        "month": "月",
+        "staff": "スタッフ",
+        "allStaff": "全スタッフ",
+        "platform": "媒体",
+        "allPlatforms": "全媒体",
+        "status": "状態",
+        "allStatuses": "全状態",
+        "paymentMethod": "支払方法",
+        "allPaymentMethods": "すべて"
+      },
+      "platform": {
+        "NAILIE_NEW": "NAILIE 新規",
+        "NAILIE_RETURNING": "NAILIE リピート",
+        "MINIMO": "MINIMO",
+        "HOT_PEPPER": "HOT PEPPER",
+        "APP": "YABAI NAIL アプリ"
+      },
+      "status": {
+        "PENDING": "承認待ち",
+        "APPROVED": "承認済み",
+        "REJECTED": "却下"
+      },
+      "paymentMethod": {
+        "CASH": "現金",
+        "PAYPAY": "PayPay",
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard"
+      },
+      "actions": {
+        "add": "代理入力",
+        "approveSelected": "選択を承認 ({count})",
+        "rejectSelected": "選択を却下 ({count})",
+        "dayLabel": "一日まとめて承認",
+        "approveDay": "承認待ちをすべて承認",
+        "approve": "承認",
+        "reject": "却下",
+        "reopen": "承認待ちに戻す",
+        "edit": "編集",
+        "loadMore": "さらに読み込む"
+      },
+      "decided": {
+        "APPROVE": "報告を承認しました",
+        "REJECT": "報告を却下しました",
+        "PENDING": "報告を承認待ちに戻しました"
+      },
+      "batchDone": "{decided} 件を処理しました",
+      "batchPartial": "{decided} 件を処理、{skipped} 件はスキップ（処理済み・ロック中・権限外）",
+      "summary": {
+        "count": "{count} 件",
+        "gross": "売上合計",
+        "fee": "アプリ手数料",
+        "staff": "スタッフ歩合",
+        "salon": "店舗取り分"
+      },
+      "columns": {
+        "selectAll": "このページをすべて選択",
+        "select": "報告を選択",
+        "date": "日付",
+        "staff": "スタッフ",
+        "platform": "媒体 / 率",
+        "gross": "売上",
+        "fee": "手数料",
+        "staffAmount": "スタッフ",
+        "salonAmount": "店舗",
+        "paymentMethod": "支払",
+        "status": "状態",
+        "actions": "操作"
+      },
+      "loading": "報告を読み込み中…",
+      "loadFailed": "報告を読み込めませんでした。",
+      "empty": "この条件の報告はありません。",
+      "locked": "給与支払済みのためロック中",
+      "unknownStaff": "他のスタッフ",
+      "actionFailed": "処理できませんでした。もう一度お試しください。",
+      "pagination": "{shown} / {total} 件を表示",
+      "errors": {
+        "locked": "この月は給与支払済みでロックされています。先にオーナーが給与画面でロック解除してください。",
+        "conflict": "この報告は他の人が変更しました。再読み込みしてやり直してください。",
+        "forbidden": "この報告を操作する権限がありません。",
+        "dateOutOfRange": "スタッフが報告できるのは直近3日までです。それ以前は管理者が入力してください。"
+      },
+      "reject": {
+        "title": "{count} 件を却下",
+        "reason": "却下理由",
+        "reasonHint": "スタッフに表示されます。500文字まで。",
+        "cancel": "キャンセル",
+        "confirm": "却下する",
+        "rejecting": "却下中…"
+      },
+      "modal": {
+        "addTitle": "お客様報告を入力",
+        "editTitle": "お客様報告を編集",
+        "staff": "スタッフ",
+        "me": "自分",
+        "date": "日付",
+        "time": "時刻",
+        "platform": "媒体",
+        "coursePrice": "コース料金 (¥)",
+        "accessoryAmount": "オプション (¥)",
+        "paymentMethod": "支払方法",
+        "note": "メモ",
+        "preview": {
+          "heading": "システム計算",
+          "incomplete": "コース料金を入力すると金額が表示されます。",
+          "failed": "計算できませんでした。",
+          "loading": "計算中…",
+          "gross": "売上",
+          "fee": "手数料",
+          "staff": "スタッフ ({rate}%)",
+          "salon": "店舗"
+        },
+        "created": "報告を送信しました（承認待ち）",
+        "updated": "報告を更新しました",
+        "saveFailed": "報告を保存できませんでした。",
+        "cancel": "キャンセル",
+        "saving": "保存中…",
+        "save": "保存",
+        "submit": "報告を送信"
+      }
+    },
+    "payroll": {
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "heading": "{period} の給与",
+      "headingHint": "承認済み報告から算出。支給額 = 歩合 + 基本給。",
+      "columns": {
+        "staff": "スタッフ",
+        "approvedCount": "件数",
+        "gross": "売上",
+        "fee": "手数料",
+        "staffTotal": "歩合",
+        "salonTotal": "店舗取り分",
+        "baseSalary": "基本給",
+        "payable": "支給額",
+        "status": "状態",
+        "actions": "操作"
+      },
+      "status": {
+        "OPEN": "集計中",
+        "PAID": "支払済み",
+        "UNLOCKED": "ロック解除"
+      },
+      "paidOn": "{date} 支払",
+      "inactive": "退職",
+      "totals": "店舗合計",
+      "empty": "この店舗にスタッフがいません。",
+      "loading": "給与を読み込み中…",
+      "loadFailed": "給与を読み込めませんでした。",
+      "actionFailed": "処理できませんでした。もう一度お試しください。",
+      "actions": {
+        "pay": "支払済みにする",
+        "unlock": "ロック解除"
+      },
+      "paid": "{name} を支払済みにしました",
+      "unlocked": "{name} の月をロック解除しました",
+      "confirm": {
+        "pay": {
+          "title": "支払の確認",
+          "body": "{period} 分として {name} に {payable} を支払済みにしますか？",
+          "hint": "この月のスタッフの報告はロックされ、追加・編集・承認できなくなります。解除はオーナーのみ。",
+          "action": "支払済みにする"
+        },
+        "unlock": {
+          "title": "月のロック解除",
+          "body": "{name} の {period} をロック解除しますか？",
+          "hint": "この月の報告が再び編集可能になります。再度支払済みにすると記録が上書きされます。",
+          "action": "ロック解除"
+        },
+        "cancel": "キャンセル"
+      },
+      "errors": {
+        "alreadyPaid": "この月はすでに支払済みです。",
+        "notPaid": "この月は未払いのため解除するものがありません。",
+        "forbidden": "この操作の権限がありません。",
+        "conflict": "データが変更されました。再読み込みしてやり直してください。"
+      },
+      "exportSheet": "給与表を出力 (Excel)",
+      "exportDetails": "報告明細を出力 (Excel)",
+      "exportQueued": "出力を受け付けました",
+      "exportLine": "出力: {status}",
+      "refresh": "更新",
+      "getLink": "ダウンロードリンク",
+      "download": "ダウンロード"
+    },
+    "staffReport": {
+      "newReport": "施術したお客様を報告",
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "summary": "{count} 件 · 取り分 {mine}",
+      "dayTotal": "{count} 名 · {mine}",
+      "gross": "売上",
+      "fee": "手数料",
+      "mine": "取り分 ({rate}%)",
+      "loading": "読み込み中…",
+      "loadFailed": "報告を読み込めませんでした。",
+      "noProfile": "ログインがスタッフ情報と連携されていません。オーナーにアカウント画面で連携してもらってください。",
+      "empty": "{period} の報告はまだありません。",
+      "edit": "編集",
+      "delete": "削除",
+      "deleted": "報告を削除しました",
+      "deleteFailed": "報告を削除できませんでした。",
+      "rejectedBecause": "却下: {reason}",
+      "confirmDelete": {
+        "title": "報告を削除",
+        "body": "{date} の報告（{amount}）を削除しますか？取り消せません。",
+        "cancel": "キャンセル",
+        "action": "削除"
+      }
+    },
+    "myPayroll": {
+      "month": "月",
+      "previousMonth": "前月",
+      "nextMonth": "翌月",
+      "heading": "{period} の給与",
+      "status": {
+        "OPEN": "集計中",
+        "PAID": "支払済み",
+        "UNLOCKED": "ロック解除"
+      },
+      "paidOn": "{date} 支払",
+      "approvedCount": "承認済み件数",
+      "gross": "お客様支払合計",
+      "fee": "手数料合計",
+      "commission": "歩合",
+      "baseSalary": "基本給",
+      "salon": "店舗取り分",
+      "hint": "承認済みの報告のみ集計されます。承認待ちはお客様報告画面で確認できます。",
+      "loading": "読み込み中…",
+      "loadFailed": "給与を読み込めませんでした。",
+      "noProfile": "ログインがスタッフ情報と連携されていません。オーナーにアカウント画面で連携してもらってください。"
+    },
     "marketing": {
       "add": "キャンペーンを追加",
       "pagination": "全 {total} 件中 {shown} 件を表示",
@@ -1377,6 +1681,8 @@
         "commission": "歩合",
         "newBaseSalary": "新しい固定給 (¥)",
         "commissionPercent": "歩合 (%)",
+        "appCommission": "アプリ歩合",
+        "appCommissionPercent": "アプリ歩合 (%)",
         "effectiveFrom": "適用開始日",
         "saving": "保存しています…",
         "submit": "歩合を更新", "heading": "歩合設定", "effectiveHint": "現在の設定の適用日より後を指定してください。確定済みの歩合は変更されません。"
@@ -1429,6 +1735,9 @@
         "revenue": "売上",
         "periodLoadFailed": "{period} の売上を読み込めません。売上と歩合は「{missing}」と表示されます。",
         "heading": "期間ごとの実績",
+        "approved": "承認済み件数",
+        "payable": "支給額",
+        "payrollStatus": { "OPEN": "集計中", "PAID": "支払済み", "UNLOCKED": "ロック解除" },
         "periodLabel": "集計期間",
         "loading": "読み込み中…",
         "loadFailed": "実績を読み込めません。",

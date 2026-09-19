@@ -1,4 +1,4 @@
-import type { AdminAccount } from "@/service";
+import type { AdminAccount, AdminStaffMember } from "@/service";
 import { matchesSearch } from "@/lib/admin-search";
 
 export type AccountRow = {
@@ -61,4 +61,60 @@ export function paginate<T>(
     page,
     pageCount,
   } as const;
+}
+
+// -- Staff profile links ------------------------------------------------------------------
+
+/** The roster profile each login is linked to. A login without one cannot sign in as STAFF. */
+export function staffByAccount(staff: ReadonlyArray<AdminStaffMember>): ReadonlyMap<string, AdminStaffMember> {
+  const index = new Map<string, AdminStaffMember>();
+  for (const member of staff) {
+    const accountId = member.accountId ?? member.account?.id ?? null;
+    if (accountId && !index.has(accountId)) index.set(accountId, member);
+  }
+  return index;
+}
+
+/** Profiles that no login points at yet: the only ones a login can be linked to. */
+export function unlinkedStaff(staff: ReadonlyArray<AdminStaffMember>): ReadonlyArray<AdminStaffMember> {
+  return staff.filter((member) => !(member.accountId ?? member.account?.id));
+}
+
+// -- Capabilities -----------------------------------------------------------------------------
+
+/**
+ * The console area a permission code belongs to, by its first segments. The screen shows a
+ * role as the areas it may touch rather than as raw codes; anything unknown keeps its code.
+ */
+const AREA_OF_PREFIX: ReadonlyArray<readonly [string, string]> = [
+  ["sales.report", "salesReports"],
+  ["payroll", "payroll"],
+  ["appointment", "appointments"],
+  ["calendar", "appointments"],
+  ["customer", "customers"],
+  ["catalog", "catalog"],
+  ["staff", "staff"],
+  ["report", "reports"],
+  ["review", "reviews"],
+  ["design", "designs"],
+  ["promotion", "marketing"],
+  ["campaign", "marketing"],
+  ["account", "accounts"],
+  ["branch", "branches"],
+  ["message", "messages"],
+  ["payment", "payments"],
+  ["refund", "payments"],
+  ["loyalty", "config"],
+  ["system", "config"],
+  ["audit", "audit"],
+  ["profile", "profile"],
+];
+
+export function capabilityAreas(permissions: ReadonlyArray<string>): ReadonlyArray<string> {
+  const areas = new Set<string>();
+  for (const code of permissions) {
+    const match = AREA_OF_PREFIX.find(([prefix]) => code === prefix || code.startsWith(`${prefix}.`));
+    areas.add(match ? match[1] : code);
+  }
+  return Array.from(areas);
 }

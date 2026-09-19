@@ -103,6 +103,7 @@
         "staff": "Staff",
         "status": "Status",
         "rate": "Commission rate",
+        "appRate": "App rate",
         "personalRevenue": "Personal revenue",
         "staffPayout": "Staff payout",
         "salonShare": "Salon's share",
@@ -220,6 +221,26 @@
         "label": "Settings",
         "title": "Settings",
         "description": "Manage the settings for your nail salon."
+      },
+      "sales-reports": {
+        "label": "Sales reports",
+        "title": "Per-customer sales reports",
+        "description": "Review each technician's customer reports; only approved reports reach payroll."
+      },
+      "payroll": {
+        "label": "Payroll",
+        "title": "Monthly payroll",
+        "description": "Approved commission per technician, mark paid and export to Excel."
+      },
+      "report": {
+        "label": "Customer reports",
+        "title": "Customer reports",
+        "description": "Report each customer you served; once approved it counts towards your pay."
+      },
+      "my-payroll": {
+        "label": "My pay",
+        "title": "My pay",
+        "description": "Your approved commission and monthly pay."
       }
     },
     "shell": {
@@ -636,6 +657,54 @@
       "transfer": "Bank transfer"
     },
     "accounts": {
+      "overview": {
+        "heading": "Account overview",
+        "active": "{count} active",
+        "noConsole": "Customer app only, no console access.",
+        "loadFailed": "Could not load the role overview."
+      },
+      "areas": {
+        "salesReports": "Sales reports",
+        "payroll": "Payroll",
+        "appointments": "Appointments",
+        "customers": "Customers",
+        "catalog": "Services",
+        "staff": "Staff",
+        "reports": "Reports",
+        "reviews": "Reviews",
+        "designs": "Nail designs",
+        "marketing": "Marketing",
+        "accounts": "Accounts",
+        "branches": "Branches",
+        "messages": "Messages",
+        "payments": "Payments",
+        "config": "Configuration",
+        "audit": "Audit log",
+        "profile": "Own profile"
+      },
+      "staffProfile": {
+        "column": "Staff profile",
+        "notApplicable": "—",
+        "missing": "Not linked",
+        "missingBlocksLogin": "Not linked – cannot sign in",
+        "link": "Link",
+        "unlink": "Unlink"
+      },
+      "linkModal": {
+        "title": "Staff profile of {name}",
+        "currentlyLinked": "Linked to the profile {staff}.",
+        "unlinkHint": "Unlinking stops this login from reporting customers or seeing payroll; a STAFF login will no longer be able to sign in.",
+        "noneAvailable": "Every staff profile is already linked. Create one on the Staff screen first.",
+        "staff": "Choose a profile",
+        "linkHint": "Only profiles no login points at are listed.",
+        "cancel": "Close",
+        "link": "Link",
+        "unlink": "Unlink",
+        "working": "Saving…",
+        "linked": "Linked {name} to the profile {staff}",
+        "unlinked": "Unlinked the profile of {name}",
+        "failed": "Could not save the link."
+      },
       "add": "Add account",
       "pagination": "Showing {shown} of {total} accounts",
       "role": {
@@ -1155,6 +1224,241 @@
         "listLabel": "New notifications", "loadFailed": "Could not load notifications."
       }
     },
+    "salesReports": {
+      "filters": {
+        "month": "Month",
+        "staff": "Technician",
+        "allStaff": "All technicians",
+        "platform": "Platform",
+        "allPlatforms": "All platforms",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "paymentMethod": "Payment",
+        "allPaymentMethods": "All"
+      },
+      "platform": {
+        "NAILIE_NEW": "NAILIE – new customer",
+        "NAILIE_RETURNING": "NAILIE – returning",
+        "MINIMO": "MINIMO",
+        "HOT_PEPPER": "HOT PEPPER",
+        "APP": "YABAI NAIL app"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "paymentMethod": {
+        "CASH": "Cash",
+        "PAYPAY": "PayPay",
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard"
+      },
+      "actions": {
+        "add": "Report on behalf",
+        "approveSelected": "Approve selected ({count})",
+        "rejectSelected": "Reject selected ({count})",
+        "dayLabel": "Approve a whole day",
+        "approveDay": "Approve all pending",
+        "approve": "Approve",
+        "reject": "Reject",
+        "reopen": "Back to pending",
+        "edit": "Edit",
+        "loadMore": "Load more"
+      },
+      "decided": {
+        "APPROVE": "Report approved",
+        "REJECT": "Report rejected",
+        "PENDING": "Report reopened"
+      },
+      "batchDone": "{decided} reports processed",
+      "batchPartial": "{decided} reports processed, {skipped} skipped (already decided, locked or out of scope)",
+      "summary": {
+        "count": "{count} reports",
+        "gross": "Gross",
+        "fee": "App fees",
+        "staff": "Technician share",
+        "salon": "Salon share"
+      },
+      "columns": {
+        "selectAll": "Select all on this page",
+        "select": "Select report",
+        "date": "Date",
+        "staff": "Technician",
+        "platform": "Platform / rate",
+        "gross": "Gross",
+        "fee": "Fee",
+        "staffAmount": "Technician",
+        "salonAmount": "Salon",
+        "paymentMethod": "Payment",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "loading": "Loading reports…",
+      "loadFailed": "Could not load reports.",
+      "empty": "No reports match these filters.",
+      "locked": "Month paid out, locked",
+      "unknownStaff": "Other technician",
+      "actionFailed": "That did not go through. Please try again.",
+      "pagination": "Showing {shown} / {total}",
+      "errors": {
+        "locked": "This month has been paid out and is locked. The owner must unlock it on the Payroll screen first.",
+        "conflict": "Someone else just changed this report. Reload and try again.",
+        "forbidden": "You are not allowed to act on this report.",
+        "dateOutOfRange": "Technicians may only report the last 3 days; older days need a manager."
+      },
+      "reject": {
+        "title": "Reject {count} report(s)",
+        "reason": "Reason",
+        "reasonHint": "The technician will see this. Up to 500 characters.",
+        "cancel": "Cancel",
+        "confirm": "Reject",
+        "rejecting": "Rejecting…"
+      },
+      "modal": {
+        "addTitle": "New customer report",
+        "editTitle": "Edit customer report",
+        "staff": "Technician",
+        "me": "Myself",
+        "date": "Date",
+        "time": "Time",
+        "platform": "Platform",
+        "coursePrice": "Course price (¥)",
+        "accessoryAmount": "Accessories (¥)",
+        "paymentMethod": "Payment",
+        "note": "Note",
+        "preview": {
+          "heading": "Computed by the system",
+          "incomplete": "Enter the course price to see the split.",
+          "failed": "Could not compute.",
+          "loading": "Computing…",
+          "gross": "Gross",
+          "fee": "App fee",
+          "staff": "Technician ({rate}%)",
+          "salon": "Salon"
+        },
+        "created": "Report sent, pending approval",
+        "updated": "Report updated",
+        "saveFailed": "Could not save the report.",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "save": "Save",
+        "submit": "Send report"
+      }
+    },
+    "payroll": {
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "heading": "Payroll {period}",
+      "headingHint": "Computed live from approved reports; payable = commission + base salary.",
+      "columns": {
+        "staff": "Technician",
+        "approvedCount": "Customers",
+        "gross": "Gross",
+        "fee": "App fees",
+        "staffTotal": "Commission",
+        "salonTotal": "Salon share",
+        "baseSalary": "Base salary",
+        "payable": "Payable",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "OPEN": "In review",
+        "PAID": "Paid",
+        "UNLOCKED": "Unlocked"
+      },
+      "paidOn": "Paid on {date}",
+      "inactive": "Inactive",
+      "totals": "Branch total",
+      "empty": "This branch has no technicians.",
+      "loading": "Loading payroll…",
+      "loadFailed": "Could not load payroll.",
+      "actionFailed": "That did not go through. Please try again.",
+      "actions": {
+        "pay": "Mark paid",
+        "unlock": "Unlock"
+      },
+      "paid": "Marked {name} as paid",
+      "unlocked": "Unlocked {name}'s month",
+      "confirm": {
+        "pay": {
+          "title": "Confirm payout",
+          "body": "Mark {payable} as paid to {name} for {period}?",
+          "hint": "The technician's reports for this month lock: nothing can be added, edited or decided. Only the owner can unlock.",
+          "action": "Mark paid"
+        },
+        "unlock": {
+          "title": "Unlock the month",
+          "body": "Unlock {period} for {name}?",
+          "hint": "The month's reports become editable again. Marking paid again overwrites the recorded figures.",
+          "action": "Unlock"
+        },
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "alreadyPaid": "This month is already marked paid.",
+        "notPaid": "This month has not been paid, so there is nothing to unlock.",
+        "forbidden": "You are not allowed to do this.",
+        "conflict": "The data just changed. Reload and try again."
+      },
+      "exportSheet": "Export payroll (Excel)",
+      "exportDetails": "Export report details (Excel)",
+      "exportQueued": "Export requested",
+      "exportLine": "Export: {status}",
+      "refresh": "Refresh",
+      "getLink": "Get download link",
+      "download": "Download"
+    },
+    "staffReport": {
+      "newReport": "Report the customer just served",
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "summary": "{count} reports · you earn {mine}",
+      "dayTotal": "{count} customers · {mine}",
+      "gross": "Gross",
+      "fee": "App fee",
+      "mine": "your share ({rate}%)",
+      "loading": "Loading…",
+      "loadFailed": "Could not load your reports.",
+      "noProfile": "Your login is not linked to a staff profile yet. Ask the owner to link it on the Accounts screen.",
+      "empty": "No reports in {period} yet.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleted": "Report deleted",
+      "deleteFailed": "Could not delete the report.",
+      "rejectedBecause": "Rejected: {reason}",
+      "confirmDelete": {
+        "title": "Delete report",
+        "body": "Delete the report of {date} ({amount})? This cannot be undone.",
+        "cancel": "Cancel",
+        "action": "Delete"
+      }
+    },
+    "myPayroll": {
+      "month": "Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "heading": "Pay for {period}",
+      "status": {
+        "OPEN": "In review",
+        "PAID": "Paid",
+        "UNLOCKED": "Unlocked"
+      },
+      "paidOn": "paid on {date}",
+      "approvedCount": "Approved customers",
+      "gross": "Customers paid",
+      "fee": "App fees",
+      "commission": "Commission",
+      "baseSalary": "Base salary",
+      "salon": "Salon share",
+      "hint": "Only approved reports count here. Pending ones are on the Customer reports screen.",
+      "loading": "Loading…",
+      "loadFailed": "Could not load your pay.",
+      "noProfile": "Your login is not linked to a staff profile yet. Ask the owner to link it on the Accounts screen."
+    },
     "marketing": {
       "add": "Add promotion",
       "pagination": "Showing {shown} of {total} promotions",
@@ -1380,6 +1684,8 @@
         "commission": "Commission",
         "newBaseSalary": "New base salary (¥)",
         "commissionPercent": "Commission (%)",
+        "appCommission": "App commission",
+        "appCommissionPercent": "App commission (%)",
         "effectiveFrom": "Effective from",
         "saving": "Saving…",
         "submit": "Update commission",
@@ -1436,6 +1742,9 @@
         "revenue": "Revenue",
         "periodLoadFailed": "Could not load revenue for {period}; revenue and commission show “{missing}”.",
         "heading": "Performance by period",
+        "approved": "Approved customers",
+        "payable": "Payable",
+        "payrollStatus": { "OPEN": "In review", "PAID": "Paid", "UNLOCKED": "Unlocked" },
         "periodLabel": "Reporting period",
         "loading": "Loading…",
         "loadFailed": "Could not load the performance data.",

@@ -130,6 +130,8 @@ export interface AdminStaffMember {
   readonly id: string;
   readonly displayName: string;
   readonly branchId: string;
+  /** The login this profile belongs to; null until linked. A STAFF login without a profile cannot sign in. */
+  readonly accountId?: string | null;
   readonly serviceIds: ReadonlyArray<string>;
   readonly active: boolean;
   readonly version: number;
@@ -147,6 +149,8 @@ export interface StaffCompensation {
   readonly branchId: string;
   readonly baseSalary: number;
   readonly commissionRate: number;
+  /** The rate for jobs booked through the customer app; equals commissionRate until the salon sets one. */
+  readonly appCommissionRate: number;
   readonly effectiveFrom: string | null;
   readonly monthlySummary: {
     readonly period: string | null;
@@ -427,6 +431,8 @@ export interface AdminStaffDraft {
 
 export interface AdminStaffPatch {
   readonly displayName?: string;
+  /** Owner only: link the profile to a login, or null to unlink it. */
+  readonly accountId?: string | null;
   readonly branchId?: string;
   readonly serviceIds?: ReadonlyArray<string>;
   readonly status?: "ACTIVE" | "INACTIVE";
@@ -436,6 +442,8 @@ export interface AdminStaffPatch {
 export interface AdminStaffCompensationInput {
   readonly baseSalary: number;
   readonly commissionRate: number;
+  /** Null clears it, so APP jobs fall back to the base rate. */
+  readonly appCommissionRate?: number | null;
   /**
    * Required, `YYYY-MM-DD`. The backend parses it unconditionally and rejects
    * the whole request when it is absent, so an optional field here meant the
@@ -752,7 +760,7 @@ export interface AdminReportExport {
 }
 
 export interface AdminReportExportInput {
-  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE";
+  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE" | "PAYROLL_MONTHLY" | "SALES_REPORTS_MONTHLY";
   readonly format?: "CSV" | "XLSX";
   readonly locale?: "vi" | "ja";
   readonly filters?: Readonly<Record<string, unknown>>;
@@ -1223,4 +1231,160 @@ export interface AdminMembershipCardResolution {
   readonly customer: AdminResolvedCustomer;
   readonly resolvedAt: string;
   readonly [field: string]: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Sales reports and payroll (platform docs/payroll-sales-reports.md)
+// ---------------------------------------------------------------------------
+
+export type AdminSalesPlatform = "NAILIE_NEW" | "NAILIE_RETURNING" | "MINIMO" | "HOT_PEPPER" | "APP";
+export type AdminSalesReportStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+/** One customer's job as reported; every money figure is what the API stored at report time. */
+export interface AdminSalesReport {
+  readonly id: string;
+  readonly branchId: string;
+  readonly staffId: string;
+  readonly reportedByAccountId: string | null;
+  /** YYYY-MM-DD in the branch's zone. */
+  readonly reportDate: string;
+  readonly servedAt: string | null;
+  readonly platform: AdminSalesPlatform;
+  readonly coursePrice: number;
+  readonly accessoryAmount: number;
+  readonly grossAmount: number;
+  readonly platformFee: number;
+  readonly staffFeeShare: number;
+  readonly salonFeeShare: number;
+  readonly staffRatePercent: number;
+  readonly staffAmount: number;
+  readonly salonAmount: number;
+  readonly paymentMethod: string;
+  readonly note: string;
+  readonly status: AdminSalesReportStatus;
+  readonly rejectionReason: string | null;
+  readonly decidedBy: string | null;
+  readonly decidedAt: string | null;
+  readonly appointmentId: string | null;
+  readonly paymentId: string | null;
+  readonly payrollPeriodId: string | null;
+  /** True once the month was paid out; the API refuses every change until the owner unlocks it. */
+  readonly locked: boolean;
+  readonly version: number;
+  readonly createdAt: string | null;
+  readonly updatedAt: string | null;
+}
+
+export interface AdminSalesReportInput {
+  /** Managers and the owner name the technician; a technician's own login reports for itself. */
+  readonly staffId?: string;
+  readonly reportDate?: string;
+  readonly servedAt?: string | null;
+  readonly platform: AdminSalesPlatform;
+  readonly coursePrice: number;
+  readonly accessoryAmount?: number;
+  readonly paymentMethod: string;
+  readonly note?: string;
+}
+
+export type AdminSalesReportPatch = Partial<Omit<AdminSalesReportInput, "staffId">>;
+
+export interface AdminSalesReportPreview {
+  readonly staffId: string;
+  readonly reportDate: string;
+  readonly platform: AdminSalesPlatform;
+  readonly grossAmount: number;
+  readonly platformFee: number;
+  readonly staffFeeShare: number;
+  readonly salonFeeShare: number;
+  readonly staffRatePercent: number;
+  readonly staffAmount: number;
+  readonly salonAmount: number;
+}
+
+export type AdminSalesReportDecision = "APPROVE" | "REJECT" | "PENDING";
+
+export interface AdminSalesReportDecisionInput {
+  readonly decision: AdminSalesReportDecision;
+  /** Required when rejecting. */
+  readonly reason?: string;
+}
+
+/** Either the named reports, or every pending report of a branch on a day. */
+export interface AdminSalesReportsBatchDecisionInput extends AdminSalesReportDecisionInput {
+  readonly reportIds?: ReadonlyArray<string>;
+  readonly branchId?: string;
+  readonly date?: string;
+}
+
+export interface AdminSalesReportsBatchDecisionResult {
+  readonly decided: number;
+  readonly skipped: ReadonlyArray<{ readonly id: string; readonly reason: string }>;
+}
+
+export type AdminPayrollStatus = "OPEN" | "PAID" | "UNLOCKED";
+
+export interface AdminPayrollRow {
+  readonly staffId: string;
+  readonly displayName: string;
+  readonly active: boolean;
+  readonly approvedCount: number;
+  readonly grossTotal: number;
+  readonly feeTotal: number;
+  readonly staffTotal: number;
+  readonly salonTotal: number;
+  readonly baseSalary: number;
+  readonly payable: number;
+  readonly status: AdminPayrollStatus;
+  readonly periodId: string | null;
+  readonly paidAt: string | null;
+  readonly paidBy: string | null;
+  readonly unlockedAt: string | null;
+  readonly periodVersion: number | null;
+}
+
+export interface AdminPayrollTotals {
+  readonly approvedCount: number;
+  readonly grossTotal: number;
+  readonly feeTotal: number;
+  readonly staffTotal: number;
+  readonly salonTotal: number;
+  readonly baseSalary: number;
+  readonly payable: number;
+}
+
+export interface AdminPayrollSheet {
+  readonly branchId: string;
+  readonly period: string;
+  readonly from: string;
+  readonly toExclusive: string;
+  readonly rows: ReadonlyArray<AdminPayrollRow>;
+  readonly totals: AdminPayrollTotals;
+}
+
+export interface AdminMyPayroll extends AdminPayrollRow {
+  readonly branchId: string;
+  readonly period: string;
+}
+
+/** Logins per role and the grants the role's template carries (from GET /admin/accounts/roles). */
+export interface AdminAccountRoleSummary {
+  readonly role: string;
+  readonly accountCount: number;
+  readonly activeCount: number;
+  readonly permissions: ReadonlyArray<string>;
+}
+
+export interface AdminAccountRoles {
+  readonly roles: ReadonlyArray<AdminAccountRoleSummary>;
+}
+
+export interface AdminPayrollUnlockResult {
+  readonly branchId: string;
+  readonly staffId: string;
+  readonly period: string;
+  readonly status: "UNLOCKED";
+  readonly unlockedAt: string;
+  readonly unlockedBy: string;
+  readonly version: number;
 }
