@@ -279,7 +279,7 @@
     "login": {
       "heading": "Đăng nhập quản trị",
       "subheading": "Dành cho quản lý và chủ chuỗi YABAI.",
-      "phone": "Số điện thoại",
+      "phone": "Số điện thoại hoặc email",
       "password": "Mật khẩu",
       "passwordPlaceholder": "Nhập mật khẩu",
       "hidePassword": "Ẩn mật khẩu",

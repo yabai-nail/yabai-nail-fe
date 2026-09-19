@@ -279,7 +279,7 @@
     "login": {
       "heading": "管理者ログイン",
       "subheading": "YABAI の店長とオーナー向けです。",
-      "phone": "電話番号",
+      "phone": "電話番号またはメール",
       "password": "パスワード",
       "passwordPlaceholder": "パスワードを入力",
       "hidePassword": "パスワードを非表示",
