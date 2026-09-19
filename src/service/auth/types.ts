@@ -157,6 +157,8 @@ export interface AdminPasswordChangeInput {
  */
 export interface AdminProfileUpdateInput {
   readonly displayName?: string;
+  /** The login phone; must be unique. Format is `0` + 9 digits (the backend also accepts `+84`). */
+  readonly phone?: string;
   readonly avatarMediaId?: string | null;
   readonly [field: string]: unknown;
 }

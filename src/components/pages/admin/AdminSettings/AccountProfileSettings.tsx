@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { notifySuccess } from "@/lib/app-toast";
+import { isAdminPhone } from "@/lib/admin-credentials";
 import { API_BASE_URL, adminMediaService, authService, useAuth } from "@/service";
 import { AdminAvatarField, mediaIdFromPublicUrl, useAvatarField } from "@/components/blocks/admin/AdminAvatarField";
 
@@ -17,13 +18,16 @@ export function AccountProfileSettings() {
   const t = useTranslations("admin.settings.profile");
   const { user, applyProfileUpdate } = useAuth();
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
   const avatar = useAvatarField(user?.avatarUrl ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const trimmed = displayName.trim();
+  const trimmedPhone = phone.trim();
   const nameValid = trimmed.length >= 2 && trimmed.length <= 80;
-  const canSubmit = nameValid && !avatar.blocked && !busy;
+  const phoneValid = isAdminPhone(trimmedPhone);
+  const canSubmit = nameValid && phoneValid && !avatar.blocked && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -33,7 +37,7 @@ export function AccountProfileSettings() {
     try {
       const resolved = await avatar.resolve();
       uploadedMediaId = resolved.uploadedMediaId;
-      const updated = await authService.updateAdminProfile({ displayName: trimmed, ...resolved.patch });
+      const updated = await authService.updateAdminProfile({ displayName: trimmed, phone: trimmedPhone, ...resolved.patch });
       // Refresh the shell header (and anything else reading the auth user) in place.
       applyProfileUpdate(updated);
       // The photo that was there before is now unreferenced when it was replaced or removed.
@@ -83,6 +87,19 @@ export function AccountProfileSettings() {
           />
         </label>
         {displayName && !nameValid ? <p className="text-xs text-admin-danger">{t("nameError")}</p> : null}
+        <label htmlFor="profile-phone" className="grid gap-2 text-sm font-semibold text-admin-ink">
+          {t("phone")}
+          <input
+            id="profile-phone"
+            className={inputClass}
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="0900000000"
+          />
+        </label>
+        {phone && !phoneValid ? <p className="text-xs text-admin-danger">{t("phoneError")}</p> : null}
         {error ? <p role="alert" className="text-sm text-admin-danger">{error}</p> : null}
         <div>
           <Button variant="primary" className="rounded-lg" isDisabled={!canSubmit} onPress={() => void submit()}>
