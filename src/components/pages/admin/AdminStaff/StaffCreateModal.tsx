@@ -58,24 +58,30 @@ export function StaffCreateModal({
     setError(null);
     let issuedAccountId = accountId;
     try {
-      if (withAccount && issuedAccountId === null) {
-        const account = await adminService.createAccount({
-          phone: phone.trim(),
+      if (withAccount) {
+        // Creating a STAFF account now provisions and links its roster profile on the backend
+        // (mutateAccount), so this single call is the whole job. A separate createStaff would
+        // link the same account again and leave two profiles on it.
+        if (issuedAccountId === null) {
+          const account = await adminService.createAccount({
+            phone: phone.trim(),
+            displayName: name.trim(),
+            // Least privilege: a technician gets a technician's account. Promoting one to
+            // manager is a deliberate act, and it lives on the accounts screen.
+            role: "STAFF",
+            branchIds: [selectedBranchId],
+            temporaryPassword: password.trim(),
+          });
+          issuedAccountId = account.id;
+          setAccountId(account.id);
+        }
+      } else {
+        // A roster-only technician who never signs in: create the profile with no linked login.
+        await adminService.createStaff({
           displayName: name.trim(),
-          // Least privilege: a technician gets a technician's account. Promoting one to
-          // manager is a deliberate act, and it lives on the accounts screen.
-          role: "STAFF",
-          branchIds: [selectedBranchId],
-          temporaryPassword: password.trim(),
+          branchId: selectedBranchId,
         });
-        issuedAccountId = account.id;
-        setAccountId(account.id);
       }
-      await adminService.createStaff({
-        displayName: name.trim(),
-        branchId: selectedBranchId,
-        ...(issuedAccountId === null ? {} : { accountId: issuedAccountId }),
-      });
       notifySuccess(tc("staffCreated"));
       onCreated();
       onClose();

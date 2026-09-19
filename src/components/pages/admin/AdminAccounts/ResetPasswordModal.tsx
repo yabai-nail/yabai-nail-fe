@@ -50,7 +50,7 @@ export function ResetPasswordModal({
   return (
     <Modal isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
       <Modal.Backdrop>
-        <Modal.Container size="sm" placement="center" scroll="inside">
+        <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">

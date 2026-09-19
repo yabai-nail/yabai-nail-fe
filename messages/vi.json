@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "Vận hành",
+        "catalog": "Dịch vụ & Marketing",
+        "finance": "Báo cáo & Lương",
+        "team": "Nhân sự",
+        "system": "Hệ thống"
+      },
       "dashboard": {
         "label": "Tổng quan",
         "title": "Tổng quan",
@@ -2030,6 +2037,8 @@
         "close": "Đóng",
         "saving": "Đang lưu…",
         "save": "Lưu thay đổi",
+        "customerSearch": "Tìm theo tên hoặc SĐT…",
+        "customerEmpty": "Không tìm thấy khách hàng.",
         "create": "Tạo lịch hẹn"
       },
       "validation": {

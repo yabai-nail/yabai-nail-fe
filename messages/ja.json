@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "運営",
+        "catalog": "サービス・販促",
+        "finance": "レポート・給与",
+        "team": "スタッフ",
+        "system": "システム"
+      },
       "dashboard": {
         "label": "ダッシュボード",
         "title": "ダッシュボード",
@@ -2012,6 +2019,8 @@
         "close": "閉じる",
         "saving": "保存中…",
         "save": "変更を保存",
+        "customerSearch": "名前または電話番号で検索…",
+        "customerEmpty": "顧客が見つかりません。",
         "create": "予約を作成"
       },
       "validation": {

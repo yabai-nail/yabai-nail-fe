@@ -362,3 +362,28 @@ body:has(.admin-shell) {
     color: var(--surface-foreground);
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Modal width scale (admin + app)
+ *
+ * HeroUI v3 caps windowed modals at max-w-lg (512px), which feels
+ * cramped for admin forms with several input fields. These rules are
+ * intentionally UNLAYERED so they override HeroUI's `@layer components`
+ * `.modal__dialog--*` widths (unlayered beats layered in the cascade),
+ * reaching every modal even though modals render in a body-level portal.
+ *
+ * Values are max caps, not fixed widths: the container is `w-full p-4`
+ * on mobile and `w-fit p-10` on desktop, so modals still shrink to fit
+ * small screens.
+ * ------------------------------------------------------------------ */
+.modal__dialog--sm {
+  max-width: 28rem; /* 384px -> 448px (confirmations, tiny forms) */
+}
+
+.modal__dialog--md {
+  max-width: 42rem; /* 448px -> 672px (standard forms — the default) */
+}
+
+.modal__dialog--lg {
+  max-width: 56rem; /* 512px -> 896px (large / multi-column forms) */
+}

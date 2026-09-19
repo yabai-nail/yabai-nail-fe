@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { MonthPicker } from "@/components/blocks/admin/MonthPicker";
 import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import { SALES_PAYMENT_METHODS, SALES_PLATFORMS } from "@/lib/sales-report-engine";
@@ -170,10 +171,14 @@ export function AdminSalesReportsComponent() {
   return (
     <AdminPageLayout>
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          {t("filters.month")}
-          <input type="month" value={period} onChange={(event) => { setPeriod(event.target.value); setPage(1); setSelected(new Set()); }} className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink" />
-        </label>
+        <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+          <span>{t("filters.month")}</span>
+          <MonthPicker
+            value={period}
+            ariaLabel={t("filters.month")}
+            onChange={(next) => { setPeriod(next); setPage(1); setSelected(new Set()); }}
+          />
+        </div>
         <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
           {t("filters.staff")}
           <AdminSelectField label={t("filters.staff")} value={staffId} onChange={(value) => { setStaffId(value); setPage(1); }} fullWidth options={[{ value: "all", label: t("filters.allStaff") }, ...staffOptions.map((option) => ({ value: option.id, label: option.name }))]} />

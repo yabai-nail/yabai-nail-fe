@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "Operations",
+        "catalog": "Services & marketing",
+        "finance": "Reports & payroll",
+        "team": "Team",
+        "system": "System"
+      },
       "dashboard": {
         "label": "Overview",
         "title": "Overview",
@@ -2020,6 +2027,8 @@
         "close": "Close",
         "saving": "Saving…",
         "save": "Save changes",
+        "customerSearch": "Search by name or phone…",
+        "customerEmpty": "No customers found.",
         "create": "Create appointment"
       },
       "validation": {

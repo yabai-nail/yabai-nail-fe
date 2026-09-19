@@ -1,5 +1,4 @@
 import {
-  CalendarDaysIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   FunnelIcon,
@@ -8,6 +7,7 @@ import {
 import { Button, Tabs } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { AppointmentDatePicker } from "./AppointmentDatePicker";
 import type {
   AppointmentStatusFilter,
   AppointmentView,
@@ -23,20 +23,26 @@ const STATUS_FILTERS = [
 
 export function AppointmentToolbar({
   dateLabel,
+  selectedDate,
+  today,
   view,
   status,
   onPrevious,
   onNext,
+  onDateSelect,
   onToday,
   onViewChange,
   onStatusChange,
   onCreate,
 }: Readonly<{
   dateLabel: string;
+  selectedDate: string;
+  today: string;
   view: AppointmentView;
   status: AppointmentStatusFilter;
   onPrevious: () => void;
   onNext: () => void;
+  onDateSelect: (dateKey: string) => void;
   onToday: () => void;
   onViewChange: (view: AppointmentView) => void;
   onStatusChange: (status: AppointmentStatusFilter) => void;
@@ -57,11 +63,12 @@ export function AppointmentToolbar({
             <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label={t("toolbar.previous")} onPress={onPrevious}>
               <ChevronLeftIcon className="size-4" />
             </Button>
-            <div className="flex min-h-10 min-w-0 items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-sm font-semibold text-admin-ink">
-              <CalendarDaysIcon className="size-4 shrink-0 text-admin-muted" />
-              <span className="truncate sm:hidden">{dateLabel.split(/\s*[(（]/)[0]}</span>
-              <span className="hidden truncate sm:inline">{dateLabel}</span>
-            </div>
+            <AppointmentDatePicker
+              value={selectedDate}
+              label={dateLabel}
+              today={today}
+              onChange={onDateSelect}
+            />
             <Button isIconOnly variant="outline" className="rounded-lg border-admin-border" aria-label={t("toolbar.next")} onPress={onNext}>
               <ChevronRightIcon className="size-4" />
             </Button>

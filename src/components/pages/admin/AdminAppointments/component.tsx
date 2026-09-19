@@ -295,7 +295,7 @@ export function AdminAppointmentsComponent({
       const created = await adminService.createAppointment(branchId, {
         customerId: draft.customer.id,
         staffId: draft.staff.id,
-        serviceIds: [draft.service.id],
+        serviceIds: [draft.service.id, ...(draft.addonIds ?? [])],
         startsAt: toIso(draft.date, draft.startTime),
         note: draft.note,
       });
@@ -456,6 +456,9 @@ export function AdminAppointmentsComponent({
       ) : null}
       <AppointmentToolbar
         dateLabel={formatAppointmentDateLabel(selectedDate, view, t)}
+        selectedDate={selectedDate}
+        today={todayAtSalon()}
+        onDateSelect={setSelectedDate}
         view={view}
         status={status}
         onPrevious={() => moveDate(-1)}
@@ -535,6 +538,7 @@ export function AdminAppointmentsComponent({
           appointment={formMode === "edit" ? selectedAppointment : null}
           appointments={appointments}
           defaultDate={selectedDate}
+          branchId={branchId}
           options={formOptions}
           onClose={() => setFormMode(null)}
           onSubmit={saveAppointment}
