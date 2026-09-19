@@ -46,6 +46,7 @@
       },
       "tabsLabel": "Settings groups",
       "placeholder": "This settings group is coming in a later phase.",
+      "profile": {"heading":"My profile","description":"Update your display name and profile photo.","displayName":"Display name","phone":"Phone number","phoneError":"Phone must be 10 digits starting with 0.","nameError":"Display name must be 2–80 characters.","saving":"Saving…","save":"Save profile","success":"Profile updated","failed":"Could not update your profile."},
       "account": {
         "heading": "Change admin password",
         "description": "The new password must include lowercase, uppercase and a number, with at least 8 characters.",
@@ -770,7 +771,7 @@
         "addTitle": "Add account",
         "phone": "Phone number",
         "displayName": "Display name",
-        "displayNamePlaceholder": "Jane Doe",
+        "phoneInvalid":"Phone must be 10 digits starting with 0.","displayNamePlaceholder": "Jane Doe",
         "role": "Role",
         "status": "Status",
         "statusLabel": "Account status",

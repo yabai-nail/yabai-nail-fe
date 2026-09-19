@@ -46,6 +46,7 @@
       },
       "tabsLabel": "Nhóm cài đặt",
       "placeholder": "Nhóm cài đặt này sẽ được phát triển ở giai đoạn tiếp theo.",
+      "profile": {"heading":"Hồ sơ của tôi","description":"Cập nhật tên hiển thị và ảnh đại diện của bạn.","displayName":"Tên hiển thị","phone":"Số điện thoại","phoneError":"Số điện thoại phải là 10 số bắt đầu bằng 0.","nameError":"Tên hiển thị phải từ 2 đến 80 ký tự.","saving":"Đang lưu…","save":"Lưu hồ sơ","success":"Đã cập nhật hồ sơ","failed":"Không cập nhật được hồ sơ."},
       "account": {
         "heading": "Đổi mật khẩu quản trị",
         "description": "Mật khẩu mới phải có chữ thường, chữ hoa, chữ số và ít nhất 8 ký tự.",
@@ -770,7 +771,7 @@
         "addTitle": "Thêm tài khoản",
         "phone": "Số điện thoại",
         "displayName": "Tên hiển thị",
-        "displayNamePlaceholder": "Nguyễn Văn A",
+        "phoneInvalid":"Số điện thoại phải là 10 số bắt đầu bằng 0.","displayNamePlaceholder": "Nguyễn Văn A",
         "role": "Vai trò",
         "status": "Trạng thái",
         "statusLabel": "Trạng thái tài khoản",

@@ -47,7 +47,9 @@ export function AccountModal({
   const canSubmit =
     displayName.trim().length >= 2 &&
     (!requiresBranch || branchIds.length > 0) &&
-    (isEdit || (isAdminPhone(phone) && isStrongTemporaryPassword(password))) &&
+    // Phone is now editable on both create and edit; the temporary password is only required at create.
+    isAdminPhone(phone) &&
+    (isEdit || isStrongTemporaryPassword(password)) &&
     !avatar.blocked &&
     !busy;
 
@@ -70,7 +72,7 @@ export function AccountModal({
       if (isEdit && account) {
         await adminService.updateAccount(
           account.id,
-          { displayName: displayName.trim(), role, status, branchIds: role === "OWNER" ? [] : branchIds, ...resolved.patch },
+          { displayName: displayName.trim(), phone: phone.trim(), role, status, branchIds: role === "OWNER" ? [] : branchIds, ...resolved.patch },
           account.version,
         );
         // The old photo is now unreferenced when it was replaced or removed. Best-effort cleanup;
@@ -128,7 +130,8 @@ export function AccountModal({
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("modal.phone")}</span>
-                  <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0900000010" disabled={isEdit} inputMode="numeric" />
+                  <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0900000010" inputMode="numeric" />
+                  {phone && !isAdminPhone(phone) ? <span className="text-xs text-admin-danger">{t("modal.phoneInvalid")}</span> : null}
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("modal.displayName")}</span>

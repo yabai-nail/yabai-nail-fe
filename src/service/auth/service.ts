@@ -11,7 +11,9 @@ import type {
   AdminPasswordChangeInput,
   AdminPasswordResetInput,
   AdminPasswordResetRequestInput,
+  AdminProfileUpdateInput,
   AdminSession,
+  AuthenticatedAdmin,
   AdminSessionBranchInput,
   AdminSessionSummary,
   CustomerSession,
@@ -82,6 +84,15 @@ export const authService = {
     executeApiOperation<void>("POST /api/v1/admin/auth/password-changes", {
       body: input,
       idempotencyKey,
+    }),
+  /**
+   * Self-service edit of the signed-in admin's own display name and avatar. The URL is under
+   * `/admin/`, so the axios interceptor sends the admin bearer. Returns the updated user so the
+   * caller can refresh the header without a reload.
+   */
+  updateAdminProfile: (input: AdminProfileUpdateInput) =>
+    executeApiOperation<AuthenticatedAdmin>("PATCH /api/v1/admin/auth/profile", {
+      body: input,
     }),
   requestAdminPasswordReset: (
     input: AdminPasswordResetRequestInput,
