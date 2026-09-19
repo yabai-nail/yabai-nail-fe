@@ -1759,6 +1759,7 @@
         "commission": "Commission"
       },
       "skills": {
+        "active": "Active",
         "inactive": "Inactive",
         "selectAll": "Select all",
         "clearAll": "Clear all",

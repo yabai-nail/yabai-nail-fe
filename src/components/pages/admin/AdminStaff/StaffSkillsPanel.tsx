@@ -106,14 +106,14 @@ export function StaffSkillsPanel({
                   disabled={!canWrite || !service.active}
                   onChange={() => toggle(service.id)}
                 />
-                <span
-                  aria-hidden="true"
-                  className={`size-1.5 shrink-0 rounded-full ${service.active ? "bg-admin-success" : "bg-admin-muted"}`}
-                />
                 <span className="flex-1 truncate text-admin-ink">{service.name}</span>
-                {service.active ? null : (
-                  <span className="shrink-0 rounded-full bg-admin-soft px-1.5 py-0.5 text-[0.6rem] font-semibold text-admin-muted">{t("skills.inactive")}</span>
-                )}
+                <span
+                  className={`shrink-0 rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${
+                    service.active ? "bg-admin-success/15 text-admin-success" : "bg-admin-soft text-admin-muted"
+                  }`}
+                >
+                  {service.active ? t("skills.active") : t("skills.inactive")}
+                </span>
                 {typeof service.durationMinutes === "number" ? (
                   <span className="text-[0.65rem] text-admin-muted">{service.durationMinutes}p</span>
                 ) : null}
