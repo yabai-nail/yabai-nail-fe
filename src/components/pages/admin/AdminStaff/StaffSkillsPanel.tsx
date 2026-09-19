@@ -35,6 +35,8 @@ export function StaffSkillsPanel({
   const [selected, setSelected] = useState<Set<string> | null>(null);
   const currentSet = selected ?? grantedIds;
   const dirty = selected !== null;
+  const allServiceIds = useMemo(() => (services.data?.items ?? []).map((service) => service.id), [services.data]);
+  const allChecked = allServiceIds.length > 0 && allServiceIds.every((id) => currentSet.has(id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,7 +70,20 @@ export function StaffSkillsPanel({
 
   return (
     <section aria-labelledby="staff-skills-heading" className="space-y-2">
-      <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
+        {canWrite && allServiceIds.length > 0 ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-lg"
+            isDisabled={busy}
+            onPress={() => setSelected(allChecked ? new Set() : new Set(allServiceIds))}
+          >
+            {allChecked ? t("skills.clearAll") : t("skills.selectAll")}
+          </Button>
+        ) : null}
+      </div>
 
       {services.isLoading || skills.isLoading ? (
         <p className="text-xs text-admin-muted">{t("compensation.loading")}</p>

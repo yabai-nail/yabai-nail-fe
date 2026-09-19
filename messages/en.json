@@ -1759,6 +1759,8 @@
         "commission": "Commission"
       },
       "skills": {
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
         "saveFailed": "Could not save the skills.",
         "heading": "Skills",
         "loading": "Loading…",

@@ -1769,6 +1769,8 @@
         "commission": "Hoa hồng"
       },
       "skills": {
+        "selectAll": "Chọn tất cả",
+        "clearAll": "Bỏ chọn tất cả",
         "saveFailed": "Không lưu được kỹ năng.",
         "heading": "Kỹ năng",
         "loading": "Đang tải…",
