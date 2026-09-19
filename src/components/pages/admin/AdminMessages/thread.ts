@@ -1,3 +1,5 @@
+import { isoDateInTimeZone } from "@/lib/salon-date";
+
 import type { ChatMessage } from "./data";
 
 /** Consecutive messages from one sender, on one day. */
@@ -7,7 +9,7 @@ export type ThreadRun = {
 };
 
 export type ThreadDay = {
-  /** Local calendar day, or "" for messages whose timestamp would not parse. */
+  /** The salon's calendar day as `YYYY-MM-DD`, or "" when the timestamp would not parse. */
   readonly key: string;
   /** Localized relative/date label, or an empty string when the day is unknown. */
   readonly label: string;
@@ -20,8 +22,27 @@ export type ThreadDateLabels = {
   readonly formatDate: (date: Date) => string;
 };
 
+/**
+ * A message belongs to the salon's day, never to the day in whichever zone the
+ * code happens to be running in.
+ *
+ * Read off the runtime clock, 23:59 and 00:01 either side of midnight in Vietnam
+ * fell into one section anywhere west of UTC+7 — the browser of an admin who is
+ * travelling, and CI, which runs in UTC.
+ */
 function dayKey(date: Date): string {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  return isoDateInTimeZone(date);
+}
+
+/**
+ * The calendar day before `key`, both `YYYY-MM-DD`. Stepped in UTC, where every
+ * day is 24 hours long, so no DST change in the salon's zone or the runtime's
+ * can turn "yesterday" into the day before it.
+ */
+function previousDay(key: string): string {
+  const midnight = new Date(`${key}T00:00:00Z`);
+  midnight.setUTCDate(midnight.getUTCDate() - 1);
+  return midnight.toISOString().slice(0, 10);
 }
 
 /**
@@ -49,12 +70,9 @@ export function sortThreadChronologically(
  */
 function dayLabel(date: Date, now: Date, labels: ThreadDateLabels): string {
   const today = dayKey(now);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-
   const key = dayKey(date);
   if (key === today) return labels.today;
-  if (key === dayKey(yesterday)) return labels.yesterday;
+  if (key === previousDay(today)) return labels.yesterday;
   return labels.formatDate(date);
 }
 
@@ -77,7 +95,7 @@ export function groupThread(
   now: Date = new Date(),
   labels: ThreadDateLabels = {
     today: dayKey(now),
-    yesterday: dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
+    yesterday: previousDay(dayKey(now)),
     formatDate: dayKey,
   },
 ): ReadonlyArray<ThreadDay> {
