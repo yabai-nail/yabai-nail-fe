@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ExclamationTriangleIcon, LinkIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { AdminAvatarZoom } from "@/components/blocks/admin/AdminAvatarField";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
@@ -182,7 +183,12 @@ export function AdminAccountsComponent() {
                       const internal = row.role !== "CUSTOMER";
                       return (
                         <tr key={row.id} className="border-b border-admin-border last:border-0">
-                          <td className="px-4 py-3 font-medium text-admin-ink">{row.displayName}</td>
+                          <td className="px-4 py-3 font-medium text-admin-ink">
+                            <div className="flex items-center gap-2">
+                              <AdminAvatarZoom src={row.avatarUrl} name={row.displayName} size="sm" />
+                              <span className="truncate">{row.displayName}</span>
+                            </div>
+                          </td>
                           <td className="px-4 py-3 font-mono text-admin-muted">{row.phone}</td>
                           <td className="px-4 py-3 text-admin-ink">{roleLabel(row.role)}</td>
                           <td className="px-4 py-3">

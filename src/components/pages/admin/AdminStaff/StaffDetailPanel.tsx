@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
-import { Avatar, Button, Card, Chip } from "@heroui/react";
+import { Button, Card, Chip } from "@heroui/react";
+import { AdminAvatarZoom } from "@/components/blocks/admin/AdminAvatarField";
 import { formatMoney } from "@/lib/admin-format";
 import { StaffCompensationForm } from "./StaffCompensationForm";
 import { StaffPerformancePanel } from "./StaffPerformancePanel";
@@ -58,7 +59,7 @@ export function StaffDetailPanel({
         <Card className={cellClass}>
           <Card.Content className="space-y-4 p-4">
             <div className="flex items-center gap-3">
-              <Avatar size="lg" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
+              <AdminAvatarZoom src={member.avatarUrl} name={member.name} size="lg" />
               <div className="min-w-0">
                 <p className="truncate font-bold">{member.name}</p>
                 <Chip size="sm" variant="soft" color={member.status === "working" ? "success" : "default"}>

@@ -17,6 +17,8 @@ export type StaffMember = {
   readonly name: string;
   readonly initials: string;
   readonly phone: string;
+  /** Public URL of the profile photo, or null when none is set. */
+  readonly avatarUrl: string | null;
   readonly status: StaffStatus;
   readonly revenue: number | null;
   readonly commissionRate: number | null;
