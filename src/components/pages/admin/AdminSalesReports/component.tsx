@@ -1,7 +1,7 @@
 "use client";
 
-import { CheckIcon, LockClosedIcon, PencilSquareIcon, PlusIcon, XMarkIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
-import { Button, Card } from "@heroui/react";
+import { CheckIcon, LockClosedIcon, PencilSquareIcon, PlusIcon, TrashIcon, XMarkIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
+import { Button, Card, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -61,6 +61,8 @@ export function AdminSalesReportsComponent() {
   const [editing, setEditing] = useState<AdminSalesReport | null>(null);
   const [creating, setCreating] = useState(false);
   const [rejecting, setRejecting] = useState<ReadonlyArray<AdminSalesReport> | null>(null);
+  // A pending, unlocked report the manager asked to delete (awaiting confirmation).
+  const [deleting, setDeleting] = useState<AdminSalesReport | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [dayToApprove, setDayToApprove] = useState(() => todayAtSalon());
@@ -126,6 +128,21 @@ export function AdminSalesReportsComponent() {
     try {
       await adminService.decideSalesReport(row.id, { decision, reason }, row.version);
       notifySuccess(t(`decided.${decision}`));
+      refresh();
+    } catch (thrown) {
+      setActionError(explain(thrown));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const removeReport = async (row: AdminSalesReport) => {
+    setBusy(row.id);
+    setActionError(null);
+    try {
+      await adminService.deleteSalesReport(row.id, row.version);
+      notifySuccess(t("deleted"));
+      setDeleting(null);
       refresh();
     } catch (thrown) {
       setActionError(explain(thrown));
@@ -298,6 +315,9 @@ export function AdminSalesReportsComponent() {
                         {canWrite ? (
                           <Button isIconOnly size="sm" variant="ghost" aria-label={t("actions.edit")} isDisabled={row.locked || busy !== null} onPress={() => setEditing(row)}><PencilSquareIcon className="size-4" /></Button>
                         ) : null}
+                        {canWrite && row.status === "PENDING" && !row.locked ? (
+                          <Button isIconOnly size="sm" variant="ghost" className="text-admin-danger" aria-label={t("actionDelete")} isDisabled={busy !== null} onPress={() => setDeleting(row)}><TrashIcon className="size-4" /></Button>
+                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -331,6 +351,33 @@ export function AdminSalesReportsComponent() {
             else void decideMany({ decision: "REJECT", reason, reportIds: targets.map((row) => row.id) });
           }}
         />
+      ) : null}
+      {deleting ? (
+        <Modal isOpen onOpenChange={(open) => { if (!open && busy === null) setDeleting(null); }}>
+          <Modal.Backdrop>
+            <Modal.Container size="sm" placement="center">
+              <Modal.Dialog className="rounded-xl border border-admin-border bg-admin-surface">
+                <Modal.Header className="border-b border-admin-border px-5 py-4">
+                  <Modal.Heading className="text-base font-bold text-admin-ink">{t("confirmDeleteTitle")}</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="px-5 py-4 text-sm text-admin-ink">
+                  {t("confirmDeleteBody", { date: deleting.reportDate, amount: formatMoney(deleting.grossAmount) })}
+                </Modal.Body>
+                <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
+                  <Button variant="ghost" className="rounded-lg" isDisabled={busy !== null} onPress={() => setDeleting(null)}>{t("modal.cancel")}</Button>
+                  <Button
+                    variant="ghost"
+                    className="rounded-lg bg-admin-danger text-white hover:bg-admin-danger/90"
+                    isDisabled={busy !== null}
+                    onPress={() => { const row = deleting; void removeReport(row); }}
+                  >
+                    {t("actionDelete")}
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
       ) : null}
     </AdminPageLayout>
   );
