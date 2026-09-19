@@ -11,17 +11,27 @@ import {
   appointmentStatusLabel,
   appointmentStatusTone,
 } from "./status";
+import {
+  DAY_END_HOUR,
+  DAY_START_HOUR,
+  layoutDayAppointments,
+  MINUTES_PER_HOUR,
+} from "./calendar-layout";
+
+const DAY_HOUR_HEIGHT_REM = 5;
 
 function AppointmentPill({
   appointment,
   isSelected,
   onSelect,
   compact = false,
+  timelineMinutes,
 }: Readonly<{
   appointment: Appointment;
   isSelected: boolean;
   onSelect: (id: string) => void;
   compact?: boolean;
+  timelineMinutes?: number;
 }>) {
   // The status dresses the pill: a 4px bar to scan by, the same colour at 10%
   // behind it, and a dot beside the written label. The label prints in every
@@ -30,24 +40,34 @@ function AppointmentPill({
   // apart for a deutan reader, so the label is what carries the meaning.
   const tStatus = useTranslations("admin.appointmentStatus");
   const tone = appointmentStatusTone[appointment.status];
+  const statusLabel = appointmentStatusLabel(appointment.status, tStatus);
+  const isTimeline = timelineMinutes !== undefined;
+  const sizeClass = isTimeline
+    ? "h-full min-h-0 overflow-hidden py-1"
+    : compact
+      ? "h-auto min-h-12 py-1.5"
+      : "h-auto min-h-16 py-2";
 
   return (
     <Button
       variant="ghost"
-      className={`h-auto w-full justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${
-        compact ? "min-h-12 py-1.5" : "min-h-16 py-2"
-      } ${isSelected ? "ring-2 ring-admin-ink/30" : ""}`}
+      aria-label={`${appointment.customer.name}, ${appointment.service.name}, ${appointment.startTime} - ${appointment.endTime}, ${statusLabel}`}
+      className={`w-full min-w-0 max-w-full justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${sizeClass} ${
+        isSelected ? "ring-2 ring-admin-ink/30" : ""
+      }`}
       onPress={() => onSelect(appointment.id)}
     >
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 flex-1 overflow-hidden">
         <span className="flex items-center justify-between gap-2">
           <strong className="truncate text-xs text-admin-ink">{appointment.customer.name}</strong>
           <time className="shrink-0 text-[0.65rem] text-admin-muted">{appointment.startTime} - {appointment.endTime}</time>
         </span>
-        <span className="mt-1 block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
+        {!isTimeline || timelineMinutes >= 60 ? (
+          <span className="mt-1 block truncate text-[0.7rem] text-admin-muted">{appointment.service.name}</span>
+        ) : null}
         <span className="mt-1 flex items-center gap-1.5 text-[0.65rem] font-medium text-admin-ink">
           <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} aria-hidden="true" />
-          {appointmentStatusLabel(appointment.status, tStatus)}
+          <span className="truncate">{statusLabel}</span>
         </span>
       </span>
     </Button>
@@ -55,26 +75,59 @@ function AppointmentPill({
 }
 
 function DayCalendar({ appointments, selectedId, onSelect }: CalendarViewProps) {
-  const hours = Array.from({ length: 12 }, (_, index) => index + 9);
+  const hours = Array.from(
+    { length: DAY_END_HOUR - DAY_START_HOUR },
+    (_, index) => index + DAY_START_HOUR,
+  );
+  const layouts = layoutDayAppointments(appointments);
+  const timelineHeightRem = hours.length * DAY_HOUR_HEIGHT_REM;
 
   return (
-    <div className="relative min-w-[34rem]">
-      {hours.map((hour) => {
-        const hourLabel = `${String(hour).padStart(2, "0")}:00`;
-        const hourAppointments = appointments.filter(
-          (appointment) => Number(appointment.startTime.slice(0, 2)) === hour,
-        );
-        return (
-          <div key={hour} className="grid min-h-20 grid-cols-[4rem_1fr] border-b border-admin-border last:border-b-0">
-            <time className="px-3 py-3 text-xs text-admin-muted">{hourLabel}</time>
-            <div className="space-y-2 border-l border-admin-border p-2">
-              {hourAppointments.map((appointment) => (
-                <AppointmentPill key={appointment.id} appointment={appointment} isSelected={selectedId === appointment.id} onSelect={onSelect} />
-              ))}
+    <div className="grid min-w-[34rem] grid-cols-[4rem_1fr]">
+      <div aria-hidden="true">
+        {hours.map((hour) => (
+          <time key={hour} className="block h-20 border-b border-admin-border px-3 py-3 text-xs text-admin-muted last:border-b-0">
+            {String(hour).padStart(2, "0")}:00
+          </time>
+        ))}
+      </div>
+      <div
+        className="relative border-l border-admin-border"
+        style={{ height: `${timelineHeightRem}rem` }}
+      >
+        <div className="absolute inset-0" aria-hidden="true">
+          {hours.map((hour) => (
+            <div key={hour} className="h-20 border-b border-admin-border last:border-b-0" />
+          ))}
+        </div>
+        {layouts.map((layout) => {
+          const topRem =
+            (layout.offsetMinutes / MINUTES_PER_HOUR) * DAY_HOUR_HEIGHT_REM;
+          const heightRem =
+            (layout.visibleDurationMinutes / MINUTES_PER_HOUR) * DAY_HOUR_HEIGHT_REM;
+          const laneWidth = 100 / layout.laneCount;
+
+          return (
+            <div
+              key={layout.appointment.id}
+              className={`absolute px-1 py-1 ${selectedId === layout.appointment.id ? "z-10" : "z-0"}`}
+              style={{
+                top: `${topRem}rem`,
+                height: `${heightRem}rem`,
+                left: `${layout.lane * laneWidth}%`,
+                width: `${laneWidth}%`,
+              }}
+            >
+              <AppointmentPill
+                appointment={layout.appointment}
+                isSelected={selectedId === layout.appointment.id}
+                onSelect={onSelect}
+                timelineMinutes={layout.visibleDurationMinutes}
+              />
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
