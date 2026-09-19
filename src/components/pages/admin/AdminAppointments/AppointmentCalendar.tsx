@@ -52,7 +52,7 @@ function AppointmentPill({
     <Button
       variant="ghost"
       aria-label={`${appointment.customer.name}, ${appointment.service.name}, ${appointment.startTime} - ${appointment.endTime}, ${statusLabel}`}
-      className={`w-full min-w-0 max-w-full justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${sizeClass} ${
+      className={`w-full min-w-0 max-w-full items-start justify-start rounded-lg border-l-4 px-2 text-left ${tone.bar} ${tone.tint} ${sizeClass} ${
         isSelected ? "ring-2 ring-admin-ink/30" : ""
       }`}
       onPress={() => onSelect(appointment.id)}

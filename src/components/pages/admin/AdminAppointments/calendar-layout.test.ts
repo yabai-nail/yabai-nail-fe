@@ -21,6 +21,12 @@ describe("day calendar layout", () => {
     expect(source).not.toContain("Number(appointment.startTime.slice(0, 2)) === hour");
   });
 
+  it("anchors appointment details to the start of a Teams-style time block", () => {
+    const source = readFileSync(new URL("./AppointmentCalendar.tsx", import.meta.url), "utf8");
+
+    expect(source).toContain("items-start");
+  });
+
   it("spans an appointment across its complete duration", () => {
     const [layout] = layoutDayAppointments([interval("long", "13:00", "15:30")]);
 
