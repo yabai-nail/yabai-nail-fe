@@ -50,7 +50,10 @@ export function StaffTable({ staff, selectedId, onSelect, canWrite, busyId, onEd
               <td className="px-3 py-2">
                 <Button variant="ghost" className="h-auto min-h-11 justify-start rounded-lg px-1" onPress={() => onSelect(member.id)}>
                   <Avatar size="sm" color="accent"><Avatar.Fallback>{member.initials}</Avatar.Fallback></Avatar>
-                  <strong>{member.name}</strong>
+                  <span className="flex flex-col items-start leading-tight">
+                    <strong>{member.name}</strong>
+                    {member.phone ? <span className="text-xs font-normal tabular-nums text-admin-muted">{member.phone}</span> : null}
+                  </span>
                 </Button>
               </td>
               <td className="px-3 py-2">
