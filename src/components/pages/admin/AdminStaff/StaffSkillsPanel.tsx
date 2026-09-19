@@ -35,7 +35,10 @@ export function StaffSkillsPanel({
   const [selected, setSelected] = useState<Set<string> | null>(null);
   const currentSet = selected ?? grantedIds;
   const dirty = selected !== null;
-  const allServiceIds = useMemo(() => (services.data?.items ?? []).map((service) => service.id), [services.data]);
+  // Only active services can be granted as skills — the backend rejects the whole set if any id
+  // is an inactive (or unknown) service. So never list inactive ones, nor let "select all" tick them.
+  const skillServices = useMemo(() => (services.data?.items ?? []).filter((service) => service.active), [services.data]);
+  const allServiceIds = useMemo(() => skillServices.map((service) => service.id), [skillServices]);
   const allChecked = allServiceIds.length > 0 && allServiceIds.every((id) => currentSet.has(id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +54,12 @@ export function StaffSkillsPanel({
     setBusy(true);
     setError(null);
     try {
+      // Only persist active services: a grant for a since-deactivated service is invisible in the
+      // active-only list yet would fail the backend's active-services check and block every save.
+      const activeIds = new Set(allServiceIds);
       await adminService.setStaffSkills(
         staffId,
-        { skills: [...currentSet].map((skillId) => ({ skillId })) },
+        { skills: [...currentSet].filter((id) => activeIds.has(id)).map((skillId) => ({ skillId })) },
         // The skill set carries its own version; the staff member's is a
         // different resource and would fail the optimistic check.
         skills.data?.version ?? staffVersion,
@@ -91,7 +97,7 @@ export function StaffSkillsPanel({
         <p role="alert" className="text-xs text-admin-danger">{t("skills.loadFailed")}</p>
       ) : (
         <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
-          {(services.data?.items ?? []).map((service) => (
+          {skillServices.map((service) => (
             <li key={service.id}>
               <label className="flex cursor-pointer items-center gap-2">
                 <input
