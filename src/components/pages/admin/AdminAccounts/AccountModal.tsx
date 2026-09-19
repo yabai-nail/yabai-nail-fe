@@ -10,7 +10,7 @@ import { notifySuccess } from "@/lib/app-toast";
 import type { AccountRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
-const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
+const inputClass = "min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const roleOptions = ["STAFF", "MANAGER", "OWNER"];
 const statusOptions = ["ACTIVE", "SUSPENDED", "DISABLED"];
 
@@ -89,23 +89,27 @@ export function AccountModal({
   return (
     <Modal isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
       <Modal.Backdrop>
-        <Modal.Container size="md" placement="center" scroll="inside">
-          <Modal.Dialog>
-            <Modal.Header className="border-b border-admin-border px-5 py-4">
-              <Modal.Heading className="text-base font-bold text-admin-ink">
+        {/* HeroUI caps "lg" at 32rem; the utility class on the dialog wins over that, so the
+            form gets room for two columns instead of a tall single one. */}
+        <Modal.Container size="lg" placement="center" scroll="inside">
+          <Modal.Dialog className="max-w-4xl">
+            <Modal.Header className="border-b border-admin-border px-6 py-4">
+              <Modal.Heading className="text-lg font-bold text-admin-ink">
                 {isEdit ? t("modal.editTitle") : t("modal.addTitle")}
               </Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="grid gap-4 px-5 py-5">
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.phone")}</span>
-                <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0900000010" disabled={isEdit} inputMode="numeric" />
-              </label>
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.displayName")}</span>
-                <input className={inputClass} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={t("modal.displayNamePlaceholder")} autoFocus />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
+            <Modal.Body className="grid gap-5 px-6 py-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">{t("modal.phone")}</span>
+                  <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0900000010" disabled={isEdit} inputMode="numeric" />
+                </label>
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">{t("modal.displayName")}</span>
+                  <input className={inputClass} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={t("modal.displayNamePlaceholder")} autoFocus />
+                </label>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("columns.role")}</span>
                   <AdminSelectField
@@ -142,7 +146,7 @@ export function AccountModal({
                   ) : branches.error ? (
                     <p role="alert" className="text-xs text-admin-danger">{t("modal.branchesLoadFailed")}</p>
                   ) : (
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       {(branches.data?.items ?? []).map((branch) => (
                         <label key={branch.id} className="flex min-h-10 items-center gap-2 rounded-lg border border-admin-border px-3 text-sm text-admin-ink">
                           <input
