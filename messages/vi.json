@@ -1769,6 +1769,7 @@
         "commission": "Hoa hồng"
       },
       "skills": {
+        "inactive": "Ngưng hoạt động",
         "selectAll": "Chọn tất cả",
         "clearAll": "Bỏ chọn tất cả",
         "saveFailed": "Không lưu được kỹ năng.",

@@ -1752,6 +1752,7 @@
         "commission": "歩合"
       },
       "skills": {
+        "inactive": "停止中",
         "selectAll": "すべて選択",
         "clearAll": "すべて解除",
         "saveFailed": "スキルを保存できません。",

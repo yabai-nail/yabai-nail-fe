@@ -97,16 +97,23 @@ export function StaffSkillsPanel({
         <p role="alert" className="text-xs text-admin-danger">{t("skills.loadFailed")}</p>
       ) : (
         <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
-          {skillServices.map((service) => (
+          {(services.data?.items ?? []).map((service) => (
             <li key={service.id}>
-              <label className="flex cursor-pointer items-center gap-2">
+              <label className={`flex items-center gap-2 ${service.active ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}>
                 <input
                   type="checkbox" className="accent-admin-accent"
                   checked={currentSet.has(service.id)}
-                  disabled={!canWrite}
+                  disabled={!canWrite || !service.active}
                   onChange={() => toggle(service.id)}
                 />
+                <span
+                  aria-hidden="true"
+                  className={`size-1.5 shrink-0 rounded-full ${service.active ? "bg-admin-success" : "bg-admin-muted"}`}
+                />
                 <span className="flex-1 truncate text-admin-ink">{service.name}</span>
+                {service.active ? null : (
+                  <span className="shrink-0 rounded-full bg-admin-soft px-1.5 py-0.5 text-[0.6rem] font-semibold text-admin-muted">{t("skills.inactive")}</span>
+                )}
                 {typeof service.durationMinutes === "number" ? (
                   <span className="text-[0.65rem] text-admin-muted">{service.durationMinutes}p</span>
                 ) : null}
