@@ -808,6 +808,7 @@
       "viewLabel": "Service management area",
       "categoriesTab": "Categories",
       "filterCategory": "Filter by category",
+      "branchFilter": {"label":"Branch","all":"All branches"},
       "categoryPrefix": "Category:",
       "categorySearchLabel": "Search categories",
       "categorySearchPlaceholder": "Search categories…",

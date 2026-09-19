@@ -8,11 +8,13 @@ import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import {
   useAdminServiceCategories,
   useAdminBranch,
+  useAdminBranchList,
   useAdminServices,
   useAdminPermission,
   type AdminServiceItem as ServerService,
@@ -60,13 +62,24 @@ function toScreenService(server: ServerService): SalonService {
 
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
-  const { branchId } = useAdminBranch();
+  const tBranch = useTranslations("admin.branchSelector");
+  const { branchIds } = useAdminBranch();
   const canWrite = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const popularityWindow = useMemo(() => getPopularityWindow(), []);
   const [filter, setFilter] = useState<ServiceFilter>("all");
   const [query, setQuery] = useState("");
+  // The catalogue is org-wide, but a service is hidden for a branch its category excludes, so the
+  // list needs its own branch scope. It opens on "every branch" — otherwise the console's active
+  // branch can silently empty the table when its categories are scoped elsewhere — and the branch
+  // list only carries the ones this admin may see, matching the header switcher's own scope.
+  const [branchFilter, setBranchFilter] = useState<string>("");
+  const branches = useAdminBranchList();
+  const branchNameById = useMemo(
+    () => new Map((branches.data?.items ?? []).map((branch) => [branch.id, branch.name] as const)),
+    [branches.data],
+  );
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices({
-    branchId: branchId ?? undefined,
+    branchId: branchFilter || undefined,
     categoryId: filter === "all" ? undefined : filter,
     from: popularityWindow.from,
     limit: 100,
@@ -170,6 +183,20 @@ export function AdminServicesComponent() {
       ) : (
         <>
           <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {/* Only when there is more than one branch to switch between, mirroring the header. The
+                catalogue is org-wide, so this narrows which branch's visibility the list reflects. */}
+            {branchIds.length > 1 ? (
+              <AdminSelectField
+                label={t("branchFilter.label")}
+                value={branchFilter}
+                onChange={(value) => { setBranchFilter(value); setPage(1); }}
+                options={[
+                  { value: "", label: t("branchFilter.all") },
+                  ...branchIds.map((id) => ({ value: id, label: branchNameById.get(id) ?? tBranch("unnamed") })),
+                ]}
+              />
+            ) : null}
             {/*
               One control instead of a strip of them. The open list carries its own search box, so
               the number of categories stops mattering to the layout: the toolbar is one row whether
@@ -229,6 +256,7 @@ export function AdminServicesComponent() {
                 </Autocomplete.Filter>
               </Autocomplete.Popover>
             </Autocomplete>
+            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
               <Button

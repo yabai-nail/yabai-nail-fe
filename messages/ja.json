@@ -808,6 +808,7 @@
       "viewLabel": "メニュー管理エリア",
       "categoriesTab": "カテゴリー",
       "filterCategory": "カテゴリーで絞り込む",
+      "branchFilter": {"label":"店舗","all":"すべての店舗"},
       "categoryPrefix": "カテゴリー：",
       "categorySearchLabel": "カテゴリーを検索",
       "categorySearchPlaceholder": "カテゴリーを検索…",

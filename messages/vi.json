@@ -808,6 +808,7 @@
       "viewLabel": "Khu vực quản lý dịch vụ",
       "categoriesTab": "Danh mục",
       "filterCategory": "Lọc theo danh mục",
+      "branchFilter": {"label":"Chi nhánh","all":"Mọi chi nhánh"},
       "categoryPrefix": "Danh mục:",
       "categorySearchLabel": "Tìm danh mục",
       "categorySearchPlaceholder": "Tìm danh mục...",
