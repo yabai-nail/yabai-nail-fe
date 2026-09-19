@@ -771,7 +771,7 @@
         "addTitle": "アカウントを追加",
         "phone": "電話番号",
         "displayName": "表示名",
-        "displayNamePlaceholder": "山田 太郎",
+        "phoneInvalid":"電話番号は0から始まる10桁で入力してください。","displayNamePlaceholder": "山田 太郎",
         "role": "役割",
         "status": "ステータス",
         "statusLabel": "アカウントのステータス",

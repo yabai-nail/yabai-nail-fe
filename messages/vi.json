@@ -771,7 +771,7 @@
         "addTitle": "Thêm tài khoản",
         "phone": "Số điện thoại",
         "displayName": "Tên hiển thị",
-        "displayNamePlaceholder": "Nguyễn Văn A",
+        "phoneInvalid":"Số điện thoại phải là 10 số bắt đầu bằng 0.","displayNamePlaceholder": "Nguyễn Văn A",
         "role": "Vai trò",
         "status": "Trạng thái",
         "statusLabel": "Trạng thái tài khoản",

@@ -771,7 +771,7 @@
         "addTitle": "Add account",
         "phone": "Phone number",
         "displayName": "Display name",
-        "displayNamePlaceholder": "Jane Doe",
+        "phoneInvalid":"Phone must be 10 digits starting with 0.","displayNamePlaceholder": "Jane Doe",
         "role": "Role",
         "status": "Status",
         "statusLabel": "Account status",
