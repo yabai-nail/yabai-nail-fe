@@ -75,7 +75,8 @@ export function AdminSettingsComponent() {
   // staff-performance read model: the roster carries identity, role and the
   // active flag, the read model carries rate, revenue and commission for the
   // period. Two requests, no per-staff fan-out.
-  const staff = useAdminStaff(undefined, canReadCommission);
+  // Load the whole roster (not the default first page) so the commission table never hides staff.
+  const staff = useAdminStaff({ limit: 100 }, canReadCommission);
   const performance = useAdminStaffPerformance(branchId, { period }, canReadCommission);
   const commissionPolicies = useMemo<ReadonlyArray<CommissionPolicy>>(() => {
     const byStaffId = indexStaffPerformance(performance.data?.rows);

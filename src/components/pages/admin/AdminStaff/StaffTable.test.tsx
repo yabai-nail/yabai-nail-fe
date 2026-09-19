@@ -1,5 +1,4 @@
 import { NextIntlClientProvider } from "next-intl";
-import type { ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -22,31 +21,34 @@ const member: StaffMember = {
   branchName: "YABAI NAIL Thao Dien",
 };
 
-function render(staff: ReadonlyArray<StaffMember>) {
+function render(staff: ReadonlyArray<StaffMember>, canWrite = true) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale="vi" messages={messages}>
-      <StaffTable staff={staff} selectedId={member.id} onSelect={() => {}} />
+      <StaffTable
+        staff={staff}
+        selectedId={member.id}
+        onSelect={() => {}}
+        canWrite={canWrite}
+        busyId={null}
+        onEdit={() => {}}
+        onToggleActive={() => {}}
+      />
     </NextIntlClientProvider>,
   );
 }
 
 describe("StaffTable", () => {
-  it("keeps edit actions out of the roster so editing starts from the detail panel", () => {
-    const LegacyCompatibleStaffTable = StaffTable as ComponentType<Record<string, unknown>>;
-    // The table reads its words from the catalogue now, so it needs the provider the
-    // console gives it; Vietnamese keeps the assertion below readable.
-    const markup = renderToStaticMarkup(
-      <NextIntlClientProvider locale="vi" messages={messages}>
-        <LegacyCompatibleStaffTable
-          staff={[member]}
-          selectedId={member.id}
-          onSelect={() => {}}
-          onEdit={() => {}}
-        />
-      </NextIntlClientProvider>,
-    );
+  it("offers edit and deactivate actions to an admin who can write", () => {
+    const markup = render([member]);
 
-    expect(markup).not.toContain("Sửa thông tin");
+    expect(markup).toContain(messages.admin.staff.editAction);
+    expect(markup).toContain(messages.admin.staff.actionDeactivate);
+  });
+
+  it("hides row actions from a read-only admin", () => {
+    const markup = render([member], false);
+
+    expect(markup).not.toContain(messages.admin.staff.actionDeactivate);
   });
 
   // The roster is org-level while everything else on the screen is branch-scoped,

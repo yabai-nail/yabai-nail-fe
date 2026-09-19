@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { MonthPicker } from "@/components/blocks/admin/MonthPicker";
 import { formatMoney } from "@/lib/admin-format";
 import { currentMonthPeriod } from "@/lib/admin-staff-performance";
 import { useAdminPayroll } from "@/service";
@@ -27,12 +28,11 @@ export function StaffPerformancePanel({
     <section aria-labelledby="staff-performance-heading" className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 id="staff-performance-heading" className="text-sm font-bold text-admin-ink">{t("performance.heading")}</h3>
-        <input
-          type="month"
+        <MonthPicker
           value={period}
-          onChange={(event) => setPeriod(event.target.value)}
-          aria-label={t("performance.periodLabel")}
-          className="rounded-lg border border-admin-border bg-admin-surface px-2 py-1 text-xs text-admin-ink"
+          onChange={setPeriod}
+          ariaLabel={t("performance.periodLabel")}
+          className="px-2 py-1 text-xs"
         />
       </div>
 

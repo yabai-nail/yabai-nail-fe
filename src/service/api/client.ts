@@ -28,6 +28,16 @@ interface CreateApiClientOptions {
 // shared `apiClient` below is built once, before any React tree exists.
 let adminTokenRefresher: (() => Promise<string | null>) | null = null;
 
+// The toast layer registers this so admin write failures surface as a notification, not just
+// an inline message a user can miss. Injected (not imported) to keep this client UI-agnostic.
+let mutationErrorNotifier: ((error: unknown) => void) | null = null;
+
+export function setMutationErrorNotifier(
+  notifier: ((error: unknown) => void) | null,
+): void {
+  mutationErrorNotifier = notifier;
+}
+
 function isRelativeBackendUrl(url: string): boolean {
   return !/^[a-z][a-z\d+.-]*:\/\//i.test(url);
 }
@@ -72,18 +82,28 @@ export function createApiClient({
       const isAdminRequest =
         isRelativeBackendUrl(config?.url ?? "") &&
         (config?.authScope === "admin" || (config?.url ?? "").includes("/admin/"));
-      if (error && typeof error === "object" && "response" in error) {
-        const status = (error as { response?: { status?: number } }).response?.status;
-        if (status === 401 && config && !config.__retried && isAdminRequest) {
-          config.__retried = true;
-          const token = await refreshAdminAccessToken();
-          if (token) {
-            config.headers?.set?.("Authorization", `Bearer ${token}`);
-            return client.request(config);
-          }
+      const status =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 401 && config && !config.__retried && isAdminRequest) {
+        config.__retried = true;
+        const token = await refreshAdminAccessToken();
+        if (token) {
+          config.headers?.set?.("Authorization", `Bearer ${token}`);
+          return client.request(config);
         }
       }
-      return Promise.reject(normalizeApiError(error));
+      const normalized = normalizeApiError(error);
+      // Surface admin write failures (create/update/delete) as a toast so they are noticed and
+      // not just shown inline. GETs stay silent — they render their own load states; 401 is the
+      // session-refresh flow above; auth endpoints (login/refresh) show their own form errors.
+      const method = (config?.method ?? "get").toLowerCase();
+      const isMutation = method === "post" || method === "put" || method === "patch" || method === "delete";
+      if (isAdminRequest && isMutation && status !== 401 && !(config?.url ?? "").includes("/auth/")) {
+        mutationErrorNotifier?.(normalized);
+      }
+      return Promise.reject(normalized);
     },
   );
 

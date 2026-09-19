@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "Vận hành",
+        "catalog": "Dịch vụ & Marketing",
+        "finance": "Báo cáo & Lương",
+        "team": "Nhân sự",
+        "system": "Hệ thống"
+      },
       "dashboard": {
         "label": "Tổng quan",
         "title": "Tổng quan",
@@ -1667,6 +1674,9 @@
       "loadingFailed": "Không tải được danh sách nhân viên.",
       "emptyHeading": "Chưa có nhân viên",
       "retry": "Thử tải lại trang.",
+      "actionDeactivate": "Vô hiệu hoá",
+      "actionActivate": "Kích hoạt",
+      "deactivateConfirm": "Vô hiệu hoá {name}? Nhân viên sẽ ẩn khỏi danh sách hoạt động và không nhận lịch mới; bạn có thể kích hoạt lại sau.",
       "firstStaff": "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng.",
       "noSelectionTitle": "Không có nhân viên",
       "noSelectionDescription": "Thay đổi bộ lọc để xem thông tin nhân viên.",
@@ -1762,6 +1772,10 @@
         "commission": "Hoa hồng"
       },
       "skills": {
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động",
+        "selectAll": "Chọn tất cả",
+        "clearAll": "Bỏ chọn tất cả",
         "saveFailed": "Không lưu được kỹ năng.",
         "heading": "Kỹ năng",
         "loading": "Đang tải…",
@@ -2030,6 +2044,8 @@
         "close": "Đóng",
         "saving": "Đang lưu…",
         "save": "Lưu thay đổi",
+        "customerSearch": "Tìm theo tên hoặc SĐT…",
+        "customerEmpty": "Không tìm thấy khách hàng.",
         "create": "Tạo lịch hẹn"
       },
       "validation": {

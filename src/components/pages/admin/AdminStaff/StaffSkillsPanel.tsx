@@ -35,6 +35,11 @@ export function StaffSkillsPanel({
   const [selected, setSelected] = useState<Set<string> | null>(null);
   const currentSet = selected ?? grantedIds;
   const dirty = selected !== null;
+  // Only active services can be granted as skills — the backend rejects the whole set if any id
+  // is an inactive (or unknown) service. So never list inactive ones, nor let "select all" tick them.
+  const skillServices = useMemo(() => (services.data?.items ?? []).filter((service) => service.active), [services.data]);
+  const allServiceIds = useMemo(() => skillServices.map((service) => service.id), [skillServices]);
+  const allChecked = allServiceIds.length > 0 && allServiceIds.every((id) => currentSet.has(id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,9 +54,12 @@ export function StaffSkillsPanel({
     setBusy(true);
     setError(null);
     try {
+      // Only persist active services: a grant for a since-deactivated service is invisible in the
+      // active-only list yet would fail the backend's active-services check and block every save.
+      const activeIds = new Set(allServiceIds);
       await adminService.setStaffSkills(
         staffId,
-        { skills: [...currentSet].map((skillId) => ({ skillId })) },
+        { skills: [...currentSet].filter((id) => activeIds.has(id)).map((skillId) => ({ skillId })) },
         // The skill set carries its own version; the staff member's is a
         // different resource and would fail the optimistic check.
         skills.data?.version ?? staffVersion,
@@ -68,7 +76,20 @@ export function StaffSkillsPanel({
 
   return (
     <section aria-labelledby="staff-skills-heading" className="space-y-2">
-      <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 id="staff-skills-heading" className="text-sm font-bold text-admin-ink">{t("skills.heading")}</h3>
+        {canWrite && allServiceIds.length > 0 ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-lg"
+            isDisabled={busy}
+            onPress={() => setSelected(allChecked ? new Set() : new Set(allServiceIds))}
+          >
+            {allChecked ? t("skills.clearAll") : t("skills.selectAll")}
+          </Button>
+        ) : null}
+      </div>
 
       {services.isLoading || skills.isLoading ? (
         <p className="text-xs text-admin-muted">{t("compensation.loading")}</p>
@@ -78,14 +99,21 @@ export function StaffSkillsPanel({
         <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-admin-border p-2 text-xs">
           {(services.data?.items ?? []).map((service) => (
             <li key={service.id}>
-              <label className="flex cursor-pointer items-center gap-2">
+              <label className={`flex items-center gap-2 ${service.active ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}>
                 <input
                   type="checkbox" className="accent-admin-accent"
                   checked={currentSet.has(service.id)}
-                  disabled={!canWrite}
+                  disabled={!canWrite || !service.active}
                   onChange={() => toggle(service.id)}
                 />
                 <span className="flex-1 truncate text-admin-ink">{service.name}</span>
+                <span
+                  className={`shrink-0 rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${
+                    service.active ? "bg-admin-success/15 text-admin-success" : "bg-admin-soft text-admin-muted"
+                  }`}
+                >
+                  {service.active ? t("skills.active") : t("skills.inactive")}
+                </span>
                 {typeof service.durationMinutes === "number" ? (
                   <span className="text-[0.65rem] text-admin-muted">{service.durationMinutes}p</span>
                 ) : null}

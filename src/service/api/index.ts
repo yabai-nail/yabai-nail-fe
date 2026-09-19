@@ -13,6 +13,7 @@ export {
   apiClient,
   createApiClient,
   setAdminTokenRefresher,
+  setMutationErrorNotifier,
 } from "./client";
 export {
   ApiClientError,

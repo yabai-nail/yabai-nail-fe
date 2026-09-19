@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { MonthPicker } from "@/components/blocks/admin/MonthPicker";
 import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import { ApiClientError, adminService, useAdminBranch, useAdminBranchList, useAdminSalesReports, type AdminSalesReport } from "@/service";
@@ -69,7 +70,7 @@ export function AdminStaffReportComponent() {
         <div className="flex items-center justify-between gap-2">
           <Button isIconOnly variant="ghost" aria-label={t("previousMonth")} onPress={() => setPeriod(shiftMonth(period, -1))}><ChevronLeftIcon className="size-5" /></Button>
           <div className="text-center">
-            <input type="month" value={period} onChange={(event) => setPeriod(event.target.value)} aria-label={t("month")} className="min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-base font-semibold text-admin-ink" />
+            <MonthPicker value={period} onChange={setPeriod} ariaLabel={t("month")} className="min-h-11 text-base" />
             <p className="mt-1 text-xs text-admin-muted">{t("summary", { count: summary.count, mine: formatMoney(summary.staffTotal) })}</p>
           </div>
           <Button isIconOnly variant="ghost" aria-label={t("nextMonth")} onPress={() => setPeriod(shiftMonth(period, 1))}><ChevronRightIcon className="size-5" /></Button>

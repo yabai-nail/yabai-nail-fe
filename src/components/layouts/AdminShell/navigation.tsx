@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { useAuth } from "@/service";
-import { adminRoutes, canAccessAdminRoute } from "./config";
+import { groupAdminRoutes } from "./config";
 
 export function AdminBrand() {
   const t = useTranslations("admin.shell");
@@ -36,50 +36,62 @@ export function AdminSidebarContent() {
   const t = useTranslations("admin.shell");
   // Route labels are keyed by the route id, which is all config.ts carries now.
   const tNav = useTranslations("admin.nav");
+  const tGroups = useTranslations("admin.nav.groups");
   // The sidebar's own sign-out was a button with no handler; the only working
   // way out was the avatar menu in the header.
   const { logout, permissions } = useAuth();
+  // Accessible routes split into ordered sidebar sections; each renders under its own heading.
+  const sections = permissions ? groupAdminRoutes(permissions) : [];
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <ScrollShadow className="min-h-0 flex-1 py-5" hideScrollBar>
-        <nav aria-label={t("navLabel")}>
-          <ul className="space-y-1">
-            {adminRoutes.filter((route) => permissions && canAccessAdminRoute(route, permissions)).map(({ id, href, icon: Icon, isAvailable }) => {
-              const label = tNav(`${id}.label`);
-              const isCurrent =
-                pathname === href ||
-                (href !== "/admin" && pathname.startsWith(`${href}/`));
+        <nav aria-label={t("navLabel")} className="space-y-5">
+          {sections.map((section) => (
+            <div key={section.group}>
+              {section.group !== "overview" ? (
+                <p className="px-3 pb-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-admin-muted/70">
+                  {tGroups(section.group)}
+                </p>
+              ) : null}
+              <ul className="space-y-1">
+                {section.routes.map(({ id, href, icon: Icon, isAvailable }) => {
+                  const label = tNav(`${id}.label`);
+                  const isCurrent =
+                    pathname === href ||
+                    (href !== "/admin" && pathname.startsWith(`${href}/`));
 
-              return (
-                <li key={href}>
-                  {isAvailable ? (
-                    <Link
-                      href={href}
-                      aria-current={isCurrent ? "page" : undefined}
-                      className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm outline-none ring-admin-accent focus-visible:ring-2 ${
-                        isCurrent
-                          ? "bg-admin-soft font-semibold text-admin-accent"
-                          : "font-medium text-admin-muted hover:bg-admin-soft hover:text-admin-ink"
-                      }`}
-                    >
-                      <Icon aria-hidden="true" className="size-5" />
-                      <span>{label}</span>
-                    </Link>
-                  ) : (
-                    <span
-                      aria-disabled="true"
-                      title={t("comingSoon")}
-                      className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-admin-muted"
-                    >
-                      <Icon aria-hidden="true" className="size-5" />
-                      <span>{label}</span>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                  return (
+                    <li key={href}>
+                      {isAvailable ? (
+                        <Link
+                          href={href}
+                          aria-current={isCurrent ? "page" : undefined}
+                          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm outline-none ring-admin-accent focus-visible:ring-2 ${
+                            isCurrent
+                              ? "bg-admin-soft font-semibold text-admin-accent"
+                              : "font-medium text-admin-muted hover:bg-admin-soft hover:text-admin-ink"
+                          }`}
+                        >
+                          <Icon aria-hidden="true" className="size-5" />
+                          <span>{label}</span>
+                        </Link>
+                      ) : (
+                        <span
+                          aria-disabled="true"
+                          title={t("comingSoon")}
+                          className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-admin-muted"
+                        >
+                          <Icon aria-hidden="true" className="size-5" />
+                          <span>{label}</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
       </ScrollShadow>
 

@@ -1,6 +1,20 @@
 /** A page number, or the gap standing between two of them. */
 export type PageSlot = number | "ellipsis";
 
+/**
+ * Slices a fully-loaded list into one page. Admin lists fetch a generous single page and page
+ * it in memory, so this keeps `page` in range and reports the total page count for the control.
+ */
+export function paginate<T>(
+  items: ReadonlyArray<T>,
+  page: number,
+  pageSize: number,
+): { readonly items: ReadonlyArray<T>; readonly page: number; readonly pageCount: number } {
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+  const current = Math.min(Math.max(1, page), pageCount);
+  return { items: items.slice((current - 1) * pageSize, current * pageSize), page: current, pageCount };
+}
+
 /** Seven slots: first, last, the current page with a neighbour either side, and the gaps. */
 const SLOTS = 7;
 const EDGE_RUN = 5;

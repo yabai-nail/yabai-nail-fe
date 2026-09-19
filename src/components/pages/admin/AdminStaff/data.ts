@@ -66,3 +66,10 @@ export function canCreateStaff(draft: {
   if (!draft.withAccount) return true;
   return isAdminPhone(draft.phone) && isStrongTemporaryPassword(draft.password);
 }
+
+/** Client-side page slice for the roster list (rows are fetched in one page, paged in memory). */
+export function paginate<T>(items: ReadonlyArray<T>, page: number, pageSize: number): { readonly items: ReadonlyArray<T>; readonly page: number; readonly pageCount: number } {
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+  const current = Math.min(Math.max(1, page), pageCount);
+  return { items: items.slice((current - 1) * pageSize, current * pageSize), page: current, pageCount };
+}

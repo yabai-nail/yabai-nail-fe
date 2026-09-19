@@ -50,6 +50,9 @@ export type AppointmentDraft = {
   readonly staff: AppointmentStaff;
   readonly status: AppointmentStatus;
   readonly note: string;
+  // Add-on service ids chosen alongside the base service (create only). The submit sends
+  // [base, ...addonIds] as serviceIds; the backend prices and schedules them together.
+  readonly addonIds?: ReadonlyArray<string>;
 };
 
 export type Appointment = AppointmentDraft & {

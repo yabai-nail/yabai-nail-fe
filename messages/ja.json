@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "運営",
+        "catalog": "サービス・販促",
+        "finance": "レポート・給与",
+        "team": "スタッフ",
+        "system": "システム"
+      },
       "dashboard": {
         "label": "ダッシュボード",
         "title": "ダッシュボード",
@@ -1655,6 +1662,9 @@
       "loading": "スタッフ一覧を読み込み中…", "loadingFailed": "スタッフ一覧を読み込めません。",
       "emptyHeading": "スタッフがいません",
       "retry": "ページを再読み込みしてください。",
+      "actionDeactivate": "無効化",
+      "actionActivate": "有効化",
+      "deactivateConfirm": "{name} を無効化しますか？稼働リストから非表示になり、新規予約を受けません。後で再有効化できます。",
       "firstStaff": "最初のスタッフを追加すると、売上と歩合の記録が始まります。",
       "noSelectionTitle": "スタッフが選択されていません",
       "noSelectionDescription": "絞り込みを変えるとスタッフの情報が表示されます。",
@@ -1745,6 +1755,10 @@
         "commission": "歩合"
       },
       "skills": {
+        "active": "稼働中",
+        "inactive": "停止中",
+        "selectAll": "すべて選択",
+        "clearAll": "すべて解除",
         "saveFailed": "スキルを保存できません。",
         "heading": "スキル",
         "loading": "読み込み中…",
@@ -2012,6 +2026,8 @@
         "close": "閉じる",
         "saving": "保存中…",
         "save": "変更を保存",
+        "customerSearch": "名前または電話番号で検索…",
+        "customerEmpty": "顧客が見つかりません。",
         "create": "予約を作成"
       },
       "validation": {

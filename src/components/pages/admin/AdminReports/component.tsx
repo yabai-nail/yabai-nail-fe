@@ -4,7 +4,9 @@ import { Button, Card } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { notifySuccess } from "@/lib/app-toast";
+import { paginate } from "@/lib/admin-pagination";
 import {
   adminService,
   useAdminPermission,
@@ -48,6 +50,7 @@ export function AdminReportsComponent() {
     [canReadCustomers, canReadRevenue, canReadStaff],
   );
   const [requestedKind, setRequestedKind] = useState<ReportKind>(() => visibleKinds[0] ?? "revenue");
+  const [page, setPage] = useState(1);
   const kind = visibleKinds.includes(requestedKind) ? requestedKind : visibleKinds[0] ?? "revenue";
   const revenue = useRevenueReport(undefined, undefined, canReadRevenue);
   const branches = useAdminBranchesReport(undefined, canReadRevenue);
@@ -90,9 +93,11 @@ export function AdminReportsComponent() {
   }, t), [rawRows, branchesList.data, accountsList.data, servicesList.data, staffList.data, t]);
 
   const columns = useMemo(() => tableColumns(rows), [rows]);
+  const { items: pagedRows, page: currentPage, pageCount } = paginate(rows, page, 12);
 
   const changeKind = (next: ReportKind) => {
     setRequestedKind(next);
+    setPage(1);
     setExportInfo(null);
     setDownloadUrl(null);
     setExportError(null);
@@ -209,7 +214,7 @@ export function AdminReportsComponent() {
                   </td>
                 </tr>
               ) : (
-                rows.map((row, index) => (
+                pagedRows.map((row, index) => (
                   <tr key={index} className="border-b border-admin-border last:border-0">
                     {columns.map((column) => (
                       <td key={column} className="px-4 py-3 text-admin-ink">
@@ -223,6 +228,9 @@ export function AdminReportsComponent() {
           </table>
         </Card.Content>
       </Card>
+      <div className="mt-3 flex justify-end">
+        <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+      </div>
     </AdminPageLayout>
   );
 }

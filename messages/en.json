@@ -142,6 +142,13 @@
       }
     },
     "nav": {
+      "groups": {
+        "operations": "Operations",
+        "catalog": "Services & marketing",
+        "finance": "Reports & payroll",
+        "team": "Team",
+        "system": "System"
+      },
       "dashboard": {
         "label": "Overview",
         "title": "Overview",
@@ -1657,6 +1664,9 @@
       "loadingFailed": "Could not load staff.",
       "emptyHeading": "No staff yet",
       "retry": "Try reloading the page.",
+      "actionDeactivate": "Deactivate",
+      "actionActivate": "Activate",
+      "deactivateConfirm": "Deactivate {name}? They will be hidden from the active roster and stop taking new bookings; you can reactivate later.",
       "firstStaff": "Add your first staff member to start tracking revenue and commission.",
       "noSelectionTitle": "No staff member selected",
       "noSelectionDescription": "Change the filter to see staff details.",
@@ -1752,6 +1762,10 @@
         "commission": "Commission"
       },
       "skills": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
         "saveFailed": "Could not save the skills.",
         "heading": "Skills",
         "loading": "Loading…",
@@ -2020,6 +2034,8 @@
         "close": "Close",
         "saving": "Saving…",
         "save": "Save changes",
+        "customerSearch": "Search by name or phone…",
+        "customerEmpty": "No customers found.",
         "create": "Create appointment"
       },
       "validation": {
