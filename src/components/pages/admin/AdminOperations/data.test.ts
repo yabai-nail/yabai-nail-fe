@@ -19,7 +19,8 @@ describe("operations helpers", () => {
   });
 
   it("formats yen with grouping and symbol", () => {
-    expect(formatMoney(50000)).toBe("50.000 ¥");
+    expect(formatMoney(50000)).toBe("¥50.000");
+    expect(formatMoney(-50000)).toBe("-¥50.000");
   });
 
   it("summarizes a customer, preferring masked phone", () => {

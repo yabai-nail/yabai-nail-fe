@@ -11,7 +11,18 @@ const moneyFormatter = new Intl.NumberFormat("vi-VN", {
 });
 
 export function formatMoney(value: number) {
-  return moneyFormatter.format(value);
+  const parts = moneyFormatter.formatToParts(value);
+  const sign = parts
+    .filter(({ type }) => type === "minusSign" || type === "plusSign")
+    .map(({ value: part }) => part)
+    .join("");
+  const symbol = parts.find(({ type }) => type === "currency")?.value ?? "¥";
+  const amount = parts
+    .filter(({ type }) => !["currency", "literal", "minusSign", "plusSign"].includes(type))
+    .map(({ value: part }) => part)
+    .join("");
+
+  return `${sign}${symbol}${amount}`;
 }
 
 export function formatNumber(value: number) {

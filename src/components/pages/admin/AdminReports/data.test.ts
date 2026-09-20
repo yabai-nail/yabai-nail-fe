@@ -43,7 +43,7 @@ describe("report derivation", () => {
   });
 
   it("formats currency keys as yen and plain numbers otherwise", () => {
-    expect(formatReportValue("revenue", 1000000)).toBe("1.000.000 ¥");
+    expect(formatReportValue("revenue", 1000000)).toBe("¥1.000.000");
     expect(formatReportValue("appointments", 12)).toBe("12");
     expect(formatReportValue("appointments", null)).toBe("—");
     expect(formatReportValue("note", "abc")).toBe("abc");
