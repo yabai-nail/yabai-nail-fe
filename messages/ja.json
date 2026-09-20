@@ -2292,7 +2292,8 @@
         "orderNote": "注文メモ",
         "orderNotePlaceholder": "必要があればメモを入力...",
         "confirm": "会計を確定",
-        "preview": "伝票を表示・印刷"
+        "preview": "伝票を表示・印刷",
+        "review": "お客様レビュー"
       },
       "invoice": {
         "title": "お会計伝票",
