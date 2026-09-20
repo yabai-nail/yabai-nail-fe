@@ -40,6 +40,7 @@ export function ServiceEditModal({
   const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
   const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
+  const [warrantyDays, setWarrantyDays] = useState(String(service.warrantyDays ?? 0));
   const [description, setDescription] = useState(service.description ?? "");
   const [bookableStandalone, setBookableStandalone] = useState(Boolean(service.bookableStandalone));
   const [imageMode, setImageMode] = useState<"keep" | "remove" | "replace">("keep");
@@ -64,6 +65,7 @@ export function ServiceEditModal({
 
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
+  const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
@@ -85,6 +87,7 @@ export function ServiceEditModal({
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
+    Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
     (imageMode !== "replace" || imageFile !== null) &&
     // A branch override the backend would refuse stops the whole save here, before the
@@ -116,6 +119,7 @@ export function ServiceEditModal({
           ...(serviceType === "BASE" ? { categoryId } : {}),
           price: priceNum,
           durationMinutes: durationNum,
+          warrantyDays: warrantyDaysNum,
           isFeatured: serviceType === "BASE" && isFeatured,
           status: isVisible ? "ACTIVE" : "INACTIVE",
           ...serviceImagePatch(imageChange),
@@ -255,6 +259,19 @@ export function ServiceEditModal({
                     value={duration}
                     onChange={(event) => setDuration(event.target.value)}
                   />
+                </label>
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">{t("form.warrantyDays")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={3650}
+                    step={1}
+                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                    value={warrantyDays}
+                    onChange={(event) => setWarrantyDays(event.target.value)}
+                  />
+                  <span className="text-xs text-admin-muted">{t("form.warrantyHint")}</span>
                 </label>
               </div>
               <label className="flex flex-col gap-2 text-sm">

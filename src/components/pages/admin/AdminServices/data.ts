@@ -17,6 +17,7 @@ export type SalonService = {
   readonly imageUrl: string | null;
   readonly price: number;
   readonly durationMinutes: number;
+  readonly warrantyDays?: number;
   readonly isVisible: boolean;
   readonly soldCount: number;
   readonly isFeatured?: boolean;

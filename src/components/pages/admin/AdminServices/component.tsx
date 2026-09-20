@@ -50,6 +50,7 @@ function toScreenService(server: ServerService): SalonService {
     imageUrl: server.imageUrl ?? null,
     price: server.price,
     durationMinutes: server.durationMinutes,
+    warrantyDays: server.warrantyDays ?? 0,
     isVisible: server.active,
     soldCount: server.soldCount ?? 0,
     isFeatured: server.isFeatured ?? false,
