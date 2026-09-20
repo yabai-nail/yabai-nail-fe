@@ -2300,7 +2300,8 @@
         "orderNote": "Order note",
         "orderNotePlaceholder": "Add a note if there is one...",
         "confirm": "Confirm the payment",
-        "preview": "View and print the invoice"
+        "preview": "View and print the invoice",
+        "review": "Customer review"
       },
       "invoice": {
         "title": "Payment invoice",

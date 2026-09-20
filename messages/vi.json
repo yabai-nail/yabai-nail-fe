@@ -2310,7 +2310,8 @@
         "orderNote": "Ghi chú đơn hàng",
         "orderNotePlaceholder": "Nhập ghi chú nếu có...",
         "confirm": "Xác nhận thanh toán",
-        "preview": "Xem & in hóa đơn"
+        "preview": "Xem & in hóa đơn",
+        "review": "Đánh giá khách hàng"
       },
       "invoice": {
         "title": "Hóa đơn thanh toán",
