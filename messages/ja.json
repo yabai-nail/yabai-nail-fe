@@ -341,7 +341,25 @@
       "emptyTitle": "会話がありません",
       "emptyDescription": "キーワードまたは絞り込みを変更してください。",
       "noCustomerTitle": "顧客が選択されていません",
-      "noCustomerDescription": "該当する会話を選ぶと顧客情報が表示されます。"
+      "noCustomerDescription": "該当する会話を選ぶと顧客情報が表示されます。",
+      "confirmation": {
+        "accessibilityLabel": "予約 {code} の詳細",
+        "heading": "お客様がアプリから予約しました",
+        "intro": "予約確定時の情報です。",
+        "customer": "お客様名",
+        "phone": "電話番号",
+        "missingPhone": "未登録",
+        "schedule": "日時",
+        "service": "サービス",
+        "options": "オプション",
+        "noOptions": "なし",
+        "staff": "担当者",
+        "duration": "所要時間",
+        "durationValue": "{minutes}分",
+        "total": "合計",
+        "code": "予約番号",
+        "note": "お客様メモ"
+      }
     },
     "nailDesigns": {
       "status": {

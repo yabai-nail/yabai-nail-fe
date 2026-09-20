@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ChatMessage } from "./data";
+import type { ChatMessage, ChatTextMessage } from "./data";
 import { groupThread, sortThreadChronologically } from "./thread";
 
 const NOW = new Date("2026-09-02T10:00:00+07:00");
@@ -15,11 +15,36 @@ const group = (messages: ReadonlyArray<ChatMessage>, now: Date = NOW) =>
 
 function msg(
   id: string,
-  sender: ChatMessage["sender"],
+  sender: ChatTextMessage["sender"],
   sentAt: string,
   content = id,
-): ChatMessage {
-  return { id, sender, content, time: "00:00", sentAt };
+): ChatTextMessage {
+  return { id, kind: "text", sender, content, time: "00:00", sentAt };
+}
+
+function bookingMsg(id: string, sentAt: string): ChatMessage {
+  return {
+    id,
+    kind: "booking-confirmation",
+    sender: "system",
+    time: "00:00",
+    sentAt,
+    booking: {
+      appointmentId: id,
+      appointmentCode: id,
+      branchId: "branch-1",
+      customerName: "Fixture customer",
+      customerPhone: "0900000000",
+      serviceName: "Fixture service",
+      optionNames: [],
+      staffName: "Fixture staff",
+      startAt: sentAt,
+      durationMinutes: 60,
+      totalJpy: 5_000,
+      branchTimeZone: "Asia/Ho_Chi_Minh",
+      note: "",
+    },
+  };
 }
 
 describe("groupThread", () => {
@@ -51,6 +76,15 @@ describe("groupThread", () => {
       NOW,
     );
     expect(days[0].runs.map((r) => r.sender)).toEqual(["customer", "salon", "customer"]);
+  });
+
+  it("keeps system booking events in separate full-width runs", () => {
+    const days = group([
+      bookingMsg("booking-1", "2026-09-02T08:00:00+07:00"),
+      bookingMsg("booking-2", "2026-09-02T08:01:00+07:00"),
+    ]);
+
+    expect(days[0].runs).toHaveLength(2);
   });
 
   it("labels today, yesterday and anything older by its date", () => {

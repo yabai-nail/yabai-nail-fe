@@ -11,6 +11,7 @@ import { Avatar, Button, InputGroup } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
+import { BookingConfirmationCard } from "./BookingConfirmationCard";
 import { groupThread } from "./thread";
 import { useAdminPermission } from "@/service";
 
@@ -41,6 +42,9 @@ function Bubble({
   message,
   isLast,
 }: Readonly<{ message: ChatMessage; isLast: boolean }>) {
+  if (message.kind === "booking-confirmation") {
+    return <BookingConfirmationCard booking={message.booking} />;
+  }
   const fromSalon = message.sender === "salon";
   const tail = fromSalon
     ? isLast ? "rounded-br-sm" : ""
@@ -187,11 +191,12 @@ export function MessageThread({
               <ol className="space-y-4">
                 {day.runs.map((run) => {
                   const fromSalon = run.sender === "salon";
+                  const fromSystem = run.sender === "system";
                   const last = run.messages[run.messages.length - 1];
                   return (
                     <li
                       key={run.messages[0].id}
-                      className={`flex flex-col gap-0.5 ${fromSalon ? "items-end" : "items-start"}`}
+                      className={`flex flex-col gap-0.5 ${fromSystem ? "items-center" : fromSalon ? "items-end" : "items-start"}`}
                     >
                       {run.messages.map((message) => (
                         <Bubble key={message.id} message={message} isLast={message.id === last.id} />
@@ -199,7 +204,11 @@ export function MessageThread({
                       {/* One timestamp for the run. It used to sit inside every
                           bubble on a line of its own, which is why a message
                           reading "2" was 54px wide and 70px tall. */}
-                      <time className="px-1 text-[0.65rem] text-admin-muted">{last.time}</time>
+                      <time
+                        className={`px-1 text-[0.65rem] text-admin-muted ${fromSystem ? "text-center" : ""}`}
+                      >
+                        {last.time}
+                      </time>
                     </li>
                   );
                 })}

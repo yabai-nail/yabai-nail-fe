@@ -341,7 +341,25 @@
       "emptyTitle": "Không có hội thoại",
       "emptyDescription": "Thay đổi từ khóa hoặc bộ lọc để tiếp tục nhắn tin.",
       "noCustomerTitle": "Chưa có khách hàng",
-      "noCustomerDescription": "Thông tin khách hàng sẽ xuất hiện khi có hội thoại phù hợp."
+      "noCustomerDescription": "Thông tin khách hàng sẽ xuất hiện khi có hội thoại phù hợp.",
+      "confirmation": {
+        "accessibilityLabel": "Thông tin lịch hẹn {code}",
+        "heading": "Khách vừa đặt lịch trên ứng dụng",
+        "intro": "Thông tin được lưu tại thời điểm lịch hẹn được xác nhận.",
+        "customer": "Họ và tên khách",
+        "phone": "Số điện thoại",
+        "missingPhone": "Chưa cung cấp",
+        "schedule": "Ngày giờ",
+        "service": "Dịch vụ",
+        "options": "Tùy chọn thêm",
+        "noOptions": "Không có",
+        "staff": "Nhân viên",
+        "duration": "Thời lượng",
+        "durationValue": "{minutes} phút",
+        "total": "Tổng tiền",
+        "code": "Mã đặt lịch",
+        "note": "Ghi chú của khách"
+      }
     },
     "nailDesigns": {
       "status": {

@@ -833,11 +833,29 @@ export interface AdminConversationPatch {
   readonly [field: string]: unknown;
 }
 
+export interface AdminBookingConfirmation {
+  readonly appointmentId: string;
+  readonly appointmentCode: string;
+  readonly branchId: string;
+  readonly customerName: string;
+  readonly customerPhone: string;
+  readonly serviceName: string;
+  readonly optionNames: ReadonlyArray<string>;
+  readonly staffName: string;
+  readonly startAt: string;
+  readonly durationMinutes: number;
+  readonly totalJpy: number;
+  readonly branchTimeZone: string;
+  readonly note: string;
+}
+
 export interface AdminMessage {
   readonly id: string;
   readonly conversationId: string;
   readonly senderType: string;
   readonly content: string;
+  readonly messageType?: string;
+  readonly booking?: AdminBookingConfirmation | null;
   readonly createdAt: string;
   readonly deliveryStatus?: string;
   readonly [field: string]: unknown;
