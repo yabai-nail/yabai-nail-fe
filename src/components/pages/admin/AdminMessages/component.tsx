@@ -13,6 +13,7 @@ import {
   useAdminConversationMessages,
   useAdminPermission,
   type AdminConversation as ServerConversation,
+  type AdminBookingConfirmation,
   type AdminMessage as ServerMessage,
 } from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
@@ -65,10 +66,53 @@ function toFixtureConversation(server: ServerConversation, unnamed: string, form
   };
 }
 
-function toChatMessage(server: ServerMessage, formatTime: (value: Date) => string): ChatMessage {
+function isBookingConfirmation(
+  booking: AdminBookingConfirmation | null | undefined,
+): booking is AdminBookingConfirmation {
+  if (!booking || !Array.isArray(booking.optionNames)) return false;
+  const stringFields = [
+    "appointmentId",
+    "appointmentCode",
+    "branchId",
+    "customerName",
+    "customerPhone",
+    "serviceName",
+    "staffName",
+    "startAt",
+    "branchTimeZone",
+    "note",
+  ] as const;
+  return (
+    stringFields.every((field) => typeof booking[field] === "string") &&
+    booking.optionNames.every((option) => typeof option === "string") &&
+    Number.isInteger(booking.durationMinutes) &&
+    booking.durationMinutes > 0 &&
+    Number.isInteger(booking.totalJpy) &&
+    booking.totalJpy >= 0
+  );
+}
+
+export function toChatMessage(
+  server: ServerMessage,
+  formatTime: (value: Date) => string,
+): ChatMessage {
+  if (
+    server.messageType === "BOOKING_CONFIRMATION" &&
+    isBookingConfirmation(server.booking)
+  ) {
+    return {
+      id: server.id,
+      kind: "booking-confirmation",
+      sender: "system",
+      booking: server.booking,
+      time: formatTimeLabel(server.createdAt, formatTime),
+      sentAt: server.createdAt,
+    };
+  }
   const sender = server.senderType.toLowerCase().includes("customer") ? "customer" : "salon";
   return {
     id: server.id,
+    kind: "text",
     sender,
     content: server.content,
     time: formatTimeLabel(server.createdAt, formatTime),
@@ -141,6 +185,7 @@ export function AdminMessagesComponent() {
     setLocalMessages((messagesByConversation) =>
       appendConversationMessage(messagesByConversation, selected.id, {
         id: localId,
+        kind: "text",
         sender: "salon",
         content,
         time: t("now"),

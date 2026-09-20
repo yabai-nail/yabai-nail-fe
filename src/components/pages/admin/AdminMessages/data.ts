@@ -7,15 +7,43 @@ export type MessageCustomer = {
   readonly phone: string;
 };
 
-export type ChatMessage = {
+export type BookingConfirmation = {
+  readonly appointmentId: string;
+  readonly appointmentCode: string;
+  readonly branchId: string;
+  readonly customerName: string;
+  readonly customerPhone: string;
+  readonly serviceName: string;
+  readonly optionNames: ReadonlyArray<string>;
+  readonly staffName: string;
+  readonly startAt: string;
+  readonly durationMinutes: number;
+  readonly totalJpy: number;
+  readonly branchTimeZone: string;
+  readonly note: string;
+};
+
+type ChatMessageBase = {
   readonly id: string;
-  readonly sender: "customer" | "salon";
-  readonly content: string;
   /** Clock time for display, already localised: "08:13". */
   readonly time: string;
   /** The raw ISO timestamp, kept so the thread can group by day. */
   readonly sentAt: string;
 };
+
+export type ChatTextMessage = ChatMessageBase & {
+  readonly kind: "text";
+  readonly sender: "customer" | "salon";
+  readonly content: string;
+};
+
+export type ChatBookingConfirmationMessage = ChatMessageBase & {
+  readonly kind: "booking-confirmation";
+  readonly sender: "system";
+  readonly booking: BookingConfirmation;
+};
+
+export type ChatMessage = ChatTextMessage | ChatBookingConfirmationMessage;
 
 export type Conversation = {
   readonly id: string;

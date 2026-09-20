@@ -107,9 +107,11 @@ export function AppointmentDetailPanel({
   const details = [
     { icon: ClockIcon, label: t("detail.time"), value: t("detail.timeValue", { start: appointment.startTime, end: appointment.endTime, minutes: appointment.service.durationMinutes }) },
     { icon: CalendarDaysIcon, label: t("toolbar.day"), value: appointment.date.split("-").reverse().join("/") },
-    { icon: ScissorsIcon, label: t("detail.service"), value: appointment.service.name },
     { icon: UserIcon, label: t("detail.staff"), value: appointment.staff.name },
   ];
+  // Every service the customer booked (base + add-ons); falls back to the summary service for
+  // local overlays that carry no resolved list.
+  const bookedServices = appointment.services?.length ? appointment.services : [appointment.service];
 
   return (
     <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -142,6 +144,20 @@ export function AppointmentDetailPanel({
               <dd className="font-medium text-admin-ink">{value}</dd>
             </div>
           ))}
+          <div className="grid grid-cols-[1rem_5rem_1fr] gap-2 text-xs">
+            <ScissorsIcon className="size-4 text-admin-muted" />
+            <dt className="text-admin-muted">{t("detail.services", { count: bookedServices.length })}</dt>
+            <dd>
+              <ul className="space-y-1">
+                {bookedServices.map((bookedService, index) => (
+                  <li key={`${bookedService.id}-${index}`} className="flex items-baseline justify-between gap-2">
+                    <span className="font-medium text-admin-ink">{bookedService.name}</span>
+                    <span className="shrink-0 tabular-nums text-admin-muted">{t("detail.serviceDuration", { minutes: bookedService.durationMinutes })}</span>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
           <div className="grid grid-cols-[1rem_5rem_1fr] gap-2 text-xs">
             <span />
             <dt className="text-admin-muted">{t("detail.status")}</dt>

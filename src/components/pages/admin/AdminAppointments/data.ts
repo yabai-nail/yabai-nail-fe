@@ -57,6 +57,10 @@ export type AppointmentDraft = {
 
 export type Appointment = AppointmentDraft & {
   readonly id: string;
+  // Every service the customer booked (base + add-ons), resolved from the appointment's
+  // serviceIds. `service` above stays the primary/summary one for the list and calendar; this
+  // is the full list the detail panel shows. Absent on local overlays and fixtures.
+  readonly services?: ReadonlyArray<AppointmentService>;
   // Raw BE state machine label (CONFIRMED, CHECKED_IN, IN_SERVICE, …). Present
   // only for server-backed rows; absent for local overlays so the lifecycle
   // action bar can hide itself for pre-persistence intents.

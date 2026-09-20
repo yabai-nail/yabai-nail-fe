@@ -117,7 +117,7 @@ export function groupThread(
 
     const runs = open.runs as ThreadRun[];
     const openRun = runs.at(-1);
-    if (openRun && openRun.sender === message.sender) {
+    if (openRun && openRun.sender === message.sender && message.sender !== "system") {
       (openRun.messages as ChatMessage[]).push(message);
     } else {
       runs.push({ sender: message.sender, messages: [message] });

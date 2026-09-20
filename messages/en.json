@@ -341,7 +341,25 @@
       "emptyTitle": "No conversations",
       "emptyDescription": "Change the search or filter to continue.",
       "noCustomerTitle": "No customer selected",
-      "noCustomerDescription": "Customer details appear once a matching conversation is selected."
+      "noCustomerDescription": "Customer details appear once a matching conversation is selected.",
+      "confirmation": {
+        "accessibilityLabel": "Appointment details for {code}",
+        "heading": "Customer booked through the app",
+        "intro": "Snapshot saved when the appointment was confirmed.",
+        "customer": "Customer name",
+        "phone": "Phone number",
+        "missingPhone": "Not provided",
+        "schedule": "Date and time",
+        "service": "Service",
+        "options": "Add-ons",
+        "noOptions": "None",
+        "staff": "Staff",
+        "duration": "Duration",
+        "durationValue": "{minutes} min",
+        "total": "Total",
+        "code": "Booking code",
+        "note": "Customer note"
+      }
     },
     "nailDesigns": {
       "status": {
@@ -2009,6 +2027,8 @@
         "totalSpend": "Total spend",
         "time": "Time",
         "timeValue": "{start} - {end} ({minutes} min)",
+        "services": "Services ({count})",
+        "serviceDuration": "{minutes} min",
         "date": "Date",
         "service": "Service",
         "staff": "Staff",
