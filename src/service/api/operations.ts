@@ -38,6 +38,7 @@ POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/no-show
 POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payment-quotes
 GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments
 POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments
+POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/reviews
 POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos
 POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/reschedule
 POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/service-completion
@@ -64,6 +65,7 @@ POST /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds
 GET /api/v1/admin/branches/{branchId}/payments/{paymentId}/refunds/{refundId}
 GET /api/v1/admin/branches/{branchId}/reviews
 PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling
+PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/publication
 POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies
 GET /api/v1/admin/branches/{branchId}/shifts
 POST /api/v1/admin/branches/{branchId}/shifts

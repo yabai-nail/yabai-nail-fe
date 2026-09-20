@@ -85,6 +85,7 @@ export interface AdminCustomer {
   readonly displayName?: string;
   readonly name?: string;
   readonly phone?: string;
+  readonly avatarUrl?: string | null;
   readonly locale?: string;
   readonly status?: string;
   readonly version: number;
@@ -224,7 +225,7 @@ export interface AdminAppointmentServiceCompletionInput {
  */
 export interface AdminAppointmentPaymentInput {
   readonly method: string;
-  readonly reference?: string;
+  readonly cashTendered?: number;
   readonly [field: string]: unknown;
 }
 
@@ -274,6 +275,8 @@ export interface AdminAppointmentPayment {
   readonly appointmentId: string;
   readonly method: string;
   readonly amount: number;
+  readonly cashTendered?: number | null;
+  readonly cashChange?: number | null;
   readonly status: string;
   readonly paidAt?: string;
   readonly version: number;
@@ -857,15 +860,32 @@ export interface AdminReview {
   readonly id: string;
   readonly appointmentId: string;
   readonly customerId: string;
-  readonly serviceRating: number;
-  readonly staffRating: number;
-  readonly comment?: string;
-  readonly managerReply?: string;
+  readonly rating: number;
+  readonly comment: string;
+  readonly managerReply?: string | null;
   readonly handlingStatus: string;
-  readonly consentToPublish?: boolean;
+  readonly source: "CUSTOMER_APP" | "COUNTER";
+  readonly publicationStatus: "PENDING" | "PUBLISHED" | "HIDDEN";
+  readonly customer?: { readonly id: string; readonly displayName: string; readonly avatarUrl?: string | null };
   readonly createdAt: string;
   readonly updatedAt?: string;
   readonly version: number;
+}
+
+export interface AdminAppointmentPaymentCapture {
+  readonly appointment: AdminAppointment;
+  readonly payment: AdminAppointmentPayment;
+  readonly pointsEarned: number;
+  readonly pointBalance: number;
+}
+
+export interface AdminReviewInput {
+  readonly rating: number;
+  readonly comment: string;
+}
+
+export interface AdminReviewPublicationPatch {
+  readonly status: "PUBLISHED" | "HIDDEN";
 }
 
 export interface AdminReviewHandlingPatch {

@@ -7,6 +7,7 @@ export type PaymentCustomerSnapshot = {
   readonly id: string;
   readonly name: string;
   readonly initials: string;
+  readonly avatarUrl: string | null;
   readonly phone: string;
   readonly birthday: string;
   readonly visits: number;
@@ -67,6 +68,7 @@ export const initialCheckoutInvoice: CheckoutInvoice = {
     id: "c1",
     name: "Nguyễn Thu Hương",
     initials: "NH",
+    avatarUrl: null,
     phone: "0901 234 567",
     birthday: "25/06/1996",
     visits: 12,

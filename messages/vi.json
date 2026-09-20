@@ -496,17 +496,32 @@
         "rating": "Điểm",
         "content": "Nội dung",
         "handling": "Xử lý",
+        "publication": "Hiển thị trên app",
         "reply": "Phản hồi",
         "actions": "Thao tác"
       },
       "empty": "Không có đánh giá phù hợp.",
-      "ratingLabel": "Dịch vụ {service} sao, nhân viên {staff} sao",
+      "ratingLabel": "{rating} sao",
       "ratingService": "dịch vụ",
       "ratingStaff": "nhân viên",
       "reply": "Trả lời",
       "reopen": "Mở lại",
       "markResolved": "Đã xử lý",
       "readOnly": "Chỉ xem",
+      "publication": {
+        "PENDING": "Chờ duyệt",
+        "PUBLISHED": "Đang hiển thị",
+        "HIDDEN": "Đã ẩn"
+      },
+      "source": {
+        "CUSTOMER_APP": "App khách hàng",
+        "COUNTER": "Tại quầy"
+      },
+      "publish": "Hiển thị",
+      "hide": "Ẩn",
+      "publicationPublished": "Đánh giá đã hiển thị trên app",
+      "publicationHidden": "Đánh giá đã được ẩn khỏi app",
+      "publicationUpdateFailed": "Không cập nhật được trạng thái hiển thị.",
       "pagination": "Hiển thị {shown} trong tổng số {total} đánh giá",
       "modal": {
         "title": "Trả lời đánh giá — {customer}",
@@ -2153,6 +2168,21 @@
       "recorded": "Giao dịch đã ghi nhận",
       "submitting": "Đang gọi quote và ghi giao dịch…",
       "paymentRecorded": "Đã ghi nhận thanh toán",
+      "cashResult": "Tiền khách đưa: {tendered} · Tiền thối: {change}",
+      "review": {
+        "title": "Đánh giá của khách hàng",
+        "customer": "Khách hàng",
+        "rating": "Số sao đánh giá",
+        "star": "{count} sao",
+        "comment": "Nội dung đánh giá",
+        "placeholder": "Nhập nhận xét của khách hàng...",
+        "publicationNote": "Đánh giá sẽ được lưu để admin duyệt và chỉ hiển thị trên app sau khi admin cho phép.",
+        "skip": "Để sau",
+        "submit": "Lưu đánh giá",
+        "submitting": "Đang lưu...",
+        "submitFailed": "Không lưu được đánh giá.",
+        "submitted": "Đã lưu đánh giá để chờ duyệt"
+      },
       "step3": "Xác nhận & thanh toán",
       "grandTotalLabel": "Tổng tiền khách thanh toán",
       "error": {
@@ -2261,6 +2291,8 @@
         "customer": "Khách hàng: <strong>{name}</strong>",
         "amount": "Số tiền: <strong>{amount}</strong>",
         "method": "Phương thức: <strong>{method}</strong>",
+        "cashTendered": "Tiền khách đưa (¥)",
+        "cashChange": "Tiền thối: {amount}",
         "serverNote": "Thao tác này ghi nhận giao dịch thật và không thể hoàn tác từ màn này.",
         "localNote": "Hóa đơn chưa gắn với lịch hẹn thật nên sẽ không có giao dịch nào được ghi.",
         "recheck": "Kiểm tra lại",
@@ -2281,7 +2313,10 @@
         "discountRange": "Giảm giá phải từ 0 đến tổng tiền dịch vụ.",
         "methodRequired": "Vui lòng chọn phương thức thanh toán.",
         "paidAtInvalid": "Thời gian xác nhận không hợp lệ.",
-        "serviceRequired": "Vui lòng chọn một dịch vụ."
+        "serviceRequired": "Vui lòng chọn một dịch vụ.",
+        "cashTenderedRequired": "Nhập số tiền khách đưa.",
+        "cashTenderedInvalid": "Tiền khách đưa phải là số yên nguyên.",
+        "cashTenderedInsufficient": "Tiền khách đưa chưa đủ số tiền cần thanh toán."
       }
     }
   }

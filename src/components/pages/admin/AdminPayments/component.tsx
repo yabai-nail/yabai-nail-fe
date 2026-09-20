@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
@@ -27,6 +27,7 @@ import { calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./paym
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
+import { PaymentReviewDialog } from "./PaymentReviewDialog";
 import { PaymentSummaryPanel } from "./PaymentSummaryPanel";
 import { ServiceCheckoutPanel } from "./ServiceCheckoutPanel";
 
@@ -83,6 +84,7 @@ function buildInvoiceFromServer(
       id: appointment.customerId,
       name: customerName,
       initials: deriveInitials(customerName),
+      avatarUrl: customer?.avatarUrl ?? null,
       phone: customer?.phone ?? "",
       birthday: "",
       visits: 0,
@@ -130,6 +132,7 @@ export function AdminPaymentsComponent() {
   const { branchId } = useAdminBranch();
   const hasServiceEditPermission = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const hasPaymentPermission = useAdminPermission("payment.create.branch");
+  const canCreateReview = useAdminPermission("review.create.branch");
 
   // Parallel joins — same shape as the appointments page.
   const {
@@ -191,6 +194,11 @@ export function AdminPaymentsComponent() {
   const isAppointmentCancelled = Boolean(appointment?.status.toUpperCase().includes("CANCELLED"));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [cashTendered, setCashTendered] = useState("");
+  const [cashResult, setCashResult] = useState<{ tendered: number; change: number } | null>(null);
+  const paymentIdempotencyKey = useRef<string | null>(null);
+  const reviewIdempotencyKey = useRef<string | null>(null);
   const totals = useMemo(() => (invoice ? calculatePaymentTotals(invoice) : null), [invoice]);
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
@@ -252,7 +260,7 @@ export function AdminPaymentsComponent() {
       return thrown instanceof Error ? thrown.message : t("error.adjustments");
     }
   };
-  const handleConfirm = () => {
+  const handleConfirm = (receivedCash: number | null) => {
     if (!invoice || !totals) return;
     // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
@@ -296,21 +304,28 @@ export function AdminPaymentsComponent() {
           );
           return;
         }
-        await adminService.recordAppointmentPayment(
+        paymentIdempotencyKey.current ??= crypto.randomUUID();
+        const capture = await adminService.recordAppointmentPayment(
           branchId!,
           appointmentId!,
-          // Only `method` reaches the backend: it recomputes the amount from the
-          // appointment so a client can never set a price. Sending amount and
-          // discount looked like it did something and did not.
-          { method: invoice.paymentMethod! },
+          {
+            method: "CASH",
+            ...(receivedCash === null ? {} : { cashTendered: receivedCash }),
+          },
           // Re-read the version: the quote above is itself a write, so the
           // appointment may have moved on since this handler started. The
           // quote's own field is loosely typed, so only trust a number.
           typeof quote.version === "number" ? quote.version : appointment?.version,
+          paymentIdempotencyKey.current,
         );
+        paymentIdempotencyKey.current = null;
+        if (capture.payment.cashTendered !== null && capture.payment.cashTendered !== undefined) {
+          setCashResult({ tendered: capture.payment.cashTendered, change: capture.payment.cashChange ?? 0 });
+        }
         notifySuccess(t("paymentRecorded"));
         setInvoice(result.value);
-        void mutateAppointment();
+        await mutateAppointment(capture.appointment, { revalidate: false });
+        if (canCreateReview) setIsReviewOpen(true);
       } catch (thrown) {
         setConfirmError(
           thrown instanceof Error ? thrown.message : t("error.record"),
@@ -319,6 +334,15 @@ export function AdminPaymentsComponent() {
         setConfirmPending(false);
       }
     })();
+  };
+
+  const handleReviewSubmit = async (input: { rating: number; comment: string }) => {
+    if (!branchId || !appointmentId) throw new Error(t("review.submitFailed"));
+    reviewIdempotencyKey.current ??= crypto.randomUUID();
+    await adminService.createAppointmentReview(branchId, appointmentId, input, reviewIdempotencyKey.current);
+    reviewIdempotencyKey.current = null;
+    notifySuccess(t("review.submitted"));
+    setIsReviewOpen(false);
   };
 
   if (!appointmentId) {
@@ -376,6 +400,11 @@ export function AdminPaymentsComponent() {
           {confirmError}
         </p>
       ) : null}
+      {cashResult ? (
+        <p role="status" className="mb-4 rounded-lg border border-admin-accent/40 bg-admin-soft px-4 py-3 text-sm font-semibold text-admin-accent">
+          {t("cashResult", { tendered: formatMoney(cashResult.tendered), change: formatMoney(cashResult.change) })}
+        </p>
+      ) : null}
       <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(28rem,1fr)_18rem]">
         <CustomerAppointmentPanel
           invoice={invoice}
@@ -384,10 +413,11 @@ export function AdminPaymentsComponent() {
         <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
           <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
-        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canCreatePayment={canCreatePayment} onSaveAdjustments={persistAdjustments} onConfirm={() => setIsConfirmOpen(true)} onPreview={() => setIsPreviewOpen(true)} />
+        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canCreatePayment={canCreatePayment} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashTendered(""); setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} />
       </div>
-      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
+      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} isServerBacked={isServerBacked} onCashTenderedChange={setCashTendered} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
+      {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>
   );
 }

@@ -9,6 +9,7 @@ import type {
   AdminAppointmentCancellationInput,
   AdminAppointmentDraft,
   AdminAppointmentPayment,
+  AdminAppointmentPaymentCapture,
   AdminAppointmentPaymentInput,
   AdminAppointmentPaymentQuote,
   AdminAppointmentPhotoInput,
@@ -101,6 +102,8 @@ import type {
   AdminPaymentRefund,
   AdminReview,
   AdminReviewHandlingPatch,
+  AdminReviewInput,
+  AdminReviewPublicationPatch,
   AdminReviewReplyInput,
   AdminPaymentRefundInput,
   AdminPromotion,
@@ -239,7 +242,7 @@ export const adminService = {
     version?: string | number,
     idempotencyKey?: string,
   ) =>
-    executeApiOperation<AdminAppointmentPayment>(
+    executeApiOperation<AdminAppointmentPaymentCapture>(
       "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
       { path: { branchId, appointmentId }, body: input, version, idempotencyKey },
     ),
@@ -622,6 +625,16 @@ export const adminService = {
       "GET /api/v1/admin/branches/{branchId}/reviews",
       { path: { branchId }, query },
     ),
+  createAppointmentReview: (
+    branchId: string,
+    appointmentId: string,
+    input: AdminReviewInput,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminReview>(
+      "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/reviews",
+      { path: { branchId, appointmentId }, body: input, idempotencyKey },
+    ),
   updateBranchReviewHandling: (
     branchId: string,
     reviewId: string,
@@ -631,6 +644,17 @@ export const adminService = {
     executeApiOperation<AdminReview>(
       "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling",
       { path: { branchId, reviewId }, body: patch, version },
+    ),
+  updateBranchReviewPublication: (
+    branchId: string,
+    reviewId: string,
+    patch: AdminReviewPublicationPatch,
+    version?: string | number,
+    idempotencyKey?: string,
+  ) =>
+    executeApiOperation<AdminReview>(
+      "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/publication",
+      { path: { branchId, reviewId }, body: patch, version, idempotencyKey },
     ),
   replyToBranchReview: (
     branchId: string,

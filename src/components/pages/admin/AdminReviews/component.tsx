@@ -31,6 +31,7 @@ export function AdminReviewsComponent() {
   const isOwner = user?.role === "OWNER";
   const canReply = useAdminPermission("review.reply.branch");
   const canModerate = useAdminPermission("review.moderate.branch");
+  const canPublish = useAdminPermission("review.publish.branch");
   const [scope, setScope] = useState<"branch" | "org">("branch");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -60,6 +61,7 @@ export function AdminReviewsComponent() {
   const [page, setPage] = useState(1);
   const [replyTo, setReplyTo] = useState<ReviewRow | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [publicationPendingId, setPublicationPendingId] = useState<string | null>(null);
 
   const statuses = useMemo(
     () => Array.from(new Set(["IN_PROGRESS", "NEW", "RESOLVED", ...handlingStatuses(source)])),
@@ -80,6 +82,21 @@ export function AdminReviewsComponent() {
       void mutate();
     } catch (err) {
       setActionError(err instanceof Error && err.message ? err.message : t("updateFailed"));
+    }
+  };
+
+  const updatePublication = async (row: ReviewRow, next: "PUBLISHED" | "HIDDEN") => {
+    if (!branchId || publicationPendingId) return;
+    setActionError(null);
+    setPublicationPendingId(row.id);
+    try {
+      await adminService.updateBranchReviewPublication(branchId, row.id, { status: next }, row.version, crypto.randomUUID());
+      notifySuccess(next === "PUBLISHED" ? t("publicationPublished") : t("publicationHidden"));
+      await mutate();
+    } catch (err) {
+      setActionError(err instanceof Error && err.message ? err.message : t("publicationUpdateFailed"));
+    } finally {
+      setPublicationPendingId(null);
     }
   };
 
@@ -136,6 +153,7 @@ export function AdminReviewsComponent() {
                 <th className="px-4 py-3">{t("columns.rating")}</th>
                 <th className="px-4 py-3">{t("columns.content")}</th>
                 <th className="px-4 py-3">{t("columns.handling")}</th>
+                <th className="px-4 py-3">{t("columns.publication")}</th>
                 <th className="px-4 py-3">{t("columns.reply")}</th>
                 <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
               </tr>
@@ -143,7 +161,7 @@ export function AdminReviewsComponent() {
             <tbody>
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-admin-muted">
                     {t("empty")}
                   </td>
                 </tr>
@@ -151,10 +169,8 @@ export function AdminReviewsComponent() {
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border align-top last:border-0">
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.customerName}</td>
-                    {/* The API scores service and staff separately; one column showed neither. */}
-                      <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={t("ratingLabel", { service: row.serviceRating, staff: row.staffRating })}>
-                      <span className="block">{ratingStars(row.serviceRating)} <span className="text-xs text-admin-muted">{t("ratingService")}</span></span>
-                      <span className="block">{ratingStars(row.staffRating)} <span className="text-xs text-admin-muted">{t("ratingStaff")}</span></span>
+                    <td className="whitespace-nowrap px-4 py-3 text-amber-500" aria-label={t("ratingLabel", { rating: row.rating })}>
+                      {ratingStars(row.rating)}
                     </td>
                     <td className="max-w-xs px-4 py-3 text-admin-ink">{row.content}</td>
                     <td className="px-4 py-3">
@@ -162,10 +178,34 @@ export function AdminReviewsComponent() {
                         {statusLabel(row.handlingStatus)}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-muted">
+                        {t(`publication.${row.publicationStatus}`)}
+                      </span>
+                      <span className="mt-1 block text-xs text-admin-muted">{t(`source.${row.source}`)}</span>
+                    </td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.replyContent ?? "—"}</td>
                     <td className="px-4 py-3">
                       {scope === "branch" ? (
-                        <div className="flex justify-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-lg"
+                            isDisabled={!canPublish || publicationPendingId !== null || row.publicationStatus === "PUBLISHED"}
+                            onPress={() => void updatePublication(row, "PUBLISHED")}
+                          >
+                            {t("publish")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-lg"
+                            isDisabled={!canPublish || publicationPendingId !== null || row.publicationStatus === "HIDDEN"}
+                            onPress={() => void updatePublication(row, "HIDDEN")}
+                          >
+                            {t("hide")}
+                          </Button>
                           <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canReply} onPress={() => setReplyTo(row)}>
                             {t("reply")}
                           </Button>
