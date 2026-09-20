@@ -11,6 +11,24 @@ export type PaymentTotals = {
   readonly grandTotal: number;
 };
 
+export type CashTenderState = {
+  readonly cashTendered: number | null;
+  readonly cashChange: number | null;
+  readonly error: string | null;
+};
+
+/** Parses whole-yen counter input; the backend still recalculates the authoritative change. */
+export function calculateCashTenderState(amountDue: number, input: string): CashTenderState {
+  if (amountDue === 0) return { cashTendered: null, cashChange: null, error: null };
+  const normalized = input.trim();
+  if (!normalized) return { cashTendered: null, cashChange: null, error: "state.cashTenderedRequired" };
+  if (!/^\d+$/.test(normalized)) return { cashTendered: null, cashChange: null, error: "state.cashTenderedInvalid" };
+  const cashTendered = Number(normalized);
+  if (!Number.isSafeInteger(cashTendered)) return { cashTendered: null, cashChange: null, error: "state.cashTenderedInvalid" };
+  if (cashTendered < amountDue) return { cashTendered, cashChange: null, error: "state.cashTenderedInsufficient" };
+  return { cashTendered, cashChange: cashTendered - amountDue, error: null };
+}
+
 export type PaymentTransitionResult =
   | { readonly ok: true; readonly value: CheckoutInvoice }
   /**

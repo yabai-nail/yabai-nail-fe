@@ -496,17 +496,32 @@
         "rating": "Rating",
         "content": "Content",
         "handling": "Handling",
+        "publication": "App display",
         "reply": "Reply",
         "actions": "Actions"
       },
       "empty": "No matching reviews.",
-      "ratingLabel": "Service {service} stars, staff {staff} stars",
+      "ratingLabel": "{rating} stars",
       "ratingService": "service",
       "ratingStaff": "staff",
       "reply": "Reply",
       "reopen": "Reopen",
       "markResolved": "Mark resolved",
       "readOnly": "Read only",
+      "publication": {
+        "PENDING": "Awaiting approval",
+        "PUBLISHED": "Published",
+        "HIDDEN": "Hidden"
+      },
+      "source": {
+        "CUSTOMER_APP": "Customer app",
+        "COUNTER": "At checkout"
+      },
+      "publish": "Publish",
+      "hide": "Hide",
+      "publicationPublished": "Review published in the app",
+      "publicationHidden": "Review hidden from the app",
+      "publicationUpdateFailed": "Could not update app visibility.",
       "pagination": "Showing {shown} of {total} reviews",
       "modal": {
         "title": "Reply to review — {customer}",
@@ -2143,6 +2158,21 @@
       "recorded": "Recorded transactions",
       "submitting": "Calling quote and recording the transaction…",
       "paymentRecorded": "Payment recorded",
+      "cashResult": "Cash received: {tendered} · Change: {change}",
+      "review": {
+        "title": "Customer review",
+        "customer": "Customer",
+        "rating": "Overall rating",
+        "star": "{count} stars",
+        "comment": "Review",
+        "placeholder": "Enter the customer's feedback...",
+        "publicationNote": "This review is saved for admin moderation and only appears in the app after an admin publishes it.",
+        "skip": "Not now",
+        "submit": "Save review",
+        "submitting": "Saving...",
+        "submitFailed": "The review could not be saved.",
+        "submitted": "Review saved for moderation"
+      },
       "step3": "Confirm and take payment",
       "grandTotalLabel": "Total the customer pays",
       "error": {
@@ -2242,6 +2272,8 @@
         "discount": "Discount",
         "total": "Total",
         "method": "Method: <strong>{method}</strong>",
+        "cashTendered": "Cash received (¥)",
+        "cashChange": "Change: {amount}",
         "methodNotChosen": "Not chosen",
         "close": "Close",
         "print": "Print the invoice"
@@ -2271,7 +2303,10 @@
         "discountRange": "The discount must be between zero and the services total.",
         "methodRequired": "Pick a payment method.",
         "paidAtInvalid": "That confirmation time is not valid.",
-        "serviceRequired": "Pick a service."
+        "serviceRequired": "Pick a service.",
+        "cashTenderedRequired": "Enter the cash received from the customer.",
+        "cashTenderedInvalid": "Cash received must be a whole number of yen.",
+        "cashTenderedInsufficient": "Cash received is less than the amount due."
       }
     }
   }

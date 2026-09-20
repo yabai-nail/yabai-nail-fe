@@ -31,6 +31,7 @@ const APPOINTMENT_OPERATION_IDS = [
   "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/allocation-candidates",
   "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments",
+  "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/reviews",
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payment-quotes",
   "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/photos",
 ] as const;
@@ -78,6 +79,7 @@ const MESSAGING_OPERATION_IDS = [
   "PATCH /api/v1/admin/conversations/{conversationId}",
   "GET /api/v1/admin/branches/{branchId}/reviews",
   "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/handling",
+  "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/publication",
   "POST /api/v1/admin/branches/{branchId}/reviews/{reviewId}/replies",
   "GET /api/v1/admin/reviews",
   "GET /api/v1/admin/branches/{branchId}/settings",
@@ -251,7 +253,9 @@ describe("adminService messaging and reviews surface", () => {
       adminService.sendConversationMessage,
       adminService.updateConversation,
       adminService.branchReviews,
+      adminService.createAppointmentReview,
       adminService.updateBranchReviewHandling,
+      adminService.updateBranchReviewPublication,
       adminService.replyToBranchReview,
       adminService.reviews,
       adminService.branchSettings,
@@ -297,6 +301,20 @@ describe("adminService messaging and reviews surface", () => {
         idempotencyKey: "reply-key",
       },
     );
+  });
+
+  it("forwards the counter review and publication contracts", async () => {
+    executeApiOperation.mockClear();
+
+    await adminService.createAppointmentReview("branch-a", "appointment-a", { rating: 5, comment: "Rat tot" }, "review-key");
+    await adminService.updateBranchReviewPublication("branch-a", "review-a", { status: "PUBLISHED" }, 3, "publish-key");
+
+    expect(executeApiOperation).toHaveBeenNthCalledWith(1, "POST /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/reviews", {
+      path: { branchId: "branch-a", appointmentId: "appointment-a" }, body: { rating: 5, comment: "Rat tot" }, idempotencyKey: "review-key",
+    });
+    expect(executeApiOperation).toHaveBeenNthCalledWith(2, "PATCH /api/v1/admin/branches/{branchId}/reviews/{reviewId}/publication", {
+      path: { branchId: "branch-a", reviewId: "review-a" }, body: { status: "PUBLISHED" }, version: 3, idempotencyKey: "publish-key",
+    });
   });
 });
 

@@ -14,7 +14,7 @@ const UNNAMED = "Unnamed customer";
 describe("review list derivation", () => {
   it("filters by handling status and query", () => {
     expect(filterReviews(reviewFixtures, "NEW", "").map((r) => r.id)).toEqual(["rv2", "rv5"]);
-    expect(filterReviews(reviewFixtures, "all", "cường").map((r) => r.id)).toEqual(["rv3"]);
+    expect(filterReviews(reviewFixtures, "all", "cuong").map((r) => r.id)).toEqual(["rv3"]);
   });
 
   it("lists distinct handling statuses sorted", () => {
@@ -36,11 +36,12 @@ describe("review list derivation", () => {
     id: "5ee9d6e8-eb37-4a20-8aa2-e03d61f465fd",
     appointmentId: "3339ad7c-22b7-4540-8916-4dc5c8271935",
     customerId: "596b00ad-c95a-4211-aba6-f3cb24b34ead",
-    serviceRating: 4,
-    staffRating: 5,
+    rating: 5,
     comment: "Review kiem thu E2E.",
     managerReply: "Cam on ban da danh gia.",
-    consentToPublish: true,
+    source: "COUNTER" as const,
+    publicationStatus: "PENDING" as const,
+    customer: { id: "596b00ad-c95a-4211-aba6-f3cb24b34ead", displayName: "Test Khach A", avatarUrl: "https://example.test/avatar.jpg" },
     handlingStatus: "IN_PROGRESS",
     createdAt: "2026-08-25T23:40:17.165Z",
     updatedAt: "2026-08-25T23:40:17.382Z",
@@ -50,25 +51,26 @@ describe("review list derivation", () => {
   it("reads the fields the API actually sends", () => {
     const row = adaptReview(liveReview, undefined, UNNAMED);
     expect(row).toMatchObject({
-      serviceRating: 4,
-      staffRating: 5,
+      rating: 5,
       content: "Review kiem thu E2E.",
       replyContent: "Cam on ban da danh gia.",
       handlingStatus: "IN_PROGRESS",
+      publicationStatus: "PENDING",
+      source: "COUNTER",
       version: 3,
     });
   });
 
   it("resolves the customer name without exposing a technical id while the list loads", () => {
     const named = adaptReview(liveReview, new Map([[liveReview.customerId, "Test Khach A DA SUA"]]), UNNAMED);
-    expect(named.customerName).toBe("Test Khach A DA SUA");
+    expect(named.customerName).toBe("Test Khach A");
     // The fallback is supplied by the caller now, so the assertion is that the
     // adapter uses what it was given -- not that it knows a Vietnamese phrase.
-    expect(adaptReview(liveReview, undefined, UNNAMED).customerName).toBe(UNNAMED);
+    expect(adaptReview({ ...liveReview, customer: undefined }, undefined, UNNAMED).customerName).toBe(UNNAMED);
   });
 
   it("keeps an unanswered review distinguishable from an answered one", () => {
-    const row = adaptReview({ ...liveReview, managerReply: undefined, comment: undefined }, undefined, UNNAMED);
+    const row = adaptReview({ ...liveReview, managerReply: undefined, comment: "" }, undefined, UNNAMED);
     expect(row.replyContent).toBeUndefined();
     expect(row.content).toBe("");
   });

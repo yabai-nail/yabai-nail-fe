@@ -4,28 +4,25 @@ import { matchesSearch } from "@/lib/admin-search";
 export type ReviewRow = {
   readonly id: string;
   readonly customerId: string;
-  /** Display name once the customer list has loaded. */
   readonly customerName: string;
-  readonly serviceRating: number;
-  readonly staffRating: number;
+  readonly rating: number;
   readonly content: string;
   readonly handlingStatus: string;
+  readonly source: "CUSTOMER_APP" | "COUNTER";
+  readonly publicationStatus: "PENDING" | "PUBLISHED" | "HIDDEN";
   readonly replyContent?: string;
   readonly createdAt: string;
   readonly version: number;
 };
 
-// The API accepts exactly NEW, IN_PROGRESS and RESOLVED. The old map named
-// PENDING and ESCALATED, which it rejects with 422.
 export const reviewFixtures: ReadonlyArray<ReviewRow> = [
-  { id: "rv1", customerId: "cust-", customerName: "Nguyễn An", serviceRating: 5, staffRating: 5, content: "Nhân viên làm rất tỉ mỉ, sẽ quay lại!", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị đã ủng hộ ạ!", createdAt: "2026-08-23T10:00:00.000Z", version: 2 },
-  { id: "rv2", customerId: "cust-", customerName: "Trần Bích", serviceRating: 4, staffRating: 4, content: "Móng đẹp nhưng chờ hơi lâu.", handlingStatus: "NEW", createdAt: "2026-08-22T09:30:00.000Z", version: 1 },
-  { id: "rv3", customerId: "cust-", customerName: "Lê Cường", serviceRating: 2, staffRating: 2, content: "Màu lên không giống mẫu.", handlingStatus: "IN_PROGRESS", createdAt: "2026-08-21T15:10:00.000Z", version: 1 },
-  { id: "rv4", customerId: "cust-", customerName: "Phạm Dung", serviceRating: 5, staffRating: 5, content: "Không gian sạch sẽ, thơm.", handlingStatus: "RESOLVED", replyContent: "Cảm ơn chị nhiều!", createdAt: "2026-08-20T13:45:00.000Z", version: 3 },
-  { id: "rv5", customerId: "cust-", customerName: "Vũ Hà", serviceRating: 3, staffRating: 3, content: "Ổn, giá hơi cao so với kỳ vọng.", handlingStatus: "NEW", createdAt: "2026-08-19T11:20:00.000Z", version: 1 },
+  { id: "rv1", customerId: "cust-1", customerName: "Nguyen An", rating: 5, content: "Nhan vien lam rat ti mi, se quay lai!", handlingStatus: "RESOLVED", source: "CUSTOMER_APP", publicationStatus: "PUBLISHED", replyContent: "Cam on chi da ung ho!", createdAt: "2026-08-23T10:00:00.000Z", version: 2 },
+  { id: "rv2", customerId: "cust-2", customerName: "Tran Bich", rating: 4, content: "Mong dep nhung cho hoi lau.", handlingStatus: "NEW", source: "COUNTER", publicationStatus: "PENDING", createdAt: "2026-08-22T09:30:00.000Z", version: 1 },
+  { id: "rv3", customerId: "cust-3", customerName: "Le Cuong", rating: 2, content: "Mau len khong giong mau.", handlingStatus: "IN_PROGRESS", source: "CUSTOMER_APP", publicationStatus: "HIDDEN", createdAt: "2026-08-21T15:10:00.000Z", version: 1 },
+  { id: "rv4", customerId: "cust-4", customerName: "Pham Dung", rating: 5, content: "Khong gian sach se, thoai mai.", handlingStatus: "RESOLVED", source: "CUSTOMER_APP", publicationStatus: "PUBLISHED", replyContent: "Cam on chi nhieu!", createdAt: "2026-08-20T13:45:00.000Z", version: 3 },
+  { id: "rv5", customerId: "cust-5", customerName: "Vu Ha", rating: 3, content: "On, gia hoi cao so voi ky vong.", handlingStatus: "NEW", source: "COUNTER", publicationStatus: "PENDING", createdAt: "2026-08-19T11:20:00.000Z", version: 1 },
 ];
 
-// The fallback name is a parameter: this runs inside a useMemo, outside the component.
 export function adaptReview(
   review: AdminReview,
   customerNames: ReadonlyMap<string, string> | undefined,
@@ -34,12 +31,13 @@ export function adaptReview(
   return {
     id: review.id,
     customerId: review.customerId,
-    customerName: customerNames?.get(review.customerId) ?? unnamed,
-    serviceRating: review.serviceRating,
-    staffRating: review.staffRating,
+    customerName: review.customer?.displayName ?? customerNames?.get(review.customerId) ?? unnamed,
+    rating: review.rating,
     content: review.comment ?? "",
     handlingStatus: review.handlingStatus,
-    replyContent: review.managerReply,
+    source: review.source,
+    publicationStatus: review.publicationStatus,
+    replyContent: review.managerReply ?? undefined,
     createdAt: review.createdAt,
     version: review.version,
   };
@@ -63,7 +61,7 @@ export function filterReviews(
 
 export function ratingStars(rating: number): string {
   const clamped = Math.max(0, Math.min(5, Math.round(rating)));
-  return "★".repeat(clamped) + "☆".repeat(5 - clamped);
+  return "\u2605".repeat(clamped) + "\u2606".repeat(5 - clamped);
 }
 
 export function paginate<T>(

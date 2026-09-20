@@ -496,17 +496,32 @@
         "rating": "評価",
         "content": "内容",
         "handling": "対応",
+        "publication": "アプリ表示",
         "reply": "返信",
         "actions": "操作"
       },
       "empty": "該当するレビューがありません。",
-      "ratingLabel": "メニュー {service} つ星、スタッフ {staff} つ星",
+      "ratingLabel": "{rating} つ星",
       "ratingService": "メニュー",
       "ratingStaff": "スタッフ",
       "reply": "返信",
       "reopen": "再オープン",
       "markResolved": "対応済みにする",
       "readOnly": "閲覧のみ",
+      "publication": {
+        "PENDING": "承認待ち",
+        "PUBLISHED": "公開中",
+        "HIDDEN": "非公開"
+      },
+      "source": {
+        "CUSTOMER_APP": "顧客アプリ",
+        "COUNTER": "会計時"
+      },
+      "publish": "公開",
+      "hide": "非公開",
+      "publicationPublished": "レビューをアプリに公開しました",
+      "publicationHidden": "レビューをアプリから非公開にしました",
+      "publicationUpdateFailed": "公開状態を更新できませんでした。",
       "pagination": "全 {total} 件中 {shown} 件を表示",
       "modal": {
         "title": "レビューに返信 — {customer}",
@@ -2135,6 +2150,21 @@
       "recorded": "記録済みの取引",
       "submitting": "quote を呼び出して取引を記録中…",
       "paymentRecorded": "支払いを記録しました",
+      "cashResult": "お預かり: {tendered} · お釣り: {change}",
+      "review": {
+        "title": "お客様レビュー",
+        "customer": "お客様",
+        "rating": "総合評価",
+        "star": "{count} つ星",
+        "comment": "レビュー内容",
+        "placeholder": "お客様の感想を入力してください...",
+        "publicationNote": "レビューは管理者の確認用に保存され、管理者が公開した後にのみアプリへ表示されます。",
+        "skip": "後で",
+        "submit": "レビューを保存",
+        "submitting": "保存中...",
+        "submitFailed": "レビューを保存できませんでした。",
+        "submitted": "レビューを承認待ちとして保存しました"
+      },
       "step3": "確認と会計",
       "grandTotalLabel": "お客様のお支払い合計",
       "error": {
@@ -2234,6 +2264,8 @@
         "discount": "割引",
         "total": "合計",
         "method": "支払い方法: <strong>{method}</strong>",
+        "cashTendered": "お預かり金額 (¥)",
+        "cashChange": "お釣り: {amount}",
         "methodNotChosen": "未選択",
         "close": "閉じる",
         "print": "伝票を印刷"
@@ -2263,7 +2295,10 @@
         "discountRange": "割引はメニュー合計以下、0 以上にしてください。",
         "methodRequired": "支払い方法を選択してください。",
         "paidAtInvalid": "確定日時が正しくありません。",
-        "serviceRequired": "メニューを選択してください。"
+        "serviceRequired": "メニューを選択してください。",
+        "cashTenderedRequired": "お客様からお預かりした金額を入力してください。",
+        "cashTenderedInvalid": "お預かり金額は1円単位の整数で入力してください。",
+        "cashTenderedInsufficient": "お預かり金額が不足しています。"
       }
     }
   }

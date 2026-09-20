@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initialCheckoutInvoice, paymentServiceCatalog } from "./data";
 import {
   addLineItem,
+  calculateCashTenderState,
   calculatePaymentTotals,
   confirmPayment,
   removeLineItem,
@@ -34,6 +35,24 @@ describe("payment totals", () => {
 
     const negative = { ...initialCheckoutInvoice, discount: -500 };
     expect(calculatePaymentTotals(negative)).toEqual({ subtotal: 12_100, discount: 0, grandTotal: 12_100 });
+  });
+});
+
+describe("cash tender", () => {
+  it("calculates exact and overpayment change in whole yen", () => {
+    expect(calculateCashTenderState(10_000, "10000")).toEqual({ cashTendered: 10_000, cashChange: 0, error: null });
+    expect(calculateCashTenderState(10_000, "15000")).toEqual({ cashTendered: 15_000, cashChange: 5_000, error: null });
+  });
+
+  it("rejects missing, fractional, malformed, and insufficient cash", () => {
+    expect(calculateCashTenderState(10_000, "").error).toBe("state.cashTenderedRequired");
+    expect(calculateCashTenderState(10_000, "10000.5").error).toBe("state.cashTenderedInvalid");
+    expect(calculateCashTenderState(10_000, "1e4").error).toBe("state.cashTenderedInvalid");
+    expect(calculateCashTenderState(10_000, "9999")).toEqual({ cashTendered: 9_999, cashChange: null, error: "state.cashTenderedInsufficient" });
+  });
+
+  it("requires no cash for a free appointment", () => {
+    expect(calculateCashTenderState(0, "")).toEqual({ cashTendered: null, cashChange: null, error: null });
   });
 });
 
