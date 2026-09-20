@@ -2274,6 +2274,7 @@
         "amount": "金額: <strong>{amount}</strong>",
         "method": "支払い方法: <strong>{method}</strong>",
         "cashTendered": "お預かり金額 (¥)",
+        "cashChangeLabel": "お釣り",
         "cashChange": "お釣り: {amount}",
         "serverNote": "この操作は実際の取引を記録します。この画面からは取り消せません。",
         "localNote": "この伝票は実際の予約に紐づいていないため、取引は記録されません。",

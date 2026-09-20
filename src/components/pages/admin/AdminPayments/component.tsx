@@ -20,10 +20,11 @@ import {
   type AdminServiceItem,
   type AdminStaffMember,
 } from "@/service";
+import { CashTenderPanel } from "./CashTenderPanel";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import type { Translator } from "@/i18n/config";
 import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
-import { calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
+import { calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
@@ -116,7 +117,9 @@ function buildInvoiceFromServer(
     benefitDiscount: appointment.benefitDiscount ?? appointment.discount,
     manualDiscount: appointment.manualDiscount ?? 0,
     discountReason: appointment.discountReason ?? appointment.manualDiscountReason ?? "",
-    paymentMethod: null,
+    // Cash is the only supported counter method, so make the single available
+    // choice explicit and show the tender/change fields immediately.
+    paymentMethod: "cash",
     orderNote: appointment.checkoutNote ?? "",
     status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
     paidAt: null,
@@ -206,6 +209,10 @@ export function AdminPaymentsComponent() {
   const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
   const canAdjust = hasPaymentPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
   const canCreatePayment = hasPaymentPermission && appointment?.status === "AWAITING_PAYMENT";
+  const cashState = invoice?.paymentMethod === "cash" && totals
+    ? calculateCashTenderState(totals.grandTotal, cashTendered)
+    : { cashTendered: null, cashChange: null, error: null };
+  const canConfirmPayment = Boolean(canCreatePayment && invoice?.paymentMethod && !cashState.error);
 
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
@@ -411,11 +418,11 @@ export function AdminPaymentsComponent() {
           isCancelled={isAppointmentCancelled}
         />
         <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
-          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} /><div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
+          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
-        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canCreatePayment={canCreatePayment} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashTendered(""); setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} />
+        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} />
       </div>
-      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} isServerBacked={isServerBacked} onCashTenderedChange={setCashTendered} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
+      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>

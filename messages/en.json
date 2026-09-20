@@ -2282,6 +2282,7 @@
         "amount": "Amount: <strong>{amount}</strong>",
         "method": "Method: <strong>{method}</strong>",
         "cashTendered": "Cash received (¥)",
+        "cashChangeLabel": "Change",
         "cashChange": "Change: {amount}",
         "serverNote": "This records a real transaction and cannot be undone from this screen.",
         "localNote": "This invoice is not tied to a real appointment, so no transaction will be recorded.",
