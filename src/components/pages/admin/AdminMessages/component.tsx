@@ -14,6 +14,7 @@ import {
   useAdminPermission,
   type AdminConversation as ServerConversation,
   type AdminBookingConfirmation,
+  type AdminWarrantyNotice,
   type AdminMessage as ServerMessage,
 } from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
@@ -92,6 +93,21 @@ function isBookingConfirmation(
   );
 }
 
+function isWarrantyNotice(warranty: AdminWarrantyNotice | null | undefined): warranty is AdminWarrantyNotice {
+  return Boolean(
+    warranty &&
+    typeof warranty.warrantyId === "string" &&
+    typeof warranty.appointmentId === "string" &&
+    typeof warranty.branchId === "string" &&
+    typeof warranty.serviceId === "string" &&
+    typeof warranty.serviceName === "string" &&
+    Number.isInteger(warranty.warrantyDays) &&
+    warranty.warrantyDays > 0 &&
+    /^\d{4}-\d{2}-\d{2}$/.test(warranty.startsOn) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(warranty.endsOn),
+  );
+}
+
 export function toChatMessage(
   server: ServerMessage,
   formatTime: (value: Date) => string,
@@ -105,6 +121,16 @@ export function toChatMessage(
       kind: "booking-confirmation",
       sender: "system",
       booking: server.booking,
+      time: formatTimeLabel(server.createdAt, formatTime),
+      sentAt: server.createdAt,
+    };
+  }
+  if (server.messageType === "WARRANTY_NOTICE" && isWarrantyNotice(server.warranty)) {
+    return {
+      id: server.id,
+      kind: "warranty-notice",
+      sender: "system",
+      warranty: server.warranty,
       time: formatTimeLabel(server.createdAt, formatTime),
       sentAt: server.createdAt,
     };

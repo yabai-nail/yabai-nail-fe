@@ -23,6 +23,18 @@ export type BookingConfirmation = {
   readonly note: string;
 };
 
+export type WarrantyNotice = {
+  readonly warrantyId: string;
+  readonly appointmentId: string;
+  readonly branchId: string;
+  readonly serviceId: string;
+  readonly serviceName: string;
+  readonly warrantyDays: number;
+  readonly startsOn: string;
+  readonly endsOn: string;
+  readonly locale: "vi" | "ja";
+};
+
 type ChatMessageBase = {
   readonly id: string;
   /** Clock time for display, already localised: "08:13". */
@@ -43,7 +55,13 @@ export type ChatBookingConfirmationMessage = ChatMessageBase & {
   readonly booking: BookingConfirmation;
 };
 
-export type ChatMessage = ChatTextMessage | ChatBookingConfirmationMessage;
+export type ChatWarrantyNoticeMessage = ChatMessageBase & {
+  readonly kind: "warranty-notice";
+  readonly sender: "system";
+  readonly warranty: WarrantyNotice;
+};
+
+export type ChatMessage = ChatTextMessage | ChatBookingConfirmationMessage | ChatWarrantyNoticeMessage;
 
 export type Conversation = {
   readonly id: string;

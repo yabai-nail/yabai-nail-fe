@@ -12,7 +12,7 @@ import { AdminAvatarField, mediaIdFromPublicUrl, useAvatarField } from "@/compon
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
-const roleOptions = ["STAFF", "MANAGER", "OWNER"];
+const roleOptions = ["CUSTOMER", "STAFF", "MANAGER", "OWNER"];
 const statusOptions = ["ACTIVE", "SUSPENDED", "DISABLED"];
 
 export function AccountModal({
@@ -36,6 +36,9 @@ export function AccountModal({
   const [role, setRole] = useState(account?.role ?? "STAFF");
   const [status, setStatus] = useState(account?.status ?? "ACTIVE");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [locale, setLocale] = useState<"vi" | "ja">("vi");
   const [branchIds, setBranchIds] = useState<ReadonlyArray<string>>(account?.branchIds ?? []);
   const avatar = useAvatarField(account?.avatarUrl ?? null);
   const [busy, setBusy] = useState(false);
@@ -43,17 +46,26 @@ export function AccountModal({
 
   const temporaryPassword = password.trim();
   const branches = useAdminBranchList();
-  const requiresBranch = role === "STAFF" || role === "MANAGER";
+  const isCustomer = role === "CUSTOMER";
+  const requiresBranch = role === "STAFF" || role === "MANAGER" || isCustomer;
+  const customerCredentialsValid =
+    !isCustomer ||
+    (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) && /^[a-zA-Z0-9_.]{3,60}$/.test(username.trim()));
   const canSubmit =
     displayName.trim().length >= 2 &&
     (!requiresBranch || branchIds.length > 0) &&
     // Phone is now editable on both create and edit; the temporary password is only required at create.
     isAdminPhone(phone) &&
+    customerCredentialsValid &&
     (isEdit || isStrongTemporaryPassword(password)) &&
     !avatar.blocked &&
     !busy;
 
   const toggleBranch = (branchId: string) => {
+    if (isCustomer) {
+      setBranchIds([branchId]);
+      return;
+    }
     setBranchIds((current) =>
       current.includes(branchId)
         ? current.filter((id) => id !== branchId)
@@ -67,6 +79,20 @@ export function AccountModal({
     setError(null);
     let uploadedMediaId: string | null = null;
     try {
+      if (!isEdit && isCustomer) {
+        await adminService.createCustomer(branchIds[0], {
+          phone: phone.trim(),
+          displayName: displayName.trim(),
+          email: email.trim().toLocaleLowerCase(),
+          username: username.trim(),
+          temporaryPassword,
+          locale,
+        });
+        notifySuccess(tc("accountCreated"));
+        onSaved();
+        onClose();
+        return;
+      }
       const resolved = await avatar.resolve();
       uploadedMediaId = resolved.uploadedMediaId;
       if (isEdit && account) {
@@ -138,7 +164,7 @@ export function AccountModal({
                   <input className={inputClass} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={t("modal.displayNamePlaceholder")} autoFocus />
                 </label>
               </div>
-              <AdminAvatarField field={avatar} name={displayName} busy={busy} />
+              {isCustomer ? null : <AdminAvatarField field={avatar} name={displayName} busy={busy} />}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("columns.role")}</span>
@@ -147,7 +173,7 @@ export function AccountModal({
                     fullWidth
                     value={role}
                     onChange={setRole}
-                    options={roleOptions.map((code) => ({ value: code, label: roleLabel(code) }))}
+                    options={(isEdit ? roleOptions.filter((code) => code !== "CUSTOMER") : roleOptions).map((code) => ({ value: code, label: roleLabel(code) }))}
                   />
                 </div>
                 {isEdit ? (
@@ -168,9 +194,32 @@ export function AccountModal({
                   </label>
                 )}
               </div>
+              {isCustomer ? (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <label className="flex flex-col gap-2 text-sm">
+                    <span className="font-semibold text-admin-ink">{t("modal.email")}</span>
+                    <input type="email" autoCapitalize="none" className={inputClass} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="customer@example.com" />
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm">
+                    <span className="font-semibold text-admin-ink">{t("modal.username")}</span>
+                    <input autoCapitalize="none" className={inputClass} value={username} onChange={(event) => setUsername(event.target.value)} placeholder="customer.name" />
+                  </label>
+                  <div className="flex flex-col gap-2 text-sm">
+                    <span className="font-semibold text-admin-ink">{t("modal.locale")}</span>
+                    <AdminSelectField
+                      label={t("modal.locale")}
+                      fullWidth
+                      value={locale}
+                      onChange={(value) => setLocale(value === "ja" ? "ja" : "vi")}
+                      options={[{ value: "vi", label: t("modal.localeVi") }, { value: "ja", label: t("modal.localeJa") }]}
+                    />
+                  </div>
+                  {!customerCredentialsValid ? <p role="alert" className="text-xs text-admin-danger sm:col-span-3">{t("modal.customerCredentialsInvalid")}</p> : null}
+                </div>
+              ) : null}
               {requiresBranch ? (
                 <fieldset className="rounded-lg border border-admin-border p-3">
-                  <legend className="px-1 text-sm font-semibold text-admin-ink">{t("modal.branches")}</legend>
+                  <legend className="px-1 text-sm font-semibold text-admin-ink">{t(isCustomer ? "modal.customerBranch" : "modal.branches")}</legend>
                   {branches.isLoading ? (
                     <p className="text-xs text-admin-muted">{t("modal.branchesLoading")}</p>
                   ) : branches.error ? (
@@ -180,7 +229,8 @@ export function AccountModal({
                       {(branches.data?.items ?? []).map((branch) => (
                         <label key={branch.id} className="flex min-h-10 items-center gap-2 rounded-lg border border-admin-border px-3 text-sm text-admin-ink">
                           <input
-                            type="checkbox"
+                            type={isCustomer ? "radio" : "checkbox"}
+                            name={isCustomer ? "customerBranch" : undefined}
                             className="accent-admin-accent"
                             checked={branchIds.includes(branch.id)}
                             onChange={() => toggleBranch(branch.id)}

@@ -39,4 +39,33 @@ describe("toChatMessage", () => {
       expect(message.booking.customerPhone).toBe("0914163312");
     }
   });
+
+  it("maps a persisted warranty notice to a system card", () => {
+    const server = {
+      id: "warranty-notice:appointment-1",
+      conversationId: "conversation-1",
+      senderType: "SYSTEM",
+      messageType: "WARRANTY_NOTICE",
+      content: "Warranty issued",
+      createdAt: "2026-09-20T08:00:00.000Z",
+      warranty: {
+        warrantyId: "warranty-1",
+        appointmentId: "appointment-1",
+        branchId: "branch-1",
+        serviceId: "service-1",
+        serviceName: "Gel color",
+        warrantyDays: 30,
+        startsOn: "2026-09-20",
+        endsOn: "2026-10-20",
+        locale: "vi",
+      },
+    } satisfies AdminMessage;
+
+    const message = toChatMessage(server, () => "15:00");
+
+    expect(message.kind).toBe("warranty-notice");
+    if (message.kind === "warranty-notice") {
+      expect(message.warranty.endsOn).toBe("2026-10-20");
+    }
+  });
 });

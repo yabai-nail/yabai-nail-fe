@@ -99,6 +99,7 @@ export interface AdminServiceItem {
   readonly description?: string;
   readonly price: number;
   readonly durationMinutes: number;
+  readonly warrantyDays?: number;
   // Filled by the admin list endpoint, which resolves the stored key to the public one.
   readonly categoryId?: string | null;
   readonly categoryName?: string | null;
@@ -320,8 +321,11 @@ export interface AdminAppointmentAllocationCandidate {
 // -- Admin customer mutations ----------------------------------------------------
 
 export interface AdminCustomerDraft {
-  readonly displayName?: string;
+  readonly displayName: string;
   readonly phone: string;
+  readonly email?: string;
+  readonly username?: string;
+  readonly temporaryPassword?: string;
   readonly locale?: string;
   readonly note?: string;
   readonly [field: string]: unknown;
@@ -579,6 +583,7 @@ export interface AdminServiceItemDraft {
   readonly categoryId?: string;
   readonly price: number;
   readonly durationMinutes: number;
+  readonly warrantyDays?: number;
   readonly description?: string;
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
@@ -596,6 +601,7 @@ export interface AdminServiceItemPatch {
   readonly categoryId?: string;
   readonly price?: number;
   readonly durationMinutes?: number;
+  readonly warrantyDays?: number;
   readonly description?: string;
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
@@ -849,6 +855,18 @@ export interface AdminBookingConfirmation {
   readonly note: string;
 }
 
+export interface AdminWarrantyNotice {
+  readonly warrantyId: string;
+  readonly appointmentId: string;
+  readonly branchId: string;
+  readonly serviceId: string;
+  readonly serviceName: string;
+  readonly warrantyDays: number;
+  readonly startsOn: string;
+  readonly endsOn: string;
+  readonly locale: "vi" | "ja";
+}
+
 export interface AdminMessage {
   readonly id: string;
   readonly conversationId: string;
@@ -856,6 +874,7 @@ export interface AdminMessage {
   readonly content: string;
   readonly messageType?: string;
   readonly booking?: AdminBookingConfirmation | null;
+  readonly warranty?: AdminWarrantyNotice | null;
   readonly createdAt: string;
   readonly deliveryStatus?: string;
   readonly [field: string]: unknown;

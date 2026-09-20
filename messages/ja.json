@@ -359,6 +359,16 @@
         "total": "合計",
         "code": "予約番号",
         "note": "お客様メモ"
+      },
+      "warranty": {
+        "accessibilityLabel": "{service} の保証情報",
+        "heading": "サービス保証が有効になりました",
+        "intro": "支払い完了時に自動保存されます。",
+        "service": "メインサービス",
+        "duration": "保証期間",
+        "days": "{count} 日",
+        "period": "保証有効期間",
+        "marketing": "YABAI NAIL をお選びいただきありがとうございます。保証期間中に確認や調整が必要な場合は、このチャットからお気軽にご相談ください。"
       }
     },
     "nailDesigns": {
@@ -810,6 +820,13 @@
         "statusLabel": "アカウントのステータス",
         "tempPassword": "仮パスワード",
         "tempPasswordPlaceholder": "8 文字以上、英字と数字を含む",
+        "email": "メールアドレス",
+        "username": "ユーザー名",
+        "locale": "お客様の言語",
+        "localeVi": "ベトナム語",
+        "localeJa": "日本語",
+        "customerBranch": "お客様の店舗",
+        "customerCredentialsInvalid": "有効なメールアドレスと、英数字・ドット・アンダースコアの3～60文字のユーザー名を入力してください。",
         "branches": "アクセス可能な店舗",
         "branchesLoading": "店舗を読み込み中…",
         "branchesLoadFailed": "店舗を読み込めません。",
@@ -863,6 +880,8 @@
         "addonService": "追加オプション",
         "addonGroup": "オプショングループコード",
         "nameJa": "日本語名",
+        "warrantyDays": "保証日数",
+        "warrantyHint": "保証なしは0を入力してください。支払い後に終了日が自動計算されます。",
         "categoryPlaceholder": "— カテゴリーを選択 —",
         "categoriesLoading": "カテゴリーを読み込み中…",
         "categoriesEmpty": "カテゴリーがありません。メニューを追加する前にカテゴリーを作成してください。"

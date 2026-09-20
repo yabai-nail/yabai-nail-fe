@@ -359,6 +359,16 @@
         "total": "Tổng tiền",
         "code": "Mã đặt lịch",
         "note": "Ghi chú của khách"
+      },
+      "warranty": {
+        "accessibilityLabel": "Thông tin bảo hành dịch vụ {service}",
+        "heading": "Đã kích hoạt bảo hành dịch vụ",
+        "intro": "Tự động lưu khi hoàn tất thanh toán.",
+        "service": "Dịch vụ chính",
+        "duration": "Thời hạn bảo hành",
+        "days": "{count} ngày",
+        "period": "Thời gian bảo hành",
+        "marketing": "Cảm ơn bạn đã tin chọn YABAI NAIL. Trong thời gian bảo hành, nếu bộ nail cần kiểm tra hoặc chỉnh sửa, hãy nhắn salon tại đây để được hỗ trợ nhanh chóng."
       }
     },
     "nailDesigns": {
@@ -810,6 +820,13 @@
         "statusLabel": "Trạng thái tài khoản",
         "tempPassword": "Mật khẩu tạm",
         "tempPasswordPlaceholder": "Ít nhất 8 ký tự, có A-z và số",
+        "email": "Email",
+        "username": "Tên đăng nhập",
+        "locale": "Ngôn ngữ của khách",
+        "localeVi": "Tiếng Việt",
+        "localeJa": "Tiếng Nhật",
+        "customerBranch": "Chi nhánh quản lý khách",
+        "customerCredentialsInvalid": "Email phải hợp lệ; tên đăng nhập từ 3–60 ký tự, chỉ gồm chữ, số, dấu chấm hoặc gạch dưới.",
         "branches": "Chi nhánh được phép truy cập",
         "branchesLoading": "Đang tải chi nhánh…",
         "branchesLoadFailed": "Không tải được chi nhánh.",
@@ -863,6 +880,8 @@
         "addonService": "Dịch vụ bổ sung",
         "addonGroup": "Mã nhóm tùy chọn",
         "nameJa": "Tên tiếng Nhật",
+        "warrantyDays": "Bảo hành (ngày)",
+        "warrantyHint": "Nhập 0 nếu không bảo hành. Ngày kết thúc sẽ tự tính sau khi thanh toán.",
         "categoryPlaceholder": "— Chọn danh mục —",
         "categoriesLoading": "Đang tải danh mục…",
         "categoriesEmpty": "Chưa có danh mục nào. Hãy tạo danh mục trước khi thêm dịch vụ."

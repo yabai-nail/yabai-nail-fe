@@ -37,6 +37,7 @@ export function ServiceCreateModal({
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("60");
+  const [warrantyDays, setWarrantyDays] = useState("0");
   const [description, setDescription] = useState("");
   const [bookableStandalone, setBookableStandalone] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -64,6 +65,7 @@ export function ServiceCreateModal({
 
   const priceNum = Number(price.replace(/\D/g, ""));
   const durationNum = Number(duration);
+  const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
@@ -76,6 +78,7 @@ export function ServiceCreateModal({
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     priceNum > 0 &&
     durationNum > 0 &&
+    Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
     // A branch override the backend would refuse must stop the submit here: past this point
     // the service is already created, so the refusal would arrive too late to undo.
@@ -99,6 +102,7 @@ export function ServiceCreateModal({
         ...(serviceType === "BASE" ? { categoryId } : {}),
         price: priceNum,
         durationMinutes: durationNum,
+        warrantyDays: warrantyDaysNum,
         ...(uploadedMediaId ? { imageMediaId: uploadedMediaId } : {}),
         status: isVisible ? "ACTIVE" : "INACTIVE",
         isFeatured: serviceType === "BASE" && isFeatured,
@@ -238,6 +242,19 @@ export function ServiceCreateModal({
                     value={duration}
                     onChange={(event) => setDuration(event.target.value)}
                   />
+                </label>
+                <label className="flex flex-col gap-2 text-sm">
+                  <span className="font-semibold text-admin-ink">{t("form.warrantyDays")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={3650}
+                    step={1}
+                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                    value={warrantyDays}
+                    onChange={(event) => setWarrantyDays(event.target.value)}
+                  />
+                  <span className="text-xs text-admin-muted">{t("form.warrantyHint")}</span>
                 </label>
               </div>
               <label className="flex flex-col gap-2 text-sm sm:col-span-2">

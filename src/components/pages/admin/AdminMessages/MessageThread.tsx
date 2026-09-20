@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 import { BookingConfirmationCard } from "./BookingConfirmationCard";
+import { WarrantyNoticeCard } from "./WarrantyNoticeCard";
 import { groupThread } from "./thread";
 import { useAdminPermission } from "@/service";
 
@@ -44,6 +45,9 @@ function Bubble({
 }: Readonly<{ message: ChatMessage; isLast: boolean }>) {
   if (message.kind === "booking-confirmation") {
     return <BookingConfirmationCard booking={message.booking} />;
+  }
+  if (message.kind === "warranty-notice") {
+    return <WarrantyNoticeCard warranty={message.warranty} />;
   }
   const fromSalon = message.sender === "salon";
   const tail = fromSalon

@@ -359,6 +359,16 @@
         "total": "Total",
         "code": "Booking code",
         "note": "Customer note"
+      },
+      "warranty": {
+        "accessibilityLabel": "Warranty details for {service}",
+        "heading": "Service warranty activated",
+        "intro": "Saved automatically when payment was completed.",
+        "service": "Main service",
+        "duration": "Warranty duration",
+        "days": "{count} days",
+        "period": "Warranty period",
+        "marketing": "Thank you for choosing YABAI NAIL. If your nails need checking or adjustment during this period, message the salon here for prompt support."
       }
     },
     "nailDesigns": {
@@ -810,6 +820,13 @@
         "statusLabel": "Account status",
         "tempPassword": "Temporary password",
         "tempPasswordPlaceholder": "At least 8 characters, with letters and numbers",
+        "email": "Email",
+        "username": "Username",
+        "locale": "Customer language",
+        "localeVi": "Vietnamese",
+        "localeJa": "Japanese",
+        "customerBranch": "Customer's salon branch",
+        "customerCredentialsInvalid": "Enter a valid email and a 3â€“60 character username using letters, numbers, dots or underscores.",
         "branches": "Accessible branches",
         "branchesLoading": "Loading branches…",
         "branchesLoadFailed": "Could not load branches.",
@@ -863,6 +880,8 @@
         "addonService": "Add-on service",
         "addonGroup": "Option group code",
         "nameJa": "Japanese name",
+        "warrantyDays": "Warranty (days)",
+        "warrantyHint": "Enter 0 for no warranty. The end date is calculated automatically after payment.",
         "categoryPlaceholder": "— Select a category —",
         "categoriesLoading": "Loading categories…",
         "categoriesEmpty": "There are no categories yet. Create one before adding a service."
