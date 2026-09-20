@@ -2027,6 +2027,8 @@
         "totalSpend": "Total spend",
         "time": "Time",
         "timeValue": "{start} - {end} ({minutes} min)",
+        "services": "Services ({count})",
+        "serviceDuration": "{minutes} min",
         "date": "Date",
         "service": "Service",
         "staff": "Staff",

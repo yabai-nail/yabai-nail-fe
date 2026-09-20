@@ -2037,6 +2037,8 @@
         "totalSpend": "Tổng chi tiêu",
         "time": "Thời gian",
         "timeValue": "{start} - {end} ({minutes} phút)",
+        "services": "Dịch vụ ({count})",
+        "serviceDuration": "{minutes} phút",
         "date": "Ngày",
         "service": "Dịch vụ",
         "staff": "Nhân viên",

@@ -2019,6 +2019,8 @@
         "totalSpend": "累計利用額",
         "time": "時間",
         "timeValue": "{start} - {end}（{minutes}分）",
+        "services": "サービス ({count})",
+        "serviceDuration": "{minutes}分",
         "date": "日付",
         "service": "メニュー",
         "staff": "スタッフ",
