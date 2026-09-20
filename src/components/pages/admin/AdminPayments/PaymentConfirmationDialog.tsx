@@ -5,14 +5,11 @@ import { formatMoney } from "@/lib/admin-format";
 import { paymentMethodLabel, type CheckoutInvoice } from "./data";
 import { calculateCashTenderState, type PaymentTotals } from "./payment-state";
 
-const inputClassName = "min-h-11 w-full rounded-lg border border-admin-border bg-admin-surface px-3 text-sm text-admin-ink outline-none focus:border-admin-accent focus:ring-2 focus:ring-admin-accent/20";
-
-export function PaymentConfirmationDialog({ invoice, totals, cashTendered, isServerBacked, onCashTenderedChange, onClose, onConfirm }: Readonly<{
+export function PaymentConfirmationDialog({ invoice, totals, cashTendered, isServerBacked, onClose, onConfirm }: Readonly<{
   invoice: CheckoutInvoice;
   totals: PaymentTotals;
   cashTendered: string;
   isServerBacked: boolean;
-  onCashTenderedChange: (value: string) => void;
   onClose: () => void;
   onConfirm: (cashTendered: number | null) => void;
 }>) {
@@ -35,22 +32,8 @@ export function PaymentConfirmationDialog({ invoice, totals, cashTendered, isSer
               <p>{t.rich("confirm.amount", { amount: formatMoney(totals.grandTotal), strong: (chunks) => <strong className="text-admin-accent">{chunks}</strong> })}</p>
               <p>{t.rich("confirm.method", { method: invoice.paymentMethod ? paymentMethodLabel(invoice.paymentMethod, tMethod) : t("invoice.methodNotChosen"), strong: (chunks) => <strong className="text-admin-ink">{chunks}</strong> })}</p>
               {isCash && totals.grandTotal > 0 ? (
-                <div className="space-y-2 rounded-lg border border-admin-border bg-admin-soft p-3">
-                  <label htmlFor="cash-tendered" className="block text-xs font-semibold text-admin-ink">{t("confirm.cashTendered")}</label>
-                  <input
-                    id="cash-tendered"
-                    className={inputClassName}
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={cashTendered}
-                    onChange={(event) => onCashTenderedChange(event.target.value)}
-                    aria-describedby="cash-tender-feedback"
-                    aria-invalid={Boolean(cash.error)}
-                    autoFocus
-                  />
-                  <p id="cash-tender-feedback" aria-live="polite" className={cash.error ? "text-xs text-admin-danger" : "text-xs font-semibold text-admin-accent"}>
-                    {cash.error ? t(cash.error) : t("confirm.cashChange", { amount: formatMoney(cash.cashChange ?? 0) })}
-                  </p>
+                <div className="rounded-lg border border-admin-border bg-admin-soft p-3 text-sm font-semibold text-admin-ink">
+                  {t("cashResult", { tendered: formatMoney(cash.cashTendered ?? 0), change: formatMoney(cash.cashChange ?? 0) })}
                 </div>
               ) : null}
               <p className="rounded-lg bg-admin-soft p-3 text-xs">{isServerBacked ? t("confirm.serverNote") : t("confirm.localNote")}</p>

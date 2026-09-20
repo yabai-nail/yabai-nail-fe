@@ -2292,6 +2292,7 @@
         "amount": "Số tiền: <strong>{amount}</strong>",
         "method": "Phương thức: <strong>{method}</strong>",
         "cashTendered": "Tiền khách đưa (¥)",
+        "cashChangeLabel": "Tiền thối",
         "cashChange": "Tiền thối: {amount}",
         "serverNote": "Thao tác này ghi nhận giao dịch thật và không thể hoàn tác từ màn này.",
         "localNote": "Hóa đơn chưa gắn với lịch hẹn thật nên sẽ không có giao dịch nào được ghi.",
