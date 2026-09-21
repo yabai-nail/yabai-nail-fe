@@ -55,6 +55,7 @@ export function MonthPicker({
     <Popover isOpen={open} onOpenChange={handleOpenChange}>
       <Button
         variant="outline"
+        onPress={() => handleOpenChange(!open)}
         aria-label={ariaLabel ?? triggerLabel}
         className={[
           "min-h-10 justify-center gap-2 rounded-lg border-admin-border bg-admin-surface px-3 text-sm font-semibold capitalize text-admin-ink",

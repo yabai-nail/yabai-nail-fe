@@ -81,6 +81,7 @@ export function AdminDateField({
       <Button
         id={id}
         variant="outline"
+        onPress={() => handleOpenChange(!open)}
         aria-label={ariaLabel}
         aria-invalid={isInvalid || undefined}
         aria-describedby={describedBy}

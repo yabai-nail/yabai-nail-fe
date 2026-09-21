@@ -56,7 +56,7 @@ export function AdminAvatarZoom({
           <Modal.Backdrop>
             <Modal.Container size="md" placement="center">
               <Modal.Dialog>
-                <Modal.Header className="flex items-center justify-between border-b border-admin-border px-5 py-3">
+                <Modal.Header className="flex flex-row items-center justify-between border-b border-admin-border px-5 py-3">
                   <Modal.Heading className="truncate text-sm font-bold text-admin-ink">{name}</Modal.Heading>
                   <button
                     type="button"

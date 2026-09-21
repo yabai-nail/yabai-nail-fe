@@ -79,6 +79,7 @@ export function AppointmentDatePicker({
     <Popover isOpen={open} onOpenChange={handleOpenChange}>
       <Button
         variant="outline"
+        onPress={() => handleOpenChange(!open)}
         aria-label={label}
         className="min-h-10 w-full min-w-0 justify-start gap-2 rounded-lg border-admin-border bg-admin-surface px-3 text-sm font-semibold text-admin-ink sm:w-auto"
       >
