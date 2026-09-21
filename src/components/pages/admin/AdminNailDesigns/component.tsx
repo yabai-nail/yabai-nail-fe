@@ -8,7 +8,7 @@ import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { useAdminNailDesignProposals, useAdminNailDesigns, useAuth, type AdminNailDesignProposal } from "@/service";
+import { useAdminNailDesignProposals, useAdminNailDesigns, useAuth, type AdminNailDesign, type AdminNailDesignProposal } from "@/service";
 import { DesignModal } from "./DesignModal";
 import { DesignDeleteModal } from "./DesignDeleteModal";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
@@ -19,6 +19,7 @@ import {
   designStatuses,
   filterDesigns,
   paginate,
+  upsertDesignInList,
   type DesignRow,
 } from "./data";
 
@@ -57,6 +58,10 @@ export function AdminNailDesignsComponent() {
   );
   const filtered = useMemo(() => filterDesigns(source, status, query), [source, status, query]);
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
+  const syncSavedDesign = async (saved: AdminNailDesign) => {
+    await mutate((current) => upsertDesignInList(current, saved), { revalidate: false });
+    void mutate();
+  };
 
   return (
     <AdminPageLayout>
@@ -143,8 +148,8 @@ export function AdminNailDesignsComponent() {
         </Card.Footer>
       </Card></> : <ProposalList data={proposals.data?.items ?? []} isLoading={proposals.isLoading} error={proposals.error} canReview={canReviewProposals} onReview={(proposal, decision) => setReviewing({ proposal, decision })} />}
 
-      {canManageCatalog && creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={() => void mutate()} /> : null}
-      {canManageCatalog && editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={() => void mutate()} /> : null}
+      {canManageCatalog && creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={syncSavedDesign} /> : null}
+      {canManageCatalog && editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={syncSavedDesign} /> : null}
       {canManageCatalog && deleting ? <DesignDeleteModal design={deleting} onClose={() => setDeleting(null)} onDeleted={() => void mutate()} /> : null}
       {canReviewProposals && reviewing ? <ProposalReviewModal proposal={reviewing.proposal} decision={reviewing.decision} onClose={() => setReviewing(null)} onSaved={() => { void proposals.mutate(); void mutate(); }} /> : null}
     </AdminPageLayout>

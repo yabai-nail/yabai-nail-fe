@@ -228,7 +228,7 @@ export function buildAddonGroups({
           addonServiceId: addon.id,
           sortOrder,
           branches: branches.map((branch) => {
-            const item = drafts[addon.id]?.branches[branch.id];
+            const item = drafts[addon.id]?.branches?.[branch.id];
             return {
               branchId: branch.id,
               enabled: item?.enabled ?? true,

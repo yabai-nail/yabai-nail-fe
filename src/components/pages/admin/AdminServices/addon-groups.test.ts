@@ -28,6 +28,45 @@ const branch = (id: string, name = id): AdminBranch =>
 
 const branches = [branch("b1"), branch("b2")];
 
+describe("buildAddonGroups with an add-on selected before branches load", () => {
+  it("uses default branch values when the selected draft has no branch map yet", () => {
+    const incompleteDrafts = {
+      a1: { selected: true },
+    } as unknown as Record<string, AddonDraft>;
+
+    expect(
+      buildAddonGroups({
+        addonCatalog: [addon("a1", "NAIL_REMOVAL")],
+        branches: [branch("branch-uuid")],
+        groups: [],
+        drafts: incompleteDrafts,
+      }),
+    ).toEqual([
+      {
+        code: "NAIL_REMOVAL",
+        selectionMode: "SINGLE",
+        required: false,
+        minSelections: 0,
+        maxSelections: 1,
+        items: [
+          {
+            addonServiceId: "a1",
+            sortOrder: 0,
+            branches: [
+              {
+                branchId: "branch-uuid",
+                enabled: true,
+                priceOverride: null,
+                durationOverride: null,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+});
+
 describe("groupAddonCatalog", () => {
   it("groups by the add-on's own group code and falls back to OTHER", () => {
     const grouped = groupAddonCatalog([

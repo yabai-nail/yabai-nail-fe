@@ -59,7 +59,7 @@ export function useAddonDrafts(source: AddonSource) {
           ...current[addonId],
           branches: {
             ...current[addonId]?.branches,
-            [branchId]: { ...current[addonId]?.branches[branchId], ...patch },
+            [branchId]: { ...current[addonId]?.branches?.[branchId], ...patch },
           },
         },
       }));

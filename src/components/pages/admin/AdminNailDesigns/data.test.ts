@@ -5,6 +5,7 @@ import {
   designStatuses,
   filterDesigns,
   paginate,
+  upsertDesignInList,
 } from "./data";
 
 describe("nail design derivation", () => {
@@ -24,6 +25,24 @@ describe("nail design derivation", () => {
 
   it("maps a legacy missing price to null", () => {
     expect(adaptDesign({ id: "d2", title: "Legacy", status: "DRAFT", version: 1 }).indicativePrice).toBeNull();
+  });
+
+  it("updates the cached price immediately while preserving zero and an omitted price", () => {
+    const current = {
+      items: [
+        { id: "d1", title: "Priced", indicativePrice: 12000, status: "DRAFT", version: 1 },
+        { id: "d2", title: "Zero", indicativePrice: 0, status: "DRAFT", version: 1 },
+      ],
+    };
+
+    const cleared = upsertDesignInList(current, {
+      ...current.items[0],
+      indicativePrice: null,
+      version: 2,
+    });
+
+    expect(cleared?.items[0]).toMatchObject({ id: "d1", indicativePrice: null, version: 2 });
+    expect(cleared?.items[1]).toMatchObject({ id: "d2", indicativePrice: 0 });
   });
 
   it("paginates and rejects invalid page size", () => {

@@ -5,7 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
-import { adminMediaService, adminService } from "@/service";
+import { adminMediaService, adminService, type AdminNailDesign } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
@@ -22,7 +22,7 @@ export function DesignModal({
 }: Readonly<{
   design: DesignRow | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (saved: AdminNailDesign) => Promise<void>;
 }>) {
   const t = useTranslations("admin.nailDesigns");
   const statusLabel = (code: string) =>
@@ -66,8 +66,8 @@ export function DesignModal({
     try {
       if (imageFile) uploadedMediaId = await adminMediaService.uploadFile(imageFile);
       const mediaIds = uploadedMediaId ? [uploadedMediaId] : design?.mediaIds;
-      if (isEdit && design) {
-        await adminService.updateNailDesign(
+      const saved = isEdit && design
+        ? await adminService.updateNailDesign(
           design.id,
           // The backend names this `title`; `name` was never read, so the
           // request failed validation with an empty title every time.
@@ -80,18 +80,16 @@ export function DesignModal({
             ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
           },
           design.version,
-        );
-      } else {
-        await adminService.createNailDesign({
+        )
+        : await adminService.createNailDesign({
           title: name.trim(),
           indicativePrice: parsedPrice!,
           status,
           ...(mediaIds ? { mediaIds } : {}),
           ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
         });
-      }
       notifySuccess(isEdit ? t("modal.updated") : t("modal.created"));
-      onSaved();
+      await onSaved(saved);
       onClose();
     } catch (err) {
       if (uploadedMediaId) {

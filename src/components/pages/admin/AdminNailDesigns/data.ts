@@ -1,4 +1,4 @@
-import type { AdminNailDesign } from "@/service";
+import type { AdminNailDesign, BackendList } from "@/service";
 import { matchesSearch } from "@/lib/admin-search";
 
 export type DesignRow = {
@@ -24,6 +24,19 @@ export function adaptDesign(design: AdminNailDesign): DesignRow {
     thumbnailUrl: design.thumbnailUrl ?? design.images?.[0] ?? null,
     indicativePrice: typeof design.indicativePrice === "number" ? design.indicativePrice : null,
   };
+}
+
+/** Apply the mutation response immediately while SWR revalidates in the background. */
+export function upsertDesignInList(
+  current: BackendList<AdminNailDesign> | undefined,
+  saved: AdminNailDesign,
+): BackendList<AdminNailDesign> | undefined {
+  if (!current) return current;
+  const existingIndex = current.items.findIndex((design) => design.id === saved.id);
+  const items = existingIndex === -1
+    ? [saved, ...current.items]
+    : current.items.map((design) => design.id === saved.id ? saved : design);
+  return { ...current, items };
 }
 
 export const designFixtures: ReadonlyArray<DesignRow> = [
