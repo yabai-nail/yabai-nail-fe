@@ -15,6 +15,7 @@ import {
   validateServiceImage,
   type ServiceImageChange,
 } from "./service-image";
+import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
 
 // Mirror of ServiceCreateModal, plus PATCH with If-Match so we don't clobber a concurrent
 // edit. Moving a service between categories happens here: the API assigns whichever category
@@ -43,6 +44,7 @@ export function ServiceEditModal({
   const [warrantyDays, setWarrantyDays] = useState(String(service.warrantyDays ?? 0));
   const [description, setDescription] = useState(service.description ?? "");
   const [bookableStandalone, setBookableStandalone] = useState(Boolean(service.bookableStandalone));
+  const [representsNoSelection, setRepresentsNoSelection] = useState(Boolean(service.representsNoSelection));
   const [imageMode, setImageMode] = useState<"keep" | "remove" | "replace">("keep");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -63,8 +65,8 @@ export function ServiceEditModal({
   // the form freezes and the button retries only the add-on step against the saved service.
   const [saved, setSaved] = useState<AdminServiceItem | null>(null);
 
-  const priceNum = Number(price.replace(/\D/g, ""));
-  const durationNum = Number(duration);
+  const priceNum = parseCatalogInteger(price);
+  const durationNum = parseCatalogInteger(duration);
   const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
     return () => {
@@ -85,8 +87,8 @@ export function ServiceEditModal({
     name.trim().length >= 2 &&
     (serviceType === "ADD_ON" || categoryId !== "") &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
-    priceNum > 0 &&
-    durationNum > 0 &&
+    isValidServiceAmount(priceNum, serviceType) &&
+    isValidServiceAmount(durationNum, serviceType) &&
     Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
     (imageMode !== "replace" || imageFile !== null) &&
@@ -114,11 +116,12 @@ export function ServiceEditModal({
           nameJa: nameJa.trim(),
           description: description.trim(),
           bookableStandalone: serviceType === "ADD_ON" && bookableStandalone,
+          representsNoSelection: serviceType === "ADD_ON" && representsNoSelection,
           serviceType,
           addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
           ...(serviceType === "BASE" ? { categoryId } : {}),
-          price: priceNum,
-          durationMinutes: durationNum,
+          price: priceNum!,
+          durationMinutes: durationNum!,
           warrantyDays: warrantyDaysNum,
           isFeatured: serviceType === "BASE" && isFeatured,
           status: isVisible ? "ACTIVE" : "INACTIVE",
@@ -214,7 +217,7 @@ export function ServiceEditModal({
                   <option value="ADD_ON">{t("form.addonService")}</option>
                 </select>
               </label>
-              {serviceType === "BASE" ? <label className="flex flex-col gap-2 text-sm">
+              <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("create.name")}</span>
                 <input
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -222,8 +225,9 @@ export function ServiceEditModal({
                   onChange={(event) => setName(event.target.value)}
                   autoFocus
                 />
-              </label> : <label className="flex flex-col gap-2 text-sm"><span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span><input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} /></label>}
-              <label className="flex flex-col gap-2 text-sm">
+              </label>
+              {serviceType === "ADD_ON" ? <label className="flex flex-col gap-2 text-sm sm:col-span-2"><span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span><input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} /></label> : null}
+              {serviceType === "BASE" ? <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("form.category")}</span>
                 <select
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -238,7 +242,7 @@ export function ServiceEditModal({
                   ))}
                 </select>
                 {categories.isLoading ? <span className="text-xs text-admin-muted">{t("form.categoriesLoading")}</span> : null}
-              </label>
+              </label> : null}
               <div className="contents">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("create.price")}</span>
@@ -253,7 +257,7 @@ export function ServiceEditModal({
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
-                    min={1}
+                    min={serviceType === "ADD_ON" ? 0 : 1}
                     step={1}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={duration}
@@ -293,7 +297,8 @@ export function ServiceEditModal({
                 />
               </label>
               {serviceType === "ADD_ON" ? (
-                <label className="flex items-start gap-2 text-sm sm:col-span-2">
+                <div className="grid gap-3 sm:col-span-2">
+                <label className="flex items-start gap-2 text-sm">
                   <input
                     type="checkbox"
                     className="mt-1 accent-admin-accent"
@@ -305,6 +310,19 @@ export function ServiceEditModal({
                     <span className="mt-1 block text-xs text-admin-muted">{t("form.bookableStandaloneHint")}</span>
                   </span>
                 </label>
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1 accent-admin-accent"
+                    checked={representsNoSelection}
+                    onChange={(event) => setRepresentsNoSelection(event.target.checked)}
+                  />
+                  <span>
+                    <span className="font-semibold text-admin-ink">{t("form.representsNoSelection")}</span>
+                    <span className="mt-1 block text-xs text-admin-muted">{t("form.representsNoSelectionHint")}</span>
+                  </span>
+                </label>
+                </div>
               ) : null}
               </div>
               <section className="flex flex-col gap-3 rounded-xl border border-admin-border bg-admin-soft p-4 text-sm">

@@ -109,6 +109,7 @@ const CATALOG_OPERATION_IDS = [
   "GET /api/v1/admin/service-categories",
   "POST /api/v1/admin/service-categories",
   "PATCH /api/v1/admin/service-categories/{categoryId}",
+  "DELETE /api/v1/admin/service-categories/{categoryId}",
   "POST /api/v1/admin/service-categories/reorder",
   "GET /api/v1/admin/surcharges",
   "POST /api/v1/admin/surcharges",
@@ -383,6 +384,7 @@ describe("adminService catalog surface", () => {
       adminService.serviceCategories,
       adminService.createServiceCategory,
       adminService.updateServiceCategory,
+      adminService.deleteServiceCategory,
       adminService.reorderServiceCategories,
       adminService.surcharges,
       adminService.createSurcharge,
@@ -398,6 +400,15 @@ describe("adminService catalog surface", () => {
     expect(executeApiOperation).toHaveBeenLastCalledWith(
       "DELETE /api/v1/admin/services/{serviceId}",
       { path: { serviceId: "service-a" }, version: 7 },
+    );
+  });
+
+  it("deletes an empty service category with optimistic concurrency", async () => {
+    await adminService.deleteServiceCategory("category-a", 4);
+
+    expect(executeApiOperation).toHaveBeenLastCalledWith(
+      "DELETE /api/v1/admin/service-categories/{categoryId}",
+      { path: { categoryId: "category-a" }, version: 4 },
     );
   });
 });

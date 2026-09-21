@@ -57,6 +57,7 @@ function toScreenService(server: ServerService): SalonService {
     serviceType: server.serviceType ?? "BASE",
     addonGroup: server.addonGroup ?? null,
     bookableStandalone: server.bookableStandalone ?? false,
+    representsNoSelection: server.representsNoSelection ?? false,
     version: server.version,
   };
 }

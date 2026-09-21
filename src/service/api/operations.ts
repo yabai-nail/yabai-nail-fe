@@ -93,6 +93,7 @@ GET /api/v1/admin/reports/staff-performance
 GET /api/v1/admin/service-categories
 POST /api/v1/admin/service-categories
 PATCH /api/v1/admin/service-categories/{categoryId}
+DELETE /api/v1/admin/service-categories/{categoryId}
 POST /api/v1/admin/service-categories/reorder
 GET /api/v1/admin/services
 POST /api/v1/admin/services

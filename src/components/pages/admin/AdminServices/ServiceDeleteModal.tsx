@@ -39,9 +39,7 @@ export function ServiceDeleteModal({
       onClose();
     } catch (thrown) {
       setError(
-        thrown instanceof ApiClientError && thrown.code === "SERVICE_HAS_BOOKING_HISTORY"
-          ? t("delete.hasHistory")
-          : thrown instanceof ApiClientError
+        thrown instanceof ApiClientError
             ? t("delete.failedWithDetails", { details: serviceDeleteErrorDetails(thrown) })
             : t("delete.failed"),
       );

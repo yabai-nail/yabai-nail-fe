@@ -24,6 +24,7 @@ export type SalonService = {
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
+  readonly representsNoSelection?: boolean;
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bars3Icon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Switch } from "@heroui/react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { adminService, useAdminBranchList, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import { CategoryEditor } from "./CategoryEditor";
+import { CategoryDeleteModal } from "./CategoryDeleteModal";
 import { filterCategories, moveCategory } from "./categories";
 import { paginate, type SalonService } from "./data";
 
@@ -28,6 +29,7 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<AdminServiceCategory | null>(null);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<AdminServiceCategory | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
@@ -39,7 +41,10 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
   // move a row against positions the screen is not showing.
   const canReorder = canWrite && query.trim() === "";
   const absoluteIndexOf = (category: AdminServiceCategory) => ordered.findIndex((row) => row.id === category.id);
-  const countIn = (categoryId: string) => services.filter((service) => service.category?.id === categoryId).length;
+  const countIn = (category: AdminServiceCategory) => Math.max(
+    category.serviceIds.length,
+    services.filter((service) => service.category?.id === category.id).length,
+  );
   // Naming all four branches says no more than "Tất cả" does, and it cost half the table width.
   // Past two names the count carries the meaning; the full list stays in the tooltip.
   const branchLabel = (scope: ReadonlyArray<string>) => {
@@ -156,7 +161,7 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
                       <td className="whitespace-nowrap px-3 py-2 text-admin-muted" title={branchTitle(scope)}>
                         {branchLabel(scope)}
                       </td>
-                      <td className="px-3 py-2 tabular-nums">{countIn(category.id)}</td>
+                      <td className="px-3 py-2 tabular-nums">{countIn(category)}</td>
                       <td className="px-3 py-2">
                         <Switch
                           isSelected={category.status === "ACTIVE"}
@@ -187,9 +192,14 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
                         </Switch>
                       </td>
                       <td className="px-3 py-2">
-                        <Button isIconOnly size="sm" variant="ghost" isDisabled={!canWrite} aria-label={t("editLabel", { name: category.name })} onPress={() => setEditing(category)}>
-                          <PencilSquareIcon className="size-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button isIconOnly size="sm" variant="ghost" isDisabled={!canWrite} aria-label={t("editLabel", { name: category.name })} onPress={() => setEditing(category)}>
+                            <PencilSquareIcon className="size-4" />
+                          </Button>
+                          <Button isIconOnly size="sm" variant="ghost" className="text-admin-danger" isDisabled={!canWrite} aria-label={t("deleteLabel", { name: category.name })} onPress={() => setDeleting(category)}>
+                            <TrashIcon className="size-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -219,6 +229,14 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
           services={services}
           onClose={() => { setCreating(false); setEditing(null); }}
           onSaved={() => void categories.mutate()}
+        />
+      ) : null}
+      {canWrite && deleting ? (
+        <CategoryDeleteModal
+          category={deleting}
+          serviceCount={countIn(deleting)}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => void categories.mutate()}
         />
       ) : null}
     </>

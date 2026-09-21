@@ -13,6 +13,7 @@ import { DesignModal } from "./DesignModal";
 import { DesignDeleteModal } from "./DesignDeleteModal";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
 import { ProposalReviewModal } from "./ProposalReviewModal";
+import { formatMoney } from "@/lib/admin-format";
 import {
   adaptDesign,
   designStatuses,
@@ -95,13 +96,14 @@ export function AdminNailDesignsComponent() {
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
                 <th className="px-4 py-3">{t("columns.design")}</th>
+                <th className="px-4 py-3">{t("columns.price")}</th>
                 <th className="px-4 py-3">{t("statusLabel")}</th>
                 <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 ? (
-                <tr><td colSpan={3} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
+                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
@@ -110,6 +112,9 @@ export function AdminNailDesignsComponent() {
                         <AdminNailDesignThumbnail imageUrl={row.thumbnailUrl} mediaId={row.mediaIds[0]} alt={row.title} />
                         <span className="font-medium text-admin-ink">{row.title}</span>
                       </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-admin-ink">
+                      {row.indicativePrice === null ? t("priceMissing") : formatMoney(row.indicativePrice)}
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">

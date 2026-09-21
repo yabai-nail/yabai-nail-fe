@@ -10,6 +10,7 @@ import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
+import { parseIndicativePrice } from "./design-price";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED", "HIDDEN"];
@@ -29,6 +30,7 @@ export function DesignModal({
   const isEdit = design !== null;
   const [name, setName] = useState(design?.title ?? "");
   const [status, setStatus] = useState(design?.status ?? "DRAFT");
+  const [indicativePrice, setIndicativePrice] = useState(design?.indicativePrice === null || design?.indicativePrice === undefined ? "" : String(design.indicativePrice));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -53,7 +55,8 @@ export function DesignModal({
     setImagePreviewUrl(nextError ? null : URL.createObjectURL(file));
   };
 
-  const canSubmit = name.trim().length >= 2 && !imageError && !busy;
+  const parsedPrice = parseIndicativePrice(indicativePrice);
+  const canSubmit = name.trim().length >= 2 && parsedPrice !== undefined && !imageError && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -71,6 +74,7 @@ export function DesignModal({
           // Publishing additionally needs explicit consent.
           {
             title: name.trim(),
+            indicativePrice: parsedPrice!,
             status,
             ...(mediaIds ? { mediaIds } : {}),
             ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
@@ -80,6 +84,7 @@ export function DesignModal({
       } else {
         await adminService.createNailDesign({
           title: name.trim(),
+          indicativePrice: parsedPrice!,
           status,
           ...(mediaIds ? { mediaIds } : {}),
           ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
@@ -116,6 +121,20 @@ export function DesignModal({
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("modal.name")}</span>
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("modal.namePlaceholder")} autoFocus />
+              </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("modal.indicativePrice")}</span>
+                <input
+                  inputMode="numeric"
+                  className={inputClass}
+                  value={indicativePrice}
+                  onChange={(event) => setIndicativePrice(event.target.value)}
+                  placeholder={t("modal.indicativePricePlaceholder")}
+                  aria-invalid={parsedPrice === undefined}
+                />
+                <span className={parsedPrice === undefined ? "text-xs text-admin-danger" : "text-xs text-admin-muted"}>
+                  {t(parsedPrice === undefined ? "modal.indicativePriceInvalid" : "modal.indicativePriceHint")}
+                </span>
               </label>
               <section className="space-y-3 rounded-xl border border-admin-border bg-admin-soft p-4">
                 <div className="flex items-center justify-between gap-3">

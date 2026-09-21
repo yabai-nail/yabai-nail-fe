@@ -154,6 +154,7 @@ export function ServiceAddonFields({
               <span className="font-semibold">{t("required")}</span>
             </label>
             <span className="text-xs text-admin-muted">{t(groupDrafts[code]?.required ? "requiredHint" : "optionalHint")}</span>
+            <span className="basis-full text-xs text-admin-muted">{t("selectionModeHint")}</span>
           </div>
           {addons.map((addon) => {
             const draft = drafts[addon.id];

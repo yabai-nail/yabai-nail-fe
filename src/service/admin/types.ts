@@ -109,6 +109,8 @@ export interface AdminServiceItem {
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
+  /** Marks the explicit customer choice that means no option from its add-on group. */
+  readonly representsNoSelection?: boolean;
   readonly active: boolean;
   readonly version: number;
 }
@@ -593,6 +595,7 @@ export interface AdminServiceItemDraft {
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
+  readonly representsNoSelection?: boolean;
   readonly [field: string]: unknown;
 }
 
@@ -611,6 +614,7 @@ export interface AdminServiceItemPatch {
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
+  readonly representsNoSelection?: boolean;
   readonly [field: string]: unknown;
 }
 
@@ -1094,6 +1098,8 @@ export interface AdminNailDesign {
   /** Stable public URLs for the photos, derived by the API from mediaIds; the first is the cover. */
   readonly images?: ReadonlyArray<string>;
   readonly thumbnailUrl?: string | null;
+  /** Optional whole-yen reference price shown with the design; it is not a booking quote. */
+  readonly indicativePrice?: number | null;
   readonly tags?: ReadonlyArray<string>;
   readonly visibility?: string;
   readonly consentToPublish?: boolean;
@@ -1104,6 +1110,7 @@ export interface AdminNailDesign {
 
 export interface AdminNailDesignDraft {
   readonly title: string;
+  readonly indicativePrice?: number | null;
   readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   /** Required by the backend before a design may be PUBLISHED. */
@@ -1113,6 +1120,7 @@ export interface AdminNailDesignDraft {
 
 export interface AdminNailDesignPatch {
   readonly title?: string;
+  readonly indicativePrice?: number | null;
   readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   readonly consentToPublish?: boolean;

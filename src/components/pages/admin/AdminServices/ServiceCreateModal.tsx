@@ -10,6 +10,7 @@ import { notifySuccess } from "@/lib/app-toast";
 import { validateServiceImage } from "./service-image";
 import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
+import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
 
 // Service creation is org-level (no branchId in the path). The category is required by the
 // API, not merely by this form: the column is NOT NULL, so a service with no category cannot
@@ -40,6 +41,7 @@ export function ServiceCreateModal({
   const [warrantyDays, setWarrantyDays] = useState("0");
   const [description, setDescription] = useState("");
   const [bookableStandalone, setBookableStandalone] = useState(false);
+  const [representsNoSelection, setRepresentsNoSelection] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -63,8 +65,8 @@ export function ServiceCreateModal({
   // step against this service instead.
   const [created, setCreated] = useState<AdminServiceItem | null>(null);
 
-  const priceNum = Number(price.replace(/\D/g, ""));
-  const durationNum = Number(duration);
+  const priceNum = parseCatalogInteger(price);
+  const durationNum = parseCatalogInteger(duration);
   const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
     return () => {
@@ -76,8 +78,8 @@ export function ServiceCreateModal({
     name.trim().length >= 2 &&
     (serviceType === "ADD_ON" || categoryId !== "") &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
-    priceNum > 0 &&
-    durationNum > 0 &&
+    isValidServiceAmount(priceNum, serviceType) &&
+    isValidServiceAmount(durationNum, serviceType) &&
     Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
     // A branch override the backend would refuse must stop the submit here: past this point
@@ -100,12 +102,13 @@ export function ServiceCreateModal({
         serviceType,
         addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
         ...(serviceType === "BASE" ? { categoryId } : {}),
-        price: priceNum,
-        durationMinutes: durationNum,
+        price: priceNum!,
+        durationMinutes: durationNum!,
         warrantyDays: warrantyDaysNum,
         ...(uploadedMediaId ? { imageMediaId: uploadedMediaId } : {}),
         status: isVisible ? "ACTIVE" : "INACTIVE",
         isFeatured: serviceType === "BASE" && isFeatured,
+        representsNoSelection: serviceType === "ADD_ON" && representsNoSelection,
       });
       // Refresh the list before the add-on step: the service is already real, and it has to
       // be visible behind the modal even if what follows fails.
@@ -236,7 +239,7 @@ export function ServiceCreateModal({
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
                     type="number"
-                    min={1}
+                    min={serviceType === "ADD_ON" ? 0 : 1}
                     step={1}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={duration}
@@ -268,7 +271,8 @@ export function ServiceCreateModal({
                 />
               </label>
               {serviceType === "ADD_ON" ? (
-                <label className="flex items-start gap-2 text-sm sm:col-span-2">
+                <div className="grid gap-3 sm:col-span-2">
+                <label className="flex items-start gap-2 text-sm">
                   <input
                     type="checkbox"
                     className="mt-1 accent-admin-accent"
@@ -280,6 +284,19 @@ export function ServiceCreateModal({
                     <span className="mt-1 block text-xs text-admin-muted">{t("form.bookableStandaloneHint")}</span>
                   </span>
                 </label>
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1 accent-admin-accent"
+                    checked={representsNoSelection}
+                    onChange={(event) => setRepresentsNoSelection(event.target.checked)}
+                  />
+                  <span>
+                    <span className="font-semibold text-admin-ink">{t("form.representsNoSelection")}</span>
+                    <span className="mt-1 block text-xs text-admin-muted">{t("form.representsNoSelectionHint")}</span>
+                  </span>
+                </label>
+                </div>
               ) : null}
               </div>
               <section className="flex flex-col gap-3 rounded-xl border border-admin-border bg-admin-soft p-4 text-sm">

@@ -46,14 +46,14 @@ const expectedFeatureOperationIds = [
 ] as const;
 
 describe("backend API operation catalog", () => {
-  it("maps all 166 canonical backend operations without duplicates", () => {
-    expect(apiOperations).toHaveLength(166);
+  it("maps all 167 canonical backend operations without duplicates", () => {
+    expect(apiOperations).toHaveLength(167);
     const keys = apiOperations.map(({ method, path }) => `${method} ${path}`);
-    expect(new Set(keys).size).toBe(166);
+    expect(new Set(keys).size).toBe(167);
   });
 
   it("classifies browser and server-only operations", () => {
-    expect(apiOperations.filter(({ audience }) => audience === "app")).toHaveLength(161);
+    expect(apiOperations.filter(({ audience }) => audience === "app")).toHaveLength(162);
     expect(apiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(5);
   });
 
@@ -68,11 +68,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(218);
+    expect(runtimeApiOperations).toHaveLength(219);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(218);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(209);
+    ).toBe(219);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(210);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);

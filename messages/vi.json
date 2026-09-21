@@ -402,9 +402,11 @@
       "loadFailed": "Không tải được danh sách mẫu nail.",
       "columns": {
         "design": "Mẫu",
+        "price": "Giá tham khảo",
         "status": "Trạng thái",
         "actions": "Thao tác"
       },
+      "priceMissing": "Chưa có giá",
       "empty": "Không có mẫu phù hợp.",
       "edit": "Sửa",
       "pagination": "Hiển thị {shown} trong tổng số {total} mẫu",
@@ -413,6 +415,10 @@
         "addTitle": "Thêm mẫu nail",
         "name": "Tên mẫu",
         "namePlaceholder": "Gradient hồng pastel",
+        "indicativePrice": "Giá tham khảo (¥)",
+        "indicativePricePlaceholder": "Ví dụ: 9000",
+        "indicativePriceHint": "Để trống nếu chưa có giá. Giá này chỉ hiển thị cùng mẫu, không thay đổi tiền đặt lịch.",
+        "indicativePriceInvalid": "Nhập số nguyên không âm, không dùng số lẻ.",
         "status": "Trạng thái",
         "statusLabel": "Trạng thái mẫu nail",
         "cancel": "Hủy",
@@ -875,6 +881,8 @@
         "description": "Mô tả",
         "bookableStandalone": "Cho đặt độc lập",
         "bookableStandaloneHint": "Khách có thể đặt riêng tùy chọn này, không cần chọn kèm dịch vụ gốc.",
+        "representsNoSelection": "Đây là lựa chọn “Không dùng tùy chọn”",
+        "representsNoSelectionHint": "Dùng cho lựa chọn như “Không phá móng”. App sẽ ghi nhận rõ lựa chọn này và không hiện thêm lựa chọn bỏ qua trùng nghĩa.",
         "serviceType": "Loại dịch vụ",
         "baseService": "Dịch vụ chính",
         "addonService": "Dịch vụ bổ sung",
@@ -928,8 +936,21 @@
         "enabledSuccess": "Đã bật danh mục", "disabledSuccess": "Đã tắt danh mục", "statusFailed": "Không đổi được trạng thái.",
         "searchLabel": "Tìm danh mục", "searchPlaceholder": "Tìm theo tên hoặc mã...", "add": "Thêm danh mục", "loadFailed": "Không tải được danh mục.", "caption": "Danh mục dịch vụ",
         "columns": { "order": "Thứ tự", "name": "Tên", "code": "Mã", "japanese": "Nhật ngữ", "branches": "Chi nhánh", "services": "Dịch vụ", "status": "Trạng thái", "actions": "Thao tác" },
-        "toggleLabel": "Bật hoặc tắt danh mục {name}", "enabled": "Bật", "disabled": "Tắt", "editLabel": "Sửa {name}",
+        "toggleLabel": "Bật hoặc tắt danh mục {name}", "enabled": "Bật", "disabled": "Tắt", "editLabel": "Sửa {name}", "deleteLabel": "Xóa {name}",
         "loading": "Đang tải danh mục…", "empty": "Chưa có danh mục nào. Thêm một danh mục để tạo được dịch vụ.", "noResults": "Không tìm thấy danh mục phù hợp.", "count": "{count} danh mục", "reorderHint": " · xoá ô tìm kiếm để đổi được thứ tự"
+      },
+      "categoryDelete": {
+        "title": "Xóa danh mục dịch vụ",
+        "confirm": "Bạn có chắc muốn xóa “{name}”? Thao tác này không thể hoàn tác.",
+        "hasServices": "Danh mục còn {count} dịch vụ. Hãy chuyển các dịch vụ sang danh mục khác trước khi xóa.",
+        "hasServicesServer": "Danh mục vẫn còn dịch vụ. Tải lại danh sách và chuyển hết dịch vụ trước khi xóa.",
+        "hint": "Tắt danh mục chỉ tạm ẩn; xóa sẽ loại danh mục khỏi hệ thống.",
+        "cancel": "Hủy",
+        "action": "Xóa danh mục",
+        "deleting": "Đang xóa…",
+        "success": "Đã xóa {name}",
+        "failed": "Không xóa được danh mục.",
+        "failedWithDetails": "Không xóa được danh mục: {details}"
       },
       "categoryEditor": {
         "editTitle": "Đổi tên danh mục",
@@ -1012,12 +1033,13 @@
       },
       "addons": {
         "title": "Tùy chọn bổ sung cho dịch vụ",
-        "description": "Chọn các tùy chọn khách có thể thêm, rồi bật hoặc ghi đè giá và thời lượng theo từng chi nhánh.",
+        "description": "Chọn các tùy chọn khách được thấy trên app, rồi bật hoặc ghi đè giá và thời lượng theo từng chi nhánh.",
         "loading": "Đang tải tùy chọn bổ sung…",
         "loadFailed": "Không tải được cấu hình tùy chọn bổ sung.",
         "empty": "Chưa có dịch vụ bổ sung. Hãy tạo dịch vụ loại “Dịch vụ bổ sung” trước.",
         "branchColumn": "Chi nhánh",
         "selectionMode": "Cách chọn",
+        "selectionModeHint": "Quy định cách khách chọn trên app; không tự chọn các ô tùy chọn bên dưới.",
         "selectionSingle": "Chọn một",
         "selectionMultiple": "Chọn nhiều",
         "required": "Bắt buộc chọn",
@@ -1032,14 +1054,14 @@
       "delete": {
         "title": "Xóa dịch vụ",
         "confirm": "Bạn có chắc muốn xóa “{name}”? Thao tác này không thể hoàn tác.",
-        "historyHint": "Dịch vụ đã có lịch sử đặt sẽ không bị xóa; hãy chuyển sang ẩn dịch vụ để giữ dữ liệu cũ.",
+        "historyHint": "Dịch vụ sẽ bị xóa khỏi danh mục và lượt đặt mới; lịch sử đã phát sinh vẫn được giữ để xem báo cáo.",
         "cancel": "Hủy",
         "action": "Xóa dịch vụ",
         "deleting": "Đang xóa…",
         "success": "Đã xóa {name}",
         "failed": "Không xóa được dịch vụ. Vui lòng tải lại và thử lại.",
         "failedWithDetails": "Không xóa được dịch vụ: {details}",
-        "hasHistory": "Dịch vụ đã có lịch sử đặt nên không thể xóa. Hãy chỉnh sửa và tắt “Công khai cho khách” thay thế."
+        "hasHistory": "Lịch sử sử dụng vẫn được giữ sau khi dịch vụ bị xóa khỏi danh mục."
       },
       "surcharge": {
         "heading": "Phụ thu",

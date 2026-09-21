@@ -18,8 +18,12 @@ describe("nail design derivation", () => {
   });
 
   it("adapts a backend design", () => {
-    const row = adaptDesign({ id: "d1", title: "X", status: "DRAFT", version: 2 });
-    expect(row).toMatchObject({ id: "d1", title: "X", status: "DRAFT", version: 2 });
+    const row = adaptDesign({ id: "d1", title: "X", indicativePrice: 0, status: "DRAFT", version: 2 });
+    expect(row).toMatchObject({ id: "d1", title: "X", indicativePrice: 0, status: "DRAFT", version: 2 });
+  });
+
+  it("maps a legacy missing price to null", () => {
+    expect(adaptDesign({ id: "d2", title: "Legacy", status: "DRAFT", version: 1 }).indicativePrice).toBeNull();
   });
 
   it("paginates and rejects invalid page size", () => {

@@ -402,9 +402,11 @@
       "loadFailed": "ネイルデザイン一覧を読み込めません。",
       "columns": {
         "design": "デザイン",
+        "price": "参考価格",
         "status": "ステータス",
         "actions": "操作"
       },
+      "priceMissing": "価格未設定",
       "empty": "該当するデザインがありません。",
       "edit": "編集",
       "pagination": "全 {total} 件中 {shown} 件を表示",
@@ -413,6 +415,10 @@
         "addTitle": "ネイルデザインを追加",
         "name": "デザイン名",
         "namePlaceholder": "パステルピンクのグラデーション",
+        "indicativePrice": "参考価格 (¥)",
+        "indicativePricePlaceholder": "例: 9000",
+        "indicativePriceHint": "価格未設定の場合は空欄にしてください。この表示価格は予約金額に反映されません。",
+        "indicativePriceInvalid": "0以上の整数を入力してください。",
         "status": "ステータス",
         "statusLabel": "ネイルデザインのステータス",
         "cancel": "キャンセル",
@@ -875,6 +881,8 @@
         "description": "説明",
         "bookableStandalone": "単独予約を許可",
         "bookableStandaloneHint": "ベースメニューを選ばずに、このオプションだけを予約できます。",
+        "representsNoSelection": "「オプションなし」を表す",
+        "representsNoSelectionHint": "「オフなし」など明示的に選ぶ項目に使用します。アプリでは選択内容を記録し、同じ意味のスキップ項目は重複表示しません。",
         "serviceType": "メニュー種別",
         "baseService": "基本メニュー",
         "addonService": "追加オプション",
@@ -928,8 +936,21 @@
         "enabledSuccess": "カテゴリーを有効にしました", "disabledSuccess": "カテゴリーを無効にしました", "statusFailed": "ステータスを変更できません。",
         "searchLabel": "カテゴリーを検索", "searchPlaceholder": "名前またはコードで検索...", "add": "カテゴリーを追加", "loadFailed": "カテゴリーを読み込めません。", "caption": "メニューのカテゴリー",
         "columns": { "order": "順番", "name": "名前", "code": "コード", "japanese": "日本語", "branches": "店舗", "services": "メニュー", "status": "ステータス", "actions": "操作" },
-        "toggleLabel": "カテゴリー {name} の有効・無効を切り替え", "enabled": "オン", "disabled": "オフ", "editLabel": "{name} を編集",
+        "toggleLabel": "カテゴリー {name} の有効・無効を切り替え", "enabled": "オン", "disabled": "オフ", "editLabel": "{name} を編集", "deleteLabel": "{name} を削除",
         "loading": "カテゴリーを読み込み中…", "empty": "カテゴリーがありません。メニューを作成する前に追加してください。", "noResults": "該当するカテゴリーがありません。", "count": "{count}カテゴリー", "reorderHint": " · 並べ替えるには検索をクリアしてください"
+      },
+      "categoryDelete": {
+        "title": "メニューカテゴリーを削除",
+        "confirm": "「{name}」を削除しますか？この操作は元に戻せません。",
+        "hasServices": "このカテゴリーにはまだ{count}件のメニューがあります。削除する前に別のカテゴリーへ移動してください。",
+        "hasServicesServer": "カテゴリーにメニューが残っています。一覧を再読み込みし、すべて移動してから削除してください。",
+        "hint": "カテゴリーをオフにすると一時的に非表示になり、削除するとシステムから取り除かれます。",
+        "cancel": "キャンセル",
+        "action": "カテゴリーを削除",
+        "deleting": "削除しています…",
+        "success": "{name} を削除しました",
+        "failed": "カテゴリーを削除できません。",
+        "failedWithDetails": "カテゴリーを削除できません: {details}"
       },
       "categoryEditor": {
         "editTitle": "カテゴリー名を変更",
@@ -1012,12 +1033,13 @@
       },
       "addons": {
         "title": "追加オプション設定",
-        "description": "追加できるオプションを選び、店舗ごとの提供可否・料金・所要時間を設定します。",
+        "description": "アプリでお客様に表示するオプションを選び、店舗ごとの提供可否・料金・所要時間を設定します。",
         "loading": "追加オプションを読み込み中…",
         "loadFailed": "追加オプション設定を読み込めません。",
         "empty": "追加オプションがありません。先に「追加オプション」を作成してください。",
         "branchColumn": "店舗",
         "selectionMode": "選択方法",
+        "selectionModeHint": "アプリでのお客様の選び方を設定します。下のオプション欄を自動選択する設定ではありません。",
         "selectionSingle": "1つ選ぶ",
         "selectionMultiple": "複数選べる",
         "required": "必須",
@@ -1032,14 +1054,14 @@
       "delete": {
         "title": "メニューを削除",
         "confirm": "「{name}」を削除しますか？この操作は元に戻せません。",
-        "historyHint": "予約履歴があるメニューは削除できません。過去データを残すには非表示にしてください。",
+        "historyHint": "メニューは一覧と新規予約から削除されます。既存の利用履歴はレポートのため保持されます。",
         "cancel": "キャンセル",
         "action": "メニューを削除",
         "deleting": "削除しています…",
         "success": "{name} を削除しました",
         "failed": "メニューを削除できません。再読み込みしてもう一度お試しください。",
         "failedWithDetails": "メニューを削除できません: {details}",
-        "hasHistory": "予約履歴があるため削除できません。編集画面で「お客様に公開」をオフにしてください。"
+        "hasHistory": "メニューを一覧から削除した後も利用履歴は保持されます。"
       },
       "surcharge": {
         "heading": "追加料金",

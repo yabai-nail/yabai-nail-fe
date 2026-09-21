@@ -415,6 +415,11 @@ export const adminService = {
       "PATCH /api/v1/admin/service-categories/{categoryId}",
       { path: { categoryId }, body: patch, version },
     ),
+  deleteServiceCategory: (categoryId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/service-categories/{categoryId}", {
+      path: { categoryId },
+      version,
+    }),
   reorderServiceCategories: (
     input: AdminServiceCategoryReorderInput,
     idempotencyKey?: string,

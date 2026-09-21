@@ -402,9 +402,11 @@
       "loadFailed": "Could not load the nail designs.",
       "columns": {
         "design": "Design",
+        "price": "Reference price",
         "status": "Status",
         "actions": "Actions"
       },
+      "priceMissing": "No price yet",
       "empty": "No matching designs.",
       "edit": "Edit",
       "pagination": "Showing {shown} of {total} designs",
@@ -413,6 +415,10 @@
         "addTitle": "Add nail design",
         "name": "Design name",
         "namePlaceholder": "Pastel pink gradient",
+        "indicativePrice": "Reference price (¥)",
+        "indicativePricePlaceholder": "For example: 9000",
+        "indicativePriceHint": "Leave blank when no price is available. This display price does not change the booking total.",
+        "indicativePriceInvalid": "Enter a non-negative whole number.",
         "status": "Status",
         "statusLabel": "Nail design status",
         "cancel": "Cancel",
@@ -875,6 +881,8 @@
         "description": "Description",
         "bookableStandalone": "Bookable on its own",
         "bookableStandaloneHint": "A customer can book this add-on without picking a base service.",
+        "representsNoSelection": "This means “No option”",
+        "representsNoSelectionHint": "Use this for choices such as “No nail removal”. The app records the explicit choice and does not show a duplicate skip option.",
         "serviceType": "Service type",
         "baseService": "Base service",
         "addonService": "Add-on service",
@@ -928,8 +936,21 @@
         "enabledSuccess": "Category enabled", "disabledSuccess": "Category disabled", "statusFailed": "Could not change the status.",
         "searchLabel": "Search categories", "searchPlaceholder": "Search by name or code...", "add": "Add category", "loadFailed": "Could not load categories.", "caption": "Service categories",
         "columns": { "order": "Order", "name": "Name", "code": "Code", "japanese": "Japanese", "branches": "Branches", "services": "Services", "status": "Status", "actions": "Actions" },
-        "toggleLabel": "Enable or disable category {name}", "enabled": "On", "disabled": "Off", "editLabel": "Edit {name}",
+        "toggleLabel": "Enable or disable category {name}", "enabled": "On", "disabled": "Off", "editLabel": "Edit {name}", "deleteLabel": "Delete {name}",
         "loading": "Loading categories…", "empty": "No categories yet. Add one before creating a service.", "noResults": "No matching categories.", "count": "{count} categories", "reorderHint": " · clear the search to reorder"
+      },
+      "categoryDelete": {
+        "title": "Delete service category",
+        "confirm": "Delete “{name}”? This action cannot be undone.",
+        "hasServices": "This category still contains {count} services. Move them to another category before deleting it.",
+        "hasServicesServer": "The category still contains services. Reload the list and move every service before deleting it.",
+        "hint": "Turning a category off only hides it temporarily; deleting removes it from the system.",
+        "cancel": "Cancel",
+        "action": "Delete category",
+        "deleting": "Deleting…",
+        "success": "Deleted {name}",
+        "failed": "Could not delete the category.",
+        "failedWithDetails": "Could not delete the category: {details}"
       },
       "categoryEditor": {
         "editTitle": "Rename category",
@@ -1012,12 +1033,13 @@
       },
       "addons": {
         "title": "Service add-ons",
-        "description": "Choose customer add-ons, then enable or override their price and duration for each branch.",
+        "description": "Choose the add-ons customers see in the app, then enable or override their price and duration for each branch.",
         "loading": "Loading add-ons…",
         "loadFailed": "Could not load add-on settings.",
         "empty": "No add-ons exist yet. Create an “Add-on service” first.",
         "branchColumn": "Branch",
         "selectionMode": "Choice",
+        "selectionModeHint": "Controls how customers choose in the app; it does not tick the option boxes below.",
         "selectionSingle": "Pick one",
         "selectionMultiple": "Pick several",
         "required": "Required",
@@ -1032,14 +1054,14 @@
       "delete": {
         "title": "Delete service",
         "confirm": "Delete “{name}”? This action cannot be undone.",
-        "historyHint": "Services with booking history cannot be deleted. Hide the service instead to preserve historical data.",
+        "historyHint": "The service is removed from the catalog and new bookings; existing history remains available for reports.",
         "cancel": "Cancel",
         "action": "Delete service",
         "deleting": "Deleting…",
         "success": "Deleted {name}",
         "failed": "Could not delete the service. Reload and try again.",
         "failedWithDetails": "Could not delete the service: {details}",
-        "hasHistory": "This service has booking history and cannot be deleted. Edit it and turn off “Public to customers” instead."
+        "hasHistory": "Usage history remains available after the service is removed from the catalog."
       },
       "surcharge": {
         "heading": "Surcharges",
