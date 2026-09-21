@@ -4,7 +4,7 @@ import { AdminIntlProvider } from "@/components/layouts/AdminIntlProvider";
 import { AdminShell } from "@/components/layouts/AdminShell";
 import { getMessages } from "@/i18n/messages";
 import { resolveLocale } from "@/i18n/locale";
-import { AdminBranchProvider } from "@/service";
+import { AdminBranchProvider, AuthProvider } from "@/service";
 
 export default async function AdminLayout({
   children,
@@ -15,16 +15,19 @@ export default async function AdminLayout({
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
 
-  // The gate is outermost among the console's own providers: no branch context and
-  // no shell chrome should exist for a visitor who has not signed in. The locale
-  // sits above it so the gate's own copy can be translated too.
+  // Keep AuthProvider inside the admin route tree. Mounting it at the app root makes
+  // every public tab rotate the admin refresh token from shared localStorage; an
+  // already-open admin tab can then reuse the spent token and revoke the family.
+  // The gate stays outside branch/shell state so anonymous visitors boot neither.
   return (
     <AdminIntlProvider locale={locale} messages={messages}>
-      <AdminAuthGate>
-        <AdminBranchProvider>
-          <AdminShell>{children}</AdminShell>
-        </AdminBranchProvider>
-      </AdminAuthGate>
+      <AuthProvider>
+        <AdminAuthGate>
+          <AdminBranchProvider>
+            <AdminShell>{children}</AdminShell>
+          </AdminBranchProvider>
+        </AdminAuthGate>
+      </AuthProvider>
     </AdminIntlProvider>
   );
 }

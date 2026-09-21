@@ -6,7 +6,7 @@ import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { SWRConfig } from "swr";
 
-import { apiFetcher, AuthProvider } from "@/service";
+import { apiFetcher } from "@/service";
 import { AppToastProvider } from "@/components/overlays/AppToastProvider";
 import { DEFAULT_TIME_ZONE } from "@/i18n/config";
 
@@ -25,12 +25,10 @@ export function AppProviders({
     <NextIntlClientProvider locale={locale} timeZone={DEFAULT_TIME_ZONE} messages={messages}>
       <I18nProvider locale={locale}>
         <SWRConfig value={{ fetcher: apiFetcher }}>
-          <AuthProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              {children}
-              <AppToastProvider />
-            </ThemeProvider>
-          </AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <AppToastProvider />
+          </ThemeProvider>
         </SWRConfig>
       </I18nProvider>
     </NextIntlClientProvider>
