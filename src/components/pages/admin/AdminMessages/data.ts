@@ -11,6 +11,8 @@ export type BookingConfirmation = {
   readonly appointmentId: string;
   readonly appointmentCode: string;
   readonly branchId: string;
+  readonly branchName?: string;
+  readonly branchAddress?: string;
   readonly customerName: string;
   readonly customerPhone: string;
   readonly serviceName: string;
@@ -21,6 +23,31 @@ export type BookingConfirmation = {
   readonly totalJpy: number;
   readonly branchTimeZone: string;
   readonly note: string;
+  readonly expectedPaymentMethod?: "CASH" | "PAYPAY" | "VISA" | null;
+};
+
+export type AppointmentCancellationNotice = {
+  readonly appointmentId: string;
+  readonly appointmentCode: string;
+  readonly branchId: string;
+  readonly branchName: string;
+  readonly branchAddress: string;
+  readonly serviceName: string;
+  readonly optionNames: ReadonlyArray<string>;
+  readonly startAt: string;
+  readonly branchTimeZone: string;
+  readonly cancelledBy: "CUSTOMER" | "SALON";
+  readonly cancelledAt: string;
+  readonly reasonCode: string;
+};
+
+export type PaymentRecordedNotice = {
+  readonly appointmentId: string;
+  readonly paymentId: string;
+  readonly branchId: string;
+  readonly amountJpy: number;
+  readonly method: "CASH" | "PAYPAY" | "VISA" | "NO_CHARGE";
+  readonly recordedAt: string;
 };
 
 export type WarrantyNotice = {
@@ -61,7 +88,19 @@ export type ChatWarrantyNoticeMessage = ChatMessageBase & {
   readonly warranty: WarrantyNotice;
 };
 
-export type ChatMessage = ChatTextMessage | ChatBookingConfirmationMessage | ChatWarrantyNoticeMessage;
+export type ChatAppointmentCancellationMessage = ChatMessageBase & {
+  readonly kind: "appointment-cancelled";
+  readonly sender: "system";
+  readonly cancellation: AppointmentCancellationNotice;
+};
+
+export type ChatPaymentRecordedMessage = ChatMessageBase & {
+  readonly kind: "payment-recorded";
+  readonly sender: "system";
+  readonly payment: PaymentRecordedNotice;
+};
+
+export type ChatMessage = ChatTextMessage | ChatBookingConfirmationMessage | ChatWarrantyNoticeMessage | ChatAppointmentCancellationMessage | ChatPaymentRecordedMessage;
 
 export type Conversation = {
   readonly id: string;

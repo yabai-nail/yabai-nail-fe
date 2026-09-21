@@ -15,6 +15,8 @@ describe("BookingConfirmationCard", () => {
             appointmentId: "appointment-1",
             appointmentCode: "YN-00012345",
             branchId: "branch-1",
+            branchName: "Tenjin",
+            branchAddress: "1-2-3 Tenjin, Fukuoka",
             customerName: "Lê Nhật Huy",
             customerPhone: "0914163312",
             serviceName: "Fixture service",
@@ -25,6 +27,7 @@ describe("BookingConfirmationCard", () => {
             totalJpy: 22_000,
             branchTimeZone: "Asia/Ho_Chi_Minh",
             note: "Mẫu màu hồng",
+            expectedPaymentMethod: "PAYPAY",
           }}
         />
       </NextIntlClientProvider>,
@@ -38,6 +41,9 @@ describe("BookingConfirmationCard", () => {
       "Cắt móng",
       "CHI_LINH_3",
       "Mẫu màu hồng",
+      "Tenjin",
+      "1-2-3 Tenjin, Fukuoka",
+      "PayPay",
     ]) {
       expect(markup).toContain(value);
     }

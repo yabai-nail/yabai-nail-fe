@@ -21,10 +21,11 @@ import {
   type AdminStaffMember,
 } from "@/service";
 import { CashTenderPanel } from "./CashTenderPanel";
+import { AmountReceivedPanel } from "./AmountReceivedPanel";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import type { Translator } from "@/i18n/config";
 import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
-import { calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
+import { buildPaymentCaptureInput, calculateAmountReceivedState, calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
 import { InvoicePreviewModal } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
@@ -37,6 +38,11 @@ function deriveInitials(name: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+function toPaymentMethod(method: string | null | undefined): PaymentMethod | null {
+  const normalized = method?.toLowerCase();
+  return normalized === "cash" || normalized === "paypay" || normalized === "visa" ? normalized : null;
 }
 
 /**
@@ -117,9 +123,7 @@ function buildInvoiceFromServer(
     benefitDiscount: appointment.benefitDiscount ?? appointment.discount,
     manualDiscount: appointment.manualDiscount ?? 0,
     discountReason: appointment.discountReason ?? appointment.manualDiscountReason ?? "",
-    // Cash is the only supported counter method, so make the single available
-    // choice explicit and show the tender/change fields immediately.
-    paymentMethod: "cash",
+    paymentMethod: toPaymentMethod(appointment.expectedPaymentMethod),
     orderNote: appointment.checkoutNote ?? "",
     status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
     paidAt: null,
@@ -134,7 +138,11 @@ export function AdminPaymentsComponent() {
   const appointmentId = searchParams.get("appointmentId");
   const { branchId } = useAdminBranch();
   const hasServiceEditPermission = useAdminPermission("catalog.write.branch", "catalog.write.all");
-  const hasPaymentPermission = useAdminPermission("payment.create.branch");
+  const canRecordAssignedPayment = useAdminPermission(
+    "payment.create.assigned",
+    "payment.create.branch",
+  );
+  const canAdjustPayment = useAdminPermission("payment.create.branch");
   const canCreateReview = useAdminPermission("review.create.branch");
 
   // Parallel joins — same shape as the appointments page.
@@ -172,10 +180,9 @@ export function AdminPaymentsComponent() {
       );
       const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
       if (captured) {
-        const method = captured.method.toLowerCase();
         return {
           ...invoice,
-          paymentMethod: (["cash", "card", "paypay", "bank_transfer", "other"].includes(method) ? method : "other") as PaymentMethod,
+          paymentMethod: toPaymentMethod(captured.method),
           status: "paid",
           paidAt: typeof captured.createdAt === "string" ? captured.createdAt : null,
         };
@@ -199,6 +206,7 @@ export function AdminPaymentsComponent() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [cashTendered, setCashTendered] = useState("");
+  const [amountReceived, setAmountReceived] = useState("");
   const [cashResult, setCashResult] = useState<{ tendered: number; change: number } | null>(null);
   const paymentIdempotencyKey = useRef<string | null>(null);
   const reviewIdempotencyKey = useRef<string | null>(null);
@@ -207,12 +215,15 @@ export function AdminPaymentsComponent() {
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
   const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active).map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
   const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
-  const canAdjust = hasPaymentPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
-  const canCreatePayment = hasPaymentPermission && appointment?.status === "AWAITING_PAYMENT";
+  const canAdjust = canAdjustPayment && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const canCreatePayment = canRecordAssignedPayment && appointment?.status === "AWAITING_PAYMENT";
   const cashState = invoice?.paymentMethod === "cash" && totals
     ? calculateCashTenderState(totals.grandTotal, cashTendered)
     : { cashTendered: null, cashChange: null, error: null };
-  const canConfirmPayment = Boolean(canCreatePayment && invoice?.paymentMethod && !cashState.error);
+  const amountReceivedState = invoice?.paymentMethod && invoice.paymentMethod !== "cash" && totals
+    ? calculateAmountReceivedState(totals.grandTotal, amountReceived)
+    : { amountReceived: null, error: null };
+  const canConfirmPayment = Boolean(canCreatePayment && invoice?.paymentMethod && !cashState.error && !amountReceivedState.error);
 
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
@@ -267,8 +278,13 @@ export function AdminPaymentsComponent() {
       return thrown instanceof Error ? thrown.message : t("error.adjustments");
     }
   };
-  const handleConfirm = (receivedCash: number | null) => {
+  const handleConfirm = (receivedAmount: number | null) => {
     if (!invoice || !totals) return;
+    const paymentMethod = invoice.paymentMethod;
+    if (!paymentMethod) {
+      setConfirmError(t("state.methodRequired"));
+      return;
+    }
     // Local status change so the UI flips to paid immediately.
     const result = confirmPayment(invoice, new Date().toISOString());
     setIsConfirmOpen(false);
@@ -315,10 +331,7 @@ export function AdminPaymentsComponent() {
         const capture = await adminService.recordAppointmentPayment(
           branchId!,
           appointmentId!,
-          {
-            method: "CASH",
-            ...(receivedCash === null ? {} : { cashTendered: receivedCash }),
-          },
+          buildPaymentCaptureInput(paymentMethod, receivedAmount),
           // Re-read the version: the quote above is itself a write, so the
           // appointment may have moved on since this handler started. The
           // quote's own field is loosely typed, so only trust a number.
@@ -332,6 +345,7 @@ export function AdminPaymentsComponent() {
         notifySuccess(t("paymentRecorded"));
         setInvoice(result.value);
         await mutateAppointment(capture.appointment, { revalidate: false });
+        await payments.mutate();
         if (canCreateReview) setIsReviewOpen(true);
       } catch (thrown) {
         setConfirmError(
@@ -418,11 +432,11 @@ export function AdminPaymentsComponent() {
           isCancelled={isAppointmentCancelled}
         />
         <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
-          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
+          <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}{invoice.paymentMethod && invoice.paymentMethod !== "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <AmountReceivedPanel amountDue={totals.grandTotal} value={amountReceived} disabled={!canCreatePayment} onChange={setAmountReceived} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
         <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
       </div>
-      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
+      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} amountReceived={amountReceived} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
       {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>

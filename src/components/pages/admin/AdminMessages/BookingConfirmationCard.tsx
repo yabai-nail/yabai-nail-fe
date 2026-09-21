@@ -4,7 +4,9 @@ import {
   CurrencyYenIcon,
   DocumentTextIcon,
   IdentificationIcon,
+  MapPinIcon,
   PhoneIcon,
+  CreditCardIcon,
   SparklesIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
@@ -26,6 +28,7 @@ type DetailRow = {
 
 export function BookingConfirmationCard({ booking }: BookingConfirmationCardProps) {
   const t = useTranslations("admin.messages.confirmation");
+  const tMethod = useTranslations("admin.paymentMethod");
   const format = useFormatter();
   const start = new Date(booking.startAt);
   const schedule = Number.isNaN(start.getTime())
@@ -48,6 +51,8 @@ export function BookingConfirmationCard({ booking }: BookingConfirmationCardProp
       icon: PhoneIcon,
     },
     { label: t("schedule"), value: schedule, icon: CalendarDaysIcon },
+    ...(booking.branchName ? [{ label: t("branch"), value: booking.branchName, icon: MapPinIcon }] : []),
+    ...(booking.branchAddress ? [{ label: t("address"), value: booking.branchAddress, icon: MapPinIcon }] : []),
     { label: t("service"), value: booking.serviceName, icon: SparklesIcon },
     {
       label: t("options"),
@@ -61,6 +66,11 @@ export function BookingConfirmationCard({ booking }: BookingConfirmationCardProp
       icon: ClockIcon,
     },
     { label: t("total"), value: total, icon: CurrencyYenIcon, emphasise: true },
+    ...(booking.expectedPaymentMethod ? [{
+      label: t("expectedPaymentMethod"),
+      value: tMethod(booking.expectedPaymentMethod.toLowerCase()),
+      icon: CreditCardIcon,
+    }] : []),
     { label: t("code"), value: booking.appointmentCode, icon: DocumentTextIcon },
   ];
 

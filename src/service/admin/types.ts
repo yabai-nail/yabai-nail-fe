@@ -69,6 +69,7 @@ export interface AdminAppointment {
   readonly manualDiscountReason?: string;
   readonly discountReason?: string;
   readonly checkoutNote?: string;
+  readonly expectedPaymentMethod?: "CASH" | "PAYPAY" | "VISA" | null;
   readonly services?: ReadonlyArray<AdminAppointmentServiceSnapshot>;
   readonly note?: string;
   readonly version: number;
@@ -227,8 +228,9 @@ export interface AdminAppointmentServiceCompletionInput {
  * `discount` used to be declared here and sent, and were silently dropped.
  */
 export interface AdminAppointmentPaymentInput {
-  readonly method: string;
+  readonly method: "CASH" | "PAYPAY" | "VISA";
   readonly cashTendered?: number;
+  readonly amountReceived?: number;
   readonly [field: string]: unknown;
 }
 
@@ -847,6 +849,8 @@ export interface AdminBookingConfirmation {
   readonly appointmentId: string;
   readonly appointmentCode: string;
   readonly branchId: string;
+  readonly branchName?: string;
+  readonly branchAddress?: string;
   readonly customerName: string;
   readonly customerPhone: string;
   readonly serviceName: string;
@@ -857,6 +861,31 @@ export interface AdminBookingConfirmation {
   readonly totalJpy: number;
   readonly branchTimeZone: string;
   readonly note: string;
+  readonly expectedPaymentMethod?: "CASH" | "PAYPAY" | "VISA" | null;
+}
+
+export interface AdminAppointmentCancellationNotice {
+  readonly appointmentId: string;
+  readonly appointmentCode: string;
+  readonly branchId: string;
+  readonly branchName: string;
+  readonly branchAddress: string;
+  readonly serviceName: string;
+  readonly optionNames: ReadonlyArray<string>;
+  readonly startAt: string;
+  readonly branchTimeZone: string;
+  readonly cancelledBy: "CUSTOMER" | "SALON";
+  readonly cancelledAt: string;
+  readonly reasonCode: string;
+}
+
+export interface AdminPaymentRecordedNotice {
+  readonly appointmentId: string;
+  readonly paymentId: string;
+  readonly branchId: string;
+  readonly amountJpy: number;
+  readonly method: "CASH" | "PAYPAY" | "VISA" | "NO_CHARGE";
+  readonly recordedAt: string;
 }
 
 export interface AdminWarrantyNotice {
@@ -879,6 +908,8 @@ export interface AdminMessage {
   readonly messageType?: string;
   readonly booking?: AdminBookingConfirmation | null;
   readonly warranty?: AdminWarrantyNotice | null;
+  readonly cancellation?: AdminAppointmentCancellationNotice | null;
+  readonly payment?: AdminPaymentRecordedNotice | null;
   readonly createdAt: string;
   readonly deliveryStatus?: string;
   readonly [field: string]: unknown;

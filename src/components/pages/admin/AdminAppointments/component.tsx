@@ -206,8 +206,8 @@ export function AdminAppointmentsComponent({
   const canAssign = useAdminPermission("appointment.assign.branch");
   const canEditActualServices = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const canAttachPhoto = useAdminPermission("appointment.media.write.assigned", "appointment.media.write.branch");
-  const canMessage = useAdminPermission("message.read.branch");
-  const canTakePayment = useAdminPermission("payment.create.branch");
+  const canMessage = useAdminPermission("message.read.assigned", "message.read.branch");
+  const canTakePayment = useAdminPermission("payment.create.assigned", "payment.create.branch");
   const canLifecycle = {
     "check-in": useAdminPermission("appointment.checkin.branch"),
     "service-start": useAdminPermission("appointment.service.start.assigned", "appointment.service.start.branch"),

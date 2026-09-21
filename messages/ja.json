@@ -350,6 +350,8 @@
         "phone": "電話番号",
         "missingPhone": "未登録",
         "schedule": "日時",
+        "branch": "店舗",
+        "address": "住所",
         "service": "サービス",
         "options": "オプション",
         "noOptions": "なし",
@@ -357,8 +359,31 @@
         "duration": "所要時間",
         "durationValue": "{minutes}分",
         "total": "合計",
+        "expectedPaymentMethod": "店頭での予定支払い方法",
         "code": "予約番号",
         "note": "お客様メモ"
+      },
+      "cancellation": {
+        "heading": "予約がキャンセルされました",
+        "intro": "予約 {code} の状態が更新されました。",
+        "branch": "店舗",
+        "address": "住所",
+        "schedule": "予約日時",
+        "service": "サービス",
+        "cancelledBy": "キャンセルした人",
+        "cancelledAt": "キャンセル日時",
+        "reason": "理由",
+        "actor": {
+          "CUSTOMER": "お客様",
+          "SALON": "サロン"
+        }
+      },
+      "paymentRecorded": {
+        "heading": "店頭での支払いを記録しました",
+        "intro": "スタッフが受領を確認した金額です。",
+        "amount": "受領金額",
+        "method": "実際の支払い方法",
+        "recordedAt": "記録日時"
       },
       "warranty": {
         "accessibilityLabel": "{service} の保証情報",
@@ -709,7 +734,9 @@
     "paymentMethod": {
       "cash": "現金",
       "card": "カード",
+      "visa": "VISA",
       "paypay": "PayPay",
+      "no_charge": "支払いなし",
       "bank_transfer": "銀行振込",
       "other": "その他",
       "transfer": "銀行振込"
@@ -2338,6 +2365,9 @@
         "cashTendered": "お預かり金額 (¥)",
         "cashChangeLabel": "お釣り",
         "cashChange": "お釣り: {amount}",
+        "amountReceived": "受領金額 (¥)",
+        "amountReceivedMatches": "お支払い額と一致しています: {amount}",
+        "amountReceivedResult": "受領金額: {amount}",
         "serverNote": "この操作は実際の取引を記録します。この画面からは取り消せません。",
         "localNote": "この伝票は実際の予約に紐づいていないため、取引は記録されません。",
         "recheck": "確認しなおす",
@@ -2345,7 +2375,7 @@
       },
       "methodPicker": {
         "label": "支払い方法",
-        "cashOnly": "現在、システムで記録できるのは現金払いのみです。"
+        "counterOnly": "店頭で受領済みの支払いだけを記録します。アプリ内で決済は行いません。"
       },
       "state": {
         "paidLocked": "支払い済みの伝票のため、金額は変更できません。",
@@ -2361,7 +2391,10 @@
         "serviceRequired": "メニューを選択してください。",
         "cashTenderedRequired": "お客様からお預かりした金額を入力してください。",
         "cashTenderedInvalid": "お預かり金額は1円単位の整数で入力してください。",
-        "cashTenderedInsufficient": "お預かり金額が不足しています。"
+        "cashTenderedInsufficient": "お預かり金額が不足しています。",
+        "amountReceivedRequired": "スタッフが受領した金額を入力してください。",
+        "amountReceivedInvalid": "受領金額は1円単位の整数で入力してください。",
+        "amountReceivedMismatch": "受領金額をお支払い額 {amount} と一致させてください。"
       }
     }
   }

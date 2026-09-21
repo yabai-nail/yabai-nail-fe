@@ -14,6 +14,8 @@ import {
   useAdminPermission,
   type AdminConversation as ServerConversation,
   type AdminBookingConfirmation,
+  type AdminAppointmentCancellationNotice,
+  type AdminPaymentRecordedNotice,
   type AdminWarrantyNotice,
   type AdminMessage as ServerMessage,
 } from "@/service";
@@ -85,6 +87,10 @@ function isBookingConfirmation(
   ] as const;
   return (
     stringFields.every((field) => typeof booking[field] === "string") &&
+    (booking.branchName === undefined || typeof booking.branchName === "string") &&
+    (booking.branchAddress === undefined || typeof booking.branchAddress === "string") &&
+    (booking.expectedPaymentMethod === undefined || booking.expectedPaymentMethod === null ||
+      booking.expectedPaymentMethod === "CASH" || booking.expectedPaymentMethod === "PAYPAY" || booking.expectedPaymentMethod === "VISA") &&
     booking.optionNames.every((option) => typeof option === "string") &&
     Number.isInteger(booking.durationMinutes) &&
     booking.durationMinutes > 0 &&
@@ -105,6 +111,45 @@ function isWarrantyNotice(warranty: AdminWarrantyNotice | null | undefined): war
     warranty.warrantyDays > 0 &&
     /^\d{4}-\d{2}-\d{2}$/.test(warranty.startsOn) &&
     /^\d{4}-\d{2}-\d{2}$/.test(warranty.endsOn),
+  );
+}
+
+function isAppointmentCancellation(
+  cancellation: AdminAppointmentCancellationNotice | null | undefined,
+): cancellation is AdminAppointmentCancellationNotice {
+  if (!cancellation || !Array.isArray(cancellation.optionNames)) return false;
+  const stringFields = [
+    "appointmentId",
+    "appointmentCode",
+    "branchId",
+    "branchName",
+    "branchAddress",
+    "serviceName",
+    "startAt",
+    "branchTimeZone",
+    "cancelledAt",
+    "reasonCode",
+  ] as const;
+  return stringFields.every((field) => typeof cancellation[field] === "string") &&
+    cancellation.optionNames.every((option) => typeof option === "string") &&
+    (cancellation.cancelledBy === "CUSTOMER" || cancellation.cancelledBy === "SALON");
+}
+
+function isPaymentRecorded(
+  payment: AdminPaymentRecordedNotice | null | undefined,
+): payment is AdminPaymentRecordedNotice {
+  return Boolean(
+    payment &&
+    typeof payment.appointmentId === "string" &&
+    typeof payment.paymentId === "string" &&
+    typeof payment.branchId === "string" &&
+    Number.isSafeInteger(payment.amountJpy) &&
+    payment.amountJpy >= 0 &&
+    (payment.method === "CASH" ||
+      payment.method === "PAYPAY" ||
+      payment.method === "VISA" ||
+      payment.method === "NO_CHARGE") &&
+    typeof payment.recordedAt === "string",
   );
 }
 
@@ -131,6 +176,26 @@ export function toChatMessage(
       kind: "warranty-notice",
       sender: "system",
       warranty: server.warranty,
+      time: formatTimeLabel(server.createdAt, formatTime),
+      sentAt: server.createdAt,
+    };
+  }
+  if (server.messageType === "APPOINTMENT_CANCELLED" && isAppointmentCancellation(server.cancellation)) {
+    return {
+      id: server.id,
+      kind: "appointment-cancelled",
+      sender: "system",
+      cancellation: server.cancellation,
+      time: formatTimeLabel(server.createdAt, formatTime),
+      sentAt: server.createdAt,
+    };
+  }
+  if (server.messageType === "PAYMENT_RECORDED" && isPaymentRecorded(server.payment)) {
+    return {
+      id: server.id,
+      kind: "payment-recorded",
+      sender: "system",
+      payment: server.payment,
       time: formatTimeLabel(server.createdAt, formatTime),
       sentAt: server.createdAt,
     };

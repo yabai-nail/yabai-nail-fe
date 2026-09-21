@@ -3,20 +3,24 @@ import { AlertDialog, Button } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { formatMoney } from "@/lib/admin-format";
 import { paymentMethodLabel, type CheckoutInvoice } from "./data";
-import { calculateCashTenderState, type PaymentTotals } from "./payment-state";
+import { calculateAmountReceivedState, calculateCashTenderState, type PaymentTotals } from "./payment-state";
 
-export function PaymentConfirmationDialog({ invoice, totals, cashTendered, isServerBacked, onClose, onConfirm }: Readonly<{
+export function PaymentConfirmationDialog({ invoice, totals, cashTendered, amountReceived, isServerBacked, onClose, onConfirm }: Readonly<{
   invoice: CheckoutInvoice;
   totals: PaymentTotals;
   cashTendered: string;
+  amountReceived: string;
   isServerBacked: boolean;
   onClose: () => void;
-  onConfirm: (cashTendered: number | null) => void;
+  onConfirm: (receivedAmount: number | null) => void;
 }>) {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
   const isCash = invoice.paymentMethod === "cash";
   const cash = isCash ? calculateCashTenderState(totals.grandTotal, cashTendered) : { cashTendered: null, cashChange: null, error: null };
+  const electronic = !isCash && invoice.paymentMethod
+    ? calculateAmountReceivedState(totals.grandTotal, amountReceived)
+    : { amountReceived: null, error: null };
 
   return (
     <AlertDialog isOpen onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -36,11 +40,16 @@ export function PaymentConfirmationDialog({ invoice, totals, cashTendered, isSer
                   {t("cashResult", { tendered: formatMoney(cash.cashTendered ?? 0), change: formatMoney(cash.cashChange ?? 0) })}
                 </div>
               ) : null}
+              {!isCash && invoice.paymentMethod && totals.grandTotal > 0 ? (
+                <div className="rounded-lg border border-admin-border bg-admin-soft p-3 text-sm font-semibold text-admin-ink">
+                  {t("confirm.amountReceivedResult", { amount: formatMoney(electronic.amountReceived ?? 0) })}
+                </div>
+              ) : null}
               <p className="rounded-lg bg-admin-soft p-3 text-xs">{isServerBacked ? t("confirm.serverNote") : t("confirm.localNote")}</p>
             </AlertDialog.Body>
             <AlertDialog.Footer className="border-t border-admin-border px-5 py-4">
               <Button variant="outline" className="rounded-lg border-admin-border" onPress={onClose}>{t("confirm.recheck")}</Button>
-              <Button variant="primary" className="rounded-lg" isDisabled={Boolean(cash.error)} onPress={() => onConfirm(cash.cashTendered)}>{t("confirm.submit")}</Button>
+              <Button variant="primary" className="rounded-lg" isDisabled={Boolean(cash.error || electronic.error)} onPress={() => onConfirm(isCash ? cash.cashTendered : electronic.amountReceived)}>{t("confirm.submit")}</Button>
             </AlertDialog.Footer>
           </AlertDialog.Dialog>
         </AlertDialog.Container>

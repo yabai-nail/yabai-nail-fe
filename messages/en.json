@@ -350,6 +350,8 @@
         "phone": "Phone number",
         "missingPhone": "Not provided",
         "schedule": "Date and time",
+        "branch": "Branch",
+        "address": "Address",
         "service": "Service",
         "options": "Add-ons",
         "noOptions": "None",
@@ -357,8 +359,31 @@
         "duration": "Duration",
         "durationValue": "{minutes} min",
         "total": "Total",
+        "expectedPaymentMethod": "Expected payment at salon",
         "code": "Booking code",
         "note": "Customer note"
+      },
+      "cancellation": {
+        "heading": "Appointment cancelled",
+        "intro": "Appointment {code} has been updated.",
+        "branch": "Branch",
+        "address": "Address",
+        "schedule": "Appointment time",
+        "service": "Service",
+        "cancelledBy": "Cancelled by",
+        "cancelledAt": "Cancelled at",
+        "reason": "Reason",
+        "actor": {
+          "CUSTOMER": "Customer",
+          "SALON": "Salon"
+        }
+      },
+      "paymentRecorded": {
+        "heading": "Payment recorded at salon",
+        "intro": "Amount the staff member confirmed receiving from the customer.",
+        "amount": "Amount received",
+        "method": "Actual payment method",
+        "recordedAt": "Recorded at"
       },
       "warranty": {
         "accessibilityLabel": "Warranty details for {service}",
@@ -709,7 +734,9 @@
     "paymentMethod": {
       "cash": "Cash",
       "card": "Card",
+      "visa": "VISA",
       "paypay": "PayPay",
+      "no_charge": "No charge",
       "bank_transfer": "Bank transfer",
       "other": "Other",
       "transfer": "Bank transfer"
@@ -2346,6 +2373,9 @@
         "cashTendered": "Cash received (¥)",
         "cashChangeLabel": "Change",
         "cashChange": "Change: {amount}",
+        "amountReceived": "Amount received (¥)",
+        "amountReceivedMatches": "Matches the amount due: {amount}",
+        "amountReceivedResult": "Amount received: {amount}",
         "serverNote": "This records a real transaction and cannot be undone from this screen.",
         "localNote": "This invoice is not tied to a real appointment, so no transaction will be recorded.",
         "recheck": "Check again",
@@ -2353,7 +2383,7 @@
       },
       "methodPicker": {
         "label": "Payment method",
-        "cashOnly": "The system currently records cash payments only."
+        "counterOnly": "This only records money received at the salon; no payment is processed in the app."
       },
       "state": {
         "paidLocked": "The invoice is already paid, so the amounts cannot change.",
@@ -2369,7 +2399,10 @@
         "serviceRequired": "Pick a service.",
         "cashTenderedRequired": "Enter the cash received from the customer.",
         "cashTenderedInvalid": "Cash received must be a whole number of yen.",
-        "cashTenderedInsufficient": "Cash received is less than the amount due."
+        "cashTenderedInsufficient": "Cash received is less than the amount due.",
+        "amountReceivedRequired": "Enter the amount the staff member received.",
+        "amountReceivedInvalid": "Amount received must be a whole number of yen.",
+        "amountReceivedMismatch": "Amount received must match the amount due: {amount}."
       }
     }
   }

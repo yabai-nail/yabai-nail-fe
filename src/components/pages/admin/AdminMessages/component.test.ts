@@ -17,6 +17,8 @@ describe("toChatMessage", () => {
         appointmentId: "appointment-1",
         appointmentCode: "YN-00012345",
         branchId: "branch-1",
+        branchName: "Tenjin",
+        branchAddress: "1-2-3 Tenjin, Fukuoka",
         customerName: "Le Nhat Huy",
         customerPhone: "0914163312",
         serviceName: "Gel color",
@@ -27,6 +29,7 @@ describe("toChatMessage", () => {
         totalJpy: 22_000,
         branchTimeZone: "Asia/Ho_Chi_Minh",
         note: "",
+        expectedPaymentMethod: "PAYPAY",
       },
     } satisfies AdminMessage;
 
@@ -37,7 +40,57 @@ describe("toChatMessage", () => {
     if (message.kind === "booking-confirmation") {
       expect(message.booking.customerName).toBe("Le Nhat Huy");
       expect(message.booking.customerPhone).toBe("0914163312");
+      expect(message.booking.branchAddress).toBe("1-2-3 Tenjin, Fukuoka");
+      expect(message.booking.expectedPaymentMethod).toBe("PAYPAY");
     }
+  });
+
+  it("maps cancellation and recorded-payment messages to system cards", () => {
+    const base = {
+      conversationId: "conversation-1",
+      senderType: "SYSTEM",
+      content: "System update",
+      createdAt: "2026-09-20T08:00:00.000Z",
+    };
+    const cancelled = toChatMessage({
+      ...base,
+      id: "cancelled:appointment-1",
+      messageType: "APPOINTMENT_CANCELLED",
+      cancellation: {
+        appointmentId: "appointment-1",
+        appointmentCode: "YN-00012345",
+        branchId: "branch-1",
+        branchName: "Tenjin",
+        branchAddress: "1-2-3 Tenjin, Fukuoka",
+        serviceName: "Gel color",
+        optionNames: ["Nail trim"],
+        startAt: "2026-09-21T07:30:00.000Z",
+        branchTimeZone: "Asia/Tokyo",
+        cancelledBy: "CUSTOMER",
+        cancelledAt: "2026-09-20T08:00:00.000Z",
+        reasonCode: "CUSTOMER_REQUEST",
+      },
+    } satisfies AdminMessage, () => "17:00");
+    const paid = toChatMessage({
+      ...base,
+      id: "payment:appointment-1",
+      messageType: "PAYMENT_RECORDED",
+      payment: {
+        appointmentId: "appointment-1",
+        paymentId: "payment-1",
+        branchId: "branch-1",
+        amountJpy: 0,
+        method: "NO_CHARGE",
+        recordedAt: "2026-09-20T08:00:00.000Z",
+      },
+    } satisfies AdminMessage, () => "17:00");
+
+    expect(cancelled).toMatchObject({ kind: "appointment-cancelled", sender: "system" });
+    expect(paid).toMatchObject({
+      kind: "payment-recorded",
+      sender: "system",
+      payment: { amountJpy: 0, method: "NO_CHARGE" },
+    });
   });
 
   it("maps a persisted warranty notice to a system card", () => {

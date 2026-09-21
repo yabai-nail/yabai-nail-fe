@@ -350,6 +350,8 @@
         "phone": "Số điện thoại",
         "missingPhone": "Chưa cung cấp",
         "schedule": "Ngày giờ",
+        "branch": "Chi nhánh",
+        "address": "Địa chỉ",
         "service": "Dịch vụ",
         "options": "Tùy chọn thêm",
         "noOptions": "Không có",
@@ -357,8 +359,31 @@
         "duration": "Thời lượng",
         "durationValue": "{minutes} phút",
         "total": "Tổng tiền",
+        "expectedPaymentMethod": "Thanh toán dự kiến tại salon",
         "code": "Mã đặt lịch",
         "note": "Ghi chú của khách"
+      },
+      "cancellation": {
+        "heading": "Lịch hẹn đã được hủy",
+        "intro": "Lịch {code} đã được cập nhật trong hệ thống.",
+        "branch": "Chi nhánh",
+        "address": "Địa chỉ",
+        "schedule": "Thời gian hẹn",
+        "service": "Dịch vụ",
+        "cancelledBy": "Người hủy",
+        "cancelledAt": "Thời điểm hủy",
+        "reason": "Lý do",
+        "actor": {
+          "CUSTOMER": "Khách hàng",
+          "SALON": "Salon"
+        }
+      },
+      "paymentRecorded": {
+        "heading": "Đã ghi nhận tiền tại salon",
+        "intro": "Thông tin khoản tiền staff đã xác nhận nhận từ khách.",
+        "amount": "Số tiền thực thu",
+        "method": "Phương thức thực thu",
+        "recordedAt": "Thời điểm ghi nhận"
       },
       "warranty": {
         "accessibilityLabel": "Thông tin bảo hành dịch vụ {service}",
@@ -709,7 +734,9 @@
     "paymentMethod": {
       "cash": "Tiền mặt",
       "card": "Thẻ",
+      "visa": "VISA",
       "paypay": "PayPay",
+      "no_charge": "Không phát sinh thanh toán",
       "bank_transfer": "Chuyển khoản",
       "other": "Khác",
       "transfer": "Chuyển khoản"
@@ -2356,6 +2383,9 @@
         "cashTendered": "Tiền khách đưa (¥)",
         "cashChangeLabel": "Tiền thối",
         "cashChange": "Tiền thối: {amount}",
+        "amountReceived": "Số tiền đã nhận (¥)",
+        "amountReceivedMatches": "Đã đối chiếu đúng số phải thu: {amount}",
+        "amountReceivedResult": "Số tiền đã nhận: {amount}",
         "serverNote": "Thao tác này ghi nhận giao dịch thật và không thể hoàn tác từ màn này.",
         "localNote": "Hóa đơn chưa gắn với lịch hẹn thật nên sẽ không có giao dịch nào được ghi.",
         "recheck": "Kiểm tra lại",
@@ -2363,7 +2393,7 @@
       },
       "methodPicker": {
         "label": "Phương thức thanh toán",
-        "cashOnly": "Hệ thống hiện chỉ ghi nhận thanh toán tiền mặt."
+        "counterOnly": "Chỉ ghi nhận tiền đã thu tại salon; ứng dụng không thực hiện giao dịch thanh toán."
       },
       "state": {
         "paidLocked": "Hóa đơn đã thanh toán nên không thể thay đổi số tiền.",
@@ -2379,7 +2409,10 @@
         "serviceRequired": "Vui lòng chọn một dịch vụ.",
         "cashTenderedRequired": "Nhập số tiền khách đưa.",
         "cashTenderedInvalid": "Tiền khách đưa phải là số yên nguyên.",
-        "cashTenderedInsufficient": "Tiền khách đưa chưa đủ số tiền cần thanh toán."
+        "cashTenderedInsufficient": "Tiền khách đưa chưa đủ số tiền cần thanh toán.",
+        "amountReceivedRequired": "Nhập số tiền staff đã nhận.",
+        "amountReceivedInvalid": "Số tiền đã nhận phải là số yên nguyên.",
+        "amountReceivedMismatch": "Số tiền đã nhận phải khớp số cần thu: {amount}."
       }
     }
   }

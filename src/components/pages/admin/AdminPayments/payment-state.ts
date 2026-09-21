@@ -17,6 +17,15 @@ export type CashTenderState = {
   readonly error: string | null;
 };
 
+export type AmountReceivedState = {
+  readonly amountReceived: number | null;
+  readonly error: string | null;
+};
+
+export type PaymentCaptureInput =
+  | { readonly method: "CASH"; readonly cashTendered?: number }
+  | { readonly method: "PAYPAY" | "VISA"; readonly amountReceived: number };
+
 /** Parses whole-yen counter input; the backend still recalculates the authoritative change. */
 export function calculateCashTenderState(amountDue: number, input: string): CashTenderState {
   if (amountDue === 0) return { cashTendered: null, cashChange: null, error: null };
@@ -27,6 +36,25 @@ export function calculateCashTenderState(amountDue: number, input: string): Cash
   if (!Number.isSafeInteger(cashTendered)) return { cashTendered: null, cashChange: null, error: "state.cashTenderedInvalid" };
   if (cashTendered < amountDue) return { cashTendered, cashChange: null, error: "state.cashTenderedInsufficient" };
   return { cashTendered, cashChange: cashTendered - amountDue, error: null };
+}
+
+/** PayPay and VISA are recorded at the counter and must match the invoice exactly. */
+export function calculateAmountReceivedState(amountDue: number, input: string): AmountReceivedState {
+  if (amountDue === 0) return { amountReceived: 0, error: null };
+  const normalized = input.trim();
+  if (!normalized) return { amountReceived: null, error: "state.amountReceivedRequired" };
+  if (!/^\d+$/.test(normalized)) return { amountReceived: null, error: "state.amountReceivedInvalid" };
+  const amountReceived = Number(normalized);
+  if (!Number.isSafeInteger(amountReceived)) return { amountReceived: null, error: "state.amountReceivedInvalid" };
+  if (amountReceived !== amountDue) return { amountReceived, error: "state.amountReceivedMismatch" };
+  return { amountReceived, error: null };
+}
+
+export function buildPaymentCaptureInput(method: PaymentMethod, receivedAmount: number | null): PaymentCaptureInput {
+  if (method === "cash") {
+    return receivedAmount === null ? { method: "CASH" } : { method: "CASH", cashTendered: receivedAmount };
+  }
+  return { method: method === "paypay" ? "PAYPAY" : "VISA", amountReceived: receivedAmount ?? 0 };
 }
 
 export type PaymentTransitionResult =

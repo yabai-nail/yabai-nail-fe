@@ -100,14 +100,14 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     href: "/admin/messages",
     icon: ChatBubbleLeftRightIcon,
     isAvailable: true,
-    requiredAnyPermission: ["message.read.branch"],
+    requiredAnyPermission: ["message.read.assigned", "message.read.branch"],
   },
   {
     id: "payments",
     href: "/admin/payments",
     icon: BanknotesIcon,
     isAvailable: true,
-    requiredAnyPermission: ["payment.read.branch"],
+    requiredAnyPermission: ["payment.read.assigned", "payment.read.branch"],
   },
   {
     id: "staff",

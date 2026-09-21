@@ -1,6 +1,6 @@
 import type { Translator } from "@/i18n/config";
 
-export type PaymentMethod = "cash" | "card" | "paypay" | "bank_transfer" | "other";
+export type PaymentMethod = "cash" | "paypay" | "visa";
 export type InvoiceStatus = "draft" | "paid";
 
 export type PaymentCustomerSnapshot = {

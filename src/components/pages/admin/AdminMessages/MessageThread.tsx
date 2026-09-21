@@ -13,6 +13,8 @@ import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 import { BookingConfirmationCard } from "./BookingConfirmationCard";
 import { WarrantyNoticeCard } from "./WarrantyNoticeCard";
+import { AppointmentCancellationCard } from "./AppointmentCancellationCard";
+import { PaymentRecordedCard } from "./PaymentRecordedCard";
 import { groupThread } from "./thread";
 import { useAdminPermission } from "@/service";
 
@@ -48,6 +50,12 @@ function Bubble({
   }
   if (message.kind === "warranty-notice") {
     return <WarrantyNoticeCard warranty={message.warranty} />;
+  }
+  if (message.kind === "appointment-cancelled") {
+    return <AppointmentCancellationCard cancellation={message.cancellation} />;
+  }
+  if (message.kind === "payment-recorded") {
+    return <PaymentRecordedCard payment={message.payment} />;
   }
   const fromSalon = message.sender === "salon";
   const tail = fromSalon

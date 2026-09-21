@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { initialCheckoutInvoice, paymentServiceCatalog } from "./data";
 import {
   addLineItem,
+  buildPaymentCaptureInput,
+  calculateAmountReceivedState,
   calculateCashTenderState,
   calculatePaymentTotals,
   confirmPayment,
@@ -53,6 +55,26 @@ describe("cash tender", () => {
 
   it("requires no cash for a free appointment", () => {
     expect(calculateCashTenderState(0, "")).toEqual({ cashTendered: null, cashChange: null, error: null });
+  });
+});
+
+describe("PayPay and VISA amount received", () => {
+  it("accepts only the exact whole-yen amount due", () => {
+    expect(calculateAmountReceivedState(10_000, "10000")).toEqual({ amountReceived: 10_000, error: null });
+    expect(calculateAmountReceivedState(10_000, "9999")).toEqual({ amountReceived: 9_999, error: "state.amountReceivedMismatch" });
+    expect(calculateAmountReceivedState(10_000, "10001")).toEqual({ amountReceived: 10_001, error: "state.amountReceivedMismatch" });
+  });
+
+  it("builds the backend capture contract for all three methods", () => {
+    expect(buildPaymentCaptureInput("cash", 15_000)).toEqual({ method: "CASH", cashTendered: 15_000 });
+    expect(buildPaymentCaptureInput("paypay", 10_000)).toEqual({ method: "PAYPAY", amountReceived: 10_000 });
+    expect(buildPaymentCaptureInput("visa", 10_000)).toEqual({ method: "VISA", amountReceived: 10_000 });
+  });
+
+  it("rejects missing and malformed amounts and supports a zero-yen invoice", () => {
+    expect(calculateAmountReceivedState(10_000, "").error).toBe("state.amountReceivedRequired");
+    expect(calculateAmountReceivedState(10_000, "10000.5").error).toBe("state.amountReceivedInvalid");
+    expect(calculateAmountReceivedState(0, "")).toEqual({ amountReceived: 0, error: null });
   });
 });
 
