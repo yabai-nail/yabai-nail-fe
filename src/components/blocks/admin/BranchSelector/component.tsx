@@ -4,7 +4,7 @@ import { BuildingStorefrontIcon, ChevronDownIcon } from "@heroicons/react/24/out
 import { Dropdown } from "@heroui/react";
 import { useTranslations } from "next-intl";
 
-import { useAdminBranch, useAdminBranchList } from "@/service";
+import { useAdminBranch, useAdminBranchList, useAdminPermission } from "@/service";
 
 // Sits in the admin shell header. Hides itself when there is nothing to
 // switch (unauthenticated admin, or admin with a single branch) so the
@@ -12,7 +12,10 @@ import { useAdminBranch, useAdminBranchList } from "@/service";
 export function BranchSelector() {
   const t = useTranslations("admin.branchSelector");
   const { branchId, branchIds, setBranchId } = useAdminBranch();
-  const { data } = useAdminBranchList();
+  // A staff session already carries its branch ids, but does not have permission
+  // to read the branch directory. Do not issue a request that is guaranteed to 403.
+  const canReadBranches = useAdminPermission("branch.read.branch", "branch.read.all");
+  const { data } = useAdminBranchList(undefined, canReadBranches);
   const branchNames = new Map((data?.items ?? []).map((branch) => [branch.id, branch.name] as const));
   const label = branchNames.get(branchId ?? "") ?? t("unnamed");
 

@@ -93,7 +93,10 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     href: "/admin/customers",
     icon: UsersIcon,
     isAvailable: true,
-    requiredAnyPermission: ["customer.read.assigned", "customer.read.branch"],
+    // The current CRM screen loads a branch-wide customer directory. Assigned-only
+    // staff must use the customer attached to their appointment until there is an
+    // assigned-customer endpoint; advertising this route otherwise ends in a 403.
+    requiredAnyPermission: ["customer.read.branch"],
   },
   {
     id: "messages",
@@ -114,7 +117,8 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     href: "/admin/staff",
     icon: UserGroupIcon,
     isAvailable: true,
-    requiredAnyPermission: ["staff.read.own", "staff.read.branch"],
+    // This is the branch roster, not the signed-in technician's own profile.
+    requiredAnyPermission: ["staff.read.branch"],
   },
   {
     id: "services",

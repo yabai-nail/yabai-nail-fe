@@ -8,7 +8,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, useAdminBranch, useAdminBranchReviews, useAdminCustomers, useAdminPermission, useAdminReviews, useAuth } from "@/service";
+import { adminService, useAdminBranch, useAdminBranchReviews, useAdminPermission, useAdminReviews, useAuth } from "@/service";
 import { ReviewReplyModal } from "./ReviewReplyModal";
 import {
   adaptReview,
@@ -40,22 +40,16 @@ export function AdminReviewsComponent() {
     status: status === "all" ? undefined : status,
   };
   const branchReviews = useAdminBranchReviews(scope === "branch" ? branchId : null, reviewQuery);
-  // The table printed the raw customer UUID. Every other list resolves ids to
-  // names the same way, from the branch's own customer list.
-  const { data: customersData } = useAdminCustomers(branchId);
   const orgReviews = useAdminReviews(reviewQuery, isOwner);
   // Org scope is a read-only overview: replies/handling need a per-review branch id,
   // so those actions stay on the branch scope where the active branch is authoritative.
   const { data, isLoading, error, mutate } = scope === "branch" ? branchReviews : orgReviews;
 
-  const customerNames = useMemo(
-    () => new Map((customersData?.items ?? []).map((c) => [c.id, c.displayName ?? c.name ?? t("unnamedCustomer")] as const)),
-    [customersData, t],
-  );
-
   const source = useMemo<ReadonlyArray<ReviewRow>>(
-    () => (data?.items ? data.items.map((review) => adaptReview(review, customerNames, t("unnamedCustomer"))) : []),
-    [data, customerNames, t],
+    // The review response already carries the customer display name. A second
+    // branch-wide CRM request was redundant and failed for read-only staff.
+    () => (data?.items ? data.items.map((review) => adaptReview(review, undefined, t("unnamedCustomer"))) : []),
+    [data, t],
   );
 
   const [page, setPage] = useState(1);

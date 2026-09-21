@@ -7,6 +7,7 @@ import { useState } from "react";
 import { adminService } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { BranchRow } from "./data";
+import { initialBranchTimeZone } from "./branch-timezone";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
@@ -28,7 +29,7 @@ export function BranchModal({
   const isEdit = branch !== null;
   const [name, setName] = useState(branch?.name ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
-  const [timezone, setTimezone] = useState(branch?.timezone ?? "Asia/Ho_Chi_Minh");
+  const [timezone, setTimezone] = useState(() => initialBranchTimeZone(branch));
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">(branch?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

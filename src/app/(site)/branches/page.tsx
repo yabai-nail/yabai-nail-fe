@@ -2,6 +2,8 @@
 
 import { useBranches } from "@/service";
 
+import { BranchBookingCard } from "./BranchBookingCard";
+
 // A Next server-metadata export can't sit next to `"use client"`, so the
 // dynamic list is a client component; static metadata is generated from a
 // parent layout instead.
@@ -32,16 +34,7 @@ const BranchesRoute = () => {
           ) : (
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {branches.map((branch) => (
-                <li
-                  key={branch.id}
-                  className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition hover:border-accent"
-                >
-                  <h2 className="text-xl font-semibold text-foreground">{branch.name}</h2>
-                  <p className="mt-3 text-sm leading-6 text-muted">{branch.address}</p>
-                  <p className="mt-4 text-xs uppercase tracking-wide text-muted">
-                    {branch.timezone}
-                  </p>
-                </li>
+                <BranchBookingCard key={branch.id} branch={branch} />
               ))}
             </ul>
           )}

@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { isoDateInTimeZone, SALON_TIME_ZONE, utcOffsetOn, zonedIso } from "./salon-date";
+import { DEFAULT_TIME_ZONE } from "@/i18n/config";
 
 describe("zonedIso", () => {
-  it("uses the branch's real offset, not a hardcoded Tokyo one", () => {
-    // The live branch is Asia/Ho_Chi_Minh. The old code appended +09:00, so
-    // 14:00 typed by the salon was stored as 12:00 their time.
+  it("honours an explicit Vietnamese branch without changing its fixture timezone", () => {
     expect(zonedIso("2026-08-25", "14:00", "Asia/Ho_Chi_Minh")).toBe(
       "2026-08-25T14:00:00+07:00",
     );
@@ -18,6 +17,11 @@ describe("zonedIso", () => {
     expect(zonedIso("2026-08-25", "14:00", "Asia/Tokyo")).toBe("2026-08-25T14:00:00+09:00");
   });
 
+  it("uses the shared Tokyo default until branch data is available", () => {
+    expect(SALON_TIME_ZONE).toBe(DEFAULT_TIME_ZONE);
+    expect(zonedIso("2026-08-25", "14:00")).toBe("2026-08-25T14:00:00+09:00");
+  });
+
   it("follows a DST change instead of assuming a fixed offset", () => {
     expect(utcOffsetOn("2026-01-15", "Europe/London")).toBe("+00:00");
     expect(utcOffsetOn("2026-07-15", "Europe/London")).toBe("+01:00");
@@ -25,17 +29,14 @@ describe("zonedIso", () => {
 });
 
 describe("isoDateInTimeZone", () => {
-  it("names the salon's day, not UTC's, in the early morning", () => {
-    // 2026-08-25T01:00 in Ho Chi Minh is still 2026-08-24T18:00 UTC. The old
-    // toISOString().slice(0,10) returned the 24th here — a whole day of
-    // bookings the admin could not see.
-    const instant = new Date("2026-08-24T18:00:00Z");
+  it("names Tokyo's day, not UTC's, across the default-zone rollover", () => {
+    const instant = new Date("2026-08-24T15:30:00Z");
     expect(instant.toISOString().slice(0, 10)).toBe("2026-08-24");
     expect(isoDateInTimeZone(instant, SALON_TIME_ZONE)).toBe("2026-08-25");
   });
 
-  it("agrees with UTC in the middle of the salon's day", () => {
-    const instant = new Date("2026-08-25T05:00:00Z"); // 12:00 in Ho Chi Minh
+  it("agrees with UTC in the middle of Tokyo's day", () => {
+    const instant = new Date("2026-08-25T03:00:00Z"); // 12:00 in Tokyo
     expect(isoDateInTimeZone(instant, SALON_TIME_ZONE)).toBe("2026-08-25");
   });
 

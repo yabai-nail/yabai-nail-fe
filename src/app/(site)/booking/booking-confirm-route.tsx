@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   bookingService,
@@ -10,13 +10,18 @@ import {
   useBranch,
   useBranchEligibleStaff,
   useBranchService,
+  useBranchServiceAddons,
 } from "@/service";
 
 import { formatMoney } from "@/lib/admin-format";
 
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { bookingCalendarDate } from "./booking-date";
+import { PublicServiceAddonPicker } from "./PublicServiceAddonPicker";
+import {
+  buildPublicAppointmentInput,
+  summarisePublicAddonSelection,
+  togglePublicAddonSelection,
+} from "./public-booking-addons";
 
 const BookingConfirmRoute = () => {
   const params = useSearchParams();
@@ -25,10 +30,17 @@ const BookingConfirmRoute = () => {
 
   const { data: branch } = useBranch(branchId);
   const { data: service } = useBranchService(branchId, serviceId);
-  const { data: staffList } = useBranchEligibleStaff(branchId);
+  const {
+    data: addonConfiguration,
+    isLoading: loadingAddons,
+    error: addonsError,
+  } = useBranchServiceAddons(branchId, serviceId);
 
-  const [date, setDate] = useState<string>(() => todayIso());
+  const [date, setDate] = useState("");
+  const [minimumDate, setMinimumDate] = useState("");
+  const customerChangedDate = useRef(false);
   const [staffId, setStaffId] = useState<string | null>(null);
+  const [selectedOptionIds, setSelectedOptionIds] = useState<ReadonlyArray<string>>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -37,12 +49,45 @@ const BookingConfirmRoute = () => {
   const [confirmation, setConfirmation] = useState<null | { id: string; startsAt: string }>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const addonGroups = useMemo(
+    () => addonConfiguration?.groups ?? [],
+    [addonConfiguration?.groups],
+  );
+  const addonSelection = useMemo(
+    () => summarisePublicAddonSelection(addonGroups, selectedOptionIds),
+    [addonGroups, selectedOptionIds],
+  );
+  const bookingServiceIds = useMemo(
+    () => (serviceId ? [serviceId, ...addonSelection.selectedServiceIds] : []),
+    [serviceId, addonSelection.selectedServiceIds],
+  );
+  const serviceIdsQuery = bookingServiceIds.join(",");
+  const addonSelectionComplete =
+    !loadingAddons && !addonsError && addonConfiguration !== undefined && addonSelection.complete;
+  const { data: staffList } = useBranchEligibleStaff(
+    addonSelectionComplete ? branchId : null,
+    serviceIdsQuery ? { serviceIds: serviceIdsQuery } : undefined,
+  );
+
+  useEffect(() => {
+    // Defer until after hydration so the server's timezone can never become the
+    // browser default. Re-run when branch data supplies the business timezone.
+    const timer = window.setTimeout(() => {
+      const today = bookingCalendarDate(new Date(), branch?.timezone);
+      setMinimumDate(today);
+      setDate((current) =>
+        !customerChangedDate.current || !current || current < today ? today : current,
+      );
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [branch?.timezone]);
+
   const availabilityQuery = useMemo(() => {
-    if (!branchId || !serviceId) return null;
-    const query: Record<string, string> = { branchId, serviceIds: serviceId, date };
+    if (!branchId || !serviceId || !date || !addonSelectionComplete) return null;
+    const query: Record<string, string> = { branchId, serviceIds: serviceIdsQuery, date };
     if (staffId) query.staffId = staffId;
     return query;
-  }, [branchId, serviceId, date, staffId]);
+  }, [branchId, serviceId, date, staffId, serviceIdsQuery, addonSelectionComplete]);
   const { data: availability, isLoading: loadingSlots } = useAvailability(availabilityQuery);
   const slots = availability?.slots ?? [];
 
@@ -96,6 +141,7 @@ const BookingConfirmRoute = () => {
 
   const canSubmit =
     Boolean(selectedSlot) &&
+    addonSelectionComplete &&
     name.trim().length >= 2 &&
     phone.trim().length >= 8 &&
     !submitting;
@@ -105,17 +151,18 @@ const BookingConfirmRoute = () => {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const appointment = await bookingService.createAppointment({
-        branchId,
-        serviceIds: [serviceId],
-        staffId: staffId ?? null,
-        startsAt: selectedSlot,
-        note: note.trim() || undefined,
-        customer: {
-          displayName: name.trim(),
-          phone: phone.trim(),
-        },
-      });
+      const appointment = await bookingService.createAppointment(
+        buildPublicAppointmentInput(serviceId, addonSelection.selectedServiceIds, {
+          branchId,
+          staffId: staffId ?? null,
+          startsAt: selectedSlot,
+          note: note.trim() || undefined,
+          customer: {
+            displayName: name.trim(),
+            phone: phone.trim(),
+          },
+        }),
+      );
       setConfirmation({ id: appointment.id, startsAt: appointment.startsAt });
     } catch (error) {
       setSubmitError(
@@ -149,12 +196,36 @@ const BookingConfirmRoute = () => {
             </h2>
             {service ? (
               <div className="text-right">
-                <p className="text-sm font-semibold text-accent">{formatMoney(service.price)}</p>
-                <p className="text-xs text-muted">{service.durationMinutes} phút</p>
+                <p className="text-sm font-semibold text-accent">
+                  {formatMoney(service.price + addonSelection.addedPrice)}
+                </p>
+                <p className="text-xs text-muted">
+                  {service.durationMinutes + addonSelection.addedMinutes} phút
+                </p>
               </div>
             ) : null}
           </div>
         </section>
+
+        {loadingAddons ? (
+          <p className="mt-6 text-sm text-muted">Đang tải tùy chọn dịch vụ…</p>
+        ) : addonsError ? (
+          <p role="alert" className="mt-6 text-sm text-danger">
+            Không tải được tùy chọn dịch vụ. Vui lòng thử lại.
+          </p>
+        ) : (
+          <PublicServiceAddonPicker
+            groups={addonGroups}
+            selectedOptionIds={selectedOptionIds}
+            onToggle={(groupCode, optionId) => {
+              setSelectedOptionIds((current) =>
+                togglePublicAddonSelection(addonGroups, groupCode, optionId, current),
+              );
+              setStaffId(null);
+              setSelectedSlot(null);
+            }}
+          />
+        )}
 
         {/* Staff picker */}
         <section aria-label="Kỹ thuật viên" className="mt-6">
@@ -194,15 +265,20 @@ const BookingConfirmRoute = () => {
           <input
             type="date"
             value={date}
-            min={todayIso()}
+            min={minimumDate || undefined}
             onChange={(event) => {
+              customerChangedDate.current = true;
               setDate(event.target.value);
               setSelectedSlot(null);
             }}
             className="mt-3 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
           />
           <div className="mt-4">
-            {loadingSlots ? (
+            {!addonSelectionComplete ? (
+              <p className="text-sm text-muted">
+                Hoàn tất tùy chọn dịch vụ trước khi chọn khung giờ.
+              </p>
+            ) : loadingSlots ? (
               <p className="text-sm text-muted">Đang tải khung giờ…</p>
             ) : slots.length === 0 ? (
               <p className="text-sm text-muted">Không có khung giờ khả dụng cho ngày này.</p>

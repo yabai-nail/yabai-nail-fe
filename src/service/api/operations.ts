@@ -200,6 +200,7 @@ GET /api/v1/admin/notification-campaigns
 DELETE /api/v1/admin/services/{serviceId}
 GET /api/v1/admin/services/{serviceId}/add-ons
 PUT /api/v1/admin/services/{serviceId}/add-ons
+GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons
 GET /api/v1/admin/home-banners
 PUT /api/v1/admin/home-banners
 DELETE /api/v1/admin/nail-designs/{designId}

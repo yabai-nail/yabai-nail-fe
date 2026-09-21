@@ -1,6 +1,12 @@
 import { executeApiOperation } from "../api";
 import type { BackendList } from "../admin/types";
-import type { Branch, BranchService, BranchServiceCategory, BranchStaff } from "./types";
+import type {
+  Branch,
+  BranchService,
+  BranchServiceAddons,
+  BranchServiceCategory,
+  BranchStaff,
+} from "./types";
 
 export const branchesService = {
   // Public browse. Uses the canonical catalog operation so tests catch a route
@@ -26,6 +32,11 @@ export const branchesService = {
   serviceDetail: (branchId: string, serviceId: string) =>
     executeApiOperation<BranchService>(
       "GET /api/v1/branches/{branchId}/services/{serviceId}",
+      { path: { branchId, serviceId } },
+    ),
+  serviceAddons: (branchId: string, serviceId: string) =>
+    executeApiOperation<BranchServiceAddons>(
+      "GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons",
       { path: { branchId, serviceId } },
     ),
   eligibleStaff: (

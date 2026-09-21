@@ -8,6 +8,7 @@ import { adminService } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { PromotionRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { parsePromotionInteger, validatePromotionForm } from "./promotion-form";
 
 const inputClass =
   "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
@@ -34,29 +35,30 @@ export function PromotionModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const numericValue = Number(value.replace(/[^\d]/g, ""));
-  const numericIssuanceLimit = Number(issuanceLimit.replace(/[^\d]/g, ""));
-  // Creating a promotion requires both dates; the backend rejects the request
-  // outright without them, and the code must be A-Z 0-9 _ - only.
-  const canSubmit =
-    name.trim().length >= 2 &&
-    numericValue > 0 &&
-    (isEdit || (/^[A-Z0-9_-]{3,60}$/.test(code.trim().toUpperCase()) && startsAt !== "" && endsAt !== "" && numericIssuanceLimit > 0)) &&
-    !busy;
+  const termsLocked = promotion?.status === "ACTIVE" || promotion?.status === "PUBLISHED";
+  const formValues = { code, title: name, type: kind, value, startAt: startsAt, endAt: endsAt, issuanceLimit };
+  const validationError = validatePromotionForm(formValues, { isEdit, termsLocked });
+  const numericValue = parsePromotionInteger(value);
+  const numericIssuanceLimit = parsePromotionInteger(issuanceLimit);
 
   // The backend takes one `value` alongside `type`; it has no `percentage`
   // field and reads neither `kind` nor `discountType`.
-  const amountFields = { type: kind, value: numericValue };
+  const amountFields = { type: kind, value: numericValue! };
 
   const submit = async () => {
-    if (!canSubmit) return;
+    if (validationError) {
+      setError(t(`promotionModal.validation.${validationError}`));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       if (isEdit && promotion) {
         await adminService.updatePromotion(
           promotion.id,
-          { title: name.trim(), ...amountFields, startAt: startsAt || undefined, endAt: endsAt || undefined },
+          termsLocked
+            ? { title: name.trim() }
+            : { title: name.trim(), ...amountFields, startAt: startsAt || undefined, endAt: endsAt || undefined },
           promotion.version,
         );
       } else {
@@ -66,7 +68,7 @@ export function PromotionModal({
           ...amountFields,
           startAt: startsAt,
           endAt: endsAt,
-          issuanceLimit: numericIssuanceLimit,
+          issuanceLimit: numericIssuanceLimit!,
         });
       }
       notifySuccess(isEdit ? tc("promotionUpdated") : tc("promotionCreated"));
@@ -84,12 +86,13 @@ export function PromotionModal({
       <Modal.Backdrop>
         <Modal.Container size="md" placement="center" scroll="inside">
           <Modal.Dialog>
-            <Modal.Header className="border-b border-admin-border px-5 py-4">
+            <form className="contents" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
+              <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
                 {isEdit ? t("promotionModal.editTitle") : t("promotionModal.addTitle")}
               </Modal.Heading>
-            </Modal.Header>
-            <Modal.Body className="grid gap-4 px-5 py-5">
+              </Modal.Header>
+              <Modal.Body className="grid gap-4 px-5 py-5">
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("promotionModal.code")}</span>
                 <input
@@ -98,12 +101,16 @@ export function PromotionModal({
                   onChange={(event) => setCode(event.target.value)}
                   placeholder="SUMMER20"
                   disabled={isEdit}
+                  required={!isEdit}
+                  minLength={3}
+                  maxLength={60}
+                  pattern="[A-Za-z0-9_-]+"
                   autoFocus={!isEdit}
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("promotionModal.name")}</span>
-                <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("promotionModal.namePlaceholder")} />
+                <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("promotionModal.namePlaceholder")} required minLength={2} maxLength={200} autoFocus={isEdit} />
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2 text-sm">
@@ -112,6 +119,7 @@ export function PromotionModal({
                     label={t("promotionModal.typeLabel")}
                     fullWidth
                     value={kind}
+                    isDisabled={termsLocked}
                     onChange={setKind}
                     options={[
                       { value: "PERCENT", label: t("promotionModal.percentOption") },
@@ -123,33 +131,34 @@ export function PromotionModal({
                   <span className="font-semibold text-admin-ink">
                     {kind === "PERCENT" ? t("promotionModal.percentValue") : t("promotionModal.fixedValue")}
                   </span>
-                  <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} />
+                  <input inputMode="numeric" className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder={kind === "PERCENT" ? "20" : "50000"} required disabled={termsLocked} />
                 </label>
               </div>
               {!isEdit ? (
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("promotionModal.issueLimit")}</span>
-                  <input inputMode="numeric" className={inputClass} value={issuanceLimit} onChange={(event) => setIssuanceLimit(event.target.value)} placeholder="1000" />
+                  <input inputMode="numeric" className={inputClass} value={issuanceLimit} onChange={(event) => setIssuanceLimit(event.target.value)} placeholder="1000" required />
                 </label>
               ) : null}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("promotionModal.startAt")}</span>
-                  <input type="date" className={inputClass} value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+                  <input type="date" className={inputClass} value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required={!isEdit} disabled={termsLocked} />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("promotionModal.endAt")}</span>
-                  <input type="date" className={inputClass} value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
+                  <input type="date" className={inputClass} value={endsAt} onChange={(event) => setEndsAt(event.target.value)} required={!isEdit} disabled={termsLocked} />
                 </label>
               </div>
               {error ? <p className="text-sm text-admin-danger" role="alert">{error}</p> : null}
-            </Modal.Body>
-            <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
+              </Modal.Body>
+              <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
               <Button variant="ghost" className="rounded-lg" onPress={onClose}>{t("promotionModal.cancel")}</Button>
-              <Button variant="primary" className="rounded-lg" isDisabled={!canSubmit} onPress={() => void submit()}>
+              <Button type="submit" variant="primary" className="rounded-lg" isDisabled={busy}>
                 {busy ? t("promotionModal.saving") : isEdit ? t("promotionModal.save") : t("promotionModal.add")}
               </Button>
-            </Modal.Footer>
+              </Modal.Footer>
+            </form>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

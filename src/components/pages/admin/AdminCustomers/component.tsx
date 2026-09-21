@@ -36,16 +36,20 @@ function deriveInitials(name: string): string {
  * invented value.
  */
 // The fallback name is threaded in: this runs inside a useMemo, outside the component.
-function toCustomerRow(server: AdminCustomer, unnamed: string): Customer {
+export function toCustomerRow(
+  server: AdminCustomer,
+  unnamed: string,
+  fallback?: Customer,
+): Customer {
   const name = server.displayName ?? server.name ?? unnamed;
   const record = server as unknown as Record<string, unknown>;
-  const readNumber = (key: string): number => {
+  const readNumber = (key: string, fallbackValue = 0): number => {
     const value = record[key];
-    return typeof value === "number" ? value : 0;
+    return typeof value === "number" ? value : fallbackValue;
   };
-  const readString = (key: string): string => {
+  const readString = (key: string, fallbackValue = ""): string => {
     const value = record[key];
-    return typeof value === "string" ? value : "";
+    return typeof value === "string" ? value : fallbackValue;
   };
   const rawSegment = readString("segment").toUpperCase();
   const rawRank = readString("membershipTier").toUpperCase();
@@ -53,28 +57,30 @@ function toCustomerRow(server: AdminCustomer, unnamed: string): Customer {
     id: server.id,
     name,
     initials: deriveInitials(name),
-    phone: server.phone ?? "",
-    birthday: readString("birthday"),
-    handle: readString("handle"),
-    preference: readString("preferenceSummary"),
-    lastVisit: readString("lastVisitAt"),
-    totalSpend: readNumber("totalSpend"),
-    points: readNumber("pointBalance"),
-    visits: readNumber("visitCount"),
+    phone: server.phone ?? fallback?.phone ?? "",
+    birthday: readString("birthday", fallback?.birthday),
+    handle: readString("handle", fallback?.handle),
+    preference: readString("preferenceSummary", fallback?.preference),
+    lastVisit: readString("lastVisitAt", fallback?.lastVisit),
+    totalSpend: readNumber("totalSpend", fallback?.totalSpend),
+    points: readNumber("pointBalance", fallback?.points),
+    visits: readNumber("visitCount", fallback?.visits),
     segment:
       rawSegment === "NEW"
         ? "new"
         : rawSegment === "LOYAL" || rawRank === "GOLD" || rawRank === "SILVER"
           ? "loyal"
-          : "regular",
+          : rawSegment
+            ? "regular"
+            : fallback?.segment ?? "regular",
     rank:
       rawRank === "GOLD" || rawRank === "SILVER" || rawRank === "BRONZE"
         ? (rawRank.toLowerCase() as CustomerRank)
-        : "none",
-    note: readString("note"),
+        : fallback?.rank ?? "none",
+    note: readString("note", fallback?.note),
     version: server.version,
-    locale: server.locale,
-    status: server.status,
+    locale: server.locale ?? fallback?.locale,
+    status: server.status ?? fallback?.status,
   };
 }
 
@@ -118,7 +124,12 @@ export function AdminCustomersComponent() {
   const firstShown = filteredCustomers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const selectedCustomer = resolveVisibleSelection(visibleCustomers, selectedId || visibleCustomers[0]?.id || "");
   const customerDetail = useAdminCustomer(branchId, selectedCustomer?.id ?? null);
-  const detailedCustomer = customerDetail.data ? toCustomerRow(customerDetail.data, t("unnamed")) : selectedCustomer;
+  // The detail endpoint intentionally returns only account fields, while the list
+  // carries segment/visit/spend summaries. Preserve those summaries instead of
+  // turning every selected customer into the default "regular" segment.
+  const detailedCustomer = customerDetail.data
+    ? toCustomerRow(customerDetail.data, t("unnamed"), selectedCustomer ?? undefined)
+    : selectedCustomer;
 
   return (
     <AdminPageLayout>
@@ -242,13 +253,14 @@ export function AdminCustomersComponent() {
             setEditSubmitting(true);
             setEditError(null);
             try {
-              await adminService.updateCustomer(
+              const updated = await adminService.updateCustomer(
                 branchId,
                 detailedCustomer.id,
                 patch,
                 detailedCustomer.version,
               );
-      notifySuccess(tc("customerUpdated"));
+              await customerDetail.mutate(updated, { revalidate: false });
+              notifySuccess(tc("customerUpdated"));
               setIsEditOpen(false);
               void mutateCustomers();
             } catch (thrown) {

@@ -31,4 +31,15 @@ describe("branchesService", () => {
       query: { city: "Fukuoka" },
     });
   });
+
+  it("loads public add-on groups for the selected branch and service", async () => {
+    executeApiOperation.mockResolvedValue({ serviceId: "service-1", groups: [] });
+
+    await branchesService.serviceAddons("branch-1", "service-1");
+
+    expect(executeApiOperation).toHaveBeenCalledWith(
+      "GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons",
+      { path: { branchId: "branch-1", serviceId: "service-1" } },
+    );
+  });
 });

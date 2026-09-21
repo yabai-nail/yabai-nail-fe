@@ -66,7 +66,9 @@ export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
   const tBranch = useTranslations("admin.branchSelector");
   const { branchIds } = useAdminBranch();
-  const canWrite = useAdminPermission("catalog.write.branch", "catalog.write.all");
+  // Service/category CRUD changes the chain-wide catalogue. Branch-level
+  // catalogue write is reserved for appointment actual-service adjustments.
+  const canWrite = useAdminPermission("catalog.write.all");
   const popularityWindow = useMemo(() => getPopularityWindow(), []);
   const [filter, setFilter] = useState<ServiceFilter>("all");
   const [query, setQuery] = useState("");

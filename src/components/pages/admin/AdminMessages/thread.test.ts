@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ChatMessage, ChatTextMessage } from "./data";
 import { groupThread, sortThreadChronologically } from "./thread";
 
-const NOW = new Date("2026-09-02T10:00:00+07:00");
+const NOW = new Date("2026-09-02T10:00:00+09:00");
 const DATE_LABELS = {
   today: "Hôm nay",
   yesterday: "Hôm qua",
@@ -103,8 +103,8 @@ describe("groupThread", () => {
     // Same sender either side of midnight: one run would hide the date change.
     const days = group(
       [
-        msg("a", "customer", "2026-09-01T23:59:00+07:00"),
-        msg("b", "customer", "2026-09-02T00:01:00+07:00"),
+        msg("a", "customer", "2026-09-01T23:59:00+09:00"),
+        msg("b", "customer", "2026-09-02T00:01:00+09:00"),
       ],
       NOW,
     );

@@ -1749,6 +1749,15 @@
         "issueLimit": "Giới hạn phát hành",
         "startAt": "Bắt đầu",
         "endAt": "Kết thúc",
+        "validation": {
+          "title": "Tên phải có từ 2 đến 200 ký tự.",
+          "code": "Mã phải có 3–60 ký tự, chỉ gồm A–Z, 0–9, gạch dưới hoặc gạch ngang.",
+          "value": "Giá trị giảm phải là số nguyên lớn hơn 0.",
+          "percentage": "Phần trăm giảm không được vượt quá 100%.",
+          "issuanceLimit": "Giới hạn phát hành phải là số nguyên lớn hơn 0.",
+          "dates": "Hãy chọn đầy đủ ngày bắt đầu và ngày kết thúc.",
+          "dateOrder": "Ngày kết thúc phải sau ngày bắt đầu."
+        },
         "cancel": "Hủy",
         "saving": "Đang lưu…",
         "save": "Lưu",

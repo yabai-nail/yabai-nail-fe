@@ -2,7 +2,13 @@
 
 import { useApiOperation } from "../api";
 import type { BackendList } from "../admin/types";
-import type { Branch, BranchService, BranchServiceCategory, BranchStaff } from "./types";
+import type {
+  Branch,
+  BranchService,
+  BranchServiceAddons,
+  BranchServiceCategory,
+  BranchStaff,
+} from "./types";
 
 export function useBranches(
   query?: Readonly<Record<string, string | number | undefined>>,
@@ -45,6 +51,15 @@ export function useBranchServices(
 export function useBranchService(branchId: string | null, serviceId: string | null) {
   return useApiOperation<BranchService>(
     branchId && serviceId ? "GET /api/v1/branches/{branchId}/services/{serviceId}" : null,
+    { path: branchId && serviceId ? { branchId, serviceId } : undefined },
+  );
+}
+
+export function useBranchServiceAddons(branchId: string | null, serviceId: string | null) {
+  return useApiOperation<BranchServiceAddons>(
+    branchId && serviceId
+      ? "GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons"
+      : null,
     { path: branchId && serviceId ? { branchId, serviceId } : undefined },
   );
 }

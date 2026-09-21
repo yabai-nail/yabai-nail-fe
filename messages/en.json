@@ -1739,6 +1739,15 @@
         "issueLimit": "Issue limit",
         "startAt": "Starts",
         "endAt": "Ends",
+        "validation": {
+          "title": "The name must be between 2 and 200 characters.",
+          "code": "The code must be 3–60 characters using only A–Z, 0–9, underscores or hyphens.",
+          "value": "The discount value must be a positive integer.",
+          "percentage": "The percentage discount cannot exceed 100%.",
+          "issuanceLimit": "The issue limit must be a positive integer.",
+          "dates": "Choose both a start date and an end date.",
+          "dateOrder": "The end date must be after the start date."
+        },
         "cancel": "Cancel",
         "saving": "Saving…",
         "save": "Save",

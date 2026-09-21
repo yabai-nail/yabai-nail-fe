@@ -1,20 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo } from "react";
 
-import { useBranches, useBranchServices } from "@/service";
+import { useBranches, useBranchServices, type Branch } from "@/service";
 
 import { formatMoney } from "@/lib/admin-format";
 
-const BookingServicesRoute = () => {
-  // Step 1 of the booking journey. The full flow (branch → service → staff
-  // → time slot → confirm) is not implemented yet — this page lands the
-  // customer on real services from the first published branch, and the
-  // "Đặt lịch" CTA anchors to the next step once it exists.
+export const resolveBookingBranchId = (
+  branches: ReadonlyArray<Pick<Branch, "id">>,
+  requestedBranchId: string | null,
+) => {
+  if (requestedBranchId && branches.some((branch) => branch.id === requestedBranchId)) {
+    return requestedBranchId;
+  }
+
+  return branches[0]?.id ?? null;
+};
+
+const BookingServicesContent = () => {
+  const searchParams = useSearchParams();
   const { branches } = useBranches();
-  const defaultBranchId = useMemo(() => branches[0]?.id ?? null, [branches]);
-  const { data, isLoading, error } = useBranchServices(defaultBranchId);
+  const requestedBranchId = searchParams.get("branchId");
+  const selectedBranchId = useMemo(
+    () => resolveBookingBranchId(branches, requestedBranchId),
+    [branches, requestedBranchId],
+  );
+  const selectedBranch = branches.find((branch) => branch.id === selectedBranchId);
+  const { data, isLoading, error } = useBranchServices(selectedBranchId);
   const services = data?.items ?? [];
 
   return (
@@ -29,9 +43,14 @@ const BookingServicesRoute = () => {
         <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:text-lg">
           Chọn dịch vụ bạn muốn để tiếp tục chọn kỹ thuật viên và thời gian.
         </p>
+        {selectedBranch ? (
+          <p className="mt-3 text-sm text-muted">
+            Chi nhánh: <strong className="text-foreground">{selectedBranch.name}</strong>
+          </p>
+        ) : null}
 
         <section aria-label="Chọn dịch vụ" className="mt-12">
-          {!defaultBranchId ? (
+          {!selectedBranchId ? (
             <p className="text-sm text-muted">Đang chờ dữ liệu chi nhánh…</p>
           ) : isLoading ? (
             <p className="text-sm text-muted">Đang tải dịch vụ…</p>
@@ -63,7 +82,7 @@ const BookingServicesRoute = () => {
                   <Link
                     href={{
                       pathname: "/booking",
-                      query: { branchId: defaultBranchId, serviceId: service.id },
+                      query: { branchId: selectedBranchId, serviceId: service.id },
                     }}
                     className="mt-5 inline-flex items-center justify-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition hover:opacity-90"
                   >
@@ -78,5 +97,11 @@ const BookingServicesRoute = () => {
     </main>
   );
 };
+
+const BookingServicesRoute = () => (
+  <Suspense fallback={<p className="px-4 py-16 text-sm text-muted">Đang tải dịch vụ…</p>}>
+    <BookingServicesContent />
+  </Suspense>
+);
 
 export default BookingServicesRoute;

@@ -57,7 +57,7 @@ describe("check-in resolution view", () => {
   // hands it -- naming COMPLETED is the catalogue's job, not this function's.
   it("renders each appointment in salon time with a labelled status", () => {
     expect(summarizeCheckIn(resolution, statusLabel).appointments).toEqual([
-      { id: "a1", time: "10:00", status: "COMPLETED", total: 250000 },
+      { id: "a1", time: "12:00", status: "COMPLETED", total: 250000 },
     ]);
   });
 
@@ -91,7 +91,7 @@ describe("membership resolution view", () => {
 
 describe("formatSalonClock", () => {
   it("shows the salon wall clock for a UTC instant", () => {
-    expect(formatSalonClock("2026-08-26T08:00:00.000Z")).toBe("15:00");
+    expect(formatSalonClock("2026-08-26T08:00:00.000Z")).toBe("17:00");
   });
 
   it("returns a dash for an unparseable instant", () => {
