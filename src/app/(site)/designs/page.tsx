@@ -1,6 +1,7 @@
 "use client";
 
 import { useNailDesigns } from "@/service";
+import { NailDesignCard } from "./NailDesignCard";
 
 const DesignsRoute = () => {
   const { data, isLoading, error } = useNailDesigns();
@@ -30,31 +31,7 @@ const DesignsRoute = () => {
           ) : (
             <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {designs.map((design) => (
-                <li
-                  key={design.id}
-                  className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:border-accent"
-                >
-                  {design.imageUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      alt={design.name}
-                      className="aspect-square w-full object-cover"
-                      src={design.imageUrl}
-                    />
-                  ) : (
-                    <div className="grid aspect-square w-full place-items-center bg-accent-soft text-xs text-accent-soft-foreground">
-                      YABAI
-                    </div>
-                  )}
-                  <div className="px-4 py-3">
-                    <p className="text-sm font-semibold text-foreground">{design.name}</p>
-                    {typeof design.favoriteCount === "number" ? (
-                      <p className="mt-1 text-xs text-muted">
-                        ♡ {design.favoriteCount.toLocaleString("vi-VN")}
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
+                <NailDesignCard key={design.id} design={design} />
               ))}
             </ul>
           )}

@@ -41,8 +41,17 @@ export interface PublicPromotion {
 
 export interface NailDesign {
   readonly id: string;
-  readonly name: string;
-  readonly imageUrl?: string;
+  /** Public API localized display name. */
+  readonly localizedName?: string | null;
+  readonly nameVi?: string | null;
+  readonly nameJa?: string | null;
+  readonly title?: string | null;
+  /** Legacy aliases kept for older deployments. */
+  readonly name?: string | null;
+  readonly imageUrl?: string | null;
+  readonly thumbnailUrl?: string | null;
+  readonly images?: ReadonlyArray<string>;
+  readonly indicativePrice?: number | null;
   readonly categoryIds?: ReadonlyArray<string>;
   readonly favoriteCount?: number;
   readonly [field: string]: unknown;
