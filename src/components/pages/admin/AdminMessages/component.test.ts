@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AdminMessage } from "@/service";
 
-import { toChatMessage } from "./component";
+import { shouldAutoMarkConversationRead, toChatMessage } from "./component";
 
 describe("toChatMessage", () => {
   it("maps a persisted booking confirmation to a system card", () => {
@@ -120,5 +120,27 @@ describe("toChatMessage", () => {
     if (message.kind === "warranty-notice") {
       expect(message.warranty.endsOn).toBe("2026-10-20");
     }
+  });
+});
+
+describe("shouldAutoMarkConversationRead", () => {
+  it("marks read when a writable staff opens an unread conversation", () => {
+    expect(shouldAutoMarkConversationRead({ unreadCount: 1, version: 3 }, true)).toBe(true);
+  });
+
+  it("stays quiet on an already-read conversation", () => {
+    expect(shouldAutoMarkConversationRead({ unreadCount: 0, version: 3 }, true)).toBe(false);
+  });
+
+  it("does not mark read without write permission", () => {
+    expect(shouldAutoMarkConversationRead({ unreadCount: 2, version: 3 }, false)).toBe(false);
+  });
+
+  it("waits for a version before issuing the If-Match write", () => {
+    expect(shouldAutoMarkConversationRead({ unreadCount: 2, version: undefined }, true)).toBe(false);
+  });
+
+  it("handles a missing selection", () => {
+    expect(shouldAutoMarkConversationRead(null, true)).toBe(false);
   });
 });
