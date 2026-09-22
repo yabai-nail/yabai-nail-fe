@@ -2,7 +2,7 @@
 
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Card } from "@heroui/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
@@ -211,6 +211,26 @@ export function toChatMessage(
   };
 }
 
+/**
+ * Whether opening a conversation should silently mark it read for the salon.
+ * Opening the thread is the read signal — the customer app already clears its own
+ * badge the moment the Tin nhắn tab gains focus, so the salon inbox mirrors that:
+ * a staff member reading the thread is enough, no reply or extra click required.
+ * Guarded so it never fires without write permission, without a version for the
+ * If-Match check, or on a conversation that is already read.
+ */
+export function shouldAutoMarkConversationRead(
+  conversation: { readonly unreadCount: number; readonly version?: number } | null,
+  canWrite: boolean,
+): boolean {
+  return (
+    conversation !== null &&
+    canWrite &&
+    conversation.version !== undefined &&
+    conversation.unreadCount > 0
+  );
+}
+
 export function AdminMessagesComponent() {
   const t = useTranslations("admin.messages");
   const tc = useTranslations("admin.common");
@@ -305,6 +325,29 @@ export function AdminMessagesComponent() {
       }
     })();
   };
+
+  // Opening a conversation marks it read for the salon, so the unread "1" clears
+  // on selection the same way the customer app clears its badge on focus. Keyed on
+  // primitives (id/unread/version), not the `selected` object, so it fires once per
+  // open and not on every render: after the mark-read refetch lands, unreadCount is
+  // 0 and the guard short-circuits. Silent by design — no success toast on a plain
+  // read — while the explicit mark-read/archive controls below still confirm.
+  const openConversationId = selected?.id ?? null;
+  const openUnreadCount = selected?.unreadCount ?? 0;
+  const openVersion = selected?.version;
+  useEffect(() => {
+    if (openConversationId === null) return;
+    if (!shouldAutoMarkConversationRead({ unreadCount: openUnreadCount, version: openVersion }, canWrite)) return;
+    void (async () => {
+      try {
+        await adminService.updateConversation(openConversationId, { status: "READ" }, openVersion);
+        await mutateConversations();
+      } catch {
+        // A failed auto-read is non-fatal: the badge stays and the staff can use the
+        // explicit mark-read control. Nothing is surfaced for a background read.
+      }
+    })();
+  }, [openConversationId, openUnreadCount, openVersion, canWrite, mutateConversations]);
 
   async function changeStatus(next: "READ" | "UNREAD" | "ARCHIVED") {
     if (!selected || selected.version === undefined) return;
