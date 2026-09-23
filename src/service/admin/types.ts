@@ -1293,6 +1293,34 @@ export interface AdminHomeBannerInput {
   readonly active?: boolean;
 }
 
+export interface AdminHomeAnnouncement {
+  readonly id: string;
+  readonly title: string;
+  readonly message: string;
+  readonly branchIds: ReadonlyArray<string>;
+  readonly startAt: string | null;
+  readonly endAt: string | null;
+  readonly sortOrder: number;
+  readonly active: boolean;
+}
+
+/** Salon news on the customer app's home strip; order is the array order. */
+export interface AdminHomeAnnouncements {
+  readonly items: ReadonlyArray<AdminHomeAnnouncement>;
+  readonly version: number;
+  readonly updatedAt: string | null;
+}
+
+export interface AdminHomeAnnouncementInput {
+  readonly id?: string;
+  readonly title: string;
+  readonly message: string;
+  readonly branchIds: ReadonlyArray<string>;
+  readonly startAt: string | null;
+  readonly endAt: string | null;
+  readonly active: boolean;
+}
+
 export interface AdminSystemConfig {
   readonly version: number;
   readonly features?: Readonly<Record<string, boolean>>;

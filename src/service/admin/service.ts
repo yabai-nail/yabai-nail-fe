@@ -76,6 +76,8 @@ import type {
   AdminBranchSettingsPatch,
   AdminHomeBannerInput,
   AdminHomeBanners,
+  AdminHomeAnnouncementInput,
+  AdminHomeAnnouncements,
   AdminMyPayroll,
   AdminPayrollRow,
   AdminPayrollSheet,
@@ -678,6 +680,13 @@ export const adminService = {
     executeApiOperation<AdminHomeBanners>("GET /api/v1/admin/home-banners"),
   updateHomeBanners: (items: ReadonlyArray<AdminHomeBannerInput>, version?: string | number) =>
     executeApiOperation<AdminHomeBanners>("PUT /api/v1/admin/home-banners", {
+      body: { items },
+      version,
+    }),
+  homeAnnouncements: () =>
+    executeApiOperation<AdminHomeAnnouncements>("GET /api/v1/admin/home-announcements"),
+  updateHomeAnnouncements: (items: ReadonlyArray<AdminHomeAnnouncementInput>, version?: string | number) =>
+    executeApiOperation<AdminHomeAnnouncements>("PUT /api/v1/admin/home-announcements", {
       body: { items },
       version,
     }),
