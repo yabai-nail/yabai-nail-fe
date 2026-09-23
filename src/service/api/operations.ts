@@ -203,6 +203,8 @@ PUT /api/v1/admin/services/{serviceId}/add-ons
 GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons
 GET /api/v1/admin/home-banners
 PUT /api/v1/admin/home-banners
+GET /api/v1/admin/home-announcements
+PUT /api/v1/admin/home-announcements
 DELETE /api/v1/admin/nail-designs/{designId}
 GET /api/v1/admin/sales-reports
 GET /api/v1/admin/sales-reports/preview
