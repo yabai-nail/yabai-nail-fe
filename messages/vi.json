@@ -1747,6 +1747,7 @@
         "confirmRemove": "Xoá tin \"{title}\"? Thay đổi có hiệu lực khi bấm Lưu tin.",
         "confirmRemoveAction": "Xoá",
         "cancel": "Huỷ",
+        "conflict": "Có người vừa lưu tin khác. Danh sách đã được tải lại, vui lòng sửa lại.",
         "modal": {
           "addTitle": "Thêm tin",
           "editTitle": "Sửa tin",
@@ -1764,7 +1765,7 @@
             "title": "Nhập tiêu đề.",
             "titleLength": "Tiêu đề tối đa 80 ký tự.",
             "messageLength": "Nội dung tối đa 500 ký tự.",
-            "dateOrder": "Ngày kết thúc phải sau ngày bắt đầu."
+            "dateOrder": "Ngày kết thúc không được trước ngày bắt đầu."
           },
           "confirm": "Xong",
           "cancel": "Huỷ"

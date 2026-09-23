@@ -1,4 +1,5 @@
 import { isoDateInTimeZone, SALON_TIME_ZONE, zonedIso } from "@/lib/salon-date";
+import { ApiClientError } from "@/service";
 import type { AdminHomeAnnouncement, AdminHomeAnnouncementInput } from "@/service";
 
 /** Mirrors the API's cap so the panel refuses a 21st item before the request does. */
@@ -81,4 +82,9 @@ export function upsertAnnouncement(items: ReadonlyArray<AnnouncementDraft>, draf
   if (position >= 0) return items.map((item, index) => (index === position ? draft : item));
   if (items.length >= HOME_ANNOUNCEMENT_LIMIT) throw new Error(`At most ${HOME_ANNOUNCEMENT_LIMIT} announcements`);
   return [...items, draft];
+}
+
+/** True when a save failed because someone else saved first (API: 412 / `VERSION_CONFLICT`). */
+export function isVersionConflict(error: unknown): boolean {
+  return error instanceof ApiClientError && (error.status === 412 || error.code === "VERSION_CONFLICT");
 }

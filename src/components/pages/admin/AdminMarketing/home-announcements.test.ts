@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { ApiClientError } from "@/service";
 import {
   HOME_ANNOUNCEMENT_LIMIT,
+  isVersionConflict,
   moveAnnouncementAt,
   removeAnnouncementAt,
   toAnnouncementDrafts,
@@ -54,5 +56,14 @@ describe("home announcement drafts", () => {
     expect(upsertAnnouncement(items, draft("d")).map((row) => row.key)).toEqual(["a", "b", "c", "d"]);
     const full = Array.from({ length: HOME_ANNOUNCEMENT_LIMIT }, (_, i) => draft(`k${i}`));
     expect(() => upsertAnnouncement(full, draft("extra"))).toThrow();
+  });
+});
+
+describe("isVersionConflict", () => {
+  it("detects a stale-version save by status or code", () => {
+    expect(isVersionConflict(new ApiClientError({ message: "x", status: 412 }))).toBe(true);
+    expect(isVersionConflict(new ApiClientError({ message: "x", code: "VERSION_CONFLICT" }))).toBe(true);
+    expect(isVersionConflict(new ApiClientError({ message: "x", status: 400, code: "VALIDATION_FAILED" }))).toBe(false);
+    expect(isVersionConflict(new Error("x"))).toBe(false);
   });
 });

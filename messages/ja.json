@@ -1736,6 +1736,7 @@
         "confirmRemove": "「{title}」を削除しますか？「お知らせを保存」で反映されます。",
         "confirmRemoveAction": "削除",
         "cancel": "キャンセル",
+        "conflict": "他の人がお知らせを保存しました。一覧を再読み込みしたので、もう一度編集してください。",
         "modal": {
           "addTitle": "お知らせを追加",
           "editTitle": "お知らせを編集",

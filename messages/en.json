@@ -1737,6 +1737,7 @@
         "confirmRemove": "Delete \"{title}\"? It takes effect when you save.",
         "confirmRemoveAction": "Delete",
         "cancel": "Cancel",
+        "conflict": "Someone else saved the news list. It has been reloaded; please re-apply your changes.",
         "modal": {
           "addTitle": "Add news",
           "editTitle": "Edit news",

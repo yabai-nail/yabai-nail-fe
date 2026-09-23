@@ -5,11 +5,12 @@ import { Button, Card, Chip, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { notifySuccess } from "@/lib/app-toast";
+import { notifyError, notifySuccess } from "@/lib/app-toast";
 import { adminService, useAdminBranchList, useAdminHomeAnnouncements, type AdminHomeAnnouncements } from "@/service";
 import { HomeAnnouncementModal } from "./HomeAnnouncementModal";
 import {
   HOME_ANNOUNCEMENT_LIMIT,
+  isVersionConflict,
   moveAnnouncementAt,
   removeAnnouncementAt,
   toAnnouncementDrafts,
@@ -27,10 +28,23 @@ export function HomeAnnouncementsPanel({ canWrite }: Readonly<{ canWrite: boolea
   const query = useAdminHomeAnnouncements();
   if (query.isLoading) return <p className="text-xs text-admin-muted">{t("loading")}</p>;
   if (query.error || !query.data) return <p role="alert" className="text-xs text-admin-danger">{t("loadFailed")}</p>;
-  return <HomeAnnouncementsEditor key={query.data.version} data={query.data} canWrite={canWrite} onSaved={(next) => void query.mutate(next, { revalidate: false })} />;
+  return (
+    <HomeAnnouncementsEditor
+      key={query.data.version}
+      data={query.data}
+      canWrite={canWrite}
+      onSaved={(next) => void query.mutate(next, { revalidate: false })}
+      onConflict={() => void query.mutate()}
+    />
+  );
 }
 
-function HomeAnnouncementsEditor({ data, canWrite, onSaved }: Readonly<{ data: AdminHomeAnnouncements; canWrite: boolean; onSaved: (next: AdminHomeAnnouncements) => void }>) {
+function HomeAnnouncementsEditor({
+  data,
+  canWrite,
+  onSaved,
+  onConflict,
+}: Readonly<{ data: AdminHomeAnnouncements; canWrite: boolean; onSaved: (next: AdminHomeAnnouncements) => void; onConflict: () => void }>) {
   const t = useTranslations("admin.marketing.announcements");
   const branches = useAdminBranchList();
   const branchNames = new Map((branches.data?.items ?? []).map((branch) => [branch.id, branch.name] as const));
@@ -49,7 +63,12 @@ function HomeAnnouncementsEditor({ data, canWrite, onSaved }: Readonly<{ data: A
       onSaved(await adminService.updateHomeAnnouncements(toAnnouncementInputs(items), data.version));
       notifySuccess(t("saved"));
     } catch (thrown) {
-      setError(thrown instanceof Error && thrown.message ? thrown.message : t("saveFailed"));
+      if (isVersionConflict(thrown)) {
+        notifyError(t("conflict"));
+        onConflict();
+      } else {
+        setError(thrown instanceof Error && thrown.message ? thrown.message : t("saveFailed"));
+      }
     } finally {
       setBusy(false);
     }
