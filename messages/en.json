@@ -1733,6 +1733,7 @@
         "saved": "News saved",
         "saveFailed": "Could not save news.",
         "unsaved": "Unsaved changes.",
+        "confirmRemoveTitle": "Delete news?",
         "confirmRemove": "Delete \"{title}\"? It takes effect when you save.",
         "confirmRemoveAction": "Delete",
         "cancel": "Cancel",

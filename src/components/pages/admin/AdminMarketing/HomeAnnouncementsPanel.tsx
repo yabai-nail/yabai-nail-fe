@@ -138,6 +138,9 @@ function HomeAnnouncementsEditor({ data, canWrite, onSaved }: Readonly<{ data: A
           <Modal.Backdrop>
             <Modal.Container size="sm" placement="center">
               <Modal.Dialog>
+                <Modal.Header className="border-b border-admin-border px-5 py-4">
+                  <Modal.Heading className="text-base font-bold text-admin-ink">{t("confirmRemoveTitle")}</Modal.Heading>
+                </Modal.Header>
                 <Modal.Body className="px-5 py-4 text-sm text-admin-ink">{t("confirmRemove", { title: items[removing]?.title ?? "" })}</Modal.Body>
                 <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
                   <Button variant="ghost" className="rounded-lg" onPress={() => setRemoving(null)}>{t("cancel")}</Button>

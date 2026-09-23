@@ -1732,6 +1732,7 @@
         "saved": "お知らせを保存しました",
         "saveFailed": "お知らせを保存できませんでした。",
         "unsaved": "未保存の変更があります。",
+        "confirmRemoveTitle": "お知らせを削除しますか？",
         "confirmRemove": "「{title}」を削除しますか？「お知らせを保存」で反映されます。",
         "confirmRemoveAction": "削除",
         "cancel": "キャンセル",

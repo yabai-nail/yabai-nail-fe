@@ -1743,6 +1743,7 @@
         "saved": "Đã lưu tin",
         "saveFailed": "Không lưu được tin.",
         "unsaved": "Có thay đổi chưa lưu.",
+        "confirmRemoveTitle": "Xoá tin?",
         "confirmRemove": "Xoá tin \"{title}\"? Thay đổi có hiệu lực khi bấm Lưu tin.",
         "confirmRemoveAction": "Xoá",
         "cancel": "Huỷ",
