@@ -1609,7 +1609,8 @@
       "tabs": {
         "promotions": "Promotions",
         "campaigns": "Campaigns",
-        "banners": "Home banners"
+        "banners": "Home banners",
+        "announcements": "In-app news"
       },
       "filterLabel": "Filter by promotion status",
       "all": "All",
@@ -1707,6 +1708,55 @@
           "confirm": "Done",
           "cancel": "Cancel",
           "uploadFailed": "Could not upload the image."
+        }
+      },
+      "announcements": {
+        "heading": "In-app news",
+        "description": "Short news that rotates on the customer app's home screen (holidays, closures, new products). List order is display order. Up to {limit} items.",
+        "add": "Add news",
+        "edit": "Edit",
+        "remove": "Delete",
+        "moveUp": "Up",
+        "moveDown": "Down",
+        "active": "Shown",
+        "hidden": "Hidden",
+        "allBranches": "All branches",
+        "always": "Always shown",
+        "window": "{from} → {to}",
+        "openStart": "Open start",
+        "openEnd": "No end",
+        "empty": "No news yet.",
+        "loading": "Loading news…",
+        "loadFailed": "Could not load news.",
+        "save": "Save news",
+        "saving": "Saving…",
+        "saved": "News saved",
+        "saveFailed": "Could not save news.",
+        "unsaved": "Unsaved changes.",
+        "confirmRemove": "Delete \"{title}\"? It takes effect when you save.",
+        "confirmRemoveAction": "Delete",
+        "cancel": "Cancel",
+        "modal": {
+          "addTitle": "Add news",
+          "editTitle": "Edit news",
+          "title": "Title",
+          "titleHint": "Required, up to 80 characters.",
+          "message": "Message",
+          "messageHint": "Optional, up to 500 characters.",
+          "branches": "Branches",
+          "branchesHint": "None selected = all branches.",
+          "startDate": "Start",
+          "endDate": "End",
+          "datesHint": "Salon time. Blank = no limit.",
+          "active": "Show in the app",
+          "errors": {
+            "title": "Enter a title.",
+            "titleLength": "Title is at most 80 characters.",
+            "messageLength": "Message is at most 500 characters.",
+            "dateOrder": "End date must be on or after the start date."
+          },
+          "confirm": "Done",
+          "cancel": "Cancel"
         }
       },
       "issueModal": {

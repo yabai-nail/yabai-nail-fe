@@ -1608,7 +1608,8 @@
       "tabs": {
         "promotions": "キャンペーン",
         "campaigns": "配信キャンペーン",
-        "banners": "ホームバナー"
+        "banners": "ホームバナー",
+        "announcements": "アプリのお知らせ"
       },
       "filterLabel": "キャンペーンのステータスで絞り込み",
       "all": "すべて",
@@ -1706,6 +1707,55 @@
           "confirm": "完了",
           "cancel": "キャンセル",
           "uploadFailed": "画像をアップロードできません。"
+        }
+      },
+      "announcements": {
+        "heading": "アプリのお知らせ",
+        "description": "お客様アプリのホームで順番に表示される短いお知らせ（休業・臨時休業・新商品など）。並び順が表示順です。最大{limit}件。",
+        "add": "お知らせを追加",
+        "edit": "編集",
+        "remove": "削除",
+        "moveUp": "上へ",
+        "moveDown": "下へ",
+        "active": "表示中",
+        "hidden": "非表示",
+        "allBranches": "全店舗",
+        "always": "常に表示",
+        "window": "{from} → {to}",
+        "openStart": "開始日なし",
+        "openEnd": "終了日なし",
+        "empty": "お知らせはまだありません。",
+        "loading": "お知らせを読み込み中…",
+        "loadFailed": "お知らせを読み込めませんでした。",
+        "save": "お知らせを保存",
+        "saving": "保存中…",
+        "saved": "お知らせを保存しました",
+        "saveFailed": "お知らせを保存できませんでした。",
+        "unsaved": "未保存の変更があります。",
+        "confirmRemove": "「{title}」を削除しますか？「お知らせを保存」で反映されます。",
+        "confirmRemoveAction": "削除",
+        "cancel": "キャンセル",
+        "modal": {
+          "addTitle": "お知らせを追加",
+          "editTitle": "お知らせを編集",
+          "title": "タイトル",
+          "titleHint": "必須・80文字以内。",
+          "message": "本文",
+          "messageHint": "任意・500文字以内。",
+          "branches": "店舗",
+          "branchesHint": "未選択＝全店舗。",
+          "startDate": "開始日",
+          "endDate": "終了日",
+          "datesHint": "サロンの時間帯。空欄＝期限なし。",
+          "active": "アプリに表示",
+          "errors": {
+            "title": "タイトルを入力してください。",
+            "titleLength": "タイトルは80文字以内です。",
+            "messageLength": "本文は500文字以内です。",
+            "dateOrder": "終了日は開始日以降にしてください。"
+          },
+          "confirm": "完了",
+          "cancel": "キャンセル"
         }
       },
       "issueModal": {

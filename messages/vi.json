@@ -1619,7 +1619,8 @@
       "tabs": {
         "promotions": "Khuyến mãi",
         "campaigns": "Chiến dịch",
-        "banners": "Banner trang chủ"
+        "banners": "Banner trang chủ",
+        "announcements": "Tin tiệm trên app"
       },
       "filterLabel": "Lọc theo trạng thái khuyến mãi",
       "all": "Tất cả",
@@ -1717,6 +1718,55 @@
           "confirm": "Xong",
           "cancel": "Huỷ",
           "uploadFailed": "Không tải được ảnh lên."
+        }
+      },
+      "announcements": {
+        "heading": "Tin tiệm trên app",
+        "description": "Tin ngắn xoay vòng ở trang chủ app khách (nghỉ lễ, đóng cửa, sản phẩm mới). Thứ tự trong danh sách là thứ tự hiển thị. Tối đa {limit} tin.",
+        "add": "Thêm tin",
+        "edit": "Sửa",
+        "remove": "Xoá",
+        "moveUp": "Lên",
+        "moveDown": "Xuống",
+        "active": "Đang hiện",
+        "hidden": "Đang ẩn",
+        "allBranches": "Tất cả chi nhánh",
+        "always": "Luôn hiển thị",
+        "window": "{from} → {to}",
+        "openStart": "Từ đầu",
+        "openEnd": "Không hạn",
+        "empty": "Chưa có tin nào.",
+        "loading": "Đang tải tin…",
+        "loadFailed": "Không tải được tin.",
+        "save": "Lưu tin",
+        "saving": "Đang lưu…",
+        "saved": "Đã lưu tin",
+        "saveFailed": "Không lưu được tin.",
+        "unsaved": "Có thay đổi chưa lưu.",
+        "confirmRemove": "Xoá tin \"{title}\"? Thay đổi có hiệu lực khi bấm Lưu tin.",
+        "confirmRemoveAction": "Xoá",
+        "cancel": "Huỷ",
+        "modal": {
+          "addTitle": "Thêm tin",
+          "editTitle": "Sửa tin",
+          "title": "Tiêu đề",
+          "titleHint": "Bắt buộc, tối đa 80 ký tự.",
+          "message": "Nội dung",
+          "messageHint": "Không bắt buộc, tối đa 500 ký tự.",
+          "branches": "Chi nhánh",
+          "branchesHint": "Không chọn = tất cả chi nhánh.",
+          "startDate": "Bắt đầu",
+          "endDate": "Kết thúc",
+          "datesHint": "Theo giờ salon. Để trống = không giới hạn.",
+          "active": "Hiển thị trên app",
+          "errors": {
+            "title": "Nhập tiêu đề.",
+            "titleLength": "Tiêu đề tối đa 80 ký tự.",
+            "messageLength": "Nội dung tối đa 500 ký tự.",
+            "dateOrder": "Ngày kết thúc phải sau ngày bắt đầu."
+          },
+          "confirm": "Xong",
+          "cancel": "Huỷ"
         }
       },
       "issueModal": {
