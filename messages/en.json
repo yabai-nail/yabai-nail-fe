@@ -325,7 +325,7 @@
       "unpin": "Unpin",
       "pinnedSection": "Pinned",
       "otherSection": "Other conversations",
-      "pinLimit": "You can pin up to 5 conversations. Unpin one first.",
+      "pinLimit": "The salon already has 5 pinned conversations (some may be ones you can't see). Unpin one or ask a manager.",
       "pinFailed": "Could not change the pin.",
       "archive": "Archive",
       "threadLabel": "Messages with {name}",

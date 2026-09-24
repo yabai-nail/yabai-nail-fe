@@ -243,6 +243,7 @@ export function AdminMessagesComponent() {
     [format],
   );
   const canWrite = useAdminPermission("message.write.branch");
+  const canPin = useAdminPermission("message.write.branch", "message.read.branch", "message.read.assigned");
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -387,6 +388,7 @@ export function AdminMessagesComponent() {
       if (conversation.id === selected?.id) {
         setStatusError(isPinLimitError(thrown) ? t("pinLimit") : thrown instanceof Error ? thrown.message : t("pinFailed"));
       }
+      void mutateConversations();
     } finally {
       setPinPendingId(null);
     }
@@ -423,7 +425,7 @@ export function AdminMessagesComponent() {
           onFilterChange={setFilter}
           onQueryChange={setQuery}
           onSelect={(id) => { setSelectedId(id); setSendError(null); setStatusError(null); }}
-          onTogglePin={canWrite ? (conversation) => void togglePin(conversation) : undefined}
+          onTogglePin={canPin ? (conversation) => void togglePin(conversation) : undefined}
           pinPendingId={pinPendingId}
         />
         {selected ? (
@@ -451,7 +453,7 @@ export function AdminMessagesComponent() {
             pinned={selected.pinned}
             pinPending={pinPendingId === selected.id}
             onTogglePin={
-              canWrite && selected.version !== undefined
+              canPin && selected.version !== undefined && selected.status !== "archived"
                 ? () => void togglePin(selected)
                 : undefined
             }

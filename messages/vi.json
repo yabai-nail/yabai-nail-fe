@@ -325,7 +325,7 @@
       "unpin": "Bỏ ghim",
       "pinnedSection": "Đã ghim",
       "otherSection": "Hội thoại khác",
-      "pinLimit": "Chỉ ghim tối đa 5 hội thoại. Hãy bỏ ghim một hội thoại trước.",
+      "pinLimit": "Cả tiệm đã ghim đủ 5 hội thoại (có thể gồm hội thoại bạn không xem được). Hãy bỏ ghim một hội thoại hoặc nhờ quản lý.",
       "pinFailed": "Không đổi được trạng thái ghim.",
       "archive": "Lưu trữ",
       "threadLabel": "Tin nhắn với {name}",

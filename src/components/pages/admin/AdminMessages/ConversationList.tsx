@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { useTranslations } from "next-intl";
 import { Avatar, Button, Tabs } from "@heroui/react";
 import { BookmarkIcon, BookmarkSlashIcon } from "@heroicons/react/24/outline";
@@ -74,75 +75,84 @@ export function ConversationList({
         {conversations.map((conversation, index) => {
           const isSelected = selectedId === conversation.id;
           const isUnread = conversation.unreadCount > 0;
+          const showPinToggle = Boolean(onTogglePin) && conversation.status !== "archived";
           return (
-            <li key={conversation.id} className="group relative">
+            <Fragment key={conversation.id}>
               {boundary > 0 && index === 0 ? (
-                <p className="bg-admin-soft/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
-                  {t("pinnedSection")}
-                </p>
+                <li role="presentation" aria-hidden="true" className="bg-admin-soft/60 px-3 py-1">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
+                    {t("pinnedSection")}
+                  </p>
+                </li>
               ) : null}
               {index === boundary ? (
-                <p className="bg-admin-soft/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
-                  {t("otherSection")}
-                </p>
+                <li role="presentation" aria-hidden="true" className="bg-admin-soft/60 px-3 py-1">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
+                    {t("otherSection")}
+                  </p>
+                </li>
               ) : null}
-              <Button
-                variant="ghost"
-                onPress={() => onSelect(conversation.id)}
-                /* A 4px bar marks the open thread. The row used to say so with
-                   a pink wash alone, which is the same wash an unread row wants
-                   for itself — so "open" and "unread" were competing for one
-                   signal and neither won. */
-                className={`h-auto min-h-[4.5rem] w-full justify-start rounded-none border-l-4 py-3 pl-3 text-left ${onTogglePin ? "pr-11" : "pr-3"} ${
-                  isSelected ? "border-l-admin-accent bg-admin-soft" : "border-l-transparent"
-                }`}
-              >
-                <Avatar size="sm" color="accent" className="shrink-0">
-                  <Avatar.Fallback>
-                    {conversation.customer.initials}
-                  </Avatar.Fallback>
-                </Avatar>
-                <span className="min-w-0 flex-1">
-                  <span className="flex min-w-0 items-baseline gap-2">
-                    {conversation.pinned ? <BookmarkSolidIcon aria-label={t("pinnedSection")} className="size-3.5 shrink-0 text-admin-accent" /> : null}
-                    <strong className={`min-w-0 flex-1 truncate text-sm ${isUnread ? "font-bold text-admin-ink" : "font-medium text-admin-ink"}`}>
-                      {conversation.customer.name}
-                    </strong>
-                    <span className={`shrink-0 whitespace-nowrap text-[0.68rem] ${isUnread ? "font-semibold text-admin-accent" : "text-admin-muted"}`}>
-                      {conversation.timeLabel}
-                    </span>
-                  </span>
-                  <span className="mt-1 flex min-w-0 items-center gap-2">
-                    <span className={`min-w-0 flex-1 truncate text-xs ${isUnread ? "font-medium text-admin-ink" : "text-admin-muted"}`}>
-                      {conversation.preview || t("noMessages")}
-                    </span>
-                    {isUnread ? (
-                      <span
-                        aria-label={t("unreadCount", { count: conversation.unreadCount })}
-                        className="grid size-5 shrink-0 place-items-center rounded-full bg-admin-accent text-[0.65rem] font-bold text-admin-on-accent"
-                      >
-                        {conversation.unreadCount}
-                      </span>
-                    ) : null}
-                  </span>
-                </span>
-              </Button>
-              {onTogglePin ? (
+              <li className="group relative">
                 <Button
-                  isIconOnly
-                  size="sm"
                   variant="ghost"
-                  aria-label={conversation.pinned ? t("unpin") : t("pin")}
-                  isDisabled={pinPendingId === conversation.id}
-                  onPress={() => onTogglePin(conversation)}
-                  className={`absolute right-1.5 top-1/2 -translate-y-1/2 bg-admin-surface ${
-                    isSelected ? "opacity-100" : "opacity-0 focus:opacity-100 group-hover:opacity-100"
+                  onPress={() => onSelect(conversation.id)}
+                  /* A 4px bar marks the open thread. The row used to say so with
+                     a pink wash alone, which is the same wash an unread row wants
+                     for itself — so "open" and "unread" were competing for one
+                     signal and neither won. */
+                  className={`h-auto min-h-[4.5rem] w-full justify-start rounded-none border-l-4 py-3 pl-3 text-left ${showPinToggle ? "pr-11" : "pr-3"} ${
+                    isSelected ? "border-l-admin-accent bg-admin-soft" : "border-l-transparent"
                   }`}
                 >
-                  {conversation.pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+                  <Avatar size="sm" color="accent" className="shrink-0">
+                    <Avatar.Fallback>
+                      {conversation.customer.initials}
+                    </Avatar.Fallback>
+                  </Avatar>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex min-w-0 items-baseline gap-2">
+                      {conversation.pinned ? <BookmarkSolidIcon aria-label={t("pinnedSection")} className="size-3.5 shrink-0 text-admin-accent" /> : null}
+                      <strong className={`min-w-0 flex-1 truncate text-sm ${isUnread ? "font-bold text-admin-ink" : "font-medium text-admin-ink"}`}>
+                        {conversation.customer.name}
+                      </strong>
+                      <span className={`shrink-0 whitespace-nowrap text-[0.68rem] ${isUnread ? "font-semibold text-admin-accent" : "text-admin-muted"}`}>
+                        {conversation.timeLabel}
+                      </span>
+                    </span>
+                    <span className="mt-1 flex min-w-0 items-center gap-2">
+                      <span className={`min-w-0 flex-1 truncate text-xs ${isUnread ? "font-medium text-admin-ink" : "text-admin-muted"}`}>
+                        {conversation.preview || t("noMessages")}
+                      </span>
+                      {isUnread ? (
+                        <span
+                          aria-label={t("unreadCount", { count: conversation.unreadCount })}
+                          className="grid size-5 shrink-0 place-items-center rounded-full bg-admin-accent text-[0.65rem] font-bold text-admin-on-accent"
+                        >
+                          {conversation.unreadCount}
+                        </span>
+                      ) : null}
+                    </span>
+                  </span>
                 </Button>
-              ) : null}
-            </li>
+                {showPinToggle ? (
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="ghost"
+                    aria-label={conversation.pinned ? t("unpin") : t("pin")}
+                    isDisabled={pinPendingId === conversation.id}
+                    onPress={() => onTogglePin?.(conversation)}
+                    className={`absolute right-1.5 top-1/2 -translate-y-1/2 bg-admin-surface ${
+                      isSelected
+                        ? "opacity-100"
+                        : "opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto group-hover:opacity-100 group-hover:pointer-events-auto"
+                    }`}
+                  >
+                    {conversation.pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+                  </Button>
+                ) : null}
+              </li>
+            </Fragment>
           );
         })}
       </ul>
