@@ -624,6 +624,16 @@ export const adminService = {
       "PATCH /api/v1/admin/conversations/{conversationId}",
       { path: { conversationId }, body: patch, version },
     ),
+  pinConversation: (conversationId: string, version?: string | number) =>
+    executeApiOperation<AdminConversation>(
+      "PUT /api/v1/admin/conversations/{conversationId}/pin",
+      { path: { conversationId }, version },
+    ),
+  unpinConversation: (conversationId: string, version?: string | number) =>
+    executeApiOperation<AdminConversation>(
+      "DELETE /api/v1/admin/conversations/{conversationId}/pin",
+      { path: { conversationId }, version },
+    ),
   branchReviews: (
     branchId: string,
     query?: Readonly<Record<string, string | number | undefined>>,

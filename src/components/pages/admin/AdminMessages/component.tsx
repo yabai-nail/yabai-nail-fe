@@ -27,6 +27,7 @@ import {
   type ConversationMessages,
 } from "./state";
 import { sortThreadChronologically } from "./thread";
+import { isPinLimitError } from "./pins";
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -64,6 +65,7 @@ function toFixtureConversation(server: ServerConversation, unnamed: string, form
     timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt, formatTime) : "",
     unreadCount: server.unreadCount,
     status: normalizedStatus,
+    pinned: typeof server.pinnedAt === "string",
     messages: [],
     version: server.version,
   };
@@ -241,6 +243,7 @@ export function AdminMessagesComponent() {
     [format],
   );
   const canWrite = useAdminPermission("message.write.branch");
+  const canPin = useAdminPermission("message.write.branch", "message.read.branch", "message.read.assigned");
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -255,6 +258,7 @@ export function AdminMessagesComponent() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [pinPendingId, setPinPendingId] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
     return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime)) ?? [];
   }, [conversationsData, formatTime, t]);
@@ -370,6 +374,26 @@ export function AdminMessagesComponent() {
     }
   }
 
+  // Salon-wide pin. The API client already toasts a failed write, so this only adds the
+  // localized inline line for the pin limit and never a second toast.
+  async function togglePin(conversation: Conversation) {
+    if (conversation.version === undefined || pinPendingId) return;
+    setPinPendingId(conversation.id);
+    setStatusError(null);
+    try {
+      if (conversation.pinned) await adminService.unpinConversation(conversation.id, conversation.version);
+      else await adminService.pinConversation(conversation.id, conversation.version);
+      void mutateConversations();
+    } catch (thrown) {
+      if (conversation.id === selected?.id) {
+        setStatusError(isPinLimitError(thrown) ? t("pinLimit") : thrown instanceof Error ? thrown.message : t("pinFailed"));
+      }
+      void mutateConversations();
+    } finally {
+      setPinPendingId(null);
+    }
+  }
+
   return (
     <AdminPageLayout>
       {conversationsError ? (
@@ -401,6 +425,8 @@ export function AdminMessagesComponent() {
           onFilterChange={setFilter}
           onQueryChange={setQuery}
           onSelect={(id) => { setSelectedId(id); setSendError(null); setStatusError(null); }}
+          onTogglePin={canPin ? (conversation) => void togglePin(conversation) : undefined}
+          pinPendingId={pinPendingId}
         />
         {selected ? (
           <MessageThread
@@ -422,6 +448,13 @@ export function AdminMessagesComponent() {
             onArchive={
               canWrite && selected.version !== undefined
                 ? () => void changeStatus("ARCHIVED")
+                : undefined
+            }
+            pinned={selected.pinned}
+            pinPending={pinPendingId === selected.id}
+            onTogglePin={
+              canPin && selected.version !== undefined && selected.status !== "archived"
+                ? () => void togglePin(selected)
                 : undefined
             }
           />
