@@ -384,7 +384,9 @@ export function AdminMessagesComponent() {
       else await adminService.pinConversation(conversation.id, conversation.version);
       void mutateConversations();
     } catch (thrown) {
-      setStatusError(isPinLimitError(thrown) ? t("pinLimit") : thrown instanceof Error ? thrown.message : t("pinFailed"));
+      if (conversation.id === selected?.id) {
+        setStatusError(isPinLimitError(thrown) ? t("pinLimit") : thrown instanceof Error ? thrown.message : t("pinFailed"));
+      }
     } finally {
       setPinPendingId(null);
     }

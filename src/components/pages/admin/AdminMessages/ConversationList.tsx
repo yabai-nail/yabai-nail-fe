@@ -93,7 +93,7 @@ export function ConversationList({
                    a pink wash alone, which is the same wash an unread row wants
                    for itself — so "open" and "unread" were competing for one
                    signal and neither won. */
-                className={`h-auto min-h-[4.5rem] w-full justify-start rounded-none border-l-4 px-3 py-3 text-left ${
+                className={`h-auto min-h-[4.5rem] w-full justify-start rounded-none border-l-4 py-3 pl-3 text-left ${onTogglePin ? "pr-11" : "pr-3"} ${
                   isSelected ? "border-l-admin-accent bg-admin-soft" : "border-l-transparent"
                 }`}
               >
@@ -135,7 +135,7 @@ export function ConversationList({
                   aria-label={conversation.pinned ? t("unpin") : t("pin")}
                   isDisabled={pinPendingId === conversation.id}
                   onPress={() => onTogglePin(conversation)}
-                  className={`absolute right-2 top-2 bg-admin-surface ${
+                  className={`absolute right-1.5 top-1/2 -translate-y-1/2 bg-admin-surface ${
                     isSelected ? "opacity-100" : "opacity-0 focus:opacity-100 group-hover:opacity-100"
                   }`}
                 >
