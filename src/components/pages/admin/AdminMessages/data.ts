@@ -109,6 +109,8 @@ export type Conversation = {
   readonly timeLabel: string;
   readonly unreadCount: number;
   readonly status: ConversationStatus;
+  /** Pinned for the whole salon; the API already lists pinned conversations first. */
+  readonly pinned: boolean;
   readonly messages: ReadonlyArray<ChatMessage>;
   // Present when adapted from useAdminConversations; drives the mark-read /
   // archive header actions in MessageThread.

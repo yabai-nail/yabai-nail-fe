@@ -829,6 +829,8 @@ export interface AdminConversation {
   readonly id: string;
   readonly status: string;
   readonly unreadCount: number;
+  /** ISO time the conversation was pinned for the whole salon; null or absent when not pinned. */
+  readonly pinnedAt?: string | null;
   readonly customer: AdminConversationCustomerSummary;
   readonly lastMessage?: {
     readonly id: string;

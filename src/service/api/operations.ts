@@ -188,6 +188,8 @@ GET /api/v1/admin/conversations
 GET /api/v1/admin/conversations/{conversationId}/messages
 POST /api/v1/admin/conversations/{conversationId}/messages
 PATCH /api/v1/admin/conversations/{conversationId}
+PUT /api/v1/admin/conversations/{conversationId}/pin
+DELETE /api/v1/admin/conversations/{conversationId}/pin
 GET /api/v1/admin/branches/{branchId}/staff-performance
 GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings

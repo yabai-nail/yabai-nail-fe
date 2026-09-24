@@ -64,6 +64,7 @@ function toFixtureConversation(server: ServerConversation, unnamed: string, form
     timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt, formatTime) : "",
     unreadCount: server.unreadCount,
     status: normalizedStatus,
+    pinned: typeof server.pinnedAt === "string",
     messages: [],
     version: server.version,
   };
