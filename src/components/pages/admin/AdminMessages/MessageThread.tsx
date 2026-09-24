@@ -1,6 +1,8 @@
 import { useFormatter, useTranslations } from "next-intl";
 import {
   ArchiveBoxIcon,
+  BookmarkIcon,
+  BookmarkSlashIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
@@ -29,6 +31,10 @@ type MessageThreadProps = {
   readonly onMarkRead?: () => void;
   /** Fired when the admin archives the current thread. Hidden if omitted. */
   readonly onArchive?: () => void;
+  readonly pinned?: boolean;
+  /** Fired when the admin toggles the pin on the current thread. Hidden if omitted. */
+  readonly onTogglePin?: () => void;
+  readonly pinPending?: boolean;
   readonly statusPending?: boolean;
   readonly statusError?: string | null;
   readonly sendPending?: boolean;
@@ -83,6 +89,9 @@ export function MessageThread({
   canWrite,
   onMarkRead,
   onArchive,
+  pinned,
+  onTogglePin,
+  pinPending = false,
   statusPending = false,
   statusError = null,
   sendPending = false,
@@ -163,6 +172,11 @@ export function MessageThread({
           >
             <CalendarDaysIcon className="size-4" />{t("createAppointment")}
           </Button>
+          {onTogglePin ? (
+            <Button size="sm" variant="ghost" onPress={onTogglePin} isDisabled={pinPending} aria-label={pinned ? t("unpin") : t("pin")}>
+              {pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+            </Button>
+          ) : null}
           {onMarkRead ? (
             <Button size="sm" variant="ghost" onPress={onMarkRead} isDisabled={statusPending} aria-label={t("markRead")}>
               <CheckCircleIcon className="size-4" />

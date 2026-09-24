@@ -1,7 +1,10 @@
 import { useTranslations } from "next-intl";
 import { Avatar, Button, Tabs } from "@heroui/react";
+import { BookmarkIcon, BookmarkSlashIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import type { Conversation, ConversationStatus } from "./data";
+import { pinnedBoundaryIndex } from "./pins";
 
 export type InboxFilter = "all" | ConversationStatus;
 
@@ -16,6 +19,8 @@ type ConversationListProps = {
   readonly onFilterChange: (value: InboxFilter) => void;
   readonly onQueryChange: (value: string) => void;
   readonly onSelect: (id: string) => void;
+  readonly onTogglePin?: (conversation: Conversation) => void;
+  readonly pinPendingId?: string | null;
 };
 
 export function ConversationList({
@@ -26,8 +31,11 @@ export function ConversationList({
   onFilterChange,
   onQueryChange,
   onSelect,
+  onTogglePin,
+  pinPendingId,
 }: ConversationListProps) {
   const t = useTranslations("admin.messages");
+  const boundary = pinnedBoundaryIndex(conversations);
   return (
     <section
       aria-labelledby="inbox-heading"
@@ -63,11 +71,21 @@ export function ConversationList({
         </Tabs>
       </div>
       <ul className="min-h-0 flex-1 divide-y divide-admin-border overflow-y-auto">
-        {conversations.map((conversation) => {
+        {conversations.map((conversation, index) => {
           const isSelected = selectedId === conversation.id;
           const isUnread = conversation.unreadCount > 0;
           return (
-            <li key={conversation.id}>
+            <li key={conversation.id} className="group relative">
+              {boundary > 0 && index === 0 ? (
+                <p className="bg-admin-soft/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
+                  {t("pinnedSection")}
+                </p>
+              ) : null}
+              {index === boundary ? (
+                <p className="bg-admin-soft/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-admin-muted">
+                  {t("otherSection")}
+                </p>
+              ) : null}
               <Button
                 variant="ghost"
                 onPress={() => onSelect(conversation.id)}
@@ -86,6 +104,7 @@ export function ConversationList({
                 </Avatar>
                 <span className="min-w-0 flex-1">
                   <span className="flex min-w-0 items-baseline gap-2">
+                    {conversation.pinned ? <BookmarkSolidIcon aria-label={t("pinnedSection")} className="size-3.5 shrink-0 text-admin-accent" /> : null}
                     <strong className={`min-w-0 flex-1 truncate text-sm ${isUnread ? "font-bold text-admin-ink" : "font-medium text-admin-ink"}`}>
                       {conversation.customer.name}
                     </strong>
@@ -108,6 +127,21 @@ export function ConversationList({
                   </span>
                 </span>
               </Button>
+              {onTogglePin ? (
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="ghost"
+                  aria-label={conversation.pinned ? t("unpin") : t("pin")}
+                  isDisabled={pinPendingId === conversation.id}
+                  onPress={() => onTogglePin(conversation)}
+                  className={`absolute right-2 top-2 bg-admin-surface ${
+                    isSelected ? "opacity-100" : "opacity-0 focus:opacity-100 group-hover:opacity-100"
+                  }`}
+                >
+                  {conversation.pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+                </Button>
+              ) : null}
             </li>
           );
         })}
