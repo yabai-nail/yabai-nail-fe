@@ -846,6 +846,7 @@ export interface AdminConversation {
     readonly content: string;
     /** "IMAGE" for a photo message, whose content may be empty. */
     readonly messageType?: string;
+    readonly recalledAt?: string;
     readonly createdAt: string;
   };
   readonly version: number;
@@ -924,6 +925,8 @@ export interface AdminMessage {
   readonly payment?: AdminPaymentRecordedNotice | null;
   /** Photos of an IMAGE message; `url` is a signed link that expires after about an hour. */
   readonly images?: ReadonlyArray<AdminChatImage>;
+  /** Set when the sender recalled the message; its content and photos are gone. */
+  readonly recalledAt?: string;
   readonly createdAt: string;
   readonly deliveryStatus?: string;
   readonly [field: string]: unknown;

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
 import { CHAT_IMAGE_LIMIT, type ChatAttachment } from "./chat-images";
+import { MessageActionsMenu } from "./MessageActionsMenu";
 import { BookingConfirmationCard } from "./BookingConfirmationCard";
 import { WarrantyNoticeCard } from "./WarrantyNoticeCard";
 import { AppointmentCancellationCard } from "./AppointmentCancellationCard";
@@ -32,6 +33,8 @@ type MessageThreadProps = {
   readonly attachments?: ReadonlyArray<ChatAttachment>;
   readonly onAttachPhotos?: (files: ReadonlyArray<File>) => void;
   readonly onRemovePhoto?: (id: string) => void;
+  /** Per-message recall / delete-for-me. Hidden (with copy) when omitted. */
+  readonly onMessageAction?: (action: "recall" | "hide", messageId: string) => Promise<void>;
   readonly onSend: () => void;
   readonly canWrite: boolean;
   /** Fired when the admin marks the current thread read. Hidden if omitted. */
@@ -58,7 +61,9 @@ type MessageThreadProps = {
 function Bubble({
   message,
   isLast,
-}: Readonly<{ message: ChatMessage; isLast: boolean }>) {
+  onMessageAction,
+}: Readonly<{ message: ChatMessage; isLast: boolean; onMessageAction?: (action: "recall" | "hide", messageId: string) => Promise<void> }>) {
+  const t = useTranslations("admin.messages");
   if (message.kind === "booking-confirmation") {
     return <BookingConfirmationCard booking={message.booking} />;
   }
@@ -75,21 +80,36 @@ function Bubble({
   const tail = fromSalon
     ? isLast ? "rounded-br-sm" : ""
     : isLast ? "rounded-bl-sm" : "";
-  return (
-    <>
-      {message.images?.length ? <ChatImages images={message.images} /> : null}
-      {message.content ? (
-        <div
-          className={`max-w-[min(34rem,78%)] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${tail} ${
-            fromSalon
-              ? "bg-admin-accent text-admin-on-accent"
-              : "border border-admin-border bg-admin-surface text-admin-ink"
-          }`}
-        >
-          {message.content}
+  const menu = onMessageAction ? <MessageActionsMenu message={message} onAction={onMessageAction} /> : null;
+  if (message.recalled) {
+    return (
+      <div className={`group flex max-w-[min(34rem,78%)] items-center gap-1 ${fromSalon ? "flex-row-reverse" : ""}`}>
+        <div className={`rounded-2xl border border-dashed border-admin-border px-3.5 py-2 text-sm italic text-admin-muted ${tail}`}>
+          {t("recalledMessage")}
         </div>
-      ) : null}
-    </>
+        {menu}
+      </div>
+    );
+  }
+  return (
+    // The menu sits on the inner side of the bubble and shows on hover or keyboard focus.
+    <div className={`group flex w-full items-center gap-1 ${fromSalon ? "flex-row-reverse" : ""}`}>
+      <div className={`flex min-w-0 max-w-[min(34rem,78%)] flex-col gap-0.5 ${fromSalon ? "items-end" : "items-start"}`}>
+        {message.images?.length ? <ChatImages images={message.images} /> : null}
+        {message.content ? (
+          <div
+            className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${tail} ${
+              fromSalon
+                ? "bg-admin-accent text-admin-on-accent"
+                : "border border-admin-border bg-admin-surface text-admin-ink"
+            }`}
+          >
+            {message.content}
+          </div>
+        ) : null}
+      </div>
+      {menu}
+    </div>
   );
 }
 
@@ -97,7 +117,7 @@ function Bubble({
 function ChatImages({ images }: Readonly<{ images: NonNullable<Extract<ChatMessage, { kind: "text" }>["images"]> }>) {
   const t = useTranslations("admin.messages");
   return (
-    <div className={`grid max-w-[min(20rem,78%)] gap-1 ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+    <div className={`grid w-80 max-w-full gap-1 ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
       {images.map((image, index) =>
         image.url ? (
           <a
@@ -130,6 +150,7 @@ export function MessageThread({
   attachments = [],
   onAttachPhotos,
   onRemovePhoto,
+  onMessageAction,
   onSend,
   canWrite,
   onMarkRead,
@@ -271,7 +292,7 @@ export function MessageThread({
                       className={`flex flex-col gap-0.5 ${fromSystem ? "items-center" : fromSalon ? "items-end" : "items-start"}`}
                     >
                       {run.messages.map((message) => (
-                        <Bubble key={message.id} message={message} isLast={message.id === last.id} />
+                        <Bubble key={message.id} message={message} isLast={message.id === last.id} onMessageAction={onMessageAction} />
                       ))}
                       {/* One timestamp for the run. It used to sit inside every
                           bubble on a line of its own, which is why a message

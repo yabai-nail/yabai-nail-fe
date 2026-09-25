@@ -187,6 +187,8 @@ PATCH /api/v1/admin/auth/profile
 GET /api/v1/admin/conversations
 GET /api/v1/admin/conversations/{conversationId}/messages
 POST /api/v1/admin/conversations/{conversationId}/messages
+POST /api/v1/admin/conversations/{conversationId}/messages/{messageId}/recall
+DELETE /api/v1/admin/conversations/{conversationId}/messages/{messageId}
 PATCH /api/v1/admin/conversations/{conversationId}
 PUT /api/v1/admin/conversations/{conversationId}/pin
 DELETE /api/v1/admin/conversations/{conversationId}/pin

@@ -615,6 +615,18 @@ export const adminService = {
       "POST /api/v1/admin/conversations/{conversationId}/messages",
       { path: { conversationId }, body: draft, idempotencyKey },
     ),
+  /** Takes a salon message back for both sides (sender within 15 min, or an owner/manager). */
+  recallConversationMessage: (conversationId: string, messageId: string) =>
+    executeApiOperation<AdminMessage>(
+      "POST /api/v1/admin/conversations/{conversationId}/messages/{messageId}/recall",
+      { path: { conversationId, messageId }, body: {} },
+    ),
+  /** Hides a message from the signed-in admin's own view only. */
+  hideConversationMessage: (conversationId: string, messageId: string) =>
+    executeApiOperation<{ readonly id: string; readonly hidden: true }>(
+      "DELETE /api/v1/admin/conversations/{conversationId}/messages/{messageId}",
+      { path: { conversationId, messageId } },
+    ),
   updateConversation: (
     conversationId: string,
     patch: AdminConversationPatch,

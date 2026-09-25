@@ -15,6 +15,8 @@ const expectedFeatureOperationIds = [
   "GET /api/v1/admin/conversations",
   "GET /api/v1/admin/conversations/{conversationId}/messages",
   "POST /api/v1/admin/conversations/{conversationId}/messages",
+  "POST /api/v1/admin/conversations/{conversationId}/messages/{messageId}/recall",
+  "DELETE /api/v1/admin/conversations/{conversationId}/messages/{messageId}",
   "PATCH /api/v1/admin/conversations/{conversationId}",
   "PUT /api/v1/admin/conversations/{conversationId}/pin",
   "DELETE /api/v1/admin/conversations/{conversationId}/pin",
@@ -74,11 +76,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(225);
+    expect(runtimeApiOperations).toHaveLength(227);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(225);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(216);
+    ).toBe(227);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(218);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);
