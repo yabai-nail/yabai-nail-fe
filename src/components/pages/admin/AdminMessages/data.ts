@@ -73,7 +73,15 @@ type ChatMessageBase = {
 export type ChatTextMessage = ChatMessageBase & {
   readonly kind: "text";
   readonly sender: "customer" | "salon";
+  /** Empty for a photo-only message. */
   readonly content: string;
+  /** Attached photos; `url` is a signed link (or a local preview while sending). */
+  readonly images?: ReadonlyArray<ChatImage>;
+};
+
+export type ChatImage = {
+  readonly mediaId: string;
+  readonly url?: string;
 };
 
 export type ChatBookingConfirmationMessage = ChatMessageBase & {

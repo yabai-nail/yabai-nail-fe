@@ -844,6 +844,8 @@ export interface AdminConversation {
     readonly id: string;
     readonly senderType: string;
     readonly content: string;
+    /** "IMAGE" for a photo message, whose content may be empty. */
+    readonly messageType?: string;
     readonly createdAt: string;
   };
   readonly version: number;
@@ -920,13 +922,23 @@ export interface AdminMessage {
   readonly warranty?: AdminWarrantyNotice | null;
   readonly cancellation?: AdminAppointmentCancellationNotice | null;
   readonly payment?: AdminPaymentRecordedNotice | null;
+  /** Photos of an IMAGE message; `url` is a signed link that expires after about an hour. */
+  readonly images?: ReadonlyArray<AdminChatImage>;
   readonly createdAt: string;
   readonly deliveryStatus?: string;
   readonly [field: string]: unknown;
 }
 
+export interface AdminChatImage {
+  readonly mediaId: string;
+  readonly url?: string;
+}
+
 export interface AdminMessageDraft {
+  /** May be empty when the message carries photos. */
   readonly content: string;
+  /** Uploaded media ids to attach (at most 4). */
+  readonly imageMediaIds?: ReadonlyArray<string>;
   readonly [field: string]: unknown;
 }
 

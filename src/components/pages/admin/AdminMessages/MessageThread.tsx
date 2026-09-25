@@ -8,11 +8,14 @@ import {
   CheckCircleIcon,
   PaperAirplaneIcon,
   PhoneIcon,
+  PhotoIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, InputGroup } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
 import type { ChatMessage, MessageCustomer } from "./data";
+import { CHAT_IMAGE_LIMIT, type ChatAttachment } from "./chat-images";
 import { BookingConfirmationCard } from "./BookingConfirmationCard";
 import { WarrantyNoticeCard } from "./WarrantyNoticeCard";
 import { AppointmentCancellationCard } from "./AppointmentCancellationCard";
@@ -25,6 +28,10 @@ type MessageThreadProps = {
   readonly messages: ReadonlyArray<ChatMessage>;
   readonly draft: string;
   readonly onDraftChange: (value: string) => void;
+  /** Photos picked in the composer, uploaded only when the message is sent. */
+  readonly attachments?: ReadonlyArray<ChatAttachment>;
+  readonly onAttachPhotos?: (files: ReadonlyArray<File>) => void;
+  readonly onRemovePhoto?: (id: string) => void;
   readonly onSend: () => void;
   readonly canWrite: boolean;
   /** Fired when the admin marks the current thread read. Hidden if omitted. */
@@ -69,14 +76,48 @@ function Bubble({
     ? isLast ? "rounded-br-sm" : ""
     : isLast ? "rounded-bl-sm" : "";
   return (
-    <div
-      className={`max-w-[min(34rem,78%)] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${tail} ${
-        fromSalon
-          ? "bg-admin-accent text-admin-on-accent"
-          : "border border-admin-border bg-admin-surface text-admin-ink"
-      }`}
-    >
-      {message.content}
+    <>
+      {message.images?.length ? <ChatImages images={message.images} /> : null}
+      {message.content ? (
+        <div
+          className={`max-w-[min(34rem,78%)] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${tail} ${
+            fromSalon
+              ? "bg-admin-accent text-admin-on-accent"
+              : "border border-admin-border bg-admin-surface text-admin-ink"
+          }`}
+        >
+          {message.content}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/** A message's photos. Each opens full size in a new tab; the signed link needs no login. */
+function ChatImages({ images }: Readonly<{ images: NonNullable<Extract<ChatMessage, { kind: "text" }>["images"]> }>) {
+  const t = useTranslations("admin.messages");
+  return (
+    <div className={`grid max-w-[min(20rem,78%)] gap-1 ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+      {images.map((image, index) =>
+        image.url ? (
+          <a
+            key={image.mediaId}
+            href={image.url}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t("openPhoto", { index: index + 1 })}
+            className="block overflow-hidden rounded-xl border border-admin-border bg-admin-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
+          >
+            {/* Signed or blob URL: nothing the Next image optimizer could fetch. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image.url} alt={t("photoAlt", { index: index + 1 })} className={`w-full object-cover ${images.length > 1 ? "aspect-square" : "max-h-72"}`} loading="lazy" />
+          </a>
+        ) : (
+          <div key={image.mediaId} className="grid aspect-square place-items-center rounded-xl border border-admin-border bg-admin-soft">
+            <PhotoIcon aria-label={t("photoUnavailable")} className="size-6 text-admin-muted" />
+          </div>
+        ),
+      )}
     </div>
   );
 }
@@ -86,6 +127,9 @@ export function MessageThread({
   messages,
   draft,
   onDraftChange,
+  attachments = [],
+  onAttachPhotos,
+  onRemovePhoto,
   onSend,
   canWrite,
   onMarkRead,
@@ -248,10 +292,53 @@ export function MessageThread({
 
       <form onSubmit={submit} className="shrink-0 border-t border-admin-border bg-admin-surface p-3">
         {sendError ? <p role="alert" className="mb-2 text-xs text-admin-danger">{sendError}</p> : null}
-        <InputGroup fullWidth>
-          <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} disabled={!canWrite} placeholder={t("composeTo", { name: customer.name })} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
-          <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!canWrite || !draft.trim() || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? t("sending") : t("send")}</Button></InputGroup.Suffix>
-        </InputGroup>
+        {attachments.length ? (
+          <ul aria-label={t("attachedPhotos")} className="mb-2 flex flex-wrap gap-2">
+            {attachments.map((attachment, index) => (
+              <li key={attachment.id} className="relative size-16 overflow-hidden rounded-lg border border-admin-border bg-admin-soft">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={attachment.previewUrl} alt={t("photoAlt", { index: index + 1 })} className="size-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => onRemovePhoto?.(attachment.id)}
+                  disabled={sendPending}
+                  aria-label={t("removePhoto", { index: index + 1 })}
+                  className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-admin-ink/70 text-white hover:bg-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent"
+                >
+                  <XMarkIcon aria-hidden className="size-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="flex items-center gap-2">
+          {onAttachPhotos ? (
+            <label
+              title={t("attachPhoto")}
+              className={`grid size-9 shrink-0 place-items-center rounded-lg border border-admin-border text-admin-muted focus-within:ring-2 focus-within:ring-admin-accent ${
+                !canWrite || sendPending || attachments.length >= CHAT_IMAGE_LIMIT ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-admin-soft hover:text-admin-accent"
+              }`}
+            >
+              <PhotoIcon aria-hidden className="size-5" />
+              <span className="sr-only">{t("attachPhoto")}</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                disabled={!canWrite || sendPending || attachments.length >= CHAT_IMAGE_LIMIT}
+                onChange={(event) => {
+                  onAttachPhotos(Array.from(event.target.files ?? []));
+                  event.target.value = "";
+                }}
+              />
+            </label>
+          ) : null}
+          <InputGroup fullWidth>
+            <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} disabled={!canWrite} placeholder={t("composeTo", { name: customer.name })} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+            <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!canWrite || (!draft.trim() && attachments.length === 0) || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? t("sending") : t("send")}</Button></InputGroup.Suffix>
+          </InputGroup>
+        </div>
       </form>
     </section>
   );
