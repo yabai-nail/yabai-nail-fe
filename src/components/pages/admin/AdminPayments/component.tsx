@@ -148,6 +148,7 @@ export function buildInvoiceFromServer(
 export function AdminPaymentsComponent() {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
+  const tRefund = useTranslations("admin.operations.refund");
   const format = useFormatter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId");
@@ -423,7 +424,7 @@ export function AdminPaymentsComponent() {
           <ul className="mt-2 space-y-1 text-xs text-admin-muted">
             {payments.data.items.map((payment) => (
               <li key={payment.id}>
-                {paymentMethodLabel(payment.method, tMethod)} · {formatMoney(payment.amount)} · {paymentStatusLabel(payment.status, t)}
+                {paymentMethodLabel(payment.method, tMethod)} · {payment.kind === "REFUND" ? `${tRefund("heading")} −${formatMoney(payment.amount)}` : formatMoney(payment.amount)} · {paymentStatusLabel(payment.status, t)}
               </li>
             ))}
           </ul>
