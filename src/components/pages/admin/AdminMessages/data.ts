@@ -77,6 +77,8 @@ export type ChatTextMessage = ChatMessageBase & {
   readonly content: string;
   /** Attached photos; `url` is a signed link (or a local preview while sending). */
   readonly images?: ReadonlyArray<ChatImage>;
+  /** Taken back by its sender: shown as a placeholder, with nothing left to act on. */
+  readonly recalled?: boolean;
 };
 
 export type ChatImage = {

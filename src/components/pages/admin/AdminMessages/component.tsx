@@ -10,6 +10,7 @@ import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
   adminMediaService,
   adminService,
+  ApiClientError,
   useAdminConversations,
   useAdminConversationMessages,
   useAdminPermission,
@@ -56,7 +57,7 @@ function toFixtureCustomer(server: ServerConversation, unnamed: string): Message
   };
 }
 
-function toFixtureConversation(server: ServerConversation, unnamed: string, formatTime: (value: Date) => string, photoPreview = ""): Conversation {
+function toFixtureConversation(server: ServerConversation, unnamed: string, formatTime: (value: Date) => string, photoPreview = "", recalledPreview = ""): Conversation {
   const status = server.status.toLowerCase();
   const normalizedStatus =
     status === "unread" || status === "read" || status === "archived" ? status : "read";
@@ -64,7 +65,7 @@ function toFixtureConversation(server: ServerConversation, unnamed: string, form
     id: server.id,
     customer: toFixtureCustomer(server, unnamed),
     // A photo-only message has no text to preview.
-    preview: server.lastMessage?.content || (server.lastMessage?.messageType === "IMAGE" ? photoPreview : ""),
+    preview: server.lastMessage?.recalledAt ? recalledPreview : server.lastMessage?.content || (server.lastMessage?.messageType === "IMAGE" ? photoPreview : ""),
     timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt, formatTime) : "",
     unreadCount: server.unreadCount,
     status: normalizedStatus,
@@ -212,6 +213,7 @@ export function toChatMessage(
     sender,
     content: server.content,
     ...(server.images?.length ? { images: server.images } : {}),
+    ...(server.recalledAt ? { recalled: true } : {}),
     time: formatTimeLabel(server.createdAt, formatTime),
     sentAt: server.createdAt,
   };
@@ -270,7 +272,7 @@ export function AdminMessagesComponent() {
   const [statusError, setStatusError] = useState<string | null>(null);
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
-    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime, t("photoPreview"))) ?? [];
+    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime, t("photoPreview"), t("recalledMessage"))) ?? [];
   }, [conversationsData, formatTime, t]);
 
   const visibleConversations = useMemo(() => {
@@ -386,6 +388,26 @@ export function AdminMessagesComponent() {
     })();
   }, [openConversationId, openUnreadCount, openVersion, selected?.status, canWrite, mutateConversations]);
 
+  // Recall takes a salon message back for both sides; hide removes any message from this
+  // admin's own view. Both refetch the thread and the inbox preview afterwards.
+  async function runMessageAction(action: "recall" | "hide", messageId: string) {
+    if (!selected) return;
+    setStatusError(null);
+    try {
+      if (action === "recall") await adminService.recallConversationMessage(selected.id, messageId);
+      else await adminService.hideConversationMessage(selected.id, messageId);
+      notifySuccess(action === "recall" ? t("messageActions.recalled") : t("messageActions.hidden"));
+      await Promise.all([mutateThread(), mutateConversations()]);
+    } catch (thrown) {
+      const code = thrown instanceof ApiClientError ? thrown.code : undefined;
+      setStatusError(
+        code === "CHAT_MESSAGE_RECALL_EXPIRED" ? t("messageActions.recallExpired")
+          : code === "CHAT_MESSAGE_RECALL_FORBIDDEN" ? t("messageActions.recallForbidden")
+            : thrown instanceof Error ? thrown.message : t("messageActions.failed"),
+      );
+    }
+  }
+
   async function changeStatus(next: "READ" | "UNREAD" | "ARCHIVED") {
     if (!selected || selected.version === undefined) return;
     setStatusPending(true);
@@ -470,6 +492,7 @@ export function AdminMessagesComponent() {
             attachments={attachments}
             onAttachPhotos={attachPhotos}
             onRemovePhoto={removePhoto}
+            onMessageAction={canWrite ? (action, messageId) => runMessageAction(action, messageId) : undefined}
             onSend={sendMessage}
             canWrite={canWrite}
             statusPending={statusPending}
