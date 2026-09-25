@@ -7,8 +7,16 @@ import type { Translator } from "@/i18n/config";
 import type { AdminAppointment, AdminCustomer, AdminServiceItem, AdminStaffMember } from "@/service";
 import { applyCustomerFacts, buildInvoiceFromServer } from "./component";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
+import { initialCheckoutInvoice } from "./data";
 
 describe("admin payment customer and appointment facts", () => {
+  it.each([["NEW", "Khách mới"], ["LOYAL", "Khách thân thiết"], ["RETURNING", "Khách lâu năm"]])("renders the CRM segment %s instead of a fixed loyal badge", (segment, label) => {
+    const invoice = applyCustomerFacts(initialCheckoutInvoice, { id: initialCheckoutInvoice.customer.id, segment, visitCount: 0, version: 1 });
+    const markup = renderToStaticMarkup(<NextIntlClientProvider locale="vi" messages={messages} timeZone="Asia/Tokyo"><CustomerAppointmentPanel invoice={invoice} appointmentStatus="CONFIRMED" /></NextIntlClientProvider>);
+    expect(markup).toContain(label);
+    if (segment === "NEW") expect(markup).not.toContain("Khách thân thiết");
+    expect(applyCustomerFacts(invoice, { id: invoice.customer.id, version: 2 }).customer.segment).toBe(invoice.customer.segment);
+  });
   it("shows the CRM totals and the completed server status", () => {
     const customer = { id: "customer-1", displayName: "E2E Customer", phone: "0900000000", birthday: "1990-01-01", visitCount: 3, totalSpend: 25_500, preferenceSummary: "Pink", version: 1 } satisfies AdminCustomer;
     const service = { id: "service-1", name: "Gel", price: 5_000, durationMinutes: 60, active: true, version: 1 } satisfies AdminServiceItem;

@@ -16,6 +16,7 @@ export function CustomerAppointmentPanel({ invoice, appointmentStatus }: Readonl
 }>) {
   const t = useTranslations("admin.payments");
   const tStatus = useTranslations("admin.appointmentStatus");
+  const tSegment = useTranslations("admin.appointments.segment");
   const normalizedStatus = normalizeAppointmentStatus(appointmentStatus);
   return (
       <Card className="h-fit gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -29,7 +30,7 @@ export function CustomerAppointmentPanel({ invoice, appointmentStatus }: Readonl
             <span className="grid size-12 shrink-0 place-items-center rounded-full bg-admin-soft font-bold text-admin-accent" aria-hidden="true">{invoice.customer.initials}</span>
             <div className="min-w-0">
               <p className="truncate font-bold text-admin-ink">{invoice.customer.name}</p>
-              <Chip size="sm" variant="soft" color="accent"><Chip.Label>{t("customer.loyal")}</Chip.Label></Chip>
+              {invoice.customer.segment ? <Chip size="sm" variant="soft" color="accent"><Chip.Label>{tSegment(invoice.customer.segment)}</Chip.Label></Chip> : null}
             </div>
           </div>
           <dl className="space-y-2 text-xs text-admin-muted">

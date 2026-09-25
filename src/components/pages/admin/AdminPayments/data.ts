@@ -1,9 +1,11 @@
 import type { Translator } from "@/i18n/config";
+import type { CustomerSegment } from "@/lib/admin-customer";
 
 export type PaymentMethod = "cash" | "paypay" | "visa";
 export type InvoiceStatus = "draft" | "paid";
 
 export type PaymentCustomerSnapshot = {
+  readonly segment?: CustomerSegment;
   readonly id: string;
   readonly name: string;
   readonly initials: string;

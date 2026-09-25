@@ -18,6 +18,7 @@ import {
 import {
   formatMoney,
   parseMoney,
+  refundableBalance,
   summarizeCheckIn,
   summarizeCustomer,
   summarizeMembership,
@@ -125,7 +126,6 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const { busy, message, error, run } = useAction();
   const refund = useAdminPaymentRefund(branchId, refundTarget?.paymentId ?? null, refundTarget?.refundId ?? null);
   const amount = parseMoney(amountText);
-  const disabled = busy || !paymentId.trim() || amount <= 0 || reason.trim().length < 2;
   const customerNames = new Map((customers.data?.items ?? []).map((customer) => [
     customer.id,
     customer.displayName ?? customer.name ?? t("unnamedCustomer"),
@@ -150,6 +150,9 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   );
   const selected = paidAppointments.find((appointment) => appointment.id === appointmentId);
   const transactions = payments.data?.items ?? [];
+  const selectedCapture = transactions.find((payment) => payment.id === paymentId && payment.kind !== "REFUND" && payment.status === "SUCCEEDED");
+  const remaining = selectedCapture ? refundableBalance(selectedCapture, transactions) : 0;
+  const disabled = busy || !selectedCapture || amount <= 0 || amount > remaining || reason.trim().length < 2;
   const statusLabel = (status: string) => {
     const code = status.toUpperCase();
     return tStatus.has(code) ? tStatus(code) : status;
@@ -265,21 +268,22 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                     className={`cursor-pointer transition-colors hover:bg-admin-soft/60 ${
                       payment.id === paymentId ? "bg-admin-soft" : ""
                     }`}
-                    onClick={() => setPaymentId(payment.id)}
+                    onClick={() => { if (payment.kind !== "REFUND" && payment.status === "SUCCEEDED") setPaymentId(payment.id); }}
                   >
                     <td className="px-3 py-2 text-right">
                       <Button
                         variant="ghost"
+                        isDisabled={payment.kind === "REFUND" || payment.status !== "SUCCEEDED"}
                         className="h-auto min-h-10 justify-end rounded-lg px-1 font-semibold"
                         onPress={() => setPaymentId(payment.id)}
                       >
-                        {formatMoney(payment.amount)}
+                        {payment.kind === "REFUND" ? `−${formatMoney(payment.amount)}` : formatMoney(payment.amount)}
                       </Button>
                     </td>
                     <td className="px-3 py-2">{methodLabel(payment.method)}</td>
-                    <td className="px-3 py-2 text-admin-muted">{paymentStatusLabel(payment.status)}</td>
+                    <td className="px-3 py-2 text-admin-muted">{payment.kind === "REFUND" ? `${t("refund.heading")} · ` : ""}{paymentStatusLabel(payment.status)}</td>
                     <td className="px-3 py-2 text-admin-muted">
-                      {payment.paidAt ? format.dateTime(new Date(payment.paidAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
+                      {payment.paidAt ? format.dateTime(new Date(payment.paidAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : payment.createdAt ? format.dateTime(new Date(payment.createdAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -288,6 +292,8 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
           </div>
         )}
       </div>
+
+      {selectedCapture ? <p className="text-xs text-admin-muted">{t("refund.remaining", { amount: formatMoney(remaining) })}</p> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1">
@@ -317,7 +323,11 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
             payment.version,
           );
           setRefundTarget({ paymentId: normalizedPaymentId, refundId: created.id });
+          setPaymentId("");
+          setAmountText("");
+          setReason("");
           notifySuccess(t("refund.recorded"));
+          await payments.mutate().catch(() => undefined);
           return null;
         })}>{busy ? t("refund.busy") : t("refund.heading")}</Button>
       </div>

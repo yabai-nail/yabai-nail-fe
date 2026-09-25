@@ -629,6 +629,7 @@
         "loadingTransactions": "Loading transactions…",
         "noTransactions": "This appointment has no transactions yet.",
         "pickTransaction": "Choose a transaction",
+        "remaining": "Remaining refundable: {amount}",
         "amount": "Refund amount (¥)",
         "reason": "Refund reason",
         "requested": "Refund requested {amount} · {status}",
@@ -649,7 +650,7 @@
           "amount": "Amount",
           "method": "Method",
           "status": "Status",
-          "paidAt": "Taken at"
+          "paidAt": "Time"
         },
         "selectAppointment": "Pick an appointment above to see its transactions.",
         "result": "Refund requested {amount} · {status}",

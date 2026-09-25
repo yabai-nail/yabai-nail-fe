@@ -283,12 +283,15 @@ export interface AdminAppointmentPhotoInput {
 export interface AdminAppointmentPayment {
   readonly id: string;
   readonly appointmentId: string;
+  readonly kind?: "CAPTURE" | "REFUND";
+  readonly parentPaymentId?: string | null;
   readonly method: string;
   readonly amount: number;
   readonly cashTendered?: number | null;
   readonly cashChange?: number | null;
   readonly status: string;
   readonly paidAt?: string;
+  readonly createdAt?: string;
   readonly version: number;
   readonly [field: string]: unknown;
 }

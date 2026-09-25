@@ -2,6 +2,7 @@ export { formatMoney } from "@/lib/admin-format";
 import { SALON_TIME_ZONE } from "@/lib/salon-date";
 import type {
   AdminCheckInResolution,
+  AdminAppointmentPayment,
   AdminCustomer,
   AdminMembershipCardResolution,
   AdminResolvedCustomer,
@@ -13,10 +14,19 @@ export type CustomerHit = {
   readonly phone: string;
 };
 
-/** Strips grouping characters so "1.000.000" or "1,000,000" become the integer amount. */
+/** Accepts whole-yen amounts, including correctly grouped thousands, but never signs or decimals. */
 export function parseMoney(input: string): number {
-  const digits = input.replace(/[^\d]/g, "");
-  return digits ? Number(digits) : 0;
+  const plain = input.trim().replace(/^¥\s*/, "").replace(/\s*¥$/, "");
+  if (!/^(?:\d+|\d{1,3}(?:[.,]\d{3})+)$/.test(plain)) return 0;
+  const amount = Number(plain.replace(/[.,]/g, ""));
+  return Number.isSafeInteger(amount) ? amount : 0;
+}
+
+export function refundableBalance(capture: AdminAppointmentPayment, transactions: ReadonlyArray<AdminAppointmentPayment>): number {
+  const refunded = transactions
+    .filter((payment) => payment.kind === "REFUND" && payment.parentPaymentId === capture.id && ["REQUESTED", "PROCESSING", "RETRY_SCHEDULED", "SUCCEEDED"].includes(payment.status))
+    .reduce((sum, payment) => sum + payment.amount, 0);
+  return Math.max(0, capture.amount - refunded);
 }
 
 export function summarizeCustomer(customer: AdminCustomer): CustomerHit {

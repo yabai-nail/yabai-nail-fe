@@ -54,10 +54,12 @@ function toPaymentMethod(method: string | null | undefined): PaymentMethod | nul
  */
 export function applyCustomerFacts(invoice: CheckoutInvoice, customer: AdminCustomer | undefined): CheckoutInvoice {
   if (!customer) return invoice;
+  const segment = String(customer.segment ?? "").toUpperCase();
   return {
     ...invoice,
     customer: {
       ...invoice.customer,
+      segment: segment === "NEW" ? "new" : segment === "LOYAL" ? "loyal" : segment ? "regular" : invoice.customer.segment,
       birthday: customer.birthday ?? "",
       visits: customer.visitCount ?? 0,
       totalSpend: customer.totalSpend ?? 0,

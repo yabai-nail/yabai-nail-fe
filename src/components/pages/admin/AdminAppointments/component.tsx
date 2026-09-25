@@ -93,13 +93,14 @@ function deriveInitials(name: string): string {
 export function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>, t: Translator): AppointmentCustomer {
   const server = byId.get(customerId);
   const name = server?.displayName ?? server?.name ?? t("fallback.customer");
+  const segment = String(server?.segment ?? "").toUpperCase();
   return {
     id: customerId,
     name,
     initials: deriveInitials(name),
     phone: server?.phone ?? "",
     birthday: server?.birthday ?? "",
-    segment: "regular",
+    segment: segment === "NEW" ? "new" : segment === "LOYAL" ? "loyal" : "regular",
     preference: server?.preferenceSummary ?? "",
     visits: server?.visitCount ?? 0,
     totalSpend: server?.totalSpend ?? 0,

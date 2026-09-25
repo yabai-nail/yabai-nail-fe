@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type { AdminAppointmentPayment } from "@/service";
 import {
   formatSalonClock,
   formatMoney,
   parseMoney,
+  refundableBalance,
   summarizeCheckIn,
   summarizeCustomer,
   summarizeMembership,
@@ -16,6 +18,23 @@ describe("operations helpers", () => {
     expect(parseMoney("1.000.000")).toBe(1000000);
     expect(parseMoney("1,250,000 ¥")).toBe(1250000);
     expect(parseMoney("abc")).toBe(0);
+    expect(parseMoney("-2000")).toBe(0);
+    expect(parseMoney("1.2")).toBe(0);
+    expect(parseMoney("5001abc")).toBe(0);
+  });
+
+  it("subtracts succeeded and reserved refunds belonging to the selected capture", () => {
+    const capture = { id: "capture-1", amount: 5000, kind: "CAPTURE", status: "SUCCEEDED" } as never;
+    const transactions = [
+      capture,
+      { id: "refund-1", amount: 2000, kind: "REFUND", parentPaymentId: "capture-1", status: "SUCCEEDED" },
+      { id: "refund-2", amount: 3000, kind: "REFUND", parentPaymentId: "capture-1", status: "SUCCEEDED" },
+      { id: "other", amount: 1000, kind: "REFUND", parentPaymentId: "capture-2", status: "SUCCEEDED" },
+      { id: "failed", amount: 1000, kind: "REFUND", parentPaymentId: "capture-1", status: "FAILED" },
+    ] as AdminAppointmentPayment[];
+    expect(refundableBalance(capture, transactions)).toBe(0);
+    expect(refundableBalance(capture, transactions.slice(0, 2))).toBe(3000);
+    expect(refundableBalance(capture, [{ id: "pending", amount: 1500, kind: "REFUND", parentPaymentId: "capture-1", status: "PROCESSING" } as AdminAppointmentPayment])).toBe(3500);
   });
 
   it("formats yen with grouping and symbol", () => {

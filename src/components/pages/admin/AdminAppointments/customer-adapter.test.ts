@@ -7,6 +7,10 @@ import { resolveCustomer } from "./component";
 const t = ((key: string) => key) as Translator;
 
 describe("appointment customer adapter", () => {
+  it.each([["NEW", "new"], ["LOYAL", "loyal"], ["RETURNING", "regular"]])("preserves server segment %s regardless of visit count", (segment, expected) => {
+    const customer: AdminCustomer = { id: "customer-segment", displayName: "Ami", segment, visitCount: 0, version: 1 };
+    expect(resolveCustomer(customer.id, new Map([[customer.id, customer]]), t).segment).toBe(expected);
+  });
   it("maps the CRM summary fields returned by the customer list", () => {
     const customer: AdminCustomer = {
       id: "customer-1",

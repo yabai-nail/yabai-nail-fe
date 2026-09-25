@@ -629,6 +629,7 @@
         "loadingTransactions": "Đang tải giao dịch…",
         "noTransactions": "Lịch hẹn này chưa có giao dịch.",
         "pickTransaction": "Chọn giao dịch",
+        "remaining": "Còn có thể hoàn: {amount}",
         "amount": "Số tiền hoàn (¥)",
         "reason": "Lý do hoàn",
         "requested": "Yêu cầu hoàn {amount} · {status}",
@@ -649,7 +650,7 @@
           "amount": "Số tiền",
           "method": "Phương thức",
           "status": "Trạng thái",
-          "paidAt": "Đã thu lúc"
+          "paidAt": "Thời điểm"
         },
         "selectAppointment": "Chọn một lịch hẹn ở bảng trên để xem giao dịch của lịch đó.",
         "result": "Yêu cầu hoàn {amount} · {status}",
