@@ -8,6 +8,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
 import {
+  adminMediaService,
   adminService,
   useAdminConversations,
   useAdminConversationMessages,
@@ -21,6 +22,7 @@ import {
 } from "@/service";
 import { ConversationList, type InboxFilter } from "./ConversationList";
 import { MessageThread } from "./MessageThread";
+import { addChatAttachments, type ChatAttachment } from "./chat-images";
 import { type ChatMessage, type Conversation, type MessageCustomer } from "./data";
 import {
   appendConversationMessage,
@@ -54,14 +56,15 @@ function toFixtureCustomer(server: ServerConversation, unnamed: string): Message
   };
 }
 
-function toFixtureConversation(server: ServerConversation, unnamed: string, formatTime: (value: Date) => string): Conversation {
+function toFixtureConversation(server: ServerConversation, unnamed: string, formatTime: (value: Date) => string, photoPreview = ""): Conversation {
   const status = server.status.toLowerCase();
   const normalizedStatus =
     status === "unread" || status === "read" || status === "archived" ? status : "read";
   return {
     id: server.id,
     customer: toFixtureCustomer(server, unnamed),
-    preview: server.lastMessage?.content ?? "",
+    // A photo-only message has no text to preview.
+    preview: server.lastMessage?.content || (server.lastMessage?.messageType === "IMAGE" ? photoPreview : ""),
     timeLabel: server.lastMessage ? formatTimeLabel(server.lastMessage.createdAt, formatTime) : "",
     unreadCount: server.unreadCount,
     status: normalizedStatus,
@@ -208,6 +211,7 @@ export function toChatMessage(
     kind: "text",
     sender,
     content: server.content,
+    ...(server.images?.length ? { images: server.images } : {}),
     time: formatTimeLabel(server.createdAt, formatTime),
     sentAt: server.createdAt,
   };
@@ -253,6 +257,7 @@ export function AdminMessagesComponent() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("");
   const [draft, setDraft] = useState("");
+  const [attachments, setAttachments] = useState<ReadonlyArray<ChatAttachment>>([]);
   const [localMessages, setLocalMessages] = useState<ConversationMessages>({});
 
   const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useAdminConversations({
@@ -265,7 +270,7 @@ export function AdminMessagesComponent() {
   const [statusError, setStatusError] = useState<string | null>(null);
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
   const source = useMemo<ReadonlyArray<Conversation>>(() => {
-    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime)) ?? [];
+    return conversationsData?.items?.map((server) => toFixtureConversation(server, t("unnamedCustomer"), formatTime, t("photoPreview"))) ?? [];
   }, [conversationsData, formatTime, t]);
 
   const visibleConversations = useMemo(() => {
@@ -289,12 +294,28 @@ export function AdminMessagesComponent() {
     return sortThreadChronologically([...serverThread, ...(localMessages[selected.id] ?? [])]);
   }, [formatTime, selected, threadData, localMessages]);
 
+  const attachPhotos = (files: ReadonlyArray<File>) => {
+    const result = addChatAttachments(attachments, files, (file) => ({ id: crypto.randomUUID(), file, previewUrl: URL.createObjectURL(file) }));
+    setAttachments(result.attachments);
+    setSendError(result.rejected === "invalid" ? t("photoInvalid") : result.rejected === "limit" ? t("photoLimit") : null);
+  };
+
+  const removePhoto = (id: string) => {
+    setAttachments((current) => {
+      const removed = current.find((item) => item.id === id);
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return current.filter((item) => item.id !== id);
+    });
+  };
+
   const sendMessage = () => {
     const content = draft.trim();
+    const photos = attachments;
     if (!selected) return;
-    if (!content) return;
+    if (!content && photos.length === 0) return;
     if (sendPending) return;
     setDraft("");
+    setAttachments([]);
     setSendError(null);
     setSendPending(true);
     const localId = `local-${crypto.randomUUID()}`;
@@ -308,14 +329,18 @@ export function AdminMessagesComponent() {
         kind: "text",
         sender: "salon",
         content,
+        ...(photos.length ? { images: photos.map((photo) => ({ mediaId: photo.id, url: photo.previewUrl })) } : {}),
         time: t("now"),
         sentAt: new Date().toISOString(),
       }),
     );
 
     void (async () => {
+      const uploaded: string[] = [];
       try {
-        await adminService.sendConversationMessage(selected.id, { content });
+        for (const photo of photos) uploaded.push(await adminMediaService.uploadFile(photo.file));
+        await adminService.sendConversationMessage(selected.id, { content, ...(uploaded.length ? { imageMediaIds: uploaded } : {}) });
+        for (const photo of photos) URL.revokeObjectURL(photo.previewUrl);
         // Server accepted; drop the local bubble and let the refetch bring
         // the canonical message (with real id + timestamp + delivery status).
         setLocalMessages((current) => {
@@ -327,6 +352,9 @@ export function AdminMessagesComponent() {
         await Promise.all([mutateThread(), mutateConversations()]);
       } catch (thrown) {
         setLocalMessages((current) => ({ ...current, [selected.id]: (current[selected.id] ?? []).filter(message => message.id !== localId) }));
+        // Orphan uploads are cleaned up best-effort; the photos go back into the composer.
+        for (const mediaId of uploaded) void adminMediaService.deleteMedia(mediaId).catch(() => undefined);
+        setAttachments((current) => current.length ? current : photos);
         setDraft((current) => current || content);
         setSendError(thrown instanceof Error ? thrown.message : t("sendFailed"));
       } finally {
@@ -439,6 +467,9 @@ export function AdminMessagesComponent() {
             messages={messages}
             draft={draft}
             onDraftChange={setDraft}
+            attachments={attachments}
+            onAttachPhotos={attachPhotos}
+            onRemovePhoto={removePhoto}
             onSend={sendMessage}
             canWrite={canWrite}
             statusPending={statusPending}
