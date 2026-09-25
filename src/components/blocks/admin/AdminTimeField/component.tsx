@@ -50,6 +50,7 @@ export function AdminTimeField({
       <Button
         id={id}
         variant="outline"
+        onPress={() => setOpen(!open)}
         aria-label={ariaLabel}
         aria-invalid={isInvalid || undefined}
         aria-describedby={describedBy}
