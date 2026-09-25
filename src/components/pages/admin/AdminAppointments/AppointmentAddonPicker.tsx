@@ -16,6 +16,7 @@ import type { AdminServiceAddonGroup, AdminServiceAddonRuleItem } from "@/servic
 
 export type AppointmentAddonSummary = Readonly<{
   ids: ReadonlyArray<string>;
+  requiredSkillIds: ReadonlyArray<string>;
   addedMinutes: number;
   addedPrice: number;
   complete: boolean;
@@ -71,14 +72,17 @@ export function AppointmentAddonPicker({
           }
         }
       }
-      const complete = groups.every((group) => {
+      const complete = Boolean(data) && groups.every((group) => {
         const count = group.items.filter((item) => ids.includes(item.addonServiceId)).length;
         const withinMax = group.maxSelections ? count <= group.maxSelections : true;
         return count >= requiredMin(group) && withinMax;
       });
-      return { ids, addedMinutes, addedPrice, complete };
+      const requiredSkillIds = groups.flatMap((group) => group.items
+        .filter((item) => ids.includes(item.addonServiceId) && !item.addon.representsNoSelection)
+        .map((item) => item.addonServiceId));
+      return { ids, requiredSkillIds, addedMinutes, addedPrice, complete };
     },
-    [groups, branchId],
+    [groups, branchId, data],
   );
 
   // Keep the form's duration/price/validity in step with the current choice. Choices are reset

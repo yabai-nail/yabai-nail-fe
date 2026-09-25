@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useCallback, useState, type FormEvent } from "react";
 import {
   hasAppointmentConflict,
+  eligibleStaffForServices,
   validateAppointmentDraft,
   type AppointmentDraftErrors,
 } from "./appointment-state";
@@ -47,7 +48,7 @@ function initialDraft(
 ): AppointmentDraft {
   const customer = options.customers[0] ?? { id: "", name: "", initials: "", phone: "", birthday: "", segment: "regular", preference: "", visits: 0, totalSpend: 0 };
   const service = options.services[0] ?? { id: "", name: "", durationMinutes: 60 };
-  const staff = options.staff[0] ?? { id: "", name: "", initials: "" };
+  const staff = eligibleStaffForServices(options.staff, [service.id])[0] ?? { id: "", name: "", initials: "" };
   return appointment ?? {
     date: defaultDate,
     startTime: "09:00",
@@ -82,8 +83,8 @@ export function AppointmentFormModal({
   // appointment. Say so plainly instead of rendering a form whose submit can
   // only fail.
   const missing = [
-    options.customers.length === 0 ? t("form.missingCustomers") : null,
-    options.services.length === 0 ? t("form.missingServices") : null,
+    !appointment && options.customers.length === 0 ? t("form.missingCustomers") : null,
+    !appointment && options.services.length === 0 ? t("form.missingServices") : null,
     options.staff.length === 0 ? t("form.missingStaff") : null,
   ].filter((label): label is string => label !== null);
 
@@ -95,11 +96,20 @@ export function AppointmentFormModal({
   const [submitting, setSubmitting] = useState(false);
   // Add-on choices live here, not in the draft, since they only apply when creating. The
   // picker reports the total extra duration/price and whether every required group is satisfied.
-  const [addon, setAddon] = useState<AppointmentAddonSummary>({ ids: [], addedMinutes: 0, addedPrice: 0, complete: true });
-  const handleAddonChange = useCallback((summary: AppointmentAddonSummary) => setAddon(summary), []);
+  const [addon, setAddon] = useState<AppointmentAddonSummary>({ ids: [], requiredSkillIds: [], addedMinutes: 0, addedPrice: 0, complete: Boolean(appointment) });
+  const handleAddonChange = useCallback((summary: AppointmentAddonSummary) => {
+    setAddon(summary);
+    setDraft((current) => {
+      const eligible = eligibleStaffForServices(options.staff, [current.service.id, ...summary.requiredSkillIds]);
+      return eligible.some((member) => member.id === current.staff.id)
+        ? current
+        : { ...current, staff: eligible[0] ?? current.staff };
+    });
+  }, [options.staff]);
   // End time is derived from the base service plus any add-on durations, never stored, so it
   // never drifts out of sync with the current selection.
   const effectiveEnd = endTimeFor(draft.startTime, draft.service.durationMinutes + addon.addedMinutes);
+  const eligibleStaff = eligibleStaffForServices(options.staff, [draft.service.id, ...addon.requiredSkillIds]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,7 +120,7 @@ export function AppointmentFormModal({
 
     if (Object.keys(nextErrors).length) return;
     // A required add-on group with nothing chosen keeps the submit button disabled; guard here too.
-    if (!addon.complete) return;
+    if (!addon.complete || !eligibleStaff.some((member) => member.id === draft.staff.id)) return;
     if (hasAppointmentConflict(appointments, submission, appointment?.id)) {
       setFormMessage(t("form.conflict"));
       return;
@@ -179,15 +189,16 @@ export function AppointmentFormModal({
                     </Field>
                   </div>
                 )}
-                {appointment ? <Field id="appointment-service" label={t("form.service")}><p className={`${fieldClassName} flex items-center`}>{draft.service.name}</p></Field> : <Field id="appointment-service" label={t("form.service")} error={errors.service} isControlLabelled={false}><AdminSelectField label={t("form.service")} fullWidth isInvalid={Boolean(errors.service)} describedBy={errors.service ? "appointment-service-error" : undefined} value={draft.service.id} onChange={(value) => setDraft({ ...draft, service: options.services.find((item) => item.id === value) ?? draft.service })} options={options.services.map((item) => ({ value: item.id, label: item.name }))} /></Field>}
+                {appointment ? <Field id="appointment-service" label={t("form.service")}><p className={`${fieldClassName} flex items-center`}>{draft.service.name}</p></Field> : <Field id="appointment-service" label={t("form.service")} error={errors.service} isControlLabelled={false}><AdminSelectField label={t("form.service")} fullWidth isInvalid={Boolean(errors.service)} describedBy={errors.service ? "appointment-service-error" : undefined} value={draft.service.id} onChange={(value) => { const service = options.services.find((item) => item.id === value) ?? draft.service; setDraft({ ...draft, service, staff: eligibleStaffForServices(options.staff, [service.id])[0] ?? draft.staff }); }} options={options.services.map((item) => ({ value: item.id, label: item.name }))} /></Field>}
                 {!appointment ? <AppointmentAddonPicker key={draft.service.id} serviceId={draft.service.id} branchId={branchId} onChange={handleAddonChange} /> : null}
-                <Field id="appointment-staff" label={t("form.staff")} error={errors.staff} isControlLabelled={false}><AdminSelectField label={t("form.staff")} fullWidth isInvalid={Boolean(errors.staff)} describedBy={errors.staff ? "appointment-staff-error" : undefined} value={draft.staff.id} onChange={(value) => setDraft({ ...draft, staff: options.staff.find((item) => item.id === value) ?? options.staff[0] })} options={options.staff.map((item) => ({ value: item.id, label: item.name }))} /></Field>
+                <Field id="appointment-staff" label={t("form.staff")} error={errors.staff} isControlLabelled={false}><AdminSelectField label={t("form.staff")} fullWidth isInvalid={Boolean(errors.staff)} describedBy={errors.staff ? "appointment-staff-error" : undefined} value={draft.staff.id} onChange={(value) => setDraft({ ...draft, staff: eligibleStaff.find((item) => item.id === value) ?? draft.staff })} options={eligibleStaff.map((item) => ({ value: item.id, label: item.name }))} /></Field>
+                {eligibleStaff.length === 0 ? <p role="alert" className="text-sm text-admin-danger">{t("form.missingStaff")}</p> : null}
                 {!appointment ? <div className="sm:col-span-2"><Field id="appointment-note" label={t("form.note")}><textarea id="appointment-note" className={`${fieldClassName} min-h-24 py-2`} value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} placeholder={t("form.notePlaceholder")} /></Field></div> : null}
                 {formMessage ? <p role="alert" className="rounded-lg bg-admin-soft px-3 py-2 text-sm text-admin-accent sm:col-span-2">{formMessage}</p> : null}
               </Modal.Body>
               <Modal.Footer className="border-t border-admin-border px-5 py-4">
                 <Button type="button" variant="outline" className="rounded-lg border-admin-border" isDisabled={submitting} onPress={onClose}>{t("form.close")}</Button>
-                <Button type="submit" variant="primary" className="rounded-lg" isDisabled={submitting || !addon.complete}>{submitting ? t("form.saving") : appointment ? t("form.save") : t("form.create")}</Button>
+                <Button type="submit" variant="primary" className="rounded-lg" isDisabled={submitting || !addon.complete || !eligibleStaff.some((member) => member.id === draft.staff.id)}>{submitting ? t("form.saving") : appointment ? t("form.save") : t("form.create")}</Button>
               </Modal.Footer>
             </form>
             )}

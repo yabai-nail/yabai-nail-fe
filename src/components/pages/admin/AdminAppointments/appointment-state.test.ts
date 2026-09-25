@@ -3,6 +3,7 @@ import type { Appointment, AppointmentDraft } from "./data";
 import {
   cancelAppointment,
   createAppointment,
+  eligibleStaffForServices,
   filterAppointments,
   getAppointmentSummary,
   getAppointmentsInRange,
@@ -40,6 +41,16 @@ const customer = {
 const service = { id: "service-1", name: "Sơn gel đơn sắc", durationMinutes: 90 };
 const maiLinh = { id: "staff-1", name: "Mai Linh", initials: "ML" };
 const thaoVy = { id: "staff-2", name: "Thảo Vy", initials: "TV" };
+
+it("only offers staff skilled in every selected service", () => {
+  const staff = [
+    { ...maiLinh, serviceIds: ["base", "addon"] },
+    { ...thaoVy, serviceIds: ["base"] },
+  ];
+  expect(eligibleStaffForServices(staff, ["base"]).map((member) => member.id)).toEqual(["staff-1", "staff-2"]);
+  expect(eligibleStaffForServices(staff, ["base", "addon"]).map((member) => member.id)).toEqual(["staff-1"]);
+  expect(eligibleStaffForServices(staff, ["other"])).toEqual([]);
+});
 
 const appointments: ReadonlyArray<Appointment> = [
   {

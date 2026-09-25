@@ -15,6 +15,7 @@ import {
   useAdminBranch,
   useAdminCustomers,
   useAdminServices,
+  useAdminServiceCategories,
   useAdminStaff,
   useAdminPermission,
   useBranch,
@@ -25,6 +26,7 @@ import {
 } from "@/service";
 import {
   filterAppointments,
+  eligibleStaffForServices,
   getAppointmentsInRange,
   getAppointmentSummary,
 } from "./appointment-state";
@@ -236,18 +238,32 @@ export function AdminAppointmentsComponent({
   const { data: customersData } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
+  const { data: categoriesData } = useAdminServiceCategories();
   const lookups = useMemo(() => ({
     customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
     services: new Map((servicesData?.items ?? []).map((s) => [s.id, s] as const)),
   }), [customersData, staffData, servicesData]);
-  // What the create/edit form may pick from: the branch's real customers,
-  // services and staff, adapted into the display shapes the form expects.
-  const formOptions = useMemo(() => ({
-    customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers, t)),
-    services: (servicesData?.items ?? []).map((s) => resolveService([s.id], lookups.services, t)),
-    staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff, t)),
-  }), [customersData, servicesData, staffData, lookups, t]);
+  // The API requires an active base service offered by this branch and a staff
+  // member skilled in that service. Keep display lookups global for old rows.
+  const formOptions = useMemo(() => {
+    const staff = (staffData?.items ?? [])
+      .filter((s) => s.active && s.branchId === branchId)
+      .map((s) => ({ ...resolveStaff(s.id, lookups.staff, t), serviceIds: s.serviceIds }));
+    const categoryIds = new Set((categoriesData?.items ?? [])
+      .filter((c) => {
+        const branches = c.branchIds ?? c.branchScope ?? [];
+        return c.status === "ACTIVE" && (!branches.length || (branchId && branches.includes(branchId)));
+      })
+      .map((c) => c.id));
+    return {
+      customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers, t)),
+      services: (servicesData?.items ?? [])
+        .filter((s) => s.active && s.serviceType === "BASE" && s.categoryId && categoryIds.has(s.categoryId) && eligibleStaffForServices(staff, [s.id]).length)
+        .map((s) => resolveService([s.id], lookups.services, t)),
+      staff,
+    };
+  }, [branchId, customersData, servicesData, staffData, categoriesData, lookups, t]);
   const source = useMemo<ReadonlyArray<Appointment>>(
     () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups, t, timeZone)),
     [data, lookups, t, timeZone],
@@ -550,7 +566,7 @@ export function AdminAppointmentsComponent({
 
       {formMode && ((formMode === "create" && canCreate) || (formMode === "edit" && canReschedule)) ? (
         <AppointmentFormModal
-          key={`${formMode}-${selectedAppointment?.id ?? "new"}-${selectedDate}`}
+          key={`${formMode}-${branchId}-${selectedAppointment?.id ?? "new"}-${selectedDate}-${formOptions.customers[0]?.id ?? "loading"}-${formOptions.services[0]?.id ?? "loading"}-${formOptions.staff[0]?.id ?? "loading"}`}
           appointment={formMode === "edit" ? selectedAppointment : null}
           appointments={appointments}
           defaultDate={selectedDate}

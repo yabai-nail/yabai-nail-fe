@@ -129,6 +129,7 @@ export interface AdminServiceCategory {
   readonly nameJa?: string | null;
   // Empty means every branch shows the category.
   readonly branchIds?: ReadonlyArray<string>;
+  readonly branchScope?: ReadonlyArray<string>;
   readonly status: string;
   readonly serviceIds: ReadonlyArray<string>;
   readonly sortOrder: number;

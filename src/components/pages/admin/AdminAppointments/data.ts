@@ -39,6 +39,7 @@ export type AppointmentStaff = {
   readonly id: string;
   readonly name: string;
   readonly initials: string;
+  readonly serviceIds?: ReadonlyArray<string>;
 };
 
 export type AppointmentDraft = {

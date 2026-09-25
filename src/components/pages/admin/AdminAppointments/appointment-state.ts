@@ -2,8 +2,13 @@ import type { Translator } from "@/i18n/config";
 import type {
   Appointment,
   AppointmentDraft,
+  AppointmentStaff,
   AppointmentStatusFilter,
 } from "./data";
+
+export function eligibleStaffForServices(staff: ReadonlyArray<AppointmentStaff>, serviceIds: ReadonlyArray<string>) {
+  return staff.filter((member) => serviceIds.every((id) => member.serviceIds?.includes(id)));
+}
 
 export type AppointmentDraftErrors = Partial<
   Record<"date" | "startTime" | "endTime" | "customer" | "service" | "staff", string>
