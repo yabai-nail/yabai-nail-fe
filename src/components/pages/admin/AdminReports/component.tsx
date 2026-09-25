@@ -104,11 +104,15 @@ export function AdminReportsComponent() {
   };
 
   const createExport = async () => {
+    if (kind === "revenue" && !revenue.data) return;
     setExportBusy(true);
     setExportError(null);
     setDownloadUrl(null);
     try {
-      const info = await adminService.createReportExport({ reportType: exportKindOf[kind] });
+      const info = await adminService.createReportExport({
+        reportType: exportKindOf[kind],
+        ...(kind === "revenue" && revenue.data ? { filters: { from: revenue.data.from, toExclusive: revenue.data.toExclusive } } : {}),
+      });
       notifySuccess(tc("reportExportCreated"));
       setExportInfo(info);
     } catch (err) {
@@ -170,7 +174,7 @@ export function AdminReportsComponent() {
             size="sm"
             variant="primary"
             className="rounded-lg"
-            isDisabled={!canExport || exportBusy}
+            isDisabled={!canExport || exportBusy || (kind === "revenue" && !revenue.data)}
             onPress={() => void createExport()}
           >
             {exportBusy ? t("creating") : t("createExport")}
