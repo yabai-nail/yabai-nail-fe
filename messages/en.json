@@ -502,6 +502,7 @@
       "loadFailed": "Could not load the branches.",
       "columns": {
         "branch": "Branch",
+        "photo": "Photo",
         "address": "Address",
         "status": "Status",
         "actions": "Actions"
@@ -536,6 +537,35 @@
         "save": "Save",
         "add": "Add",
         "saveFailed": "Could not save the branch."
+      },
+      "delete": "Delete",
+      "image": {
+        "title": "Branch photo",
+        "requirements": "JPG, PNG or WebP, up to 5 MB. Shown in the customer app.",
+        "pick": "Choose photo",
+        "replace": "Replace photo",
+        "remove": "Remove photo",
+        "cancel": "Cancel",
+        "removalPending": "The photo will be removed on save.",
+        "undo": "Undo",
+        "alt": "Photo of {name}",
+        "errors": {
+          "empty": "The image file is empty.",
+          "tooLarge": "The image is larger than 5 MB.",
+          "unsupportedType": "Only JPG, PNG or WebP images are accepted."
+        }
+      },
+      "deleteDialog": {
+        "title": "Delete branch",
+        "confirm": "Delete the branch \"{name}\"? It will disappear from the admin console and the customer app.",
+        "hint": "Its appointment history, payroll and reports are kept. Open appointments must be finished and its staff moved or deactivated first.",
+        "cancel": "Cancel",
+        "action": "Delete branch",
+        "deleting": "Deleting…",
+        "success": "Deleted branch {name}.",
+        "failed": "Could not delete the branch.",
+        "openAppointments": "The branch still has unfinished appointments. Finish or cancel them before deleting it.",
+        "activeStaff": "The branch still has active staff. Move them to another branch or deactivate them before deleting it."
       }
     },
     "reviews": {

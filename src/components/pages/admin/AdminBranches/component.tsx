@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { BuildingStorefrontIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button, Card } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
@@ -9,6 +9,7 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminRecordDetail } from "@/components/blocks/admin/AdminRecordDetail";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { useAdminBranchDetail, useAdminBranchList, useAdminPermission } from "@/service";
+import { BranchDeleteModal } from "./BranchDeleteModal";
 import { BranchModal } from "./BranchModal";
 import {
   adaptBranch,
@@ -37,6 +38,7 @@ export function AdminBranchesComponent() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<BranchRow | null>(null);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<BranchRow | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = useAdminBranchDetail(detailId);
   const detailRecord = detail.data as unknown as Record<string, unknown> | undefined;
@@ -75,6 +77,7 @@ export function AdminBranchesComponent() {
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
+                <th className="w-20 px-4 py-3">{t("columns.photo")}</th>
                 <th className="px-4 py-3">{t("columns.branch")}</th>
                 <th className="px-4 py-3">{t("columns.address")}</th>
                 <th className="px-4 py-3">{t("columns.status")}</th>
@@ -83,10 +86,20 @@ export function AdminBranchesComponent() {
             </thead>
             <tbody>
               {visible.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
+                    <td className="px-4 py-3">
+                      <div className="grid h-10 w-14 place-items-center overflow-hidden rounded-md border border-admin-border bg-admin-soft">
+                        {row.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={row.imageUrl} alt={t("image.alt", { name: row.name })} className="size-full object-cover" loading="lazy" />
+                        ) : (
+                          <BuildingStorefrontIcon aria-hidden className="size-5 text-admin-muted" />
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.name}</td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.address ?? "—"}</td>
                     <td className="px-4 py-3">
@@ -98,6 +111,9 @@ export function AdminBranchesComponent() {
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setDetailId(row.id)}>{t("detailAction")}</Button>
                         <Button size="sm" variant="outline" className="rounded-lg" isDisabled={!canWrite} onPress={() => setEditing(row)}>{t("edit")}</Button>
+                        <Button size="sm" variant="ghost" isIconOnly className="rounded-lg text-admin-danger" aria-label={t("delete")} isDisabled={!canWrite} onPress={() => setDeleting(row)}>
+                          <TrashIcon aria-hidden className="size-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -116,6 +132,10 @@ export function AdminBranchesComponent() {
       {canWrite && editing ? <BranchModal branch={editing} onClose={() => setEditing(null)} onSaved={() => {
         void mutate();
         if (detailId === editing.id) void detail.mutate();
+      }} /> : null}
+      {canWrite && deleting ? <BranchDeleteModal branch={deleting} onClose={() => setDeleting(null)} onDeleted={() => {
+        void mutate();
+        if (detailId === deleting.id) setDetailId(null);
       }} /> : null}
       {detailId ? (
         <AdminRecordDetail

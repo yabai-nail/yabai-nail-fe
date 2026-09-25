@@ -502,6 +502,7 @@
       "loadFailed": "Không tải được danh sách chi nhánh.",
       "columns": {
         "branch": "Chi nhánh",
+        "photo": "Ảnh",
         "address": "Địa chỉ",
         "status": "Trạng thái",
         "actions": "Thao tác"
@@ -536,6 +537,35 @@
         "save": "Lưu",
         "add": "Thêm",
         "saveFailed": "Không lưu được chi nhánh."
+      },
+      "delete": "Xóa",
+      "image": {
+        "title": "Ảnh chi nhánh",
+        "requirements": "JPG, PNG hoặc WebP, tối đa 5 MB. Hiển thị trên app khách hàng.",
+        "pick": "Chọn ảnh",
+        "replace": "Đổi ảnh",
+        "remove": "Gỡ ảnh",
+        "cancel": "Hủy",
+        "removalPending": "Ảnh sẽ bị gỡ khi lưu.",
+        "undo": "Hoàn tác",
+        "alt": "Ảnh chi nhánh {name}",
+        "errors": {
+          "empty": "Tệp ảnh trống.",
+          "tooLarge": "Ảnh vượt quá 5 MB.",
+          "unsupportedType": "Chỉ nhận ảnh JPG, PNG hoặc WebP."
+        }
+      },
+      "deleteDialog": {
+        "title": "Xóa chi nhánh",
+        "confirm": "Xóa chi nhánh \"{name}\"? Chi nhánh sẽ biến mất khỏi admin và app khách hàng.",
+        "hint": "Lịch sử lịch hẹn, bảng lương và báo cáo của chi nhánh vẫn được giữ nguyên. Cần hoàn tất các lịch hẹn đang mở và chuyển hoặc ngừng nhân viên của chi nhánh trước.",
+        "cancel": "Hủy",
+        "action": "Xóa chi nhánh",
+        "deleting": "Đang xóa…",
+        "success": "Đã xóa chi nhánh {name}.",
+        "failed": "Không xóa được chi nhánh.",
+        "openAppointments": "Chi nhánh còn lịch hẹn chưa hoàn tất. Hãy hoàn tất hoặc hủy chúng trước khi xóa.",
+        "activeStaff": "Chi nhánh còn nhân viên đang hoạt động. Hãy chuyển sang chi nhánh khác hoặc ngừng họ trước khi xóa."
       }
     },
     "reviews": {
