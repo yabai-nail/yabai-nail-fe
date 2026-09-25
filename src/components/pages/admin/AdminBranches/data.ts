@@ -7,6 +7,7 @@ export type BranchRow = {
   readonly address?: string;
   readonly status?: string;
   readonly timezone?: string;
+  readonly imageUrl?: string | null;
   readonly version: number;
 };
 
@@ -26,6 +27,7 @@ export function adaptBranch(branch: AdminBranch): BranchRow {
     address: branch.address,
     status: branchStatusFromActive(branch.active),
     timezone: branch.timezone,
+    imageUrl: branch.imageUrl ?? null,
     version: branch.version,
   };
 }

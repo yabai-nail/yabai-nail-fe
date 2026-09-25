@@ -838,6 +838,11 @@ export const adminService = {
       body: patch,
       version,
     }),
+  deleteBranch: (branchId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/branches/{branchId}", {
+      path: { branchId },
+      version,
+    }),
   accounts: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminAccount>>("GET /api/v1/admin/accounts", { query }),
   createAccount: (draft: AdminAccountDraft, idempotencyKey?: string) =>
