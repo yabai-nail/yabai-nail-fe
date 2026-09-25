@@ -6,7 +6,7 @@ import { getCustomerSegmentLabel } from "@/lib/admin-customer";
 import { formatNumber, formatMoney } from "@/lib/admin-format";
 import { CustomerLoyaltyPanel } from "./CustomerLoyaltyPanel";
 import { CustomerNotesPanel } from "./CustomerNotesPanel";
-import type { Customer } from "./data";
+import { customerRankLabel, type Customer } from "./data";
 
 
 export function CustomerDetailPanel({
@@ -51,7 +51,7 @@ export function CustomerDetailPanel({
           <div><dt className="text-admin-muted">{t("detail.totalSpend")}</dt><dd className="mt-1 font-bold text-admin-accent">{formatMoney(customer.totalSpend)}</dd></div>
           <div><dt className="text-admin-muted">{t("detail.visits")}</dt><dd className="mt-1 font-bold">{customer.visits}</dd></div>
           <div><dt className="text-admin-muted">{t("detail.points")}</dt><dd className="mt-1 font-bold">{formatNumber(customer.points)}</dd></div>
-          <div><dt className="text-admin-muted">{t("detail.rank")}</dt><dd className="mt-1 font-bold">{t(`rank.${customer.rank}`)}</dd></div>
+          <div><dt className="text-admin-muted">{t("detail.rank")}</dt><dd className="mt-1 font-bold">{customerRankLabel(customer.rank, t)}</dd></div>
         </dl>
         {/* The real service history is rendered by CustomerLoyaltyPanel below
             from the nail-history read model; there is no second, local copy. */}

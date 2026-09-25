@@ -7,6 +7,7 @@ import { useState } from "react";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { formatMoney, formatNumber } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
+import { customerRankLabel } from "./data";
 import {
   adminService,
   useAdminCustomerBenefits,
@@ -31,7 +32,7 @@ export function CustomerLoyaltyPanel({
   const historyQuery = useAdminCustomerNailHistory(branchId, customerId);
   const promotionsQuery = useAdminPromotions(undefined, canReadPromotions);
   const benefits = benefitsQuery.data;
-  const tierLabel = benefits?.tier ? ({ MEMBER: t("rank.member"), SILVER: t("rank.silver"), GOLD: t("rank.gold"), PLATINUM: t("rank.platinum") }[benefits.tier.toUpperCase()] ?? benefits.tier) : "—";
+  const tierLabel = benefits?.tier ? customerRankLabel(benefits.tier, t) : "—";
   const history = historyQuery.data?.items ?? [];
   const promotions = (promotionsQuery.data?.items ?? []).filter((promotion) => promotion.status === "ACTIVE");
 

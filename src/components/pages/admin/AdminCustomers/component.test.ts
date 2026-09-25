@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { AdminCustomer } from "@/service";
 
 import { toCustomerRow } from "./component";
-import type { Customer } from "./data";
+import { customerRankLabel, customerSegmentFilter, type Customer } from "./data";
 
 const listCustomer: Customer = {
   id: "customer-1",
@@ -26,6 +26,17 @@ const listCustomer: Customer = {
 };
 
 describe("toCustomerRow", () => {
+  it("preserves member, platinum and configured tiers without changing the server segment", () => {
+    for (const tier of ["MEMBER", "PLATINUM", "VIP_CUSTOM"]) {
+      const row = toCustomerRow({ id: "c", displayName: "Customer", version: 1, membershipTier: tier, segment: "NEW", visitCount: 0 } as AdminCustomer, "Unnamed", { ...listCustomer, rank: "gold" });
+      expect(row).toMatchObject({ rank: tier.toLowerCase(), segment: "new", visits: 0 });
+      expect(customerRankLabel(row.rank, key => key)).toBe(tier === "VIP_CUSTOM" ? tier : `rank.${tier.toLowerCase()}`);
+    }
+    expect(customerSegmentFilter("regular")).toBe("RETURNING");
+    expect(customerSegmentFilter("loyal")).toBe("LOYAL");
+    expect(customerSegmentFilter("new")).toBe("NEW");
+    expect(customerSegmentFilter("all")).toBeUndefined();
+  });
   it("keeps list-only CRM summaries when the detail endpoint returns account fields only", () => {
     const detail: AdminCustomer = {
       id: "customer-1",

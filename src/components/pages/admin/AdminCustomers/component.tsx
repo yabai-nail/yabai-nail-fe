@@ -17,7 +17,7 @@ import { CustomerCreateModal } from "./CustomerCreateModal";
 import { CustomerDetailPanel } from "./CustomerDetailPanel";
 import { CustomerEditModal } from "./CustomerEditModal";
 import { CustomerTable } from "./CustomerTable";
-import type { Customer, CustomerRank, CustomerSegment } from "./data";
+import { customerSegmentFilter, type Customer, type CustomerSegment } from "./data";
 
 type CustomerFilter = "all" | CustomerSegment;
 
@@ -68,15 +68,12 @@ export function toCustomerRow(
     segment:
       rawSegment === "NEW"
         ? "new"
-        : rawSegment === "LOYAL" || rawRank === "GOLD" || rawRank === "SILVER"
+        : rawSegment === "LOYAL"
           ? "loyal"
           : rawSegment
             ? "regular"
             : fallback?.segment ?? "regular",
-    rank:
-      rawRank === "GOLD" || rawRank === "SILVER" || rawRank === "BRONZE"
-        ? (rawRank.toLowerCase() as CustomerRank)
-        : fallback?.rank ?? "none",
+    rank: rawRank ? rawRank.toLowerCase() : fallback?.rank ?? "none",
     note: readString("note", fallback?.note),
     version: server.version,
     locale: server.locale ?? fallback?.locale,
@@ -95,7 +92,7 @@ export function AdminCustomersComponent() {
   const [query, setQuery] = useState("");
   const { data, isLoading, error, mutate: mutateCustomers } = useAdminCustomers(branchId, {
     q: query.trim() || undefined,
-    segment: filter === "all" ? undefined : filter.toUpperCase(),
+    segment: customerSegmentFilter(filter),
   });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);

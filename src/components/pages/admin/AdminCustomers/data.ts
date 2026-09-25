@@ -7,7 +7,18 @@
 import type { CustomerSegment } from "@/lib/admin-customer";
 
 export type { CustomerSegment } from "@/lib/admin-customer";
-export type CustomerRank = "gold" | "silver" | "bronze" | "none";
+export type CustomerRank = string;
+
+export function customerRankLabel(rank: string, translate: (key: string) => string): string {
+  const normalized = rank.toLowerCase();
+  return ["member", "silver", "gold", "platinum", "bronze", "none"].includes(normalized)
+    ? translate(`rank.${normalized}`)
+    : rank.toUpperCase();
+}
+
+export function customerSegmentFilter(segment: "all" | CustomerSegment): string | undefined {
+  return segment === "all" ? undefined : segment === "regular" ? "RETURNING" : segment.toUpperCase();
+}
 
 export type Customer = {
   readonly id: string;
