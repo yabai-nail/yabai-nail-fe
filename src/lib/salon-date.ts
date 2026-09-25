@@ -29,6 +29,19 @@ export function todayAtSalon(timeZone: string = SALON_TIME_ZONE): string {
   return isoDateInTimeZone(new Date(), timeZone);
 }
 
+/** Wall-clock time in `HH:mm` for the given instant in the salon's zone. */
+export function clockInTimeZone(
+  instant: Date,
+  timeZone: string = SALON_TIME_ZONE,
+): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(instant);
+}
+
 /**
  * UTC offset of `timeZone` on `isoDate`, as `+07:00`. Read from the runtime's
  * own zone data rather than hardcoded, so it stays right across a DST change

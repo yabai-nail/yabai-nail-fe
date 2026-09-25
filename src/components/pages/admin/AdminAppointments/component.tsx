@@ -17,6 +17,7 @@ import {
   useAdminServices,
   useAdminStaff,
   useAdminPermission,
+  useBranch,
   type AdminAppointment as ServerAppointment,
   type AdminCustomer,
   type AdminServiceItem,
@@ -32,7 +33,7 @@ import { AppointmentDetailPanel } from "./AppointmentDetailPanel";
 import { AssignStaffModal } from "./AssignStaffModal";
 import { ActualServicesModal } from "./ActualServicesModal";
 import { AttachPhotoModal } from "./AttachPhotoModal";
-import { todayAtSalon, zonedIso } from "@/lib/salon-date";
+import { clockInTimeZone, isoDateInTimeZone, SALON_TIME_ZONE, todayAtSalon, zonedIso } from "@/lib/salon-date";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { AppointmentList } from "./AppointmentList";
 import { AppointmentSummary } from "./AppointmentSummary";
@@ -62,18 +63,17 @@ const lifecycleSuccessKeys: Record<AppointmentLifecycleAction, "checkInDone" | "
   "no-show": "noShowDone",
 };
 
-function toDatePart(iso: string): string {
-  // en-CA gives ISO YYYY-MM-DD, which matches the fixture's date shape.
+function toDatePart(iso: string, timeZone: string): string {
   try {
-    return new Date(iso).toLocaleDateString("en-CA");
+    return isoDateInTimeZone(new Date(iso), timeZone);
   } catch {
     return iso.slice(0, 10);
   }
 }
 
-function toTimePart(iso: string): string {
+function toTimePart(iso: string, timeZone: string): string {
   try {
-    return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+    return clockInTimeZone(new Date(iso), timeZone);
   } catch {
     return iso.slice(11, 16);
   }
@@ -163,12 +163,13 @@ function toFixtureAppointment(
     readonly services: Map<string, AdminServiceItem>;
   },
   t: Translator,
+  timeZone: string,
 ): Appointment {
   return {
     id: server.id,
-    date: toDatePart(server.startsAt),
-    startTime: toTimePart(server.startsAt),
-    endTime: toTimePart(server.endsAt),
+    date: toDatePart(server.startsAt, timeZone),
+    startTime: toTimePart(server.startsAt, timeZone),
+    endTime: toTimePart(server.endsAt, timeZone),
     customer: resolveCustomer(server.customerId, lookups.customers, t),
     service: resolveService(server.serviceIds, lookups.services, t),
     services: resolveServices(server.serviceIds, lookups.services, t),
@@ -200,6 +201,8 @@ export function AdminAppointmentsComponent({
   const tc = useTranslations("admin.common");
   const router = useRouter();
   const { branchId } = useAdminBranch();
+  const { data: branch } = useBranch(branchId);
+  const timeZone = branch?.timezone ?? SALON_TIME_ZONE;
   const canCreate = useAdminPermission("appointment.create.branch");
   const canReschedule = useAdminPermission("appointment.reschedule.branch");
   const canCancel = useAdminPermission("appointment.cancel.branch");
@@ -223,8 +226,8 @@ export function AdminAppointmentsComponent({
   const calendarTo = shiftAppointmentDate(viewRange.end, "day", 1);
   const { data, isLoading, error, mutate: mutateAppointments } = useAdminCalendar(
     branchId,
-    zonedIso(viewRange.start, "00:00"),
-    zonedIso(calendarTo, "00:00"),
+    zonedIso(viewRange.start, "00:00", timeZone),
+    zonedIso(calendarTo, "00:00", timeZone),
     view,
   );
   const deepLinkAppointment = useAdminAppointment(branchId, initialSelectedId ?? null);
@@ -247,8 +250,8 @@ export function AdminAppointmentsComponent({
     staff: (staffData?.items ?? []).map((s) => resolveStaff(s.id, lookups.staff, t)),
   }), [customersData, servicesData, staffData, lookups, t]);
   const source = useMemo<ReadonlyArray<Appointment>>(
-    () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups, t)),
-    [data, lookups, t],
+    () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups, t, timeZone)),
+    [data, lookups, t, timeZone],
   );
   const appointments = source;
   // The calendar opens on the salon's today. It used to open on
@@ -266,7 +269,7 @@ export function AdminAppointmentsComponent({
       deepLinkAppointment.data;
     if (target) {
       setDrilldownConsumed(true);
-      setSelectedDate(toDatePart(target.startsAt));
+      setSelectedDate(toDatePart(target.startsAt, timeZone));
     }
   }
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(() => initialCreate ? "create" : null);
@@ -289,11 +292,8 @@ export function AdminAppointmentsComponent({
     setSelectedDate((date) => shiftAppointmentDate(date, view, direction));
   }
 
-  // The form gives local date + time strings; attach the branch's real UTC
-  // offset so the backend stores the wall-clock moment the admin selected.
-  // This used to hardcode +09:00 (Asia/Tokyo) while the live branch runs
-  // Asia/Ho_Chi_Minh, which shifted every saved appointment two hours early.
-  const toIso = (date: string, time: string): string => zonedIso(date, time);
+  // Read and write appointment wall-clock values in the selected branch's zone.
+  const toIso = (date: string, time: string): string => zonedIso(date, time, timeZone);
 
   async function saveAppointment(draft: AppointmentDraft) {
     if (!branchId) throw new Error(t("error.branchRequired"));
@@ -474,13 +474,13 @@ export function AdminAppointmentsComponent({
       <AppointmentToolbar
         dateLabel={formatAppointmentDateLabel(selectedDate, view, t)}
         selectedDate={selectedDate}
-        today={todayAtSalon()}
+        today={todayAtSalon(timeZone)}
         onDateSelect={setSelectedDate}
         view={view}
         status={status}
         onPrevious={() => moveDate(-1)}
         onNext={() => moveDate(1)}
-        onToday={() => setSelectedDate(todayAtSalon())}
+        onToday={() => setSelectedDate(todayAtSalon(timeZone))}
         onViewChange={setView}
         onStatusChange={setStatus}
         onCreate={canCreate ? () => setFormMode("create") : undefined}

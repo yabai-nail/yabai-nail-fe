@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isoDateInTimeZone, SALON_TIME_ZONE, utcOffsetOn, zonedIso } from "./salon-date";
+import { clockInTimeZone, isoDateInTimeZone, SALON_TIME_ZONE, utcOffsetOn, zonedIso } from "./salon-date";
 import { DEFAULT_TIME_ZONE } from "@/i18n/config";
 
 describe("zonedIso", () => {
@@ -29,6 +29,12 @@ describe("zonedIso", () => {
 });
 
 describe("isoDateInTimeZone", () => {
+  it("keeps a Tokyo appointment at 09:00 when the browser runs in another timezone", () => {
+    const startsAt = new Date("2026-09-25T00:00:00.000Z");
+    expect(isoDateInTimeZone(startsAt, "Asia/Tokyo")).toBe("2026-09-25");
+    expect(clockInTimeZone(startsAt, "Asia/Tokyo")).toBe("09:00");
+  });
+
   it("names Tokyo's day, not UTC's, across the default-zone rollover", () => {
     const instant = new Date("2026-08-24T15:30:00Z");
     expect(instant.toISOString().slice(0, 10)).toBe("2026-08-24");
