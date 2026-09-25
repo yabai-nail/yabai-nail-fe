@@ -53,9 +53,10 @@ export function AdminReportsComponent() {
   const [page, setPage] = useState(1);
   const kind = visibleKinds.includes(requestedKind) ? requestedKind : visibleKinds[0] ?? "revenue";
   const revenue = useRevenueReport(undefined, undefined, canReadRevenue);
-  const branches = useAdminBranchesReport(undefined, canReadRevenue);
-  const customers = useAdminCustomersReport(undefined, canReadCustomers);
-  const staff = useAdminStaffPerformanceReport(undefined, canReadStaff);
+  const reportPeriod = revenue.data ? { from: revenue.data.from, toExclusive: revenue.data.toExclusive } : undefined;
+  const branches = useAdminBranchesReport(reportPeriod, canReadRevenue && !!reportPeriod);
+  const customers = useAdminCustomersReport(reportPeriod, canReadCustomers && (!canReadRevenue || !!reportPeriod));
+  const staff = useAdminStaffPerformanceReport(reportPeriod, canReadStaff && (!canReadRevenue || !!reportPeriod));
   const needsBranchLookup = kind === "branches";
   const needsCustomerLookup = kind === "customers";
   const needsStaffLookup = kind === "staff";
@@ -75,6 +76,9 @@ export function AdminReportsComponent() {
 
   const reportByKind = { revenue, branches, customers, staff } as const;
   const active = reportByKind[kind];
+  const exportPeriod = active.data?.from && active.data?.toExclusive
+    ? { from: active.data.from, toExclusive: active.data.toExclusive }
+    : null;
 
   const cards = useMemo(() => metricCards(revenue.data, t), [revenue.data, t]);
 
@@ -104,14 +108,14 @@ export function AdminReportsComponent() {
   };
 
   const createExport = async () => {
-    if (kind === "revenue" && !revenue.data) return;
+    if (!exportPeriod) return;
     setExportBusy(true);
     setExportError(null);
     setDownloadUrl(null);
     try {
       const info = await adminService.createReportExport({
         reportType: exportKindOf[kind],
-        ...(kind === "revenue" && revenue.data ? { filters: { from: revenue.data.from, toExclusive: revenue.data.toExclusive } } : {}),
+        filters: exportPeriod,
       });
       notifySuccess(tc("reportExportCreated"));
       setExportInfo(info);
@@ -174,7 +178,7 @@ export function AdminReportsComponent() {
             size="sm"
             variant="primary"
             className="rounded-lg"
-            isDisabled={!canExport || exportBusy || (kind === "revenue" && !revenue.data)}
+            isDisabled={!canExport || exportBusy || !exportPeriod}
             onPress={() => void createExport()}
           >
             {exportBusy ? t("creating") : t("createExport")}
