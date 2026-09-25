@@ -119,6 +119,7 @@ export function AdminCustomersComponent() {
   const currentPage = Math.min(page, pageCount);
   const visibleCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const firstShown = filteredCustomers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const hasActiveFilter = query.trim() !== "" || filter !== "all";
   const selectedCustomer = resolveVisibleSelection(visibleCustomers, selectedId || visibleCustomers[0]?.id || "");
   const customerDetail = useAdminCustomer(branchId, selectedCustomer?.id ?? null);
   // The detail endpoint intentionally returns only account fields, while the list
@@ -189,11 +190,13 @@ export function AdminCustomersComponent() {
       ) : source.length === 0 ? (
         <Card className="rounded-lg border-admin-border bg-admin-surface shadow-none">
           <Card.Content className="p-12 text-center">
-            <h2 className="font-bold">{t("emptyHeading")}</h2>
+            <h2 className="font-bold">{t(hasActiveFilter ? "noSelectionTitle" : "emptyHeading")}</h2>
             <p className="mt-2 text-sm text-admin-muted">
               {error
                 ? t("retry")
-                : branchId
+                : hasActiveFilter
+                  ? t("noSelectionDescription")
+                  : branchId
                   ? t("firstCustomer")
                   : t("pickBranch")}
             </p>
