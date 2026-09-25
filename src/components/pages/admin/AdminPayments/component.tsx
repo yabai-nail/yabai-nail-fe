@@ -455,7 +455,7 @@ export function AdminPaymentsComponent() {
         <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
       </div>
       {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} amountReceived={amountReceived} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
-      {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
+      {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} branchId={appointment.branchId} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>
   );
