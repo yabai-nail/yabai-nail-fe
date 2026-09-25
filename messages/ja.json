@@ -502,6 +502,7 @@
       "loadFailed": "店舗一覧を読み込めません。",
       "columns": {
         "branch": "店舗",
+        "photo": "写真",
         "address": "住所",
         "status": "ステータス",
         "actions": "操作"
@@ -536,6 +537,35 @@
         "save": "保存",
         "add": "追加",
         "saveFailed": "店舗を保存できません。"
+      },
+      "delete": "削除",
+      "image": {
+        "title": "店舗の写真",
+        "requirements": "JPG・PNG・WebP、5 MB まで。お客様アプリに表示されます。",
+        "pick": "写真を選択",
+        "replace": "写真を変更",
+        "remove": "写真を外す",
+        "cancel": "キャンセル",
+        "removalPending": "保存すると写真が外されます。",
+        "undo": "元に戻す",
+        "alt": "{name} の写真",
+        "errors": {
+          "empty": "画像ファイルが空です。",
+          "tooLarge": "画像が 5 MB を超えています。",
+          "unsupportedType": "JPG・PNG・WebP の画像のみ対応しています。"
+        }
+      },
+      "deleteDialog": {
+        "title": "店舗を削除",
+        "confirm": "店舗「{name}」を削除しますか？管理画面とお客様アプリから表示されなくなります。",
+        "hint": "予約履歴・給与・レポートは保持されます。削除前に未完了の予約を完了し、スタッフを他店舗へ移動するか停止してください。",
+        "cancel": "キャンセル",
+        "action": "店舗を削除",
+        "deleting": "削除しています…",
+        "success": "店舗「{name}」を削除しました。",
+        "failed": "店舗を削除できません。",
+        "openAppointments": "未完了の予約が残っています。完了またはキャンセルしてから削除してください。",
+        "activeStaff": "稼働中のスタッフがいます。他店舗へ移動するか停止してから削除してください。"
       }
     },
     "reviews": {
