@@ -48,12 +48,25 @@ function toPaymentMethod(method: string | null | undefined): PaymentMethod | nul
 /**
  * Adapt a real appointment + its joined lookups into the fixture-shaped
  * CheckoutInvoice the checkout components already consume. Values the API
- * doesn't yet provide (birthday, preference, spend) fall back to zeros /
- * empty strings — the page stays functional and the salon can still tick a
- * payment method and confirm. Staff commission is intentionally absent: the
- * backend owns the rate per staff member and recomputes it on capture.
+ * doesn't provide fall back to zeros / empty strings. Staff commission is
+ * intentionally absent: the backend owns the rate per staff member and
+ * recomputes it on capture.
  */
-function buildInvoiceFromServer(
+export function applyCustomerFacts(invoice: CheckoutInvoice, customer: AdminCustomer | undefined): CheckoutInvoice {
+  if (!customer) return invoice;
+  return {
+    ...invoice,
+    customer: {
+      ...invoice.customer,
+      birthday: customer.birthday ?? "",
+      visits: customer.visitCount ?? 0,
+      totalSpend: customer.totalSpend ?? 0,
+      preference: customer.preferenceSummary ?? "",
+    },
+  };
+}
+
+export function buildInvoiceFromServer(
   appointment: ServerAppointment,
   lookups: {
     readonly customers: Map<string, AdminCustomer>;
@@ -85,7 +98,7 @@ function buildInvoiceFromServer(
     };
   };
 
-  return {
+  return applyCustomerFacts({
     id: appointment.id,
     customer: {
       id: appointment.customerId,
@@ -127,7 +140,7 @@ function buildInvoiceFromServer(
     orderNote: appointment.checkoutNote ?? "",
     status: ["PAID", "COMPLETED"].some((status) => appointment.status.toUpperCase().includes(status)) ? "paid" : "draft",
     paidAt: null,
-  };
+  }, customer);
 }
 
 export function AdminPaymentsComponent() {
@@ -155,7 +168,7 @@ export function AdminPaymentsComponent() {
     branchId,
     appointmentId,
   );
-  const { data: customersData } = useAdminCustomers(branchId);
+  const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
   const payments = useAdminAppointmentPayments(branchId, appointmentId);
@@ -201,7 +214,6 @@ export function AdminPaymentsComponent() {
     });
   };
 
-  const isAppointmentCancelled = Boolean(appointment?.status.toUpperCase().includes("CANCELLED"));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -295,7 +307,7 @@ export function AdminPaymentsComponent() {
       setConfirmError(t(result.error));
       return;
     }
-    if (!isServerBacked) {
+    if (!isServerBacked || !appointment) {
       setConfirmError(t("error.noAppointment"));
       return;
     }
@@ -345,7 +357,11 @@ export function AdminPaymentsComponent() {
         notifySuccess(t("paymentRecorded"));
         setInvoice(result.value);
         await mutateAppointment(capture.appointment, { revalidate: false });
-        await payments.mutate();
+        const [, customerRefresh] = await Promise.allSettled([payments.mutate(), mutateCustomers()]);
+        if (customerRefresh.status === "fulfilled") {
+          const refreshedCustomer = customerRefresh.value?.items.find((customer) => customer.id === appointment.customerId);
+          setInvoice((current) => applyCustomerFacts(current, refreshedCustomer));
+        }
         if (canCreateReview) setIsReviewOpen(true);
       } catch (thrown) {
         setConfirmError(
@@ -384,7 +400,7 @@ export function AdminPaymentsComponent() {
       </AdminPageLayout>
     );
   }
-  if (appointmentLoading || !invoice || !totals) {
+  if (appointmentLoading || !appointment || !invoice || !totals) {
     return (
       <AdminPageLayout>
         <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
@@ -429,7 +445,7 @@ export function AdminPaymentsComponent() {
       <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(28rem,1fr)_18rem]">
         <CustomerAppointmentPanel
           invoice={invoice}
-          isCancelled={isAppointmentCancelled}
+          appointmentStatus={appointment.status}
         />
         <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
           <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}{invoice.paymentMethod && invoice.paymentMethod !== "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <AmountReceivedPanel amountDue={totals.grandTotal} value={amountReceived} disabled={!canCreatePayment} onChange={setAmountReceived} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>

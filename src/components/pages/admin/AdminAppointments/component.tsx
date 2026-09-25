@@ -88,20 +88,19 @@ function deriveInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
-function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>, t: Translator): AppointmentCustomer {
+export function resolveCustomer(customerId: string, byId: Map<string, AdminCustomer>, t: Translator): AppointmentCustomer {
   const server = byId.get(customerId);
   const name = server?.displayName ?? server?.name ?? t("fallback.customer");
-  const record = server as unknown as Record<string, unknown> | undefined;
   return {
     id: customerId,
     name,
     initials: deriveInitials(name),
     phone: server?.phone ?? "",
-    birthday: (record?.birthday as string) ?? "",
+    birthday: server?.birthday ?? "",
     segment: "regular",
-    preference: (record?.preference as string) ?? "",
-    visits: (record?.visits as number) ?? 0,
-    totalSpend: (record?.totalSpend as number) ?? 0,
+    preference: server?.preferenceSummary ?? "",
+    visits: server?.visitCount ?? 0,
+    totalSpend: server?.totalSpend ?? 0,
   };
 }
 

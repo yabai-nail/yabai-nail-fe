@@ -29,8 +29,9 @@ type MessageThreadProps = {
   readonly canWrite: boolean;
   /** Fired when the admin marks the current thread read. Hidden if omitted. */
   readonly onMarkRead?: () => void;
-  /** Fired when the admin archives the current thread. Hidden if omitted. */
+  /** Fired when the admin archives or restores the current thread. Hidden if omitted. */
   readonly onArchive?: () => void;
+  readonly archived?: boolean;
   readonly pinned?: boolean;
   /** Fired when the admin toggles the pin on the current thread. Hidden if omitted. */
   readonly onTogglePin?: () => void;
@@ -89,6 +90,7 @@ export function MessageThread({
   canWrite,
   onMarkRead,
   onArchive,
+  archived = false,
   pinned,
   onTogglePin,
   pinPending = false,
@@ -183,7 +185,7 @@ export function MessageThread({
             </Button>
           ) : null}
           {onArchive ? (
-            <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label={t("tabs.archived")}>
+            <Button size="sm" variant="ghost" onPress={onArchive} isDisabled={statusPending} aria-label={archived ? t("restore") : t("archive")}>
               <ArchiveBoxIcon className="size-4" />
             </Button>
           ) : null}

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AdminMessage } from "@/service";
 
-import { shouldAutoMarkConversationRead, toChatMessage } from "./component";
+import { conversationArchiveAction, shouldAutoMarkConversationRead, toChatMessage } from "./component";
 
 describe("toChatMessage", () => {
   it("maps a persisted booking confirmation to a system card", () => {
@@ -142,5 +142,17 @@ describe("shouldAutoMarkConversationRead", () => {
 
   it("handles a missing selection", () => {
     expect(shouldAutoMarkConversationRead(null, true)).toBe(false);
+  });
+
+  it("does not restore an archived conversation just because it is opened", () => {
+    expect(shouldAutoMarkConversationRead({ unreadCount: 2, version: 3, status: "archived" }, true)).toBe(false);
+  });
+});
+
+describe("conversationArchiveAction", () => {
+  it("archives an inbox thread and restores an archived thread", () => {
+    expect(conversationArchiveAction("read")).toBe("ARCHIVED");
+    expect(conversationArchiveAction("unread")).toBe("ARCHIVED");
+    expect(conversationArchiveAction("archived")).toBe("READ");
   });
 });

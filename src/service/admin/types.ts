@@ -87,6 +87,10 @@ export interface AdminCustomer {
   readonly name?: string;
   readonly phone?: string;
   readonly avatarUrl?: string | null;
+  readonly birthday?: string | null;
+  readonly visitCount?: number;
+  readonly totalSpend?: number;
+  readonly preferenceSummary?: string | null;
   readonly locale?: string;
   readonly status?: string;
   readonly version: number;

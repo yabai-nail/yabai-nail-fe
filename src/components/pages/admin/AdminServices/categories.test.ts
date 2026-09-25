@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AdminServiceCategory } from "@/service";
-import { filterCategories, moveCategory } from "./categories";
+import { assignableCategories, changedCategory, filterCategories, moveCategory } from "./categories";
 
 const category = (id: string, code: string, nameVi: string, sortOrder: number): AdminServiceCategory => ({
   id,
@@ -20,6 +20,28 @@ const catalogue = [
 ];
 
 describe("category list derivation", () => {
+  it("offers only active categories when assigning a service", () => {
+    const inactive = { ...category("c4", "OTHER", "Khác", 3), status: "INACTIVE" };
+    const otherInactive = { ...category("c5", "DESIGN", "Thiết kế", 4), status: "INACTIVE" };
+
+    expect(assignableCategories([...catalogue, inactive, otherInactive]).map((row) => row.id)).toEqual([
+      "c1",
+      "c2",
+      "c3",
+    ]);
+    expect(assignableCategories([...catalogue, inactive, otherInactive], "c4").map((row) => row.id)).toEqual([
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+    ]);
+  });
+
+  it("omits an unchanged category but sends a reassignment", () => {
+    expect(changedCategory("inactive-current", "inactive-current")).toEqual({});
+    expect(changedCategory("active-next", "inactive-current")).toEqual({ categoryId: "active-next" });
+  });
+
   it("finds a category by its display name, ignoring case", () => {
     // The shared admin matcher lowercases but keeps diacritics, and every other list behaves
     // this way -- categories must not be the one place that searches differently.

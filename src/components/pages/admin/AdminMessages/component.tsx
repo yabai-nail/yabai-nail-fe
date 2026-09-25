@@ -222,15 +222,20 @@ export function toChatMessage(
  * If-Match check, or on a conversation that is already read.
  */
 export function shouldAutoMarkConversationRead(
-  conversation: { readonly unreadCount: number; readonly version?: number } | null,
+  conversation: { readonly unreadCount: number; readonly version?: number; readonly status?: Conversation["status"] } | null,
   canWrite: boolean,
 ): boolean {
   return (
     conversation !== null &&
     canWrite &&
     conversation.version !== undefined &&
+    conversation.status !== "archived" &&
     conversation.unreadCount > 0
   );
+}
+
+export function conversationArchiveAction(status: Conversation["status"]): "READ" | "ARCHIVED" {
+  return status === "archived" ? "READ" : "ARCHIVED";
 }
 
 export function AdminMessagesComponent() {
@@ -341,7 +346,7 @@ export function AdminMessagesComponent() {
   const openVersion = selected?.version;
   useEffect(() => {
     if (openConversationId === null) return;
-    if (!shouldAutoMarkConversationRead({ unreadCount: openUnreadCount, version: openVersion }, canWrite)) return;
+    if (!shouldAutoMarkConversationRead({ unreadCount: openUnreadCount, version: openVersion, status: selected?.status }, canWrite)) return;
     void (async () => {
       try {
         await adminService.updateConversation(openConversationId, { status: "READ" }, openVersion);
@@ -351,7 +356,7 @@ export function AdminMessagesComponent() {
         // explicit mark-read control. Nothing is surfaced for a background read.
       }
     })();
-  }, [openConversationId, openUnreadCount, openVersion, canWrite, mutateConversations]);
+  }, [openConversationId, openUnreadCount, openVersion, selected?.status, canWrite, mutateConversations]);
 
   async function changeStatus(next: "READ" | "UNREAD" | "ARCHIVED") {
     if (!selected || selected.version === undefined) return;
@@ -447,9 +452,10 @@ export function AdminMessagesComponent() {
             }
             onArchive={
               canWrite && selected.version !== undefined
-                ? () => void changeStatus("ARCHIVED")
+                ? () => void changeStatus(conversationArchiveAction(selected.status))
                 : undefined
             }
+            archived={selected.status === "archived"}
             pinned={selected.pinned}
             pinPending={pinPendingId === selected.id}
             onTogglePin={

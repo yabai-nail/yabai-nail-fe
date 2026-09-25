@@ -7,14 +7,16 @@ import {
 import { Card, Chip } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { formatMoney } from "@/lib/admin-format";
+import { appointmentStatusColor, appointmentStatusLabel, normalizeAppointmentStatus } from "../AdminAppointments/status";
 import type { CheckoutInvoice } from "./data";
 
-export function CustomerAppointmentPanel({ invoice, isCancelled }: Readonly<{
+export function CustomerAppointmentPanel({ invoice, appointmentStatus }: Readonly<{
   invoice: CheckoutInvoice;
-  isCancelled: boolean;
+  appointmentStatus: string;
 }>) {
   const t = useTranslations("admin.payments");
   const tStatus = useTranslations("admin.appointmentStatus");
+  const normalizedStatus = normalizeAppointmentStatus(appointmentStatus);
   return (
       <Card className="h-fit gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
         <Card.Header className="flex flex-row items-center justify-between border-b border-admin-border px-4 py-3">
@@ -37,7 +39,7 @@ export function CustomerAppointmentPanel({ invoice, isCancelled }: Readonly<{
             <div className="flex justify-between gap-3 border-t border-admin-border pt-3"><dt>{t("customer.totalSpend")}</dt><dd className="font-semibold text-admin-ink">{formatMoney(invoice.customer.totalSpend)}</dd></div>
           </dl>
           <div className="border-t border-admin-border pt-4">
-            <div className="mb-3 flex items-center justify-between gap-2"><h3 className="text-sm font-bold text-admin-ink">{t("appointment.heading")}</h3><Chip size="sm" variant="soft" color={isCancelled ? "danger" : "success"}><Chip.Label>{isCancelled ? tStatus("CANCELLED") : tStatus("CONFIRMED")}</Chip.Label></Chip></div>
+            <div className="mb-3 flex items-center justify-between gap-2"><h3 className="text-sm font-bold text-admin-ink">{t("appointment.heading")}</h3><Chip size="sm" variant="soft" color={appointmentStatusColor[normalizedStatus]}><Chip.Label>{appointmentStatusLabel(normalizedStatus, tStatus)}</Chip.Label></Chip></div>
             <dl className="space-y-3 text-xs text-admin-muted">
               <InfoRow icon={CalendarDaysIcon} label={t("appointment.date")} value={invoice.appointment.date} />
               <InfoRow icon={ClockIcon} label={t("appointment.time")} value={invoice.appointment.time} />

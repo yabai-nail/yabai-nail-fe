@@ -11,6 +11,7 @@ import { validateServiceImage } from "./service-image";
 import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
 import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
+import { assignableCategories } from "./categories";
 
 // Service creation is org-level (no branchId in the path). The category is required by the
 // API, not merely by this form: the column is NOT NULL, so a service with no category cannot
@@ -30,7 +31,7 @@ export function ServiceCreateModal({
   const tAddons = useTranslations("admin.services.addons");
   const locale = useLocale();
   const categories = useAdminServiceCategories();
-  const categoryItems = categories.data?.items ?? [];
+  const categoryItems = assignableCategories(categories.data?.items ?? []);
   const [name, setName] = useState("");
   const [nameJa, setNameJa] = useState("");
   const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(lockedServiceType ?? "BASE");
@@ -76,7 +77,7 @@ export function ServiceCreateModal({
 
   const canSubmit =
     name.trim().length >= 2 &&
-    (serviceType === "ADD_ON" || categoryId !== "") &&
+    (serviceType === "ADD_ON" || categoryItems.some((category) => category.id === categoryId)) &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     isValidServiceAmount(priceNum, serviceType) &&
     isValidServiceAmount(durationNum, serviceType) &&

@@ -16,6 +16,7 @@ import {
   type ServiceImageChange,
 } from "./service-image";
 import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
+import { assignableCategories, changedCategory } from "./categories";
 
 // Mirror of ServiceCreateModal, plus PATCH with If-Match so we don't clobber a concurrent
 // edit. Moving a service between categories happens here: the API assigns whichever category
@@ -33,7 +34,7 @@ export function ServiceEditModal({
   const tAddons = useTranslations("admin.services.addons");
   const locale = useLocale();
   const categories = useAdminServiceCategories();
-  const categoryItems = categories.data?.items ?? [];
+  const categoryItems = assignableCategories(categories.data?.items ?? [], service.category?.id);
   const [name, setName] = useState(service.name);
   const [nameJa, setNameJa] = useState(service.nameJa ?? "");
   const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(service.serviceType ?? "BASE");
@@ -85,7 +86,7 @@ export function ServiceEditModal({
 
   const canSubmit =
     name.trim().length >= 2 &&
-    (serviceType === "ADD_ON" || categoryId !== "") &&
+    (serviceType === "ADD_ON" || categoryItems.some((category) => category.id === categoryId)) &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
     isValidServiceAmount(priceNum, serviceType) &&
     isValidServiceAmount(durationNum, serviceType) &&
@@ -119,7 +120,7 @@ export function ServiceEditModal({
           representsNoSelection: serviceType === "ADD_ON" && representsNoSelection,
           serviceType,
           addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
-          ...(serviceType === "BASE" ? { categoryId } : {}),
+          ...(serviceType === "BASE" ? changedCategory(categoryId, service.category?.id) : {}),
           price: priceNum!,
           durationMinutes: durationNum!,
           warrantyDays: warrantyDaysNum,

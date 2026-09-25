@@ -328,6 +328,7 @@
       "pinLimit": "The salon already has 5 pinned conversations (some may be ones you can't see). Unpin one or ask a manager.",
       "pinFailed": "Could not change the pin.",
       "archive": "Archive",
+      "restore": "Restore conversation",
       "threadLabel": "Messages with {name}",
       "composeLabel": "Write a message",
       "composePlaceholder": "Write a message…",
