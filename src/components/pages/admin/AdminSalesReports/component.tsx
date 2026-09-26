@@ -23,7 +23,7 @@ import {
   type AdminSalesReport,
   type AdminSalesReportDecision,
 } from "@/service";
-import { REPORT_FETCH_LIMIT, REPORT_PAGE_SIZE, currentMonth, decidableIds, isMonth, monthBounds, paginate, reportErrorKey, summarize } from "./data";
+import { REPORT_FETCH_LIMIT, REPORT_PAGE_SIZE, currentMonth, decidableIds, isMonth, isReportEditable, monthBounds, paginate, reportErrorKey, summarize } from "./data";
 import { RejectModal } from "./RejectModal";
 import { ReportModal } from "./ReportModal";
 
@@ -169,11 +169,12 @@ export function AdminSalesReportsComponent() {
   const selectedDecidable = decidableIds(items, selected);
   const { items: visible, page: currentPage, pageCount } = paginate(items, page, REPORT_PAGE_SIZE);
   const summary = summarize(items);
-  const allVisibleSelected = visible.length > 0 && visible.every((row) => selected.has(row.id));
+  const selectable = visible.filter((row) => !row.locked && !row.refundOfReportId && row.status === "PENDING");
+  const allVisibleSelected = selectable.length > 0 && selectable.every((row) => selected.has(row.id));
   const toggleVisible = () => {
     const next = new Set(selected);
-    if (allVisibleSelected) visible.forEach((row) => next.delete(row.id));
-    else visible.forEach((row) => next.add(row.id));
+    if (allVisibleSelected) selectable.forEach((row) => next.delete(row.id));
+    else selectable.forEach((row) => next.add(row.id));
     setSelected(next);
   };
   const toggleOne = (id: string) => {
@@ -278,7 +279,7 @@ export function AdminSalesReportsComponent() {
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
                     <td className="px-3 py-3">
-                      <input type="checkbox" className="accent-admin-accent" aria-label={t("columns.select")} checked={selected.has(row.id)} onChange={() => toggleOne(row.id)} />
+                      <input type="checkbox" className="accent-admin-accent" aria-label={t("columns.select")} disabled={row.locked || Boolean(row.refundOfReportId) || row.status !== "PENDING"} checked={selected.has(row.id)} onChange={() => toggleOne(row.id)} />
                     </td>
                     <td className="px-3 py-3 text-admin-ink">
                       <div>{row.reportDate}</div>
@@ -287,6 +288,7 @@ export function AdminSalesReportsComponent() {
                     <td className="px-3 py-3 text-admin-ink">{staffName(row.staffId)}</td>
                     <td className="px-3 py-3 text-admin-muted">
                       <div>{t(`platform.${row.platform}`)}</div>
+                      {row.refundOfReportId ? <div className="text-xs text-admin-danger" title={row.refundOfReportId}>{t("refundAdjustment")}</div> : row.paymentId ? <div className="text-xs">{t("automaticReport")}</div> : null}
                       <div className="text-xs">{row.staffRatePercent}%</div>
                     </td>
                     <td className="px-3 py-3 text-right font-semibold text-admin-ink">{formatMoney(row.grossAmount)}</td>
@@ -303,19 +305,19 @@ export function AdminSalesReportsComponent() {
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1">
-                        {canApprove && row.status !== "APPROVED" ? (
+                        {canApprove && !row.refundOfReportId && row.status !== "APPROVED" ? (
                           <Button isIconOnly size="sm" variant="ghost" aria-label={t("actions.approve")} isDisabled={row.locked || busy !== null} onPress={() => void decideOne(row, "APPROVE")}><CheckIcon className="size-4" /></Button>
                         ) : null}
-                        {canApprove && row.status !== "REJECTED" ? (
+                        {canApprove && !row.refundOfReportId && row.status !== "REJECTED" ? (
                           <Button isIconOnly size="sm" variant="ghost" aria-label={t("actions.reject")} isDisabled={row.locked || busy !== null} onPress={() => setRejecting([row])}><XMarkIcon className="size-4" /></Button>
                         ) : null}
-                        {canApprove && row.status !== "PENDING" ? (
+                        {canApprove && !row.refundOfReportId && row.status !== "PENDING" ? (
                           <Button isIconOnly size="sm" variant="ghost" aria-label={t("actions.reopen")} isDisabled={row.locked || busy !== null} onPress={() => void decideOne(row, "PENDING")}><ArrowUturnLeftIcon className="size-4" /></Button>
                         ) : null}
-                        {canWrite ? (
+                        {canWrite && isReportEditable(row) ? (
                           <Button isIconOnly size="sm" variant="ghost" aria-label={t("actions.edit")} isDisabled={row.locked || busy !== null} onPress={() => setEditing(row)}><PencilSquareIcon className="size-4" /></Button>
                         ) : null}
-                        {canWrite && row.status === "PENDING" && !row.locked ? (
+                        {canWrite && row.status === "PENDING" && isReportEditable(row) ? (
                           <Button isIconOnly size="sm" variant="ghost" className="text-admin-danger" aria-label={t("actionDelete")} isDisabled={busy !== null} onPress={() => setDeleting(row)}><TrashIcon className="size-4" /></Button>
                         ) : null}
                       </div>

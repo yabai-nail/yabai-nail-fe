@@ -1489,6 +1489,8 @@
       "loadFailed": "Không tải được báo cáo.",
       "empty": "Không có báo cáo nào trong bộ lọc này.",
       "locked": "Tháng đã thanh toán lương, đã khoá",
+      "refundAdjustment": "Điều chỉnh hoàn tiền (tự động)",
+      "automaticReport": "Từ lịch hẹn · không sửa thủ công",
       "unknownStaff": "Nhân viên khác",
       "actionFailed": "Thao tác không thành công. Vui lòng thử lại.",
       "pagination": "Hiển thị {shown} / {total}",

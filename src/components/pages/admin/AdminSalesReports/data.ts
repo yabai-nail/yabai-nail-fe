@@ -32,7 +32,7 @@ export interface ReportSummary {
 export function summarize(items: ReadonlyArray<AdminSalesReport>): ReportSummary {
   return items.reduce<ReportSummary>(
     (sum, item) => ({
-      count: sum.count + 1,
+      count: sum.count + (item.refundOfReportId ? 0 : 1),
       grossTotal: sum.grossTotal + item.grossAmount,
       feeTotal: sum.feeTotal + item.platformFee,
       staffTotal: sum.staffTotal + item.staffAmount,
@@ -50,7 +50,12 @@ export function paginate<T>(items: ReadonlyArray<T>, page: number, pageSize: num
 
 /** The selected reports a batch approval can actually take: pending and not locked. */
 export function decidableIds(items: ReadonlyArray<AdminSalesReport>, selected: ReadonlySet<string>): string[] {
-  return items.filter((item) => selected.has(item.id) && item.status === "PENDING" && !item.locked).map((item) => item.id);
+  return items.filter((item) => selected.has(item.id) && item.status === "PENDING" && !item.locked && !item.refundOfReportId).map((item) => item.id);
+}
+
+/** Payment-generated entries are immutable; corrections belong to the refund ledger. */
+export function isReportEditable(item: AdminSalesReport): boolean {
+  return !item.locked && !item.paymentId && !item.refundOfReportId;
 }
 
 export type ReportErrorKey = "locked" | "conflict" | "forbidden" | "dateOutOfRange";

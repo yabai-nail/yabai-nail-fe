@@ -1478,6 +1478,8 @@
       "loadFailed": "報告を読み込めませんでした。",
       "empty": "この条件の報告はありません。",
       "locked": "給与支払済みのためロック中",
+      "refundAdjustment": "返金調整（自動）",
+      "automaticReport": "予約から自動作成・金額編集不可",
       "unknownStaff": "他のスタッフ",
       "actionFailed": "処理できませんでした。もう一度お試しください。",
       "pagination": "{shown} / {total} 件を表示",

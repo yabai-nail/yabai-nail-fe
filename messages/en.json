@@ -1479,6 +1479,8 @@
       "loadFailed": "Could not load reports.",
       "empty": "No reports match these filters.",
       "locked": "Month paid out, locked",
+      "refundAdjustment": "Refund adjustment (automatic)",
+      "automaticReport": "From appointment · read-only amounts",
       "unknownStaff": "Other technician",
       "actionFailed": "That did not go through. Please try again.",
       "pagination": "Showing {shown} / {total}",

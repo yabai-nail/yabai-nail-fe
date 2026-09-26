@@ -11,7 +11,7 @@ import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import { ApiClientError, adminService, useAdminBranch, useAdminBranchList, useAdminSalesReports, type AdminSalesReport } from "@/service";
 import { formatPeriod, shiftMonth } from "../AdminPayroll/data";
-import { REPORT_FETCH_LIMIT, currentMonth, isMonth, monthBounds, reportErrorKey, summarize } from "../AdminSalesReports/data";
+import { REPORT_FETCH_LIMIT, currentMonth, isMonth, isReportEditable, monthBounds, reportErrorKey, summarize } from "../AdminSalesReports/data";
 import { ReportModal } from "../AdminSalesReports/ReportModal";
 import { groupByDay } from "./data";
 
@@ -90,16 +90,17 @@ export function AdminStaffReportComponent() {
             <section key={group.date} aria-label={group.date} className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between px-1">
                 <h2 className="text-sm font-bold text-admin-ink">{group.date}</h2>
-                <span className="text-xs text-admin-muted">{t("dayTotal", { count: group.rows.length, mine: formatMoney(group.mine) })}</span>
+                <span className="text-xs text-admin-muted">{t("dayTotal", { count: group.rows.filter((row) => !row.refundOfReportId).length, mine: formatMoney(group.mine) })}</span>
               </div>
               {group.rows.map((row) => {
-                const editable = row.status === "PENDING" && !row.locked;
+                const editable = row.status === "PENDING" && isReportEditable(row);
                 return (
                   <Card key={row.id} className="gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none">
                     <Card.Content className="flex flex-col gap-2 px-4 py-3 text-sm">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="font-semibold text-admin-ink">{tl(`platform.${row.platform}`)}{row.servedAt ? <span className="font-normal text-admin-muted"> · {row.servedAt}</span> : null}</p>
+                          {row.refundOfReportId ? <p className="text-xs text-admin-danger">{tl("refundAdjustment")}</p> : row.paymentId ? <p className="text-xs text-admin-muted">{tl("automaticReport")}</p> : null}
                           <p className="text-xs text-admin-muted">{t("gross")}: {formatMoney(row.grossAmount)} · {tl(`paymentMethod.${row.paymentMethod}`)}{row.platformFee ? ` · ${t("fee")}: ${formatMoney(row.platformFee)}` : ""}</p>
                         </div>
                         <div className="shrink-0 text-right">

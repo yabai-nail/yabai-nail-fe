@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiClientError, type AdminSalesReport } from "@/service";
-import { decidableIds, isMonth, monthBounds, paginate, reportErrorKey, summarize } from "./data";
+import { decidableIds, isMonth, isReportEditable, monthBounds, paginate, reportErrorKey, summarize } from "./data";
 
 function report(overrides: Partial<AdminSalesReport>): AdminSalesReport {
   return {
@@ -28,6 +28,12 @@ describe("monthBounds", () => {
 });
 
 describe("summarize", () => {
+  it("deducts refund amounts without counting adjustments as extra customers", () => {
+    expect(summarize([
+      report({ grossAmount: 5000, platformFee: 0, staffAmount: 500, salonAmount: 4500 }),
+      report({ id: "refund", refundOfReportId: "r", grossAmount: -2000, platformFee: 0, staffAmount: -200, salonAmount: -1800 }),
+    ])).toEqual({ count: 1, grossTotal: 3000, feeTotal: 0, staffTotal: 300, salonTotal: 2700 });
+  });
   it("adds the money columns of the given reports", () => {
     expect(summarize([report({}), report({ id: "r2", grossAmount: 12000, platformFee: 880, staffAmount: 5720, salonAmount: 5400 })])).toEqual({
       count: 2, grossTotal: 22000, feeTotal: 1760, staffTotal: 10340, salonTotal: 9900,
@@ -46,9 +52,22 @@ describe("paginate", () => {
 });
 
 describe("decidableIds", () => {
+  it("cannot independently approve automatic reversals but allows the source report", () => {
+    const items = [report({ id: "source", paymentId: "capture" }), report({ id: "refund", refundOfReportId: "source", paymentId: "refund-payment" })];
+    expect(decidableIds(items, new Set(["source", "refund"]))).toEqual(["source"]);
+  });
   it("keeps only the selected reports that are pending and unlocked", () => {
     const items = [report({ id: "a" }), report({ id: "b", status: "APPROVED" }), report({ id: "c", locked: true }), report({ id: "d" })];
     expect(decidableIds(items, new Set(["a", "b", "c"]))).toEqual(["a"]);
+  });
+});
+
+describe("isReportEditable", () => {
+  it("allows manual open reports only", () => {
+    expect(isReportEditable(report({}))).toBe(true);
+    expect(isReportEditable(report({ locked: true }))).toBe(false);
+    expect(isReportEditable(report({ paymentId: "capture" }))).toBe(false);
+    expect(isReportEditable(report({ refundOfReportId: "source" }))).toBe(false);
   });
 });
 

@@ -1434,6 +1434,8 @@ export interface AdminSalesReport {
   readonly decidedAt: string | null;
   readonly appointmentId: string | null;
   readonly paymentId: string | null;
+  /** Automatic, read-only reversal of the referenced sales report. */
+  readonly refundOfReportId?: string | null;
   readonly payrollPeriodId: string | null;
   /** True once the month was paid out; the API refuses every change until the owner unlocks it. */
   readonly locked: boolean;
