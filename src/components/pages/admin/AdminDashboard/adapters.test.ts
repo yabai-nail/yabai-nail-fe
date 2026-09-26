@@ -13,6 +13,7 @@ import {
   buildMonthlyRows,
   buildPaymentMethodRows,
   buildRangeRevenueRows,
+  buildRevenueTrend,
   buildStaffCards,
   buildTodayRevenueRows,
   currentMonthPeriod,
@@ -82,7 +83,7 @@ describe("buildDashboardMetrics", () => {
   });
 
   it("renders the four live KPI cards from the branch dashboard payload", () => {
-    const [appointments, revenue, customers, staff] = buildDashboardMetrics(fullKpi, false, false, t);
+    const [appointments, revenue, customers, staff] = buildDashboardMetrics(fullKpi, false, false, t, [{ status: "PENDING_CONFIRMATION" }, { status: "PENDING_CONFIRMATION" }]);
 
     expect(appointments.value).toBe("12");
     expect(appointments.detail).toBe("breakdown.line(confirmed=8,inService=1,completed=1,tail=breakdown.pendingTail(count=2))");
@@ -117,8 +118,31 @@ describe("buildDashboardMetrics", () => {
 });
 
 describe("pendingAppointmentCount", () => {
-  it("never goes negative when the counters overlap", () => {
-    expect(pendingAppointmentCount({ total: 2, confirmed: 2, inService: 1, completed: 1 })).toBe(0);
+  it("counts only pending confirmation, never cancelled, expired or other active states", () => {
+    const statuses = ["CANCELLED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_SALON", "EXPIRED", "NO_SHOW", "CHECKED_IN", "AWAITING_PAYMENT", "COMPLETED", "PENDING_CONFIRMATION"];
+    expect(pendingAppointmentCount(statuses.map(status => ({ status })))).toBe(1);
+    expect(pendingAppointmentCount([])).toBe(0);
+  });
+
+  it("does not invent a pending appointment from a cancelled remainder", () => {
+    const kpi = { total: 3, confirmed: 0, inService: 0, completed: 2 };
+    const [appointments] = buildDashboardMetrics(kpi, false, false, t, []);
+    expect(appointments.detail).toBe("breakdown.line(confirmed=0,inService=0,completed=2,tail=)");
+    expect(buildActivityItems({ kpi, alerts: [] }, t)).toEqual([]);
+  });
+});
+
+describe("buildRevenueTrend", () => {
+  it("plots the canonical daily recognized revenue and preserves its total", () => {
+    const points = buildRevenueTrend([{ date: "2026-09-25", recognizedRevenue: 30500 }, { date: "2026-09-26", recognizedRevenue: 5000 }]);
+    expect(points).toEqual([{ date: "2026-09-25", label: "25/9", revenue: 30500 }, { date: "2026-09-26", label: "26/9", revenue: 5000 }]);
+    expect(points.reduce((sum, point) => sum + point.revenue, 0)).toBe(35500);
+  });
+
+  it("does not mistake branch aggregates for daily points and handles an empty branch", () => {
+    expect(buildRevenueTrend([{ branchId: "hiro", recognizedRevenue: 35500 }] as unknown as RevenueReport["dailyRows"])).toEqual([]);
+    expect(buildRevenueTrend([])).toEqual([]);
+    expect(buildRevenueTrend(undefined)).toEqual([]);
   });
 });
 
@@ -257,7 +281,7 @@ describe("buildActivityItems", () => {
   it("derives pending-confirmation, alert and yesterday-revenue entries", () => {
     const items = buildActivityItems({
       kpi: fullKpi,
-      alerts: [{ id: "a1", startsAt: "2026-08-24T03:00:00.000Z", status: "PENDING" }],
+      alerts: [{ id: "a1", startsAt: "2026-08-24T03:00:00.000Z", status: "PENDING_CONFIRMATION" }],
       branchTimeZone: "Asia/Ho_Chi_Minh",
     }, t);
 
@@ -266,7 +290,7 @@ describe("buildActivityItems", () => {
       "alert-a1",
       "previous-revenue",
     ]);
-    expect(items[0].title).toBe("alert.pendingTitle(count=2)");
+    expect(items[0].title).toBe("alert.pendingTitle(count=1)");
     expect(items[1].time).toBe("10:00");
     expect(items[2].detail).toContain("6.630.000");
   });

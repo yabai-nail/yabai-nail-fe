@@ -21,7 +21,7 @@ export function AdminDashboardComponent() {
   const { data, isLoading, error } = useAdminDashboard(branchId);
 
   const metrics = useMemo<ReadonlyArray<DashboardMetric>>(
-    () => buildDashboardMetrics(data?.kpi, isLoading || !branchId, error !== undefined, t),
+    () => buildDashboardMetrics(data?.kpi, isLoading || !branchId, error !== undefined, t, data?.alerts),
     [data, isLoading, error, branchId, t],
   );
 

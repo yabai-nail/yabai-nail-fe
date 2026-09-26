@@ -40,7 +40,7 @@ export function RevenueTrendPanel() {
   // Same SWR key as MonthlySummaryPanel's month report, so this shares its cache
   // entry rather than issuing a second request for the same window.
   const report = useRevenueReportRange(range.from, range.to, branchId);
-  const points = useMemo(() => buildRevenueTrend(report.data?.rows), [report.data]);
+  const points = useMemo(() => buildRevenueTrend(report.data?.dailyRows), [report.data]);
 
   const accent = CHART_SERIES[0];
 

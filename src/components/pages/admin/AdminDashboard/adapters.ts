@@ -78,8 +78,8 @@ function formatPercent(value: number): string {
   return `${Math.abs(value).toFixed(1).replace(".", ",")}%`;
 }
 
-function appointmentDetail(kpi: AdminDashboardKpi, t: Translator): string {
-  const pending = pendingAppointmentCount(kpi);
+function appointmentDetail(kpi: AdminDashboardKpi, t: Translator, alerts: ReadonlyArray<{ readonly status: string }>): string {
+  const pending = pendingAppointmentCount(alerts);
   const tail = pending > 0 ? t("breakdown.pendingTail", { count: pending }) : "";
   return t("breakdown.line", { confirmed: kpi.confirmed, inService: kpi.inService, completed: kpi.completed, tail });
 }
@@ -103,6 +103,7 @@ export function buildDashboardMetrics(
   isLoading: boolean,
   hasError: boolean,
   t: Translator,
+  alerts: ReadonlyArray<{ readonly status: string }> = [],
 ): ReadonlyArray<DashboardMetric> {
   if (hasError) {
     return metricBases.map((base) => ({
@@ -121,7 +122,7 @@ export function buildDashboardMetrics(
   return metricBases.map((base): DashboardMetric => {
     switch (base.id) {
       case "appointments":
-        return { ...resolveBase(base, t), value: String(kpi.total), detail: appointmentDetail(kpi, t) };
+        return { ...resolveBase(base, t), value: String(kpi.total), detail: appointmentDetail(kpi, t, alerts) };
       case "revenue":
         return {
           ...resolveBase(base, t),
@@ -208,18 +209,18 @@ function shortDayLabel(date: string): string {
 }
 
 /**
- * Turns the revenue report's loosely-typed daily rows into chart points. Rows
+ * Turns the revenue report's explicit daily rows into chart points. Rows
  * missing a numeric revenue or a date are dropped rather than plotted as zero,
  * so a gap in the data reads as a gap and not as a real dip to nothing.
  */
 export function buildRevenueTrend(
-  rows: ReadonlyArray<Record<string, unknown>> | undefined,
+  rows: RevenueReport["dailyRows"],
 ): ReadonlyArray<RevenueTrendPoint> {
   if (!rows) return [];
   return rows.flatMap((row) => {
-    const revenue = readNumber(row, ["revenue", "grossRevenue", "amount", "total"]);
-    const date = readString(row, ["date", "day", "period"]);
-    if (revenue === null || date === null) return [];
+    const revenue = row.recognizedRevenue;
+    const date = row.date;
+    if (typeof revenue !== "number" || !Number.isFinite(revenue) || typeof date !== "string" || !date) return [];
     return [{ date, label: shortDayLabel(date), revenue }];
   });
 }
@@ -349,8 +350,8 @@ export function formatClock(iso: string, timeZone?: string): string {
   }).format(at);
 }
 
-export function pendingAppointmentCount(kpi: AdminDashboardKpi): number {
-  return Math.max(0, kpi.total - kpi.confirmed - kpi.inService - kpi.completed);
+export function pendingAppointmentCount(alerts: ReadonlyArray<{ readonly status: string }>): number {
+  return alerts.filter(appointment => appointment.status === "PENDING_CONFIRMATION").length;
 }
 
 export type ActivitySource = {
@@ -366,7 +367,7 @@ export function buildActivityItems(
   if (!data) return [];
   const items: NotificationItem[] = [];
 
-  const pending = pendingAppointmentCount(data.kpi);
+  const pending = pendingAppointmentCount(data.alerts);
   if (pending > 0) {
     items.push({
       id: "pending-appointments",

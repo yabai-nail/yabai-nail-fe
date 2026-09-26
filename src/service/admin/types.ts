@@ -182,6 +182,7 @@ export interface RevenueReport {
   readonly generatedAt: string;
   readonly metrics: Readonly<Record<string, { readonly value: number | null }>>;
   readonly rows: ReadonlyArray<Record<string, unknown>>;
+  readonly dailyRows?: ReadonlyArray<{ readonly date: string; readonly recognizedRevenue: number }>;
 }
 
 // -- Admin appointment mutations -------------------------------------------------
