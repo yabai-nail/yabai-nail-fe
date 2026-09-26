@@ -7,12 +7,11 @@ import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { useAdminBranch, useAdminDashboard } from "@/service";
 import { AppointmentsPanel } from "./AppointmentsPanel";
 import { MetricCard } from "./MetricCard";
-import { MonthlySummaryPanel } from "./MonthlySummaryPanel";
 import { RevenuePanel } from "./RevenuePanel";
-import { RevenueTrendPanel } from "./RevenueTrendPanel";
 import { StaffPanel } from "./StaffPanel";
 import { UtilityPanel } from "./UtilityPanel";
 import { buildDashboardMetrics } from "./adapters";
+import { OverviewSection } from "./overview/OverviewSection";
 import type { DashboardMetric } from "./data";
 
 export function AdminDashboardComponent() {
@@ -36,10 +35,6 @@ export function AdminDashboardComponent() {
         </div>
       </section>
 
-      <section aria-label={t("trend.title")} className="mt-4">
-        <RevenueTrendPanel />
-      </section>
-
       {/*
         Both rows below run on the same twelve columns and every panel spans four of
         them or eight, so the card edges land on the same two lines down the page.
@@ -56,9 +51,13 @@ export function AdminDashboardComponent() {
         <UtilityPanel />
       </section>
 
+      {/* Week / month / year of the branch against the window before, with Excel export. It
+          replaces the month-only trend and summary panels, which read the owner-only chain
+          report and so failed for managers. */}
+      <OverviewSection />
+
       <section aria-label={t("performanceRegion")} className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12">
         <StaffPanel />
-        <MonthlySummaryPanel />
       </section>
     </AdminPageLayout>
   );

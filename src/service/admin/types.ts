@@ -54,6 +54,66 @@ export interface AdminDashboardData {
   readonly dataFreshness?: AdminDashboardDataFreshness;
 }
 
+export type AdminOverviewPeriod = "WEEK" | "MONTH" | "YEAR";
+
+/**
+ * `GET /admin/branches/{branchId}/overview`: one branch over a week, month or year, compared
+ * with the window before it. Money is whole yen, attributed to the service day (branch zone).
+ */
+export interface AdminBranchOverview {
+  readonly branchId: string;
+  readonly branchName: string;
+  readonly branchTimeZone: string;
+  readonly currency: string;
+  readonly generatedAt: string;
+  readonly timeBasis: "APPOINTMENT_START";
+  readonly range: {
+    readonly period: AdminOverviewPeriod;
+    readonly granularity: "DAY" | "MONTH";
+    readonly from: string;
+    readonly toExclusive: string;
+    readonly previousFrom: string;
+    readonly previousToExclusive: string;
+    readonly buckets: ReadonlyArray<string>;
+    readonly previousBuckets: ReadonlyArray<string>;
+  };
+  readonly kpi: {
+    readonly revenue: number;
+    readonly previousRevenue: number;
+    readonly revenueChangePercent: number | null;
+    readonly refundTotal: number;
+    readonly netRevenue: number;
+    readonly completedCount: number;
+    readonly previousCompletedCount: number;
+    readonly cancelledCount: number;
+    readonly noShowCount: number;
+    readonly cancellationRatePercent: number | null;
+    readonly averageTicket: number | null;
+    readonly uniqueCustomers: number;
+    readonly newCustomers: number;
+    readonly returningCustomers: number;
+  };
+  readonly series: ReadonlyArray<{
+    readonly bucket: string;
+    readonly revenue: number;
+    readonly previousRevenue: number;
+    readonly completed: number;
+    readonly cancelled: number;
+    readonly noShow: number;
+  }>;
+  readonly paymentMethods: ReadonlyArray<{ readonly method: string; readonly amount: number; readonly count: number }>;
+  readonly services: ReadonlyArray<{ readonly serviceId: string; readonly name: string; readonly count: number; readonly revenue: number }>;
+  readonly staff: ReadonlyArray<{ readonly staffId: string; readonly displayName: string; readonly revenue: number; readonly completedCount: number }>;
+  readonly actionItems: {
+    readonly pendingConfirmations: number;
+    readonly unreadConversations: number;
+    readonly pendingSalesReports: number;
+    readonly pendingLeaveRequests: number;
+  };
+  /** Owner only; null for a manager. */
+  readonly branchComparison: ReadonlyArray<{ readonly branchId: string; readonly branchName: string; readonly revenue: number; readonly completedCount: number }> | null;
+}
+
 export interface AdminAppointment {
   readonly id: string;
   readonly customerId: string;
@@ -793,7 +853,7 @@ export interface AdminReportExport {
 }
 
 export interface AdminReportExportInput {
-  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE" | "PAYROLL_MONTHLY" | "SALES_REPORTS_MONTHLY";
+  readonly reportType: "REVENUE_SUMMARY" | "BRANCHES" | "CUSTOMERS" | "STAFF_PERFORMANCE" | "PAYROLL_MONTHLY" | "SALES_REPORTS_MONTHLY" | "BRANCH_OVERVIEW";
   readonly format?: "CSV" | "XLSX";
   readonly locale?: "vi" | "ja";
   readonly filters?: Readonly<Record<string, unknown>>;

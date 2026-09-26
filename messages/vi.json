@@ -1360,19 +1360,84 @@
       "overviewHeading": "Tổng quan hôm nay",
       "activityRegion": "Hoạt động cửa hàng",
       "performanceRegion": "Hiệu suất nhân viên và thu nhập tháng",
-      "trend": {
-        "title": "Doanh thu theo ngày (tháng này)",
-        "loading": "Đang tải biểu đồ doanh thu…",
-        "empty": "Chưa có doanh thu trong tháng này.",
-        "error": "Không tải được biểu đồ doanh thu.",
-        "seriesLabel": "Doanh thu"
-      },
-      "monthly": {
-        "heading": "Thu nhập của quán (tháng {month}/{year})",
-        "loading": "Đang tải tổng kết tháng…",
-        "afterCommission": "Còn lại sau hoa hồng",
-        "loadFailed": "Không tải được tổng kết tháng.",
-        "costUnavailable": "Chưa trừ chi phí vận hành — backend chưa có chi phí theo tháng"
+      "overview": {
+        "title": "Tổng quan theo kỳ",
+        "periodLabel": "Chọn kỳ xem",
+        "periods": {
+          "WEEK": "Tuần",
+          "MONTH": "Tháng",
+          "YEAR": "Năm"
+        },
+        "previous": "Kỳ trước",
+        "next": "Kỳ sau",
+        "loading": "Đang tải tổng quan…",
+        "loadFailed": "Không tải được tổng quan.",
+        "previousOf": {
+          "WEEK": "tuần trước",
+          "MONTH": "tháng trước",
+          "YEAR": "năm trước"
+        },
+        "kpi": {
+          "revenue": "Doanh thu",
+          "netRevenue": "Doanh thu thuần",
+          "refund": "Đã hoàn {amount}",
+          "completed": "Lịch hoàn tất",
+          "previousCount": "{period}: {count}",
+          "averageTicket": "Trung bình / lịch",
+          "cancellationRate": "Tỉ lệ huỷ + không đến",
+          "cancelBreakdown": "{cancelled} huỷ · {noShow} không đến"
+        },
+        "change": "{percent}% so với {period}",
+        "noComparison": "Chưa có số kỳ trước để so",
+        "charts": {
+          "revenue": "Doanh thu",
+          "revenueHint": "Nét mờ là {period}",
+          "payments": "Theo phương thức thanh toán",
+          "outcomes": "Kết quả lịch hẹn",
+          "customers": "Khách mới và khách quay lại",
+          "services": "Top dịch vụ theo doanh thu",
+          "staff": "Doanh thu theo nhân viên",
+          "branches": "So sánh chi nhánh"
+        },
+        "series": {
+          "current": "Kỳ này",
+          "previous": "Kỳ trước"
+        },
+        "outcomes": {
+          "completed": "Hoàn tất",
+          "cancelled": "Huỷ",
+          "noShow": "Không đến"
+        },
+        "customers": {
+          "new": "Khách mới",
+          "returning": "Khách quay lại",
+          "split": "{newShare}% khách mới, {returningShare}% khách quay lại",
+          "newShare": "{share}% là khách mới",
+          "total": "{count} khách đã phục vụ"
+        },
+        "actions": {
+          "title": "Cần xử lý ngay",
+          "pendingConfirmations": "Lịch chờ xác nhận",
+          "unreadConversations": "Tin nhắn chưa đọc",
+          "pendingSalesReports": "Báo cáo chờ duyệt",
+          "pendingLeaveRequests": "Đơn nghỉ chờ duyệt"
+        },
+        "export": {
+          "action": "Xuất Excel",
+          "preparing": "Đang tạo file…",
+          "download": "Tải file Excel",
+          "queued": "Đang tạo file Excel, sẽ sẵn sàng sau vài giây.",
+          "failed": "Không xuất được file Excel."
+        },
+        "timesSold": "{count} lần",
+        "completedCount": "{count} lịch hoàn tất",
+        "noRevenue": "Chưa có doanh thu trong kỳ này.",
+        "noAppointments": "Chưa có lịch hẹn nào kết thúc trong kỳ này.",
+        "noPayments": "Chưa có khoản thu nào trong kỳ này.",
+        "noCustomers": "Chưa phục vụ khách nào trong kỳ này.",
+        "noServices": "Chưa có dịch vụ nào hoàn tất.",
+        "noStaff": "Chưa có nhân viên nào hoàn tất lịch.",
+        "basisNote": "Doanh thu tính theo ngày làm dịch vụ (giờ chi nhánh), chỉ gồm lịch đã hoàn tất. Trang Báo cáo tính theo ngày tạo lịch nên có thể lệch nhẹ."
       },
       "revenue": {
         "netToday": "Tiền quán thực nhận",
