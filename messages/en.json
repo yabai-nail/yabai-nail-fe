@@ -1172,6 +1172,8 @@
         "kind": "Type",
         "kindLabel": "Surcharge type",
         "fixed": "Fixed amount",
+        "amountInvalid": "The surcharge must be a whole number of yen greater than zero.",
+        "percentInvalid": "The surcharge percentage must be greater than zero and at most 100%.",
         "percent": "Percentage",
         "amount": "Amount (¥)",
         "cancel": "Cancel",

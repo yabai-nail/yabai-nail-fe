@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Modal } from "@heroui/react";
 import { useState } from "react";
-import { formatMoney } from "@/lib/admin-format";
+import { formatMoney, parseWholeYen } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
@@ -89,7 +89,7 @@ export function SurchargePanel() {
   );
 }
 
-function SurchargeEditor({
+export function SurchargeEditor({
   surcharge,
   onClose,
   onSaved,
@@ -118,13 +118,16 @@ function SurchargeEditor({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const numericAmount = Number(amount.replace(/\D/g, ""));
+  const numericAmount = parseWholeYen(amount);
   const numericPercent = Number(percent);
+  const validAmount = numericAmount !== null && numericAmount > 0;
+  const validPercent = Number.isFinite(numericPercent) && numericPercent > 0 && numericPercent <= 100;
+  const invalidNumber = kind === "FIXED" ? amount !== "" && !validAmount : percent !== "" && !validPercent;
   const canSubmit =
     code.trim().length > 0 &&
     name.trim().length > 0 &&
     !busy &&
-    (kind === "FIXED" ? numericAmount > 0 : numericPercent > 0);
+    (kind === "FIXED" ? validAmount : validPercent);
 
   async function submit() {
     if (!canSubmit) return;
@@ -139,7 +142,7 @@ function SurchargeEditor({
       name: name.trim(),
       type: kind,
       status: (active ? "ACTIVE" : "INACTIVE") as "ACTIVE" | "INACTIVE",
-      ...(kind === "FIXED" ? { amount: numericAmount } : { percent: numericPercent }),
+      ...(kind === "FIXED" ? { amount: numericAmount! } : { percent: numericPercent }),
     };
     try {
       if (isEdit) {
@@ -207,6 +210,7 @@ function SurchargeEditor({
                   <span className="text-xs font-semibold text-admin-ink">{t("surcharge.amount")}</span>
                   <input
                     inputMode="numeric"
+                    aria-invalid={invalidNumber}
                     value={amount}
                     onChange={(event) => setAmount(event.target.value)}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -218,7 +222,9 @@ function SurchargeEditor({
                   <input
                     type="number"
                     min={0}
+                    max={100}
                     step={0.5}
+                    aria-invalid={invalidNumber}
                     value={percent}
                     onChange={(event) => setPercent(event.target.value)}
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
@@ -233,6 +239,7 @@ function SurchargeEditor({
                 />
                 {t("surcharge.active")}
               </label>
+              {invalidNumber ? <p role="alert" className="text-xs text-admin-danger">{t(kind === "FIXED" ? "surcharge.amountInvalid" : "surcharge.percentInvalid")}</p> : null}
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">

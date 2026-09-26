@@ -1172,6 +1172,8 @@
         "kind": "Kiểu",
         "kindLabel": "Kiểu phụ thu",
         "fixed": "Số tiền cố định",
+        "amountInvalid": "Phụ thu phải là số nguyên yên lớn hơn 0.",
+        "percentInvalid": "Tỷ lệ phụ thu phải lớn hơn 0 và không quá 100%.",
         "percent": "Phần trăm",
         "amount": "Số tiền (¥)",
         "cancel": "Huỷ",
