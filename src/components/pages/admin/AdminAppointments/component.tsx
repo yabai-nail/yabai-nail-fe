@@ -58,6 +58,7 @@ import {
   shiftAppointmentDate,
 } from "./date-utils";
 import { normalizeAppointmentStatus } from "./status";
+import { bookedServices } from "./booked-services";
 
 const lifecycleSuccessKeys: Record<AppointmentLifecycleAction, "checkInDone" | "serviceStarted" | "serviceCompleted" | "noShowDone"> = {
   "check-in": "checkInDone",
@@ -129,22 +130,6 @@ function resolveService(
   };
 }
 
-/** Every booked service resolved to a display shape, in the order the appointment stored them. */
-function resolveServices(
-  serviceIds: ReadonlyArray<string>,
-  byId: Map<string, AdminServiceItem>,
-  t: Translator,
-): ReadonlyArray<AppointmentService> {
-  return serviceIds.map((id) => {
-    const server = byId.get(id);
-    return {
-      id,
-      name: server?.name ?? t("fallback.service"),
-      durationMinutes: server?.durationMinutes ?? 60,
-    };
-  });
-}
-
 function resolveStaff(staffId: string, byId: Map<string, AdminStaffMember>, t: Translator): AppointmentStaff {
   const server = byId.get(staffId);
   const name = server?.displayName ?? t("fallback.staff");
@@ -174,8 +159,7 @@ function toFixtureAppointment(
     startTime: toTimePart(server.startsAt, timeZone),
     endTime: toTimePart(server.endsAt, timeZone),
     customer: resolveCustomer(server.customerId, lookups.customers, t),
-    service: resolveService(server.serviceIds, lookups.services, t),
-    services: resolveServices(server.serviceIds, lookups.services, t),
+    ...bookedServices(server, lookups.services, t),
     staff: resolveStaff(server.staffId, lookups.staff, t),
     status: normalizeAppointmentStatus(server.status),
     note: server.note ?? "",

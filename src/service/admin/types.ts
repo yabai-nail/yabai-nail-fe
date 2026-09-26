@@ -58,6 +58,7 @@ export interface AdminAppointment {
   readonly id: string;
   readonly customerId: string;
   readonly branchId: string;
+  readonly branchTimeZone?: string;
   readonly staffId: string;
   readonly serviceIds: ReadonlyArray<string>;
   readonly startsAt: string;

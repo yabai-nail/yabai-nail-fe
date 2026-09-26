@@ -33,6 +33,7 @@ export type AppointmentService = {
   readonly id: string;
   readonly name: string;
   readonly durationMinutes: number;
+  readonly unitPrice?: number;
 };
 
 export type AppointmentStaff = {

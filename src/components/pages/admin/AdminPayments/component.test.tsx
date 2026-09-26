@@ -10,6 +10,19 @@ import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import { initialCheckoutInvoice } from "./data";
 
 describe("admin payment customer and appointment facts", () => {
+  it.each([
+    ["Asia/Ho_Chi_Minh", "Asia/Tokyo", "2026-09-27T02:00:00Z", "27/09/2026", "09:00"],
+    ["Asia/Tokyo", "Asia/Ho_Chi_Minh", "2026-09-27T02:00:00Z", "27/09/2026", "11:00"],
+    ["Asia/Ho_Chi_Minh", "Asia/Tokyo", "2026-09-26T16:30:00Z", "26/09/2026", "23:30"],
+    ["Asia/Tokyo", "Asia/Ho_Chi_Minh", "2026-09-26T16:30:00Z", "27/09/2026", "01:30"],
+    [undefined, "Asia/Ho_Chi_Minh", "2026-09-26T16:30:00Z", "26/09/2026", "23:30"],
+  ])("uses frozen appointment zone %s before branch fallback %s for date and time", (frozen, fallback, startsAt, date, time) => {
+    const appointment = { id: "timezone", customerId: "customer", branchId: "branch", branchTimeZone: frozen, staffId: "staff", serviceIds: [], startsAt, endsAt: startsAt, status: "CONFIRMED", total: 0, discount: 0, version: 1 } satisfies AdminAppointment;
+    const invoice = buildInvoiceFromServer(appointment, { customers: new Map(), services: new Map(), staff: new Map() }, ((key: string) => key) as Translator,
+      (value, timeZone) => new Intl.DateTimeFormat("en-GB", { timeZone, day: "2-digit", month: "2-digit", year: "numeric" }).format(value),
+      (value, timeZone) => new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }).format(value), fallback);
+    expect(invoice.appointment).toMatchObject({ date, time });
+  });
   it.each([["NEW", "Khách mới"], ["LOYAL", "Khách thân thiết"], ["RETURNING", "Khách lâu năm"]])("renders the CRM segment %s instead of a fixed loyal badge", (segment, label) => {
     const invoice = applyCustomerFacts(initialCheckoutInvoice, { id: initialCheckoutInvoice.customer.id, segment, visitCount: 0, version: 1 });
     const markup = renderToStaticMarkup(<NextIntlClientProvider locale="vi" messages={messages} timeZone="Asia/Tokyo"><CustomerAppointmentPanel invoice={invoice} appointmentStatus="CONFIRMED" /></NextIntlClientProvider>);

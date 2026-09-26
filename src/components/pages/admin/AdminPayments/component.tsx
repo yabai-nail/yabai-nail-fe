@@ -5,12 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { formatMoney } from "@/lib/admin-format";
+import { SALON_TIME_ZONE } from "@/lib/salon-date";
 import { notifySuccess } from "@/lib/app-toast";
 import {
   adminService,
   useAdminAppointment,
   useAdminAppointmentPayments,
   useAdminBranch,
+  useAdminBranchDetail,
   useAdminCustomers,
   useAdminServices,
   useAdminStaff,
@@ -76,8 +78,9 @@ export function buildInvoiceFromServer(
     readonly staff: Map<string, AdminStaffMember>;
   },
   t: Translator,
-  formatDate: (value: Date) => string,
-  formatTime: (value: Date) => string,
+  formatDate: (value: Date, timeZone: string) => string,
+  formatTime: (value: Date, timeZone: string) => string,
+  branchTimeZone?: string,
 ): CheckoutInvoice {
   const customer = lookups.customers.get(appointment.customerId);
   const staff = lookups.staff.get(appointment.staffId);
@@ -85,8 +88,9 @@ export function buildInvoiceFromServer(
   const primaryServiceId = orderedSnapshots[0]?.serviceId ?? appointment.serviceIds[0] ?? "unknown";
   const primaryService = lookups.services.get(primaryServiceId);
   const start = new Date(appointment.startsAt);
-  const date = formatDate(start);
-  const time = formatTime(start);
+  const timeZone = appointment.branchTimeZone ?? branchTimeZone ?? SALON_TIME_ZONE;
+  const date = formatDate(start, timeZone);
+  const time = formatTime(start, timeZone);
   const customerName = customer?.displayName ?? customer?.name ?? t("fallback.customer");
   const staffName = staff?.displayName ?? t("fallback.staff");
 
@@ -171,6 +175,7 @@ export function AdminPaymentsComponent() {
     branchId,
     appointmentId,
   );
+  const branch = useAdminBranchDetail(appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
   const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
@@ -191,8 +196,9 @@ export function AdminPaymentsComponent() {
         appointment,
         lookups,
         t,
-        (value) => format.dateTime(value, { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" }),
-        (value) => format.dateTime(value, { hour: "2-digit", minute: "2-digit", hour12: false }),
+        (value, timeZone) => format.dateTime(value, { timeZone, weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" }),
+        (value, timeZone) => format.dateTime(value, { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }),
+        branch.data?.timezone,
       );
       const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
       if (captured) {
@@ -206,7 +212,7 @@ export function AdminPaymentsComponent() {
       return invoice;
     }
     return null;
-  }, [appointment, format, lookups, payments.data, t]);
+  }, [appointment, branch.data?.timezone, format, lookups, payments.data, t]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
