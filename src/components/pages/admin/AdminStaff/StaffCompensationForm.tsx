@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@heroui/react";
 import { useState } from "react";
-import { formatMoney } from "@/lib/admin-format";
+import { formatMoney, parseWholeYen } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import { todayAtSalon } from "@/lib/salon-date";
 import {
@@ -34,11 +34,12 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
   const initialRate = compensation?.commissionRate ?? 60;
   // APP jobs pay their own rate; until the salon sets one the API applies the base rate.
   const initialAppRate = compensation?.appCommissionRate ?? initialRate;
-  const effectiveBase = baseSalary === "" ? initialBase : Number(baseSalary.replace(/\D/g, ""));
+  const effectiveBase = baseSalary === "" ? initialBase : parseWholeYen(baseSalary);
   const effectiveRate = rate === "" ? initialRate : Number(rate);
   const effectiveAppRate = appRate === "" ? initialAppRate : Number(appRate);
   const canSubmit =
     !busy &&
+    effectiveBase !== null &&
     Number.isFinite(effectiveBase) &&
     Number.isFinite(effectiveRate) &&
     Number.isFinite(effectiveAppRate) &&
@@ -107,6 +108,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           <input
             id={`${staffId}-base-salary`}
             inputMode="numeric"
+            aria-invalid={effectiveBase === null}
             value={baseSalary}
             onChange={(event) => setBaseSalary(event.target.value)}
             placeholder={formatMoney(initialBase)}
@@ -164,6 +166,7 @@ export function StaffCompensationForm({ staffId }: Readonly<{ staffId: string }>
           {busy ? t("compensation.saving") : t("compensation.submit")}
         </Button>
       </div>
+      {effectiveBase === null ? <p role="alert" className="text-xs text-admin-danger">{t("compensation.salaryInvalid")}</p> : null}
       {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
     </section>
   );

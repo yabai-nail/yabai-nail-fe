@@ -4,6 +4,14 @@
  */
 export const SALON_CURRENCY = "JPY";
 
+/** Whole, non-negative yen; invalid input must not become a different saved amount. */
+export function parseWholeYen(input: string): number | null {
+  const plain = input.trim().replace(/^¥\s*/, "").replace(/\s*¥$/, "");
+  if (!/^(?:\d+|\d{1,3}([.,])\d{3}(?:\1\d{3})*)$/.test(plain)) return null;
+  const amount = Number(plain.replace(/[.,]/g, ""));
+  return Number.isSafeInteger(amount) ? amount : null;
+}
+
 const moneyFormatter = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: SALON_CURRENCY,

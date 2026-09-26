@@ -1941,6 +1941,7 @@
         "baseSalary": "Lương cứng",
         "commission": "Hoa hồng",
         "newBaseSalary": "Lương cứng mới (¥)",
+        "salaryInvalid": "Lương cứng phải là số nguyên yên không âm.",
         "commissionPercent": "Hoa hồng (%)",
         "appCommission": "Hoa hồng APP",
         "appCommissionPercent": "Hoa hồng APP (%)",

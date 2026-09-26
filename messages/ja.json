@@ -1928,6 +1928,7 @@
         "baseSalary": "固定給",
         "commission": "歩合",
         "newBaseSalary": "新しい固定給 (¥)",
+        "salaryInvalid": "固定給は0以上の整数（円）で入力してください。",
         "commissionPercent": "歩合 (%)",
         "appCommission": "アプリ歩合",
         "appCommissionPercent": "アプリ歩合 (%)",
