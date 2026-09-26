@@ -1357,17 +1357,84 @@
       "overviewHeading": "Today at a glance",
       "activityRegion": "Salon activity",
       "performanceRegion": "Staff performance and monthly income",
-      "trend": {
-        "title": "Revenue by day (this month)",
-        "loading": "Loading the revenue chart…",
-        "empty": "No revenue yet this month.",
-        "error": "Could not load the revenue chart.",
-        "seriesLabel": "Revenue"
-      },
-      "monthly": {
-        "heading": "Salon income ({month}/{year})",
-        "loading": "Loading the monthly summary…",
-        "afterCommission": "Left after commission", "loadFailed": "Could not load the monthly summary.", "costUnavailable": "Operating costs are not deducted because the backend has no monthly cost data"
+      "overview": {
+        "title": "Overview by period",
+        "periodLabel": "Choose the period",
+        "periods": {
+          "WEEK": "Week",
+          "MONTH": "Month",
+          "YEAR": "Year"
+        },
+        "previous": "Previous period",
+        "next": "Next period",
+        "loading": "Loading the overview…",
+        "loadFailed": "Could not load the overview.",
+        "previousOf": {
+          "WEEK": "last week",
+          "MONTH": "last month",
+          "YEAR": "last year"
+        },
+        "kpi": {
+          "revenue": "Revenue",
+          "netRevenue": "Net revenue",
+          "refund": "Refunded {amount}",
+          "completed": "Completed",
+          "previousCount": "{period}: {count}",
+          "averageTicket": "Average per visit",
+          "cancellationRate": "Cancel + no-show rate",
+          "cancelBreakdown": "{cancelled} cancelled · {noShow} no-show"
+        },
+        "change": "{percent}% vs {period}",
+        "noComparison": "Nothing to compare yet",
+        "charts": {
+          "revenue": "Revenue",
+          "revenueHint": "The faint line is {period}",
+          "payments": "By payment method",
+          "outcomes": "Appointment outcomes",
+          "customers": "New and returning customers",
+          "services": "Top services by revenue",
+          "staff": "Revenue by staff",
+          "branches": "Branch comparison"
+        },
+        "series": {
+          "current": "This period",
+          "previous": "Previous period"
+        },
+        "outcomes": {
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "noShow": "No-show"
+        },
+        "customers": {
+          "new": "New",
+          "returning": "Returning",
+          "split": "{newShare}% new, {returningShare}% returning",
+          "newShare": "{share}% are new",
+          "total": "{count} customers served"
+        },
+        "actions": {
+          "title": "Needs you now",
+          "pendingConfirmations": "Bookings to confirm",
+          "unreadConversations": "Unread messages",
+          "pendingSalesReports": "Reports to approve",
+          "pendingLeaveRequests": "Leave requests to approve"
+        },
+        "export": {
+          "action": "Export Excel",
+          "preparing": "Preparing file…",
+          "download": "Download Excel",
+          "queued": "Preparing the Excel file; it will be ready in a few seconds.",
+          "failed": "Could not export the Excel file."
+        },
+        "timesSold": "{count} times",
+        "completedCount": "{count} completed",
+        "noRevenue": "No revenue in this period yet.",
+        "noAppointments": "No appointments ended in this period yet.",
+        "noPayments": "No payments in this period yet.",
+        "noCustomers": "No customers served in this period yet.",
+        "noServices": "No services completed yet.",
+        "noStaff": "No staff completed an appointment yet.",
+        "basisNote": "Revenue is counted on the service day (branch time) and covers completed appointments only. The Reports page counts by booking date, so it can differ slightly."
       },
       "revenue": {
         "netToday": "Salon takes home",

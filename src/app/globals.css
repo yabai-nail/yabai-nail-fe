@@ -153,6 +153,10 @@ body:has(.admin-shell) {
   --admin-warning: #d88318;
   --admin-danger: #d1113f;
   --admin-on-accent: #ffffff;
+  /* Categorical chart slots, validated colour-blind safe for every pair (dataviz validator). */
+  --admin-chart-1: #2a78d6;
+  --admin-chart-2: #eb6834;
+  --admin-chart-3: #1baf7a;
 
   --background: var(--admin-canvas);
   --foreground: var(--admin-ink);
@@ -211,6 +215,9 @@ body:has(.admin-shell) {
   --admin-warning: #e8a34a;
   --admin-danger: #ef8b9a;
   --admin-on-accent: #2b0715;
+  --admin-chart-1: #3987e5;
+  --admin-chart-2: #d95926;
+  --admin-chart-3: #199e70;
 
   --background: var(--admin-canvas);
   --foreground: var(--admin-ink);

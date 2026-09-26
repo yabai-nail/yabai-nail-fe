@@ -193,6 +193,7 @@ PATCH /api/v1/admin/conversations/{conversationId}
 PUT /api/v1/admin/conversations/{conversationId}/pin
 DELETE /api/v1/admin/conversations/{conversationId}/pin
 GET /api/v1/admin/branches/{branchId}/staff-performance
+GET /api/v1/admin/branches/{branchId}/overview
 GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings
 GET /api/v1/admin/branches/{branchId}/payments/{paymentId}

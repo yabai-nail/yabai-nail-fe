@@ -5,7 +5,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Card, Dropdown } from "@heroui/react";
 import { useMemo, useState } from "react";
 
-import { useAdminBranch, useAdminDashboard, useRevenueReportRange } from "@/service";
+import { useAdminBranch, useAdminDashboard, useAdminPermission, useRevenueReportRange } from "@/service";
 import {
   MISSING,
   buildPaymentMethodRows,
@@ -17,13 +17,17 @@ import {
   type RevenueRangePreset,
 } from "./adapters";
 
-const presets: ReadonlyArray<RevenueRangePreset> = ["today", "week", "month"];
+const allPresets: ReadonlyArray<RevenueRangePreset> = ["today", "week", "month"];
 
 export function RevenuePanel() {
   const t = useTranslations("admin.dashboard");
   const tMethod = useTranslations("admin.paymentMethod");
   const { branchId } = useAdminBranch();
   const [preset, setPreset] = useState<RevenueRangePreset>("today");
+  // Week / month read the chain revenue report, which only the owner may call; a manager would
+  // get a 403. Managers read those windows in the overview section below instead.
+  const canReadRangeReport = useAdminPermission("report.revenue.read.all");
+  const presets: ReadonlyArray<RevenueRangePreset> = canReadRangeReport ? allPresets : ["today"];
 
   const dashboard = useAdminDashboard(branchId);
   const range = useMemo(() => revenueRange(preset, new Date()), [preset]);
