@@ -34,6 +34,7 @@ export interface AdminDashboardKpi {
   readonly workingStaffCount?: number;
   readonly offStaffCount?: number;
   readonly expenses?: number;
+  readonly refundTotal?: number;
   readonly commission?: number;
   readonly salonShare?: number;
 }

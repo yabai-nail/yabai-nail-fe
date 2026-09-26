@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Appointment, AppointmentDraft } from "./data";
 import {
   cancelAppointment,
+  initialAppointmentCustomer,
   createAppointment,
   eligibleStaffForServices,
   filterAppointments,
@@ -39,6 +40,16 @@ const customer = {
 };
 
 const service = { id: "service-1", name: "Sơn gel đơn sắc", durationMinutes: 90 };
+
+it("prefills the exact message customer, never the first unrelated branch customer", () => {
+  const other = { ...customer, id: "other-customer" };
+  expect(initialAppointmentCustomer([other, customer], customer.id)).toEqual(customer);
+  expect(initialAppointmentCustomer([other], customer.id).id).toBe("");
+  expect(initialAppointmentCustomer([], customer.id).id).toBe("");
+  // Exact detail lookup adds a customer outside the paginated branch list.
+  expect(initialAppointmentCustomer([customer, other], customer.id)).toEqual(customer);
+  expect(initialAppointmentCustomer([other, customer])).toEqual(other);
+});
 const maiLinh = { id: "staff-1", name: "Mai Linh", initials: "ML" };
 const thaoVy = { id: "staff-2", name: "Thảo Vy", initials: "TV" };
 

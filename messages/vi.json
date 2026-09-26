@@ -2285,6 +2285,8 @@
         "save": "Lưu thay đổi",
         "customerSearch": "Tìm theo tên hoặc SĐT…",
         "customerEmpty": "Không tìm thấy khách hàng.",
+        "customerPrefillLoading": "Đang tải khách hàng từ cuộc trò chuyện…",
+        "customerPrefillUnavailable": "Chưa tải được khách hàng từ cuộc trò chuyện tại chi nhánh đang chọn. Hãy đóng cửa sổ, chọn chi nhánh quản lý khách rồi tạo lịch lại từ tin nhắn; nếu đã đúng chi nhánh, thử tải lại trang. Không có khách khác được chọn thay thế.",
         "create": "Tạo lịch hẹn"
       },
       "validation": {

@@ -2275,6 +2275,8 @@
         "save": "Save changes",
         "customerSearch": "Search by name or phone…",
         "customerEmpty": "No customers found.",
+        "customerPrefillLoading": "Loading the conversation customer…",
+        "customerPrefillUnavailable": "The conversation customer could not be loaded for the selected branch. Close this window, select the customer's branch, and create the appointment from messages again; if the branch is correct, reload the page. No other customer has been selected instead.",
         "create": "Create appointment"
       },
       "validation": {

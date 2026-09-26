@@ -1,10 +1,17 @@
 import type { Translator } from "@/i18n/config";
 import type {
   Appointment,
+  AppointmentCustomer,
   AppointmentDraft,
   AppointmentStaff,
   AppointmentStatusFilter,
 } from "./data";
+
+export function initialAppointmentCustomer(customers: ReadonlyArray<AppointmentCustomer>, customerId?: string): AppointmentCustomer {
+  // An explicit message customer must never fall back to an unrelated first row.
+  return (customerId ? customers.find((customer) => customer.id === customerId) : customers[0])
+    ?? { id: "", name: "", initials: "", phone: "", birthday: "", segment: "regular", preference: "", visits: 0, totalSpend: 0 };
+}
 
 export function eligibleStaffForServices(staff: ReadonlyArray<AppointmentStaff>, serviceIds: ReadonlyArray<string>) {
   return staff.filter((member) => serviceIds.every((id) => member.serviceIds?.includes(id)));

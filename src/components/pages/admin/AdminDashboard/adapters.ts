@@ -166,6 +166,7 @@ export function buildTodayRevenueRows(
 ): ReadonlyArray<AmountRow> {
   return [
     { id: "gross", label: t("summary.gross"), value: formatOptionalMoney(kpi?.revenue) },
+    { id: "refund", label: t("summary.refund"), value: formatOptionalMoney(kpi?.refundTotal) },
     { id: "cost", label: t("summary.cost"), value: formatOptionalMoney(kpi?.expenses) },
     { id: "commission", label: t("summary.commission"), value: formatOptionalMoney(kpi?.commission) },
   ];

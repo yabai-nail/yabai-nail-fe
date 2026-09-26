@@ -4,6 +4,7 @@ import { Button, Modal } from "@heroui/react";
 import { useCallback, useState, type FormEvent } from "react";
 import {
   hasAppointmentConflict,
+  initialAppointmentCustomer,
   eligibleStaffForServices,
   validateAppointmentDraft,
   type AppointmentDraftErrors,
@@ -45,8 +46,9 @@ function initialDraft(
   appointment: Appointment | null,
   defaultDate: string,
   options: AppointmentFormOptions,
+  initialCustomerId?: string,
 ): AppointmentDraft {
-  const customer = options.customers[0] ?? { id: "", name: "", initials: "", phone: "", birthday: "", segment: "regular", preference: "", visits: 0, totalSpend: 0 };
+  const customer = initialAppointmentCustomer(options.customers, initialCustomerId);
   const service = options.services[0] ?? { id: "", name: "", durationMinutes: 60 };
   const staff = eligibleStaffForServices(options.staff, [service.id])[0] ?? { id: "", name: "", initials: "" };
   return appointment ?? {
@@ -67,6 +69,8 @@ export function AppointmentFormModal({
   defaultDate,
   branchId,
   options,
+  initialCustomerId,
+  customerPrefillMessage,
   onClose,
   onSubmit,
 }: Readonly<{
@@ -75,6 +79,8 @@ export function AppointmentFormModal({
   defaultDate: string;
   branchId: string | null;
   options: AppointmentFormOptions;
+  initialCustomerId?: string;
+  customerPrefillMessage?: string;
   onClose: () => void;
   onSubmit: (draft: AppointmentDraft) => Promise<void>;
 }>) {
@@ -89,7 +95,7 @@ export function AppointmentFormModal({
   ].filter((label): label is string => label !== null);
 
   const [draft, setDraft] = useState(() =>
-    initialDraft(appointment, defaultDate, options),
+    initialDraft(appointment, defaultDate, options, initialCustomerId),
   );
   const [errors, setErrors] = useState<AppointmentDraftErrors>({});
   const [formMessage, setFormMessage] = useState("");
@@ -149,11 +155,11 @@ export function AppointmentFormModal({
                 <p className="mt-0.5 text-xs text-admin-muted">{t("form.subtitle")}</p>
               </div>
             </Modal.Header>
-            {missing.length > 0 ? (
+            {missing.length > 0 || customerPrefillMessage ? (
               <>
                 <Modal.Body className="px-5 py-6">
                   <p role="alert" className="rounded-lg bg-admin-soft px-3 py-2 text-sm text-admin-ink">
-                    {t("form.missing", { items: missing.join(", ") })}
+                    {customerPrefillMessage ?? t("form.missing", { items: missing.join(", ") })}
                   </p>
                 </Modal.Body>
                 <Modal.Footer className="border-t border-admin-border px-5 py-4">

@@ -235,7 +235,7 @@ export function MessageThread({
             variant="outline"
             className="rounded-lg border-admin-accent bg-admin-soft text-admin-accent"
             isDisabled={!canCreateAppointment}
-            onPress={() => router.push("/admin/appointments?create=1")}
+            onPress={() => router.push(`/admin/appointments?create=1&customerId=${encodeURIComponent(customer.id)}`)}
           >
             <CalendarDaysIcon className="size-4" />{t("createAppointment")}
           </Button>

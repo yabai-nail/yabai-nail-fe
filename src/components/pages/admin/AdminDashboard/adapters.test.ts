@@ -55,8 +55,9 @@ const fullKpi: AdminDashboardKpi = {
   workingStaffCount: 3,
   offStaffCount: 1,
   expenses: 1_230_000,
+  refundTotal: 100_000,
   commission: 3_548_000,
-  salonShare: 3_082_000,
+  salonShare: 2_982_000,
 };
 
 // The four counters are all an older deploy is guaranteed to return.
@@ -150,13 +151,20 @@ describe("revenue rows", () => {
   it("reads today's breakdown from the dashboard KPI", () => {
     const rows = buildTodayRevenueRows(fullKpi, t);
     expect(amountOf(rows, "gross")).toContain("7.860.000");
+    expect(amountOf(rows, "refund")).toContain("100.000");
+    expect(rows.find((row) => row.id === "refund")?.label).toBe("summary.refund");
     expect(amountOf(rows, "cost")).toContain("1.230.000");
     expect(amountOf(rows, "commission")).toContain("3.548.000");
   });
 
   it("falls back to a placeholder when the KPI has not arrived", () => {
     const rows = buildTodayRevenueRows(undefined, t);
-    expect(rows.map((row) => row.value)).toEqual([MISSING, MISSING, MISSING]);
+    expect(rows.map((row) => row.value)).toEqual([MISSING, MISSING, MISSING, MISSING]);
+  });
+
+  it("keeps a zero refund visible and missing legacy refund data explicit", () => {
+    expect(amountOf(buildTodayRevenueRows({ ...bareKpi, refundTotal: 0 }, t), "refund")).toContain("0");
+    expect(amountOf(buildTodayRevenueRows(bareKpi, t), "refund")).toBe(MISSING);
   });
 
   it("reads a wider range from the revenue report metrics", () => {

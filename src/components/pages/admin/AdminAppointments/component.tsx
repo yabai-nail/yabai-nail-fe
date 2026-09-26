@@ -14,6 +14,7 @@ import {
   useAdminCalendar,
   useAdminBranch,
   useAdminCustomers,
+  useAdminCustomer,
   useAdminServices,
   useAdminServiceCategories,
   useAdminStaff,
@@ -194,10 +195,12 @@ const LIFECYCLE_BY_STATUS: Record<string, ReadonlyArray<AppointmentLifecycleActi
 export function AdminAppointmentsComponent({
   initialCreate = false,
   initialSelectedId,
+  initialCustomerId,
 }: Readonly<{
   initialCreate?: boolean;
   /** Deep-link target from dashboard drill-down; overrides the first-row default. */
   initialSelectedId?: string;
+  initialCustomerId?: string;
 }>) {
   const t = useTranslations("admin.appointments");
   const tc = useTranslations("admin.common");
@@ -206,6 +209,7 @@ export function AdminAppointmentsComponent({
   const { data: branch } = useBranch(branchId);
   const timeZone = branch?.timezone ?? SALON_TIME_ZONE;
   const canCreate = useAdminPermission("appointment.create.branch");
+  const [prefillCustomerId, setPrefillCustomerId] = useState(initialCreate ? initialCustomerId : undefined);
   const canReschedule = useAdminPermission("appointment.reschedule.branch");
   const canCancel = useAdminPermission("appointment.cancel.branch");
   const canAssign = useAdminPermission("appointment.assign.branch");
@@ -237,14 +241,25 @@ export function AdminAppointmentsComponent({
   // hand back their own lookup, and the adapter fills the joined record so
   // the detail panel reads real names instead of "Khách #xxxxx".
   const { data: customersData } = useAdminCustomers(branchId);
+  // Exact branch-scoped lookup also resolves customers outside the first list page.
+  const prefillCustomer = useAdminCustomer(branchId, canCreate && prefillCustomerId && !customersData?.items.some((c) => c.id === prefillCustomerId) ? prefillCustomerId : null);
+  const customers = useMemo(() => {
+    const rows = customersData?.items ?? [];
+    return prefillCustomer.data && prefillCustomer.data.id === prefillCustomerId && !rows.some((c) => c.id === prefillCustomerId)
+      ? [prefillCustomer.data, ...rows]
+      : rows;
+  }, [customersData, prefillCustomer.data, prefillCustomerId]);
+  const customerPrefillMessage = prefillCustomerId && !customers.some((c) => c.id === prefillCustomerId)
+    ? t(prefillCustomer.isLoading ? "form.customerPrefillLoading" : "form.customerPrefillUnavailable")
+    : undefined;
   const { data: staffData } = useAdminStaff();
   const { data: servicesData } = useAdminServices();
   const { data: categoriesData } = useAdminServiceCategories();
   const lookups = useMemo(() => ({
-    customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
+    customers: new Map(customers.map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
     services: new Map((servicesData?.items ?? []).map((s) => [s.id, s] as const)),
-  }), [customersData, staffData, servicesData]);
+  }), [customers, staffData, servicesData]);
   // The API requires an active base service offered by this branch and a staff
   // member skilled in that service. Keep display lookups global for old rows.
   const formOptions = useMemo(() => {
@@ -258,13 +273,13 @@ export function AdminAppointmentsComponent({
       })
       .map((c) => c.id));
     return {
-      customers: (customersData?.items ?? []).map((c) => resolveCustomer(c.id, lookups.customers, t)),
+      customers: customers.map((c) => resolveCustomer(c.id, lookups.customers, t)),
       services: (servicesData?.items ?? [])
         .filter((s) => s.active && s.serviceType === "BASE" && s.categoryId && categoryIds.has(s.categoryId) && eligibleStaffForServices(staff, [s.id]).length)
         .map((s) => resolveService([s.id], lookups.services, t)),
       staff,
     };
-  }, [branchId, customersData, servicesData, staffData, categoriesData, lookups, t]);
+  }, [branchId, customers, servicesData, staffData, categoriesData, lookups, t]);
   const source = useMemo<ReadonlyArray<Appointment>>(
     () => (data?.appointments ?? []).map((row) => toFixtureAppointment(row, lookups, t, timeZone)),
     [data, lookups, t, timeZone],
@@ -340,6 +355,7 @@ export function AdminAppointmentsComponent({
     notifySuccess(formMode === "edit" ? tc("appointmentUpdated") : tc("appointmentCreated"));
     await mutateAppointments();
     setFormMode(null);
+    setPrefillCustomerId(undefined);
   }
 
   // Server-side lifecycle transitions the detail panel exposes. Each call
@@ -567,13 +583,15 @@ export function AdminAppointmentsComponent({
 
       {formMode && ((formMode === "create" && canCreate) || (formMode === "edit" && canReschedule)) ? (
         <AppointmentFormModal
-          key={`${formMode}-${branchId}-${selectedAppointment?.id ?? "new"}-${selectedDate}-${formOptions.customers[0]?.id ?? "loading"}-${formOptions.services[0]?.id ?? "loading"}-${formOptions.staff[0]?.id ?? "loading"}`}
+          key={`${formMode}-${branchId}-${selectedAppointment?.id ?? "new"}-${selectedDate}-${prefillCustomerId ?? ""}-${Boolean(customerPrefillMessage)}-${formOptions.customers[0]?.id ?? "loading"}-${formOptions.services[0]?.id ?? "loading"}-${formOptions.staff[0]?.id ?? "loading"}`}
           appointment={formMode === "edit" ? selectedAppointment : null}
           appointments={appointments}
           defaultDate={selectedDate}
           branchId={branchId}
           options={formOptions}
-          onClose={() => setFormMode(null)}
+          initialCustomerId={formMode === "create" ? prefillCustomerId : undefined}
+          customerPrefillMessage={formMode === "create" ? customerPrefillMessage : undefined}
+          onClose={() => { setFormMode(null); setPrefillCustomerId(undefined); }}
           onSubmit={saveAppointment}
         />
       ) : null}
