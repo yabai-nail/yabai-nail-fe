@@ -29,10 +29,9 @@ export function AttachPhotoModal({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const uploadAndAttach = async () => {
-    if (!file) return;
+    if (!file || uploading || submitting) return;
     setUploading(true);
     setUploadError(null);
-    let mediaId: string | null = null;
     try {
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
         throw new Error(t("photo.typeError"));
@@ -40,22 +39,9 @@ export function AttachPhotoModal({
       if (file.size < 1 || file.size > 10_000_000) {
         throw new Error(t("photo.sizeError"));
       }
-      const upload = await adminMediaService.startUpload({
-        fileName: file.name,
-        contentType: file.type as "image/jpeg" | "image/png" | "image/webp",
-        sizeBytes: file.size,
-      });
-      mediaId = upload.mediaId;
-      const response = await fetch(upload.uploadUrl, {
-        method: "PUT",
-        headers: upload.requiredHeaders,
-        body: file,
-      });
-      if (!response.ok) throw new Error(t("photo.uploadFailed"));
-      await adminMediaService.completeUpload(mediaId);
+      const mediaId = await adminMediaService.uploadFile(file);
       onConfirm({ mediaId, kind, note: note.trim() || undefined });
     } catch (thrown) {
-      if (mediaId) await adminMediaService.abortUpload(mediaId).catch(() => undefined);
       setUploadError(thrown instanceof Error ? thrown.message : t("photo.genericFailed"));
     } finally {
       setUploading(false);
