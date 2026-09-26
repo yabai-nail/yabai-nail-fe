@@ -1172,6 +1172,8 @@
         "kind": "種別",
         "kindLabel": "追加料金の種別",
         "fixed": "固定額",
+        "amountInvalid": "追加料金は0より大きい整数（円）で入力してください。",
+        "percentInvalid": "追加料金の割合は0より大きく100%以下で入力してください。",
         "percent": "割合",
         "amount": "金額 (¥)",
         "cancel": "キャンセル",

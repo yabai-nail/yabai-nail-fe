@@ -14,6 +14,7 @@ export type StaffPerformanceRow = {
   readonly displayName: string | null;
   readonly workingStatus: string | null;
   readonly revenue: number | null;
+  readonly refundTotal: number | null;
   readonly orderCount: number | null;
   readonly commissionRate: number | null;
   /** The rate for app-booked jobs; the read model reports it next to the base rate. */
@@ -69,6 +70,7 @@ export function readStaffPerformanceRows(
         ?? readString(row, ["displayName", "staffName"]),
       workingStatus: readString(row, ["workingStatus", "status"]),
       revenue: readNumber(row, ["revenue", "revenue"]),
+      refundTotal: readNumber(row, ["refundTotal"]),
       orderCount: readNumber(row, ["orderCount", "count"]),
       commissionRate: readNumber(row, ["commissionRate", "rate"]),
       appCommissionRate: readNumber(row, ["appCommissionRate"]),
@@ -88,6 +90,14 @@ export function indexStaffPerformance(
     if (!index.has(row.staffId)) index.set(row.staffId, row);
   }
   return index;
+}
+
+/** Retained money for the API's completed-month cohort, including signed reversals. */
+export function staffSalonShare(kpi: { readonly revenue?: number | null; readonly refundTotal?: number | null; readonly commissionAmount?: number | null } | undefined): number | null {
+  const { revenue, refundTotal, commissionAmount } = kpi ?? {};
+  return typeof revenue === "number" && typeof refundTotal === "number" && typeof commissionAmount === "number"
+    ? revenue - refundTotal - commissionAmount
+    : null;
 }
 
 /** Average of the rates the backend actually reported; `null` when it reported none. */
