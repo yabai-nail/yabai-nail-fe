@@ -39,9 +39,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-  # Reads the live API and needs an admin credential, so it cannot run on a fork
-  # PR and must not gate one. Scheduled instead, where a contract drift shows up
-  # as a failed run rather than as a blank column somebody notices months later.
+  # Reads the live API and needs an admin credential, so it cannot run on a fork PR.
   contract:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -59,6 +57,23 @@ jobs:
           YABAI_ADMIN_PHONE: ${{ secrets.YABAI_ADMIN_PHONE }}
           YABAI_ADMIN_PASSWORD: ${{ secrets.YABAI_ADMIN_PASSWORD }}
         run: pnpm contract:check
+
+  # This test sends a real phone challenge. The API allows five per phone per
+  # hour, so running it on every push exhausts the shared test phone.
+  chat-smoke:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: staging-chat-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Customer ↔ salon chat E2E
         env:
           YABAI_API_URL: ${{ vars.YABAI_API_URL }}

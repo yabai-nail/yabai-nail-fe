@@ -90,6 +90,15 @@ export function AdminServicesComponent() {
     q: query.trim() || undefined,
     to: popularityWindow.to,
   });
+  // Keep the current branch/search scope for category badges while leaving out
+  // only the selected category. The full-catalogue query below serves add-ons.
+  const countQuery = useAdminServices({
+    branchId: branchFilter || undefined,
+    from: popularityWindow.from,
+    limit: 100,
+    q: query.trim() || undefined,
+    to: popularityWindow.to,
+  });
   const categories = useAdminServiceCategories();
   const categoryItems = categories.data?.items ?? [];
   // Two jobs, two surfaces: browsing the catalogue, and maintaining the categories it is filed
@@ -108,12 +117,21 @@ export function AdminServicesComponent() {
   // worse than one extra list read. The key matches the create modal's own catalogue read,
   // so those two share a response.
   const addonQuery = useAdminServices();
-  const addonServices = useMemo(
-    () => selectAddonServices((addonQuery.data?.items ?? []).map(toScreenService)),
+  const allServices = useMemo(
+    () => (addonQuery.data?.items ?? []).map(toScreenService),
     [addonQuery.data],
+  );
+  const addonServices = useMemo(
+    () => selectAddonServices(allServices),
+    [allServices],
   );
   // Add-ons have their own tab, so they are not rows of the service catalogue any more.
   const baseServices = useMemo(() => selectBaseServices(source), [source]);
+  const countBaseServices = useMemo(
+    () => selectBaseServices((countQuery.data?.items ?? []).map(toScreenService)),
+    [countQuery.data],
+  );
+  const allBaseServices = useMemo(() => selectBaseServices(allServices), [allServices]);
 
   const [page, setPage] = useState(1);
   const filtered = useMemo(
@@ -129,11 +147,12 @@ export function AdminServicesComponent() {
     setFilter(value);
     setPage(1);
   };
-  const unfiledCount = baseServices.filter((service) => service.category === null).length;
-  const countIn = (categoryId: string) => baseServices.filter((service) => service.category?.id === categoryId).length;
+  const unfiledCount = countBaseServices.filter((service) => service.category === null).length;
+  const countIn = (categoryId: string) => countBaseServices.filter((service) => service.category?.id === categoryId).length;
   // Both reads show the same rows through different filters, so a write has to refresh each.
   const refreshCatalogue = () => {
     void mutateServices();
+    void countQuery.mutate();
     void addonQuery.mutate();
   };
 
@@ -159,7 +178,7 @@ export function AdminServicesComponent() {
       </Tabs>
 
       {view === "categories" ? (
-        <CategoryTable services={baseServices} canWrite={canWrite} />
+        <CategoryTable services={allBaseServices} canWrite={canWrite} />
       ) : view === "addons" ? (
         <>
           <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
@@ -245,7 +264,7 @@ export function AdminServicesComponent() {
                   </SearchField>
                   <ListBox aria-label={t("categoriesTab")} className="max-h-64 overflow-y-auto">
                     <ListBox.Item id="all" textValue={t("allServices")}>
-                      {t("allServices")} · {source.length}
+                      {t("allServices")} · {countBaseServices.length}
                     </ListBox.Item>
                     {categoryItems.map((category) => (
                       <ListBox.Item
