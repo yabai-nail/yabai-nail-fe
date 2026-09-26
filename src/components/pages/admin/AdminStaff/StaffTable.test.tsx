@@ -14,6 +14,7 @@ const member: StaffMember = {
   avatarUrl: null,
   status: "working" as const,
   revenue: 10_000,
+  refundTotal: 0,
   commissionRate: 10,
   commissionAmount: 1_000,
   orders: 2,

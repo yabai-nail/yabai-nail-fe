@@ -3,6 +3,7 @@ import { PencilSquareIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Chip } from "@heroui/react";
 import { AdminAvatarZoom } from "@/components/blocks/admin/AdminAvatarField";
 import { formatMoney } from "@/lib/admin-format";
+import { staffSalonShare } from "@/lib/admin-staff-performance";
 import { StaffCompensationForm } from "./StaffCompensationForm";
 import { StaffPerformancePanel } from "./StaffPerformancePanel";
 import { StaffShiftsPanel } from "./StaffShiftsPanel";
@@ -35,10 +36,7 @@ export function StaffDetailPanel({
   onEdit?: () => void;
 }>) {
   const t = useTranslations("admin.staff");
-  const salonShare =
-    typeof member.revenue === "number" && typeof member.commissionAmount === "number"
-      ? member.revenue - member.commissionAmount
-      : null;
+  const salonShare = staffSalonShare(member);
 
   return (
     <section aria-label={`${t("detail.heading")}: ${member.name}`} className="space-y-3">

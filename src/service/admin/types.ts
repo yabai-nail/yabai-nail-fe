@@ -571,6 +571,7 @@ export interface AdminLeaveRequestDecisionInput {
 
 export interface AdminStaffPerformanceKpi {
   readonly revenue?: number;
+  readonly refundTotal?: number;
   readonly orderCount?: number;
   readonly commissionAmount?: number;
   readonly activeStaffCount?: number;

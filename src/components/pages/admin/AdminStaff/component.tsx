@@ -16,6 +16,7 @@ import {
   averageCommissionRate,
   currentMonthPeriod,
   indexStaffPerformance,
+  staffSalonShare,
   type StaffPerformanceRow,
 } from "@/lib/admin-staff-performance";
 import {
@@ -67,6 +68,7 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
     avatarUrl: server.avatarUrl ?? null,
     status: server.active ? "working" : "leave",
     revenue: performance?.revenue ?? null,
+    refundTotal: performance?.refundTotal ?? null,
     commissionRate: performance?.commissionRate ?? null,
     commissionAmount: performance?.commissionAmount ?? null,
     orders: performance?.orderCount ?? null,
@@ -166,8 +168,7 @@ export function AdminStaffComponent() {
   const kpi = performance.data?.kpi;
   const revenue = kpi?.revenue ?? null;
   const commission = kpi?.commissionAmount ?? null;
-  const salonShare =
-    typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
+  const salonShare = staffSalonShare(kpi);
   const averageRate = averageCommissionRate(source.map((member) => member.commissionRate));
   const workingCount = source.filter((member) => member.status === "working").length;
   const metrics = [

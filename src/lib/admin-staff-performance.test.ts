@@ -4,18 +4,39 @@ import {
   currentMonthPeriod,
   indexStaffPerformance,
   readStaffPerformanceRows,
+  staffSalonShare,
 } from "./admin-staff-performance";
 
 const verifiedRow = {
   staff: { id: "staff-1", displayName: "Mai Linh" },
   workingStatus: "ACTIVE",
   revenue: 2840000,
+  refundTotal: 0,
   orderCount: 4,
   commissionRate: 60,
   appCommissionRate: 50,
   commissionAmount: 1704000,
   version: 3,
 };
+
+describe("staffSalonShare", () => {
+  it.each([
+    [35500, 5000, 3050, 27450],
+    [10000, 0, 1000, 9000],
+    [10000, 2000, 800, 7200],
+    [10000, 10000, 0, 0],
+    [0, 0, 0, 0],
+    [10000, 10000, 100, -100],
+    [10000, 2000, -100, 8100],
+  ])("subtracts refunds and signed commission: %s/%s/%s", (revenue, refundTotal, commissionAmount, expected) => {
+    expect(staffSalonShare({ revenue, refundTotal, commissionAmount })).toBe(expected);
+  });
+  it("does not invent zero refunds for a legacy or unloaded API response", () => {
+    expect(staffSalonShare(undefined)).toBeNull();
+    expect(staffSalonShare({ revenue: 35500, commissionAmount: 3050 })).toBeNull();
+    expect(readStaffPerformanceRows([{ staffId: "legacy" }])[0].refundTotal).toBeNull();
+  });
+});
 
 describe("currentMonthPeriod", () => {
   it("formats the UTC month as YYYY-MM with a padded month", () => {
@@ -32,6 +53,7 @@ describe("readStaffPerformanceRows", () => {
         displayName: "Mai Linh",
         workingStatus: "ACTIVE",
         revenue: 2840000,
+        refundTotal: 0,
         orderCount: 4,
         commissionRate: 60,
         appCommissionRate: 50,

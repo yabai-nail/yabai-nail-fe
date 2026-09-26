@@ -21,6 +21,7 @@ export type StaffMember = {
   readonly avatarUrl: string | null;
   readonly status: StaffStatus;
   readonly revenue: number | null;
+  readonly refundTotal: number | null;
   readonly commissionRate: number | null;
   readonly commissionAmount: number | null;
   readonly orders: number | null;
