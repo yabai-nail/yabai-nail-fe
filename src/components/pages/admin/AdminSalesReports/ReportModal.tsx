@@ -9,14 +9,9 @@ import { notifySuccess } from "@/lib/app-toast";
 import { SALES_PAYMENT_METHODS, SALES_PLATFORMS, type SalesPlatform } from "@/lib/sales-report-engine";
 import { todayAtSalon } from "@/lib/salon-date";
 import { adminService, useAdminSalesReportPreview, type AdminSalesReport, type AdminSalesReportInput } from "@/service";
-import { reportErrorKey } from "./data";
+import { parseReportAmount, reportErrorKey } from "./data";
 
 const inputClass = "min-h-11 rounded-lg border border-admin-border bg-admin-surface px-3 text-base text-admin-ink";
-
-function digits(value: string): number | null {
-  const cleaned = value.replace(/[^\d]/g, "");
-  return cleaned === "" ? null : Number(cleaned);
-}
 
 /**
  * One customer's report, added or edited. The figures shown before saving come from the API's
@@ -55,9 +50,11 @@ export function ReportModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const course = digits(coursePrice);
-  const accessories = digits(accessoryAmount) ?? 0;
-  const complete = course !== null && reportDate !== "" && (!canPickStaff || staffId !== "");
+  const course = parseReportAmount(coursePrice);
+  const accessories = accessoryAmount.trim() === "" ? 0 : parseReportAmount(accessoryAmount);
+  const invalidCourse = coursePrice.trim() !== "" && course === null;
+  const invalidAccessories = accessories === null;
+  const complete = course !== null && accessories !== null && reportDate !== "" && (!canPickStaff || staffId !== "");
   const preview = useAdminSalesReportPreview(
     complete
       ? {
@@ -151,11 +148,11 @@ export function ReportModal({
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-admin-ink">{t("coursePrice")}</span>
-                  <input inputMode="numeric" value={coursePrice} onChange={(event) => setCoursePrice(event.target.value)} placeholder="8000" className={inputClass} />
+                  <input inputMode="numeric" aria-invalid={invalidCourse} value={coursePrice} onChange={(event) => setCoursePrice(event.target.value)} placeholder="8000" className={inputClass} />
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-admin-ink">{t("accessoryAmount")}</span>
-                  <input inputMode="numeric" value={accessoryAmount} onChange={(event) => setAccessoryAmount(event.target.value)} placeholder="0" className={inputClass} />
+                  <input inputMode="numeric" aria-invalid={invalidAccessories} value={accessoryAmount} onChange={(event) => setAccessoryAmount(event.target.value)} placeholder="0" className={inputClass} />
                 </label>
               </div>
               <fieldset className="flex flex-col gap-2">
@@ -175,7 +172,9 @@ export function ReportModal({
 
               <section className="rounded-xl border border-admin-border bg-admin-soft p-3">
                 <p className="text-xs font-semibold text-admin-ink">{t("preview.heading")}</p>
-                {!complete ? (
+                {invalidCourse || invalidAccessories ? (
+                  <p role="alert" className="mt-1 text-xs text-admin-danger">{t("amountInvalid")}</p>
+                ) : !complete ? (
                   <p className="mt-1 text-xs text-admin-muted">{t("preview.incomplete")}</p>
                 ) : preview.error ? (
                   <p role="alert" className="mt-1 text-xs text-admin-danger">{explain(preview.error, t("preview.failed"))}</p>

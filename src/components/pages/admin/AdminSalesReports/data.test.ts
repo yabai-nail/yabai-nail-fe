@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { ApiClientError, type AdminSalesReport } from "@/service";
-import { decidableIds, isMonth, isReportEditable, monthBounds, paginate, reportErrorKey, summarize } from "./data";
+import { decidableIds, isMonth, isReportEditable, monthBounds, paginate, parseReportAmount, reportErrorKey, summarize } from "./data";
+
+describe("parseReportAmount", () => {
+  it.each(["-1", "+1", "1.5", "1,5", "1e3", "12abc", "abc", "8,00", "1,000.000", "9007199254740992", "", " "])("rejects %s without stripping invalid characters", (input) => {
+    expect(parseReportAmount(input)).toBeNull();
+  });
+  it.each([["0", 0], [" 8000 ", 8000], ["8,000", 8000], ["8.000", 8000], ["¥1,250,000", 1250000], ["1.250.000 ¥", 1250000]] as const)("accepts whole/grouped yen %s", (input, expected) => {
+    expect(parseReportAmount(input)).toBe(expected);
+  });
+});
 
 function report(overrides: Partial<AdminSalesReport>): AdminSalesReport {
   return {

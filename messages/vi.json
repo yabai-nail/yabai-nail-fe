@@ -1517,6 +1517,7 @@
         "time": "Giờ làm",
         "platform": "Nền tảng",
         "coursePrice": "Giá course (¥)",
+        "amountInvalid": "Giá course và phụ kiện phải là số nguyên yên không âm.",
         "accessoryAmount": "Phụ kiện (¥)",
         "paymentMethod": "Thanh toán",
         "note": "Ghi chú",

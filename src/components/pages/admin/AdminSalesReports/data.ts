@@ -5,6 +5,14 @@ export const REPORT_PAGE_SIZE = 20;
 /** The API caps a page at 100; the screen asks for the most it can and pages further by cursor. */
 export const REPORT_FETCH_LIMIT = 100;
 
+/** Whole, non-negative yen; invalid input must not become a different saved amount. */
+export function parseReportAmount(input: string): number | null {
+  const plain = input.trim().replace(/^¥\s*/, "").replace(/\s*¥$/, "");
+  if (!/^(?:\d+|\d{1,3}([.,])\d{3}(?:\1\d{3})*)$/.test(plain)) return null;
+  const amount = Number(plain.replace(/[.,]/g, ""));
+  return Number.isSafeInteger(amount) ? amount : null;
+}
+
 /** `YYYY-MM` of today in the branch's zone. */
 export function currentMonth(timeZone?: string): string {
   return todayAtSalon(timeZone).slice(0, 7);

@@ -1507,6 +1507,7 @@
         "time": "Time",
         "platform": "Platform",
         "coursePrice": "Course price (¥)",
+        "amountInvalid": "Course and accessory amounts must be whole, non-negative yen.",
         "accessoryAmount": "Accessories (¥)",
         "paymentMethod": "Payment",
         "note": "Note",
