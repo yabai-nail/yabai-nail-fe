@@ -13,6 +13,7 @@ import {
   averageCommissionRate,
   currentMonthPeriod,
   indexStaffPerformance,
+  staffSalonShare,
 } from "@/lib/admin-staff-performance";
 import { useAdminBranch, useAdminPermission, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
@@ -97,16 +98,15 @@ export function AdminSettingsComponent() {
         rate: row?.commissionRate ?? null,
         appRate: row?.appCommissionRate ?? null,
         personalRevenue: row?.revenue ?? null,
+        refundTotal: row?.refundTotal ?? null,
         payout: row?.commissionAmount ?? null,
       } satisfies CommissionPolicy;
     });
   }, [staff.data, performance.data, t]);
 
   const kpi = performance.data?.kpi;
-  const revenue = kpi?.revenue ?? null;
   const commission = kpi?.commissionAmount ?? null;
-  const salonShare =
-    typeof revenue === "number" && typeof commission === "number" ? revenue - commission : null;
+  const salonShare = staffSalonShare(kpi);
   const averageRate = averageCommissionRate(commissionPolicies.map((policy) => policy.rate));
   const workingCount = commissionPolicies.filter((policy) => policy.status === "working").length;
   const metrics = [

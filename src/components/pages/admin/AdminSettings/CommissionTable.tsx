@@ -2,6 +2,7 @@ import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Chip } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/admin-format";
+import { staffSalonShare } from "@/lib/admin-staff-performance";
 import type { CommissionPolicy } from "./data";
 import { useTranslations } from "next-intl";
 
@@ -34,10 +35,7 @@ export function CommissionTable({
         </thead>
         <tbody className="divide-y divide-admin-border">
           {policies.map((policy) => {
-            const salonShare =
-              typeof policy.personalRevenue === "number" && typeof policy.payout === "number"
-                ? policy.personalRevenue - policy.payout
-                : null;
+            const salonShare = staffSalonShare({ revenue: policy.personalRevenue, refundTotal: policy.refundTotal, commissionAmount: policy.payout });
 
             return (
               <tr key={policy.id}>
