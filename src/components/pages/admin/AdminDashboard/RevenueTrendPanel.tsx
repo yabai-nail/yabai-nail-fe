@@ -22,7 +22,7 @@ import {
   CHART_TOOLTIP_STYLE,
 } from "@/components/blocks/admin/charts";
 import { formatMoney } from "@/lib/admin-format";
-import { useRevenueReportRange } from "@/service";
+import { useAdminBranch, useRevenueReportRange } from "@/service";
 import { buildRevenueTrend, currentMonthPeriod, monthRange } from "./adapters";
 
 /** Yen axis ticks: full amounts are too wide, so 46 800 -> "47K", 1 200 000 -> "1.2M". */
@@ -34,11 +34,12 @@ function compactYen(value: number): string {
 
 export function RevenueTrendPanel() {
   const t = useTranslations("admin.dashboard");
+  const { branchId } = useAdminBranch();
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const range = useMemo(() => monthRange(period), [period]);
   // Same SWR key as MonthlySummaryPanel's month report, so this shares its cache
   // entry rather than issuing a second request for the same window.
-  const report = useRevenueReportRange(range.from, range.to);
+  const report = useRevenueReportRange(range.from, range.to, branchId);
   const points = useMemo(() => buildRevenueTrend(report.data?.rows), [report.data]);
 
   const accent = CHART_SERIES[0];

@@ -33,6 +33,7 @@ export function RevenuePanel() {
   const report = useRevenueReportRange(
     preset === "today" ? null : range.from,
     preset === "today" ? null : range.to,
+    branchId,
   );
 
   const isToday = preset === "today";

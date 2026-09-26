@@ -3,7 +3,7 @@
 import { ArrowDownTrayIcon, ChevronLeftIcon, ChevronRightIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { MonthPicker } from "@/components/blocks/admin/MonthPicker";
@@ -30,13 +30,22 @@ type ExportKind = "PAYROLL_MONTHLY" | "SALES_REPORTS_MONTHLY";
  * Both Excel exports go through the same export queue as the other reports.
  */
 export function AdminPayrollComponent() {
+  const { branchId } = useAdminBranch();
+  const [period, setPeriod] = useState(() => currentMonth());
+  // A queued file belongs to one branch/month. Changing either discards its UI and polling.
+  return <PayrollSheet key={`${branchId}:${period}`} branchId={branchId} period={period} setPeriod={setPeriod} />;
+}
+
+function PayrollSheet({ branchId, period, setPeriod }: {
+  readonly branchId: string | null;
+  readonly period: string;
+  readonly setPeriod: (period: string) => void;
+}) {
   const t = useTranslations("admin.payroll");
   const tr = useTranslations("admin.reports");
   const canPay = useAdminPermission("payroll.pay.branch");
   const canUnlock = useAdminPermission("payroll.unlock.all");
   const canExport = useAdminPermission("report.export.all");
-  const { branchId } = useAdminBranch();
-  const [period, setPeriod] = useState(() => currentMonth());
   const sheet = useAdminPayroll(branchId && isMonth(period) ? { branchId, period } : null);
   const [confirm, setConfirm] = useState<Confirm | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -44,6 +53,11 @@ export function AdminPayrollComponent() {
   const [exportInfo, setExportInfo] = useState<AdminReportExport | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const exportStatus = useAdminReportExport(exportInfo?.exportId ?? null);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   const explain = (thrown: unknown): string => {
     const key = payrollErrorKey(thrown);
@@ -78,12 +92,13 @@ export function AdminPayrollComponent() {
     setDownloadUrl(null);
     try {
       const info = await adminService.createReportExport({ reportType, format: "XLSX", filters: { branchId, period } });
+      if (!mounted.current) return;
       notifySuccess(t("exportQueued"));
       setExportInfo(info);
     } catch (thrown) {
-      setActionError(explain(thrown));
+      if (mounted.current) setActionError(explain(thrown));
     } finally {
-      setBusy(null);
+      if (mounted.current) setBusy(null);
     }
   };
 
@@ -92,9 +107,9 @@ export function AdminPayrollComponent() {
     setActionError(null);
     try {
       const result = await adminService.reportExportDownloadUrl(exportInfo.exportId);
-      setDownloadUrl(result.signedUrl);
+      if (mounted.current) setDownloadUrl(result.signedUrl);
     } catch (thrown) {
-      setActionError(explain(thrown));
+      if (mounted.current) setActionError(explain(thrown));
     }
   };
 

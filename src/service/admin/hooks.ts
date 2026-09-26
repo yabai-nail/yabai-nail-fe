@@ -257,10 +257,10 @@ export function useRevenueReport(from?: string, to?: string, enabled = true) {
 
 // Same report, but skipped entirely until the caller has a range to ask for.
 // `to` is exclusive and the backend rejects windows longer than 12 months.
-export function useRevenueReportRange(from: string | null, to: string | null) {
+export function useRevenueReportRange(from: string | null, to: string | null, branchId?: string | null) {
   return useApiOperation<RevenueReport>(
-    from && to ? "GET /api/v1/admin/reports/revenue-summary" : null,
-    { query: { from: from ?? undefined, to: to ?? undefined } },
+    from && to && branchId !== null ? "GET /api/v1/admin/reports/revenue-summary" : null,
+    { query: { from: from ?? undefined, to: to ?? undefined, ...(branchId ? { branchId } : {}) } },
   );
 }
 

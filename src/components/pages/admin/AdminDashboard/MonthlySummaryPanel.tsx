@@ -19,7 +19,7 @@ export function MonthlySummaryPanel() {
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const range = useMemo(() => monthRange(period), [period]);
 
-  const report = useRevenueReportRange(range.from, range.to);
+  const report = useRevenueReportRange(range.from, range.to, branchId);
   // Monthly commission only exists on the branch staff-performance read model;
   // the revenue report does not expose it.
   const performance = useAdminStaffPerformance(branchId, { period });
