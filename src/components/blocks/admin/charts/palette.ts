@@ -19,6 +19,14 @@ export const CHART_SERIES = [
   "var(--admin-warning)",
 ] as const;
 
+/**
+ * Colour-blind-safe identity colours for part-to-whole charts where any two slices can touch.
+ * Only three: a fourth hue can no longer be told apart from every other one, so a chart folds
+ * the rest into an "other" slice painted CHART_OTHER.
+ */
+export const CHART_CATEGORICAL = ["var(--admin-chart-1)", "var(--admin-chart-2)", "var(--admin-chart-3)"] as const;
+export const CHART_OTHER = "var(--admin-muted)";
+
 export const CHART_GRID = "var(--admin-border)";
 export const CHART_AXIS = "var(--admin-muted)";
 

@@ -18,7 +18,7 @@ export function StaffPanel() {
   const members = useMemo(() => buildStaffCards(data?.rows, t), [data, t]);
 
   return (
-    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-8">
+    <Card className="flex h-full flex-col gap-0 rounded-xl border-admin-border bg-admin-surface p-0 shadow-none xl:col-span-12">
       <Card.Header className="flex flex-row items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <h2 className="text-sm font-bold text-admin-ink">
           {t("staff.heading", { period })}

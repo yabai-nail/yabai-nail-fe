@@ -2,7 +2,6 @@ import { useFormatter, useTranslations } from "next-intl";
 import {
   ArchiveBoxIcon,
   BookmarkIcon,
-  BookmarkSlashIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
@@ -11,6 +10,7 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import { Avatar, Button, InputGroup } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, type FormEvent } from "react";
@@ -240,8 +240,18 @@ export function MessageThread({
             <CalendarDaysIcon className="size-4" />{t("createAppointment")}
           </Button>
           {onTogglePin ? (
-            <Button size="sm" variant="ghost" onPress={onTogglePin} isDisabled={pinPending} aria-label={pinned ? t("unpin") : t("pin")}>
-              {pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+            // A toggle: the icon shows the current state (filled = pinned), the label says what a
+            // press does. A slashed icon used to stand for "pinned", which read as the opposite.
+            <Button
+              size="sm"
+              variant="ghost"
+              onPress={onTogglePin}
+              isDisabled={pinPending}
+              aria-label={pinned ? t("unpin") : t("pin")}
+              aria-pressed={Boolean(pinned)}
+              className={pinned ? "text-admin-accent" : undefined}
+            >
+              {pinned ? <BookmarkSolidIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
             </Button>
           ) : null}
           {onMarkRead ? (

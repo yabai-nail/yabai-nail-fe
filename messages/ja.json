@@ -1356,17 +1356,84 @@
       "overviewHeading": "本日の概要",
       "activityRegion": "店舗の活動",
       "performanceRegion": "スタッフの実績と月間収入",
-      "trend": {
-        "title": "日別売上（今月）",
-        "loading": "売上グラフを読み込み中…",
-        "empty": "今月の売上はまだありません。",
-        "error": "売上グラフを読み込めませんでした。",
-        "seriesLabel": "売上"
-      },
-      "monthly": {
-        "heading": "店舗収入（{year}年{month}月）",
-        "loading": "月間サマリーを読み込み中…",
-        "afterCommission": "歩合控除後の残り", "loadFailed": "月次サマリーを読み込めません。", "costUnavailable": "バックエンドに月次コストデータがないため、運営費は差し引かれていません"
+      "overview": {
+        "title": "期間サマリー",
+        "periodLabel": "表示期間",
+        "periods": {
+          "WEEK": "週",
+          "MONTH": "月",
+          "YEAR": "年"
+        },
+        "previous": "前の期間",
+        "next": "次の期間",
+        "loading": "サマリーを読み込み中…",
+        "loadFailed": "サマリーを読み込めません。",
+        "previousOf": {
+          "WEEK": "前週",
+          "MONTH": "前月",
+          "YEAR": "前年"
+        },
+        "kpi": {
+          "revenue": "売上",
+          "netRevenue": "純売上",
+          "refund": "返金 {amount}",
+          "completed": "完了予約",
+          "previousCount": "{period}: {count}",
+          "averageTicket": "平均単価",
+          "cancellationRate": "キャンセル率",
+          "cancelBreakdown": "キャンセル {cancelled} · 無断 {noShow}"
+        },
+        "change": "{period}比 {percent}%",
+        "noComparison": "比較できる前期間のデータがありません",
+        "charts": {
+          "revenue": "売上",
+          "revenueHint": "薄い線は{period}",
+          "payments": "支払方法別",
+          "outcomes": "予約の結果",
+          "customers": "新規客とリピート客",
+          "services": "売上上位のメニュー",
+          "staff": "スタッフ別売上",
+          "branches": "店舗比較"
+        },
+        "series": {
+          "current": "今期間",
+          "previous": "前期間"
+        },
+        "outcomes": {
+          "completed": "完了",
+          "cancelled": "キャンセル",
+          "noShow": "無断キャンセル"
+        },
+        "customers": {
+          "new": "新規",
+          "returning": "リピート",
+          "split": "新規 {newShare}%、リピート {returningShare}%",
+          "newShare": "新規 {share}%",
+          "total": "来店客 {count} 名"
+        },
+        "actions": {
+          "title": "対応が必要",
+          "pendingConfirmations": "確認待ちの予約",
+          "unreadConversations": "未読メッセージ",
+          "pendingSalesReports": "承認待ちレポート",
+          "pendingLeaveRequests": "承認待ち休暇申請"
+        },
+        "export": {
+          "action": "Excel出力",
+          "preparing": "作成中…",
+          "download": "Excelをダウンロード",
+          "queued": "Excelファイルを作成しています。数秒で準備できます。",
+          "failed": "Excelを出力できません。"
+        },
+        "timesSold": "{count}回",
+        "completedCount": "完了 {count} 件",
+        "noRevenue": "この期間の売上はまだありません。",
+        "noAppointments": "この期間に終了した予約はまだありません。",
+        "noPayments": "この期間の支払いはまだありません。",
+        "noCustomers": "この期間の来店客はまだいません。",
+        "noServices": "完了したメニューはまだありません。",
+        "noStaff": "予約を完了したスタッフはまだいません。",
+        "basisNote": "売上は施術日（店舗の現地時間）で集計し、完了した予約のみを含みます。レポート画面は予約作成日で集計するため、若干異なる場合があります。"
       },
       "revenue": {
         "netToday": "店舗の実収入",

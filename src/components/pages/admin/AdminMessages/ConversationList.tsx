@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { useTranslations } from "next-intl";
 import { Avatar, Button, Tabs } from "@heroui/react";
-import { BookmarkIcon, BookmarkSlashIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import type { Conversation, ConversationStatus } from "./data";
@@ -140,15 +140,20 @@ export function ConversationList({
                     size="sm"
                     variant="ghost"
                     aria-label={conversation.pinned ? t("unpin") : t("pin")}
+                    aria-pressed={conversation.pinned}
                     isDisabled={pinPendingId === conversation.id}
                     onPress={() => onTogglePin?.(conversation)}
+                    // A pinned row keeps its toggle visible, filled in the accent colour, so the
+                    // state reads at a glance; an unpinned row only offers it on hover or focus.
                     className={`absolute right-1.5 top-1/2 -translate-y-1/2 bg-admin-surface ${
-                      isSelected
+                      conversation.pinned ? "text-admin-accent " : ""
+                    }${
+                      isSelected || conversation.pinned
                         ? "opacity-100"
                         : "opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto group-hover:opacity-100 group-hover:pointer-events-auto"
                     }`}
                   >
-                    {conversation.pinned ? <BookmarkSlashIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
+                    {conversation.pinned ? <BookmarkSolidIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
                   </Button>
                 ) : null}
               </li>

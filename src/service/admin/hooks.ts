@@ -12,6 +12,8 @@ import type {
   AdminCustomerNailHistoryEntry,
   AdminCustomerNote,
   AdminDashboardData,
+  AdminBranchOverview,
+  AdminOverviewPeriod,
   AdminServiceCategory,
   AdminServiceItem,
   AdminServiceAddonConfiguration,
@@ -54,6 +56,14 @@ export function useAdminDashboard(branchId: string | null, localDate?: string) {
   return useApiOperation<AdminDashboardData>(
     branchId ? "GET /api/v1/admin/branches/{branchId}/dashboard" : null,
     { path: branchId ? { branchId } : undefined, query: { localDate } },
+  );
+}
+
+/** The owner dashboard for one branch: a week / month / year around `date` vs the one before. */
+export function useAdminBranchOverview(branchId: string | null, period: AdminOverviewPeriod, date?: string) {
+  return useApiOperation<AdminBranchOverview>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/overview" : null,
+    { path: branchId ? { branchId } : undefined, query: { period, date } },
   );
 }
 
