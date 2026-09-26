@@ -224,7 +224,17 @@ export function ServiceEditModal({
                   className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
+                  placeholder={t("create.namePlaceholder")}
                   autoFocus
+                />
+              </label>
+              {/* Same field order as ServiceCreateModal, so both dialogs line up row for row. */}
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("form.nameJa")}</span>
+                <input
+                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                  value={nameJa}
+                  onChange={(event) => setNameJa(event.target.value)}
                 />
               </label>
               {serviceType === "ADD_ON" ? <label className="flex flex-col gap-2 text-sm sm:col-span-2"><span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span><input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} /></label> : null}
@@ -242,7 +252,13 @@ export function ServiceEditModal({
                     </option>
                   ))}
                 </select>
-                {categories.isLoading ? <span className="text-xs text-admin-muted">{t("form.categoriesLoading")}</span> : null}
+                {categories.isLoading ? (
+                  <span className="text-xs text-admin-muted">{t("form.categoriesLoading")}</span>
+                ) : categoryItems.length === 0 ? (
+                  <span role="alert" className="text-xs text-admin-danger">
+                    {t("form.categoriesEmpty")}
+                  </span>
+                ) : null}
               </label> : null}
               <div className="contents">
                 <label className="flex flex-col gap-2 text-sm">
@@ -252,6 +268,7 @@ export function ServiceEditModal({
                     className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
                     value={price}
                     onChange={(event) => setPrice(event.target.value)}
+                    placeholder="6600"
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm">
@@ -279,14 +296,6 @@ export function ServiceEditModal({
                   <span className="text-xs text-admin-muted">{t("form.warrantyHint")}</span>
                 </label>
               </div>
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("form.nameJa")}</span>
-                <input
-                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                  value={nameJa}
-                  onChange={(event) => setNameJa(event.target.value)}
-                />
-              </label>
               <label className="flex flex-col gap-2 text-sm sm:col-span-2">
                 <span className="font-semibold text-admin-ink">{t("form.description")}</span>
                 <textarea
