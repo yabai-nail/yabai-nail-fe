@@ -32,8 +32,9 @@ export function AdminAuditLogsComponent() {
   const t = useTranslations("admin.auditLogs");
   const [query, setQuery] = useState("");
   const [action, setAction] = useState("all");
+  // Search the joined display names/translated labels locally. This hook already
+  // loads every cursor page; API q only matches raw codes/ids and drops these rows.
   const { data, isLoading, error } = useAdminAuditLogs({
-    q: query.trim() || undefined,
     action: action === "all" ? undefined : action,
   });
   // Parallel joins: the log rows only carry ids, so the account and branch
