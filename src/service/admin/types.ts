@@ -73,6 +73,7 @@ export interface AdminAppointment {
   readonly checkoutNote?: string;
   readonly expectedPaymentMethod?: "CASH" | "PAYPAY" | "VISA" | null;
   readonly services?: ReadonlyArray<AdminAppointmentServiceSnapshot>;
+  readonly photos?: ReadonlyArray<{ readonly mediaId: string; readonly kind: "BEFORE" | "AFTER" | "OTHER"; readonly note: string; readonly url: string }>;
   readonly note?: string;
   readonly version: number;
 }

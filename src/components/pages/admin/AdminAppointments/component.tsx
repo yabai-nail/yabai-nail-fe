@@ -298,6 +298,7 @@ export function AdminAppointmentsComponent({
     return status === "all" ? inRange : inRange.filter((appointment) => appointment.status === status);
   }, [appointments, status, viewRange]);
   const selectedAppointment = resolveVisibleSelection(visibleCalendarAppointments, selectedId);
+  const selectedPhotoDetail = useAdminAppointment(branchId, selectedAppointment?.id ?? null);
   const summary = useMemo(
     () => getAppointmentSummary(filterAppointments(appointments, { date: selectedDate, status: "all" })),
     [appointments, selectedDate],
@@ -447,6 +448,7 @@ export function AdminAppointmentsComponent({
       await adminService.attachAppointmentPhoto(branchId, selectedAppointment.id, input);
       notifySuccess(tc("photoAttached"));
       setIsPhotoOpen(false);
+      void selectedPhotoDetail.mutate();
       void mutateAppointments();
     } catch (thrown) {
       setPhotoError(
@@ -519,6 +521,7 @@ export function AdminAppointmentsComponent({
         <aside className="lg:col-span-2 xl:col-span-1" aria-label={t("regionDetail")}>
           {selectedAppointment ? (
             <AppointmentDetailPanel
+              photos={selectedPhotoDetail.data?.id === selectedAppointment.id ? selectedPhotoDetail.data.photos : undefined}
               appointment={selectedAppointment}
               lifecycleActions={
                 selectedAppointment.serverStatus

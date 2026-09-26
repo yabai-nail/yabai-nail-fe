@@ -19,6 +19,7 @@ import {
 import { Avatar, Button, Card, Chip } from "@heroui/react";
 import { formatNumber, formatMoney } from "@/lib/admin-format";
 import type { Appointment, AppointmentLifecycleAction } from "./data";
+import type { AdminAppointment } from "@/service/admin/types";
 import {
   appointmentStatusColor,
   appointmentStatusLabel,
@@ -42,6 +43,7 @@ const LIFECYCLE_ICON: Record<AppointmentLifecycleAction, typeof CheckCircleIcon>
 
 export function AppointmentDetailPanel({
   appointment,
+  photos,
   lifecycleActions = [],
   lifecyclePending = null,
   lifecycleError = null,
@@ -55,6 +57,7 @@ export function AppointmentDetailPanel({
   onAttachPhoto,
 }: Readonly<{
   appointment: Appointment;
+  photos?: AdminAppointment["photos"];
   /** BE lifecycle transitions enabled for the current serverStatus. */
   lifecycleActions?: ReadonlyArray<AppointmentLifecycleAction>;
   /** Which transition is currently mid-request (disables the whole bar). */
@@ -232,6 +235,16 @@ export function AppointmentDetailPanel({
           <ChatBubbleLeftRightIcon className="size-4" />{t("detail.message")}
         </Button> : null}
       </Card.Footer>
+      {photos?.length ? <section aria-label={t("photo.title")} className="grid grid-cols-2 gap-3 border-t border-admin-border p-4">
+        {photos.map(photo => <figure key={`${photo.mediaId}:${photo.kind}`}>
+          <a href={photo.url} target="_blank" rel="noreferrer">
+            {/* Private signed URLs need no image optimizer or public media promotion. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.url} alt={t(photo.kind === "BEFORE" ? "photo.before" : photo.kind === "AFTER" ? "photo.after" : "photo.other")} className="h-28 w-full rounded-lg object-cover" />
+          </a>
+          <figcaption className="mt-1 break-words text-xs text-admin-muted">{photo.note}</figcaption>
+        </figure>)}
+      </section> : null}
     </Card>
   );
 }
