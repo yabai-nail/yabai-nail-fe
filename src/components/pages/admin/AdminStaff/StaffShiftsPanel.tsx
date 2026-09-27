@@ -6,6 +6,8 @@ import { Button, Chip, Modal } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { todayAtSalon } from "@/lib/salon-date";
 import { notifySuccess } from "@/lib/app-toast";
+import { AdminDateField } from "@/components/blocks/admin/AdminDateField";
+import { AdminTimeField } from "@/components/blocks/admin/AdminTimeField";
 import {
   adminService,
   useAdminPermission,
@@ -13,6 +15,15 @@ import {
   useAdminStaffShifts,
   type AdminStaffShift,
 } from "@/service";
+import {
+  createShiftsInOrder,
+  expandShiftDates,
+  MAX_SHIFT_DAYS,
+  monthRange,
+  nextMonthRange,
+  weekRange,
+} from "./shift-dates";
+import { ShiftDayCalendar } from "./ShiftDayCalendar";
 
 /**
  * Splits a stored `YYYY-MM-DD` into the two things a roster is read by: the weekday and the
@@ -52,6 +63,10 @@ export function StaffShiftsPanel({
   const staffShifts = useMemo(
     () => ((shifts.data?.items ?? []) as AdminStaffShift[]).filter((shift) => shift.staffId === staffId),
     [shifts.data, staffId],
+  );
+  const takenDates = useMemo(
+    () => new Set(staffShifts.filter((shift) => shift.type !== "LEAVE" && shift.approvalStatus === "APPROVED").map((shift) => shift.localDate)),
+    [staffShifts],
   );
 
   const [openMode, setOpenMode] = useState<"shift" | "leave" | null>(null);
@@ -180,6 +195,7 @@ export function StaffShiftsPanel({
           branchId={branchId}
           staffId={staffId}
           mode={openMode}
+          takenDates={takenDates}
           onClose={() => setOpenMode(null)}
           onSaved={() => { void shifts.mutate(); void leaveRequests.mutate(); }}
         />
@@ -192,12 +208,14 @@ function ShiftOrLeaveDialog({
   branchId,
   staffId,
   mode,
+  takenDates,
   onClose,
   onSaved,
 }: Readonly<{
   branchId: string;
   staffId: string;
   mode: "shift" | "leave";
+  takenDates: ReadonlySet<string>;
   onClose: () => void;
   onSaved: () => void;
 }>) {
@@ -205,25 +223,45 @@ function ShiftOrLeaveDialog({
   const tc = useTranslations("admin.common");
   const today = todayAtSalon();
   const [date, setDate] = useState(today);
+  const [selectedDays, setSelectedDays] = useState<Set<string>>(() => new Set());
+  const [visibleMonth, setVisibleMonth] = useState(() => ({
+    year: Number(today.slice(0, 4)),
+    month: Number(today.slice(5, 7)) - 1,
+  }));
   const [start, setStart] = useState("09:00");
   const [end, setEnd] = useState("17:00");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  const shiftDates = [...selectedDays].sort();
+  const tooManyDays = shiftDates.length > MAX_SHIFT_DAYS;
   // Quarter-hour and ordering are backend rules; check them here so the admin
   // is told before submitting rather than after a 422.
-  const timesValid =
-    mode === "leave" || (isQuarterHour(start) && isQuarterHour(end) && end > start);
+  const timesValid = isQuarterHour(start) && isQuarterHour(end) && end > start;
   const canSubmit =
     !busy &&
-    Boolean(date && start && end) &&
-    timesValid &&
-    (mode === "shift" || reason.trim().length > 0);
+    (mode === "shift"
+      ? timesValid && shiftDates.length > 0 && !tooManyDays
+      : Boolean(date) && reason.trim().length > 0);
+
+  const quickRanges = [
+    { key: "quickWeek", range: weekRange(today) },
+    { key: "quickMonth", range: monthRange(today) },
+    { key: "quickNextMonth", range: nextMonthRange(today) },
+  ] as const;
+
+  function pickRange(range: { from: string; to: string }) {
+    const every = [0, 1, 2, 3, 4, 5, 6];
+    setSelectedDays(new Set(expandShiftDates(range.from, range.to, every).filter((day) => !takenDates.has(day))));
+    setVisibleMonth({ year: Number(range.from.slice(0, 4)), month: Number(range.from.slice(5, 7)) - 1 });
+  }
 
   async function submit() {
     if (!canSubmit) return;
     setBusy(true);
+    setProgress(0);
     setError(null);
     try {
       if (mode === "shift") {
@@ -232,13 +270,31 @@ function ShiftOrLeaveDialog({
         // itself. Sending startsAt/endsAt left localDate and the two times
         // empty, so every save came back "Ngay, khoang ca hoac nhan vien
         // khong hop le."
-        await adminService.createStaffShift(branchId, {
-          staffId,
-          localDate: date,
-          startLocalTime: start,
-          endLocalTime: end,
-          type: "WORK",
+        const result = await createShiftsInOrder(shiftDates, async (localDate) => {
+          await adminService.createStaffShift(branchId, {
+            staffId,
+            localDate,
+            startLocalTime: start,
+            endLocalTime: end,
+            type: "WORK",
+          });
+          setProgress((done) => done + 1);
         });
+        if (result.created.length) onSaved();
+        if (result.error) {
+          const message = result.error instanceof Error ? result.error.message : t("shifts.saveFailed");
+          setError(result.created.length ? t("shifts.batchStopped", { created: result.created.length, message }) : message);
+          return;
+        }
+        if (!result.created.length) {
+          setError(t("shifts.allSkipped"));
+          return;
+        }
+        notifySuccess(
+          result.skipped.length
+            ? tc("shiftsCreatedSkipped", { created: result.created.length, skipped: result.skipped.length })
+            : tc("shiftsCreated", { created: result.created.length }),
+        );
       } else {
         // Leave is whole days: from/to, plus a reason the backend requires.
         await adminService.createLeaveRequest(branchId, {
@@ -247,9 +303,9 @@ function ShiftOrLeaveDialog({
           to: date,
           reason: reason.trim(),
         });
+        notifySuccess(tc("leaveRequested"));
+        onSaved();
       }
-      notifySuccess(mode === "shift" ? tc("shiftCreated") : tc("leaveRequested"));
-      onSaved();
       onClose();
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : t("shifts.saveFailed"));
@@ -268,63 +324,94 @@ function ShiftOrLeaveDialog({
                 {mode === "shift" ? t("shifts.addShift") : t("shifts.requestLeave")}
               </Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="grid gap-3 px-5 py-4 text-sm">
-              <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-admin-ink">{t("shifts.date")}</span>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                  className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.start")}</span>
-                  <input
-                    type="time"
-                    value={start}
-                    onChange={(event) => setStart(event.target.value)}
-                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                  />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.end")}</span>
-                  <input
-                    type="time"
-                    value={end}
-                    onChange={(event) => setEnd(event.target.value)}
-                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                  />
-                </label>
-              </div>
-              {mode === "shift" && !timesValid ? (
-                <p className="text-xs text-admin-muted">
-                  {t("shifts.timeValidation")}
-                </p>
-              ) : null}
-              {mode === "leave" ? (
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-admin-ink">{t("shifts.reason")}</span>
-                  <input
-                    value={reason}
-                    onChange={(event) => setReason(event.target.value)}
-                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                  />
-                </label>
-              ) : null}
+            <Modal.Body className="grid gap-5 px-5 py-4 text-sm">
+              {mode === "shift" ? (
+                <>
+                  <section className="grid gap-2">
+                    <h4 className="text-sm font-bold text-admin-ink">{t("shifts.hours")}</h4>
+                    <div className="flex items-center gap-2">
+                      <AdminTimeField ariaLabel={t("shifts.start")} value={start} onChange={setStart} />
+                      <span aria-hidden="true" className="text-admin-muted">→</span>
+                      <AdminTimeField ariaLabel={t("shifts.end")} value={end} onChange={setEnd} />
+                    </div>
+                    {timesValid ? null : (
+                      <p className="text-xs text-admin-danger">{t("shifts.timeValidation")}</p>
+                    )}
+                  </section>
+                  <section className="grid gap-2">
+                    <div>
+                      <h4 className="text-sm font-bold text-admin-ink">{t("shifts.pickDays")}</h4>
+                      <p className="text-xs text-admin-muted">{t("shifts.pickDaysHint")}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {quickRanges.map(({ key, range }) => (
+                        <Button key={key} size="sm" variant="outline" className="rounded-full" onPress={() => pickRange(range)}>
+                          {t(`shifts.${key}`)}
+                        </Button>
+                      ))}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-full"
+                        isDisabled={selectedDays.size === 0}
+                        onPress={() => setSelectedDays(new Set())}
+                      >
+                        {t("shifts.clearDays")}
+                      </Button>
+                    </div>
+                    <ShiftDayCalendar
+                      month={visibleMonth}
+                      onMonthChange={setVisibleMonth}
+                      selected={selectedDays}
+                      onSelectedChange={setSelectedDays}
+                      today={today}
+                      takenDates={takenDates}
+                    />
+                  </section>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-admin-ink">{t("shifts.date")}</span>
+                    <AdminDateField ariaLabel={t("shifts.date")} value={date} onChange={setDate} />
+                  </div>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-admin-ink">{t("shifts.reason")}</span>
+                    <input
+                      value={reason}
+                      onChange={(event) => setReason(event.target.value)}
+                      className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
+                    />
+                  </label>
+                </>
+              )}
               {error ? <p role="alert" className="text-xs text-admin-danger">{error}</p> : null}
             </Modal.Body>
-            <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-              <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("shifts.cancel")}</Button>
-              <Button
-                variant="primary"
-                className="rounded-lg"
-                onPress={() => void submit()}
-                isDisabled={!canSubmit}
-              >
-                {busy ? t("shifts.saving") : t("shifts.save")}
-              </Button>
+            <Modal.Footer className="flex items-center justify-between gap-2 border-t border-admin-border px-5 py-3">
+              <p aria-live="polite" className={`text-xs font-semibold ${tooManyDays ? "text-admin-danger" : "text-admin-muted"}`}>
+                {mode === "shift"
+                  ? tooManyDays
+                    ? t("shifts.tooManyDays", { max: MAX_SHIFT_DAYS })
+                    : t("shifts.selectedCount", { count: shiftDates.length })
+                  : null}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="ghost" className="rounded-lg" onPress={onClose} isDisabled={busy}>{t("shifts.cancel")}</Button>
+                <Button
+                  variant="primary"
+                  className="rounded-lg"
+                  onPress={() => void submit()}
+                  isDisabled={!canSubmit}
+                >
+                  {busy
+                    ? mode === "shift" && shiftDates.length > 1
+                      ? t("shifts.savingProgress", { done: progress, total: shiftDates.length })
+                      : t("shifts.saving")
+                    : mode === "shift" && shiftDates.length > 0
+                      ? t("shifts.saveCount", { count: shiftDates.length })
+                      : t("shifts.save")}
+                </Button>
+              </div>
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>
