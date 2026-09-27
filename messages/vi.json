@@ -1427,7 +1427,12 @@
           "preparing": "Đang tạo file…",
           "download": "Tải file Excel",
           "queued": "Đang tạo file Excel, sẽ sẵn sàng sau vài giây.",
-          "failed": "Không xuất được file Excel."
+          "failed": "Không xuất được file Excel.",
+          "slow": "Lâu hơn bình thường, máy chủ có thể đang thử lại. Bạn có thể để trang mở hoặc quay lại sau.",
+          "stopWaiting": "Huỷ chờ",
+          "failedScope": "Bạn không có quyền xuất báo cáo của chi nhánh này.",
+          "failedFilter": "Khoảng thời gian xuất không hợp lệ.",
+          "failedStorage": "Kho lưu trữ file đang lỗi, hãy thử lại sau ít phút."
         },
         "timesSold": "{count} lần",
         "completedCount": "{count} lịch hoàn tất",

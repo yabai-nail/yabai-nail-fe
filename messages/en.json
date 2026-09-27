@@ -1424,7 +1424,12 @@
           "preparing": "Preparing file…",
           "download": "Download Excel",
           "queued": "Preparing the Excel file; it will be ready in a few seconds.",
-          "failed": "Could not export the Excel file."
+          "failed": "Could not export the Excel file.",
+          "slow": "Taking longer than usual; the server may be retrying. Keep this page open or come back later.",
+          "stopWaiting": "Stop waiting",
+          "failedScope": "You don't have access to export this branch's report.",
+          "failedFilter": "The export period is not valid.",
+          "failedStorage": "File storage is having trouble; try again in a few minutes."
         },
         "timesSold": "{count} times",
         "completedCount": "{count} completed",

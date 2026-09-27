@@ -55,6 +55,19 @@ describe("overview section wiring", () => {
     expect(section).toMatch(/aria-pressed=\{period === value\}/);
   });
 
+  it("re-arms the mounted guard on every mount so StrictMode's remount does not swallow the export", () => {
+    // React dev mounts, unmounts and remounts: a guard only ever cleared left the queued
+    // export ignored — no polling, no toast, and the button stuck disabled after the 202.
+    const section = read("overview", "OverviewSection.tsx");
+    expect(section).toMatch(/useEffect\(\(\) => \{\s*mounted\.current = true;\s*return \(\) => \{\s*mounted\.current = false;\s*\};\s*\}, \[\]\);/);
+  });
+
+  it("downloads the file by itself once it is READY, once per export", () => {
+    const section = read("overview", "OverviewSection.tsx");
+    expect(section).toContain('if (state !== "READY" || !info || autoDownloaded.current === info.exportId) return;');
+    expect(section).toMatch(/autoDownloaded\.current = info\.exportId;\s*void download\(info\.exportId\);/);
+  });
+
   it("keeps the quick revenue range owner-only so managers are not sent to a 403", () => {
     expect(read("RevenuePanel.tsx")).toMatch(/canReadRangeReport \? allPresets : \["today"\]/);
   });

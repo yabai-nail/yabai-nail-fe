@@ -11,10 +11,10 @@ import {
   ClockIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import { Button } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 
 import { notifySuccess } from "@/lib/app-toast";
 import { formatMoney } from "@/lib/admin-format";
@@ -30,6 +30,7 @@ import {
 } from "@/service";
 import { ChartCard, CustomerMix, OutcomesChart, PaymentMethodsChart, RankedBars, RevenueCompareChart } from "./OverviewCharts";
 import { formatPeriodLabel, isCurrentOrFutureWindow, shiftOverviewAnchor } from "./overview-period";
+import { exportFailureKey, formatElapsed, isExportSlow } from "./export-state";
 
 const PERIODS: ReadonlyArray<AdminOverviewPeriod> = ["WEEK", "MONTH", "YEAR"];
 
@@ -223,17 +224,48 @@ function OverviewExport({ branchId, period, date }: Readonly<{ branchId: string;
   const [info, setInfo] = useState<AdminReportExport | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(0);
   const status = useAdminReportExport(info?.exportId ?? null);
   const mounted = useRef(true);
-  useEffect(() => () => { mounted.current = false; }, []);
+  // Set on every mount, not just initialised: React dev remounts once, and a guard that was
+  // only ever cleared then ignored the queued export (no polling, button stuck disabled).
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   // The worker builds the file in the background: ask again every 2 s until it is READY or FAILED.
   const state = status.data?.status;
+  const waiting = info !== null && state !== "READY" && state !== "FAILED";
   const { mutate: refreshStatus } = status;
   useEffect(() => {
-    if (!info || state === "READY" || state === "FAILED") return;
+    if (!waiting) return;
     const timer = window.setInterval(() => void refreshStatus(), 2_000);
     return () => window.clearInterval(timer);
-  }, [info, state, refreshStatus]);
+  }, [waiting, refreshStatus]);
+  // There is no percentage to show, so count the seconds instead of leaving a silent button.
+  useEffect(() => {
+    if (!waiting) return;
+    const timer = window.setInterval(() => setElapsed((seconds) => seconds + 1), 1_000);
+    return () => window.clearInterval(timer);
+  }, [waiting]);
+
+  const download = useCallback(async (exportId: string) => {
+    try {
+      const result = await adminService.reportExportDownloadUrl(exportId);
+      window.location.assign(result.signedUrl);
+    } catch (thrown) {
+      if (mounted.current) setFailed(thrown instanceof Error && thrown.message ? thrown.message : t("export.failed"));
+    }
+  }, [t]);
+  // Hand the file over as soon as it is built, once per export; the button stays for a re-download.
+  const autoDownloaded = useRef<string | null>(null);
+  useEffect(() => {
+    if (state !== "READY" || !info || autoDownloaded.current === info.exportId) return;
+    autoDownloaded.current = info.exportId;
+    void download(info.exportId);
+  }, [state, info, download]);
   if (!canExport) return null;
 
   const queue = async () => {
@@ -243,6 +275,7 @@ function OverviewExport({ branchId, period, date }: Readonly<{ branchId: string;
       const created = await adminService.createReportExport({ reportType: "BRANCH_OVERVIEW", format: "XLSX", locale: locale === "ja" ? "ja" : "vi", filters: { branchId, period, date } });
       if (!mounted.current) return;
       notifySuccess(t("export.queued"));
+      setElapsed(0);
       setInfo(created);
     } catch (thrown) {
       if (mounted.current) setFailed(thrown instanceof Error && thrown.message ? thrown.message : t("export.failed"));
@@ -251,26 +284,30 @@ function OverviewExport({ branchId, period, date }: Readonly<{ branchId: string;
     }
   };
 
-  const download = async () => {
-    if (!info) return;
-    try {
-      const result = await adminService.reportExportDownloadUrl(info.exportId);
-      window.location.assign(result.signedUrl);
-    } catch (thrown) {
-      if (mounted.current) setFailed(thrown instanceof Error && thrown.message ? thrown.message : t("export.failed"));
-    }
-  };
-
   return (
-    <div className="flex items-center gap-2">
-      {failed || state === "FAILED" ? <span role="alert" className="text-xs text-admin-danger">{failed ?? t("export.failed")}</span> : null}
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      {failed || state === "FAILED" ? (
+        <span role="alert" className="text-xs text-admin-danger">{failed ?? t(`export.${exportFailureKey(status.data?.errorCode)}`)}</span>
+      ) : null}
+      {waiting && isExportSlow(elapsed) ? (
+        <>
+          <span className="max-w-64 text-xs text-admin-muted">{t("export.slow")}</span>
+          <Button size="sm" variant="ghost" className="rounded-lg" onPress={() => setInfo(null)}>{t("export.stopWaiting")}</Button>
+        </>
+      ) : null}
       {state === "READY" ? (
-        <Button size="sm" variant="primary" className="rounded-lg" onPress={() => void download()}>
+        <Button size="sm" variant="primary" className="rounded-lg" onPress={() => { if (info) void download(info.exportId); }}>
           <ArrowDownTrayIcon className="size-4" />{t("export.download")}
         </Button>
+      ) : waiting ? (
+        <span role="status" className="inline-flex h-8 items-center gap-2 rounded-lg border border-admin-border px-3 text-sm text-admin-ink">
+          <Spinner size="sm" color="current" />
+          {t("export.preparing")}
+          <span className="tabular-nums text-admin-muted">{formatElapsed(elapsed)}</span>
+        </span>
       ) : (
-        <Button size="sm" variant="outline" className="rounded-lg" isDisabled={busy || (info !== null && state !== "FAILED")} onPress={() => void queue()}>
-          <ArrowDownTrayIcon className="size-4" />{info && state !== "FAILED" ? t("export.preparing") : t("export.action")}
+        <Button size="sm" variant="outline" className="rounded-lg" isDisabled={busy} onPress={() => void queue()}>
+          <ArrowDownTrayIcon className="size-4" />{t("export.action")}
         </Button>
       )}
     </div>

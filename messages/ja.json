@@ -1423,7 +1423,12 @@
           "preparing": "作成中…",
           "download": "Excelをダウンロード",
           "queued": "Excelファイルを作成しています。数秒で準備できます。",
-          "failed": "Excelを出力できません。"
+          "failed": "Excelを出力できません。",
+          "slow": "通常より時間がかかっています。サーバーが再試行中の可能性があります。このままお待ちいただくか、後でもう一度お試しください。",
+          "stopWaiting": "待機をやめる",
+          "failedScope": "この店舗のレポートを出力する権限がありません。",
+          "failedFilter": "出力期間が正しくありません。",
+          "failedStorage": "ファイル保存先で問題が発生しています。数分後にもう一度お試しください。"
         },
         "timesSold": "{count}回",
         "completedCount": "完了 {count} 件",
