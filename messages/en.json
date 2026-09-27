@@ -5,7 +5,7 @@
       "appointmentCreated": "Appointment created", "appointmentUpdated": "Appointment updated", "staffAssigned": "Staff assigned", "actualServicesUpdated": "Actual services updated", "photoAttached": "Photo attached to appointment", "appointmentCancelled": "Appointment cancelled", "checkInDone": "Appointment checked in", "serviceStarted": "Service started", "serviceCompleted": "Service completed", "noShowDone": "Customer marked as no-show",
       "branchUpdated": "Branch updated", "branchCreated": "Branch added", "customerUpdated": "Customer updated", "customerCreated": "Customer added", "pointsUpdated": "Customer points updated", "couponIssued": "Coupon issued to customer", "noteCreated": "Note added", "noteUpdated": "Note updated",
       "promotionActivated": "Promotion activated", "promotionPaused": "Promotion paused", "campaignCreated": "Campaign created", "campaignStatus": "Status: {status}.", "campaignCancelled": "Campaign cancelled", "promotionIssued": "Promotion issued", "promotionIssuedBody": "Sent to {count} customers.", "promotionUpdated": "Promotion updated", "promotionCreated": "Promotion added",
-      "conversationArchived": "Conversation archived", "conversationUpdated": "Conversation status updated", "membershipFound": "Membership found for {name}.", "customersFound": "Found {count} customers.", "reportExportCreated": "Report export requested", "reviewResolved": "Review resolved", "reviewReopened": "Review reopened", "reviewReplySent": "Review reply sent", "surchargeUpdated": "Surcharge updated", "surchargeCreated": "Surcharge added", "settingsSaved": "Settings updated", "compensationSaved": "Salary and commission updated", "staffCreated": "Staff member added", "staffUpdated": "Staff member updated", "leaveApproved": "Leave request approved", "leaveRejected": "Leave request rejected", "shiftCreated": "Shift added", "leaveRequested": "Leave request submitted", "skillsSaved": "Staff skills updated"
+      "conversationArchived": "Conversation archived", "conversationUpdated": "Conversation status updated", "membershipFound": "Membership found for {name}.", "customersFound": "Found {count} customers.", "reportExportCreated": "Report export requested", "reviewResolved": "Review resolved", "reviewReopened": "Review reopened", "reviewReplySent": "Review reply sent", "surchargeUpdated": "Surcharge updated", "surchargeCreated": "Surcharge added", "settingsSaved": "Settings updated", "compensationSaved": "Salary and commission updated", "staffCreated": "Staff member added", "staffUpdated": "Staff member updated", "leaveApproved": "Leave request approved", "leaveRejected": "Leave request rejected", "shiftCreated": "Shift added", "shiftsCreated": "{created, plural, one {Added # shift} other {Added # shifts}}", "shiftsCreatedSkipped": "Added {created}, skipped {skipped} {skipped, plural, one {day} other {days}} that already had a shift", "leaveRequested": "Leave request submitted", "skillsSaved": "Staff skills updated"
     },
     "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
     "avatar": {"title":"Profile photo","requirements":"JPG, PNG or WebP · up to 5 MB","pick":"Choose a file","replace":"Replace photo","remove":"Remove photo","cancel":"Discard selection","undo":"Undo","removalPending":"The photo will be removed when you save.","alt":"{name}'s profile photo","zoomOpen":"Enlarge {name}'s photo","close":"Close","errors":{"unsupportedType":"Only JPG, PNG or WebP images are supported.","empty":"The image file is empty.","tooLarge":"The image must not exceed 5 MB."}},
@@ -2123,7 +2123,24 @@
         "cancel": "Cancel",
         "saving": "Saving…",
         "save": "Save",
-        "timeValidation": "Start and end must be on a 15-minute boundary (00, 15, 30, 45), and end must be after start."
+        "timeValidation": "Start and end must be on a 15-minute boundary (00, 15, 30, 45), and end must be after start.",
+        "hours": "Working hours",
+        "pickDays": "Pick work days",
+        "pickDaysHint": "Tap a day to add or remove it. Tap a weekday name to fill that column for the month.",
+        "pickColumn": "Select or clear this whole column",
+        "clearDays": "Clear",
+        "legendSelected": "Days to add",
+        "legendTaken": "Already has a shift",
+        "takenDay": "{date}, already has a shift",
+        "selectedCount": "{count, plural, one {# day selected} other {# days selected}}",
+        "saveCount": "{count, plural, one {Add # shift} other {Add # shifts}}",
+        "tooManyDays": "You can add at most {max} days at a time.",
+        "quickWeek": "This week",
+        "quickMonth": "This month",
+        "quickNextMonth": "Next month",
+        "savingProgress": "Saving {done}/{total}…",
+        "batchStopped": "Added {created} before an error: {message}",
+        "allSkipped": "Every chosen date already has an overlapping shift."
       }
     },
     "auditLogs": {
