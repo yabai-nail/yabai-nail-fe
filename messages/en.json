@@ -98,7 +98,7 @@
         "staffTitle": "Staff payout",
         "staffDetail": "Revenue × commission %",
         "salonTitle": "Salon's share",
-        "salonDetail": "Revenue − staff payout"
+        "salonDetail": "Revenue − refunds − staff payout"
       },
       "table": {
         "caption": "Staff and commission rates",

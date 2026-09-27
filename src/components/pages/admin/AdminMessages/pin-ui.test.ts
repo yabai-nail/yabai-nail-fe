@@ -22,6 +22,11 @@ describe("conversation pin UI", () => {
     expect(list).toMatch(/pointer-events-none/);
     expect(list).toMatch(/focus:pointer-events-auto/);
     expect(list).toMatch(/group-hover:pointer-events-auto/);
+    // A pinned row keeps a filled, pressed toggle visible so its state reads without hovering.
+    expect(list).toMatch(/aria-pressed=\{conversation\.pinned\}/);
+    expect(list).toMatch(/isSelected \|\| conversation\.pinned/);
+    expect(list).toMatch(/conversation\.pinned \? <BookmarkSolidIcon className="size-4" \/>/);
+    expect(list).not.toMatch(/BookmarkSlashIcon/);
     // Archived rows don't offer the pin toggle at all.
     expect(list).toMatch(/conversation\.status !== "archived"/);
   });

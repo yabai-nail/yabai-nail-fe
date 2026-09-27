@@ -98,7 +98,7 @@
         "staffTitle": "スタッフの受取額",
         "staffDetail": "売上 × 歩合率",
         "salonTitle": "店舗の取り分",
-        "salonDetail": "売上 − スタッフの受取額"
+        "salonDetail": "売上 − 返金 − スタッフの受取額"
       },
       "table": {
         "caption": "スタッフと歩合率の一覧",

@@ -6,11 +6,13 @@ import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { notifySuccess } from "@/lib/app-toast";
+import { SALON_TIME_ZONE } from "@/lib/salon-date";
 import {
   adminService,
   useAdminAppointmentPayments,
   useAdminAppointments,
   useAdminBranch,
+  useAdminBranchDetail,
   useAdminCustomers,
   useAdminPaymentRefund,
   useAdminPermission,
@@ -115,6 +117,8 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
   const tMethod = useTranslations("admin.paymentMethod");
   const tPayment = useTranslations("admin.payments");
   const appointments = useAdminAppointments(branchId);
+  const branch = useAdminBranchDetail(branchId);
+  const branchTimeZone = branch.data?.timezone ?? SALON_TIME_ZONE;
   const customers = useAdminCustomers(branchId);
   const [appointmentId, setAppointmentId] = useState("");
   const [paymentId, setPaymentId] = useState("");
@@ -149,6 +153,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
     currentPage * REFUND_PAGE_SIZE,
   );
   const selected = paidAppointments.find((appointment) => appointment.id === appointmentId);
+  const transactionTimeZone = selected?.branchTimeZone ?? branchTimeZone;
   const transactions = payments.data?.items ?? [];
   const selectedCapture = transactions.find((payment) => payment.id === paymentId && payment.kind !== "REFUND" && payment.status === "SUCCEEDED");
   const remaining = selectedCapture ? refundableBalance(selectedCapture, transactions) : 0;
@@ -213,7 +218,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                       </Button>
                     </td>
                     <td className="px-3 py-2 text-admin-muted">
-                      {format.dateTime(new Date(appointment.startsAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      {format.dateTime(new Date(appointment.startsAt), { timeZone: appointment.branchTimeZone ?? branchTimeZone, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </td>
                     <td className="px-3 py-2 text-right font-medium">{formatMoney(appointment.total)}</td>
                     <td className="px-3 py-2">
@@ -283,7 +288,7 @@ function RefundForm({ branchId }: Readonly<{ branchId: string }>) {
                     <td className="px-3 py-2">{methodLabel(payment.method)}</td>
                     <td className="px-3 py-2 text-admin-muted">{payment.kind === "REFUND" ? `${t("refund.heading")} · ` : ""}{paymentStatusLabel(payment.status)}</td>
                     <td className="px-3 py-2 text-admin-muted">
-                      {payment.paidAt ? format.dateTime(new Date(payment.paidAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : payment.createdAt ? format.dateTime(new Date(payment.createdAt), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
+                      {payment.paidAt ? format.dateTime(new Date(payment.paidAt), { timeZone: transactionTimeZone, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : payment.createdAt ? format.dateTime(new Date(payment.createdAt), { timeZone: transactionTimeZone, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
                     </td>
                   </tr>
                 ))}

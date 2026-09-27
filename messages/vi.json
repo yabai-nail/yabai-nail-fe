@@ -98,7 +98,7 @@
         "staffTitle": "Tiền nhân viên nhận",
         "staffDetail": "Doanh thu × % hoa hồng",
         "salonTitle": "Phần tiệm nhận",
-        "salonDetail": "Doanh thu − tiền nhân viên nhận"
+        "salonDetail": "Doanh thu − hoàn tiền − tiền nhân viên nhận"
       },
       "table": {
         "caption": "Danh sách nhân viên và tỷ lệ hoa hồng",

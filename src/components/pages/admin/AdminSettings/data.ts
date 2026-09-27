@@ -19,5 +19,6 @@ export type CommissionPolicy = {
   /** The rate for app-booked jobs, when the read model reports one. */
   readonly appRate: number | null;
   readonly personalRevenue: number | null;
+  readonly refundTotal: number | null;
   readonly payout: number | null;
 };

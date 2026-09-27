@@ -24,7 +24,9 @@ export function ActualServicesModal({
   const { data, isLoading, error: loadError } = useAdminServices();
   const services = data?.items ?? [];
   const [selected, setSelected] = useState<ReadonlySet<string>>(
-    () => new Set([appointment.service.id]),
+    () => new Set(appointment.services?.length
+      ? appointment.services.map((service) => service.id)
+      : [appointment.service.id, ...(appointment.addonIds ?? [])]),
   );
 
   function toggle(id: string) {
