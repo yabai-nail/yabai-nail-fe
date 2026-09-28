@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const harness = vi.hoisted(() => ({
   branchId: "hiro",
+  rows: [] as unknown[],
   states: [] as unknown[],
   nextState: 0,
   writes: [] as Array<{ slot: number; value: unknown }>,
@@ -35,7 +36,7 @@ vi.mock("@/service", () => ({
   adminService: { createReportExport: harness.create, reportExportDownloadUrl: harness.download },
   useAdminBranch: () => ({ branchId: harness.branchId }),
   useAdminPermission: () => true,
-  useAdminPayroll: () => ({ data: { rows: [] } }),
+  useAdminPayroll: () => ({ data: { rows: harness.rows } }),
   useAdminReportExport: () => ({ data: { status: "READY" }, mutate: vi.fn() }),
 }));
 
@@ -52,6 +53,12 @@ function action(node: ReactNode, label: string): (() => void) | undefined {
     if ((children === label || Array.isArray(children) && children.includes(label)) && element.props.onPress) return element.props.onPress;
     return action(children, label);
   }
+}
+
+function hasText(node: ReactNode, text: string): boolean {
+  if (Array.isArray(node)) return node.some((child) => hasText(child, text));
+  if (node && typeof node === "object" && "props" in node) return hasText((node as Element).props.children, text);
+  return node === text;
 }
 
 function boundary(period = "2026-09") {
@@ -76,11 +83,26 @@ function deferred<T>() {
 
 beforeEach(() => {
   harness.branchId = "hiro";
+  harness.rows = [];
   harness.states = [];
   harness.nextState = 0;
   harness.writes = [];
   harness.cleanups = [];
   vi.clearAllMocks();
+});
+
+it("shows paid date only for a PAID payroll row", () => {
+  const row = {
+    staffId: "staff", displayName: "Technician", active: true,
+    approvedCount: 4, grossTotal: 11700, feeTotal: 0, staffTotal: 1170,
+    salonTotal: 10530, baseSalary: 0, payable: 1170,
+    status: "UNLOCKED", periodId: "period", paidAt: "2026-09-26T00:00:00Z",
+    paidBy: "owner", unlockedAt: "2026-09-27T00:00:00Z", periodVersion: 1,
+  };
+  harness.rows = [row];
+  expect(hasText(sheet(), "paidOn")).toBe(false);
+  harness.rows = [{ ...row, status: "PAID" }];
+  expect(hasText(sheet(), "paidOn")).toBe(true);
 });
 
 describe("payroll export branch/month lifetime", () => {

@@ -44,7 +44,7 @@ export function AdminMyPayrollComponent() {
               <span className="text-xs font-semibold uppercase tracking-wide text-admin-muted">{t("heading", { period: formatPeriod(period) })}</span>
               <span className="text-3xl font-bold text-admin-accent">{formatMoney(row.payable)}</span>
               <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${row.status === "PAID" ? "bg-admin-soft text-admin-accent" : "bg-admin-soft text-admin-muted"}`}>
-                {t(`status.${row.status}`)}{row.paidAt ? ` · ${t("paidOn", { date: row.paidAt.slice(0, 10) })}` : ""}
+                {t(`status.${row.status}`)}{row.status === "PAID" && row.paidAt ? ` · ${t("paidOn", { date: row.paidAt.slice(0, 10) })}` : ""}
               </span>
             </Card.Header>
             <Card.Content className="grid grid-cols-2 gap-3 px-5 py-4 text-sm">

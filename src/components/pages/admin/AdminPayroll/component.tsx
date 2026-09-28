@@ -193,7 +193,7 @@ function PayrollSheet({ branchId, period, setPeriod }: {
                     <td className="px-3 py-3 text-right font-bold text-admin-ink">{formatMoney(row.payable)}</td>
                     <td className="px-3 py-3">
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(row.status)}`}>{t(`status.${row.status}`)}</span>
-                      {row.paidAt ? <div className="mt-1 text-xs text-admin-muted">{t("paidOn", { date: row.paidAt.slice(0, 10) })}</div> : null}
+                      {row.status === "PAID" && row.paidAt ? <div className="mt-1 text-xs text-admin-muted">{t("paidOn", { date: row.paidAt.slice(0, 10) })}</div> : null}
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1">
