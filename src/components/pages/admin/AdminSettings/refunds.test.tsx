@@ -10,8 +10,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/service", () => ({
   useAdminBranch: () => ({ branchId: "branch" }),
   useAdminPermission: () => true,
-  useAdminStaff: () => ({ data: { items: [{ id: "staff", displayName: "Fixture", active: true }] } }),
+  useAdminStaff: () => ({ data: { items: [{ id: "staff", displayName: "Fixture", active: true, branchId: "branch" }, { id: "other", displayName: "Other salon", active: true, branchId: "other-branch" }] } }),
   useAdminStaffPerformance: () => ({ data: { kpi: state, rows: [{ staff: { id: "staff" }, ...state }] } }),
+  useAdminBranchList: () => ({ data: { items: [{ id: "branch", name: "Tenjin" }] } }),
 }));
 vi.mock("@heroui/react", () => {
   const Box = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
@@ -28,6 +29,13 @@ vi.mock("./SettingsAside", () => ({ SettingsAside: () => null }));
 import { AdminSettingsComponent } from "./component";
 
 describe("settings salon remainder uses the same refund contract as staff performance", () => {
+  it("scopes the commission roster and label to the active branch", () => {
+    const html = renderToStaticMarkup(<NextIntlClientProvider locale="vi" messages={messages} timeZone="Asia/Tokyo"><AdminSettingsComponent /></NextIntlClientProvider>);
+    expect(html).toContain("Chi nhánh: Tenjin");
+    expect(html).toContain("Fixture");
+    expect(html).not.toContain("Other salon");
+  });
+
   it.each([
     [17700, 6000, 1170, 10530],
     [6000, 6000, 0, 0],

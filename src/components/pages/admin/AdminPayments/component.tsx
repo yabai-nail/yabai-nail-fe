@@ -15,10 +15,13 @@ import {
   useAdminBranchDetail,
   useAdminCustomers,
   useAdminServices,
+  useAdminServiceAddons,
   useAdminStaff,
   useAdminPermission,
   type AdminAppointment as ServerAppointment,
   type AdminCustomer,
+  type AdminAppointmentPayment,
+  type AdminServiceAddonConfiguration,
   type AdminServiceItem,
   type AdminStaffMember,
 } from "@/service";
@@ -26,9 +29,9 @@ import { CashTenderPanel } from "./CashTenderPanel";
 import { AmountReceivedPanel } from "./AmountReceivedPanel";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import type { Translator } from "@/i18n/config";
-import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
+import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod, type PaymentServiceSnapshot } from "./data";
 import { buildPaymentCaptureInput, calculateAmountReceivedState, calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
-import { InvoicePreviewModal } from "./InvoicePreviewModal";
+import { InvoicePreviewModal, type PaymentSettlementSummary } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
 import { PaymentReviewDialog } from "./PaymentReviewDialog";
@@ -45,6 +48,27 @@ function deriveInitials(name: string): string {
 function toPaymentMethod(method: string | null | undefined): PaymentMethod | null {
   const normalized = method?.toLowerCase();
   return normalized === "cash" || normalized === "paypay" || normalized === "visa" ? normalized : null;
+}
+
+export function buildPaymentSettlementSummary(
+  payments: ReadonlyArray<AdminAppointmentPayment>,
+): PaymentSettlementSummary {
+  const capture = payments.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
+  if (!capture) return { status: "unpaid", paymentId: null, paidAt: null, method: null, capturedAmount: 0, refundedAmount: 0, netAmount: 0, cashTendered: null, cashChange: null };
+  const refundedAmount = payments
+    .filter((payment) => payment.kind === "REFUND" && payment.status === "SUCCEEDED" && (!payment.parentPaymentId || payment.parentPaymentId === capture.id))
+    .reduce((total, payment) => total + payment.amount, 0);
+  return {
+    status: refundedAmount > 0 && refundedAmount >= capture.amount ? "refunded" : refundedAmount > 0 ? "partially_refunded" : "paid",
+    paymentId: capture.id,
+    paidAt: capture.paidAt ?? capture.createdAt ?? null,
+    method: capture.method,
+    capturedAmount: capture.amount,
+    refundedAmount,
+    netAmount: Math.max(0, capture.amount - refundedAmount),
+    cashTendered: capture.cashTendered ?? null,
+    cashChange: capture.cashChange ?? null,
+  };
 }
 
 /**
@@ -149,6 +173,43 @@ export function buildInvoiceFromServer(
   }, customer);
 }
 
+export function checkoutAddonOptions(
+  configuration: AdminServiceAddonConfiguration | undefined,
+  branchId: string | null | undefined,
+  selectedIds: ReadonlyArray<string>,
+): ReadonlyArray<PaymentServiceSnapshot> {
+  if (!configuration || !branchId) return [];
+  const selected = new Set(selectedIds);
+  return configuration.groups.flatMap((group) => {
+    const selectedItems = group.items.filter((item) => selected.has(item.addonServiceId));
+    if (selectedItems.length >= group.maxSelections) return [];
+    const selectedNone = selectedItems.some((item) => item.addon.representsNoSelection);
+    const selectedActual = selectedItems.some((item) => !item.addon.representsNoSelection);
+    return group.items.flatMap((item) => {
+      const branch = item.branches.find((candidate) => candidate.branchId === branchId);
+      if (selected.has(item.addonServiceId) || !item.addon.active || branch?.enabled === false) return [];
+      if (selectedNone && !item.addon.representsNoSelection || selectedActual && item.addon.representsNoSelection) return [];
+      return [{
+        id: item.addonServiceId,
+        name: item.addon.name,
+        price: item.addon.representsNoSelection ? 0 : branch?.priceOverride ?? item.addon.price,
+      }];
+    });
+  });
+}
+
+export function lockedCheckoutAddonIds(
+  configuration: AdminServiceAddonConfiguration | undefined,
+  selectedIds: ReadonlyArray<string>,
+): ReadonlySet<string> {
+  const selected = new Set(selectedIds);
+  return new Set(configuration?.groups.flatMap((group) => {
+    const selectedInGroup = group.items.filter((item) => selected.has(item.addonServiceId));
+    const minimum = group.required ? Math.max(1, group.minSelections) : group.minSelections;
+    return selectedInGroup.length <= minimum ? selectedInGroup.map((item) => item.addonServiceId) : [];
+  }) ?? []);
+}
+
 export function AdminPaymentsComponent() {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
@@ -178,8 +239,9 @@ export function AdminPaymentsComponent() {
   const branch = useAdminBranchDetail(appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
   const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
-  const { data: servicesData } = useAdminServices();
+  const { data: servicesData } = useAdminServices({ branchId: branchId ?? undefined, status: "ACTIVE", limit: 100 });
   const payments = useAdminAppointmentPayments(branchId, appointmentId);
+  const settlement = useMemo(() => buildPaymentSettlementSummary(payments.data?.items ?? []), [payments.data?.items]);
   const lookups = useMemo(() => ({
     customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
@@ -200,21 +262,22 @@ export function AdminPaymentsComponent() {
         (value, timeZone) => format.dateTime(value, { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }),
         branch.data?.timezone,
       );
-      const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
-      if (captured) {
+      if (settlement.status !== "unpaid") {
         return {
           ...invoice,
-          paymentMethod: toPaymentMethod(captured.method),
+          paymentMethod: toPaymentMethod(settlement.method),
           status: "paid",
-          paidAt: typeof captured.createdAt === "string" ? captured.createdAt : null,
+          paidAt: settlement.paidAt,
         };
       }
       return invoice;
     }
     return null;
-  }, [appointment, branch.data?.timezone, format, lookups, payments.data, t]);
+  }, [appointment, branch.data?.timezone, format, lookups, settlement, t]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
+  const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const addonConfiguration = useAdminServiceAddons(canEditServices ? invoice?.currentService.id ?? null : null);
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
     setOverride((current) => {
       const base = current ?? seededInvoice;
@@ -228,14 +291,21 @@ export function AdminPaymentsComponent() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [cashTendered, setCashTendered] = useState("");
   const [amountReceived, setAmountReceived] = useState("");
+  const [draftDiscount, setDraftDiscount] = useState<{ appointmentId: string; value: number } | null>(null);
   const [cashResult, setCashResult] = useState<{ tendered: number; change: number } | null>(null);
   const paymentIdempotencyKey = useRef<string | null>(null);
   const reviewIdempotencyKey = useRef<string | null>(null);
-  const totals = useMemo(() => (invoice ? calculatePaymentTotals(invoice) : null), [invoice]);
+  const totals = useMemo(() => {
+    if (!invoice) return null;
+    const manualDiscount = draftDiscount?.appointmentId === appointmentId ? draftDiscount.value : invoice.manualDiscount;
+    return calculatePaymentTotals({ ...invoice, discount: invoice.benefitDiscount + manualDiscount });
+  }, [appointmentId, draftDiscount, invoice]);
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
-  const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active).map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
-  const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active && service.serviceType !== "ADD_ON").map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
+  const selectedAddonIds = useMemo(() => invoice?.additionalItems.map((item) => item.id) ?? [], [invoice?.additionalItems]);
+  const additionalServices = useMemo(() => checkoutAddonOptions(addonConfiguration.data, branchId, selectedAddonIds), [addonConfiguration.data, branchId, selectedAddonIds]);
+  const lockedAdditionalItemIds = useMemo(() => addonConfiguration.data ? lockedCheckoutAddonIds(addonConfiguration.data, selectedAddonIds) : new Set(selectedAddonIds), [addonConfiguration.data, selectedAddonIds]);
   const canAdjust = canAdjustPayment && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
   const canCreatePayment = canRecordAssignedPayment && appointment?.status === "AWAITING_PAYMENT";
   const cashState = invoice?.paymentMethod === "cash" && totals
@@ -271,7 +341,7 @@ export function AdminPaymentsComponent() {
       const saved = await adminService.updateAppointmentCheckoutAdjustments(
         branchId,
         appointmentId,
-        { manualDiscount, discountReason, ...(checkoutNote ? { checkoutNote } : {}) },
+        { manualDiscount, discountReason, checkoutNote },
         appointment.version,
         crypto.randomUUID(),
       );
@@ -294,10 +364,22 @@ export function AdminPaymentsComponent() {
         checkoutNote: saved.checkoutNote,
         version: saved.version,
       }, { revalidate: false });
+      setDraftDiscount(null);
       return null;
     } catch (thrown) {
       return thrown instanceof Error ? thrown.message : t("error.adjustments");
     }
+  };
+  const prepareConfirmation = async (manualDiscount: number, discountReason: string, checkoutNote: string): Promise<string | null> => {
+    if (!invoice) return t("error.noAppointment");
+    const changed = manualDiscount !== invoice.manualDiscount || discountReason !== invoice.discountReason || checkoutNote !== invoice.orderNote;
+    if (changed) {
+      const error = await persistAdjustments(manualDiscount, discountReason, checkoutNote);
+      if (error) return error;
+    }
+    setCashResult(null);
+    setIsConfirmOpen(true);
+    return null;
   };
   const handleConfirm = (receivedAmount: number | null) => {
     if (!invoice || !totals) return;
@@ -456,13 +538,13 @@ export function AdminPaymentsComponent() {
           invoice={invoice}
           appointmentStatus={appointment.status}
         />
-        <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
+        <ServiceCheckoutPanel invoice={invoice} branchId={appointment.branchId} services={serviceCatalog} additionalServices={additionalServices} lockedAdditionalItemIds={lockedAdditionalItemIds} canEdit={canEditServices} onSave={persistServices}>
           <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}{invoice.paymentMethod && invoice.paymentMethod !== "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <AmountReceivedPanel amountDue={totals.grandTotal} value={amountReceived} disabled={!canCreatePayment} onChange={setAmountReceived} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
-        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
+        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={prepareConfirmation} onDraftDiscountChange={(value) => setDraftDiscount(value === null || !appointmentId ? null : { appointmentId, value })} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
       </div>
       {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} amountReceived={amountReceived} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
-      {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} branchId={appointment.branchId} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
+      {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} branchId={appointment.branchId} totals={totals} settlement={settlement} onClose={() => setIsPreviewOpen(false)} /> : null}
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>
   );

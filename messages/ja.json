@@ -2532,6 +2532,7 @@
         "subtitle": "お客様が実際に受けたメニューを選んでください。",
         "current": "選択中",
         "pick": "選ぶ",
+        "save": "メニューと追加メニューを適用",
         "close": "閉じる"
       },
       "lineItem": {
@@ -2578,6 +2579,14 @@
         "total": "合計",
         "method": "支払い方法: <strong>{method}</strong>",
         "methodNotChosen": "未選択",
+        "statusUnpaid": "未払い",
+        "statusPaid": "支払い済み",
+        "statusPartiallyRefunded": "一部返金",
+        "statusRefunded": "全額返金",
+        "refunded": "返金済み",
+        "netAmount": "実収入",
+        "transactionId": "取引ID",
+        "paidAt": "支払日時",
         "close": "閉じる",
         "print": "伝票を印刷"
       },
@@ -2611,6 +2620,7 @@
         "itemNotFoundEdit": "編集するメニューが見つかりません。",
         "itemNotFoundDelete": "削除するメニューが見つかりません。",
         "discountRange": "割引はメニュー合計以下、0 以上にしてください。",
+        "reduceDiscountBeforeServiceChange": "現在の割引が新しい合計金額を超えています。メニューを変更する前に割引額を減らしてください。",
         "methodRequired": "支払い方法を選択してください。",
         "paidAtInvalid": "確定日時が正しくありません。",
         "serviceRequired": "メニューを選択してください。",

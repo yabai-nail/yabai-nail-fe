@@ -2540,6 +2540,7 @@
         "subtitle": "Pick the service the customer actually received.",
         "current": "Selected",
         "pick": "Pick",
+        "save": "Apply service & add-ons",
         "close": "Close"
       },
       "lineItem": {
@@ -2586,6 +2587,14 @@
         "total": "Total",
         "method": "Method: <strong>{method}</strong>",
         "methodNotChosen": "Not chosen",
+        "statusUnpaid": "Unpaid",
+        "statusPaid": "Paid",
+        "statusPartiallyRefunded": "Partially refunded",
+        "statusRefunded": "Fully refunded",
+        "refunded": "Refunded",
+        "netAmount": "Net received",
+        "transactionId": "Transaction ID",
+        "paidAt": "Paid at",
         "close": "Close",
         "print": "Print the invoice"
       },
@@ -2619,6 +2628,7 @@
         "itemNotFoundEdit": "The service to edit could not be found.",
         "itemNotFoundDelete": "The service to delete could not be found.",
         "discountRange": "The discount must be between zero and the services total.",
+        "reduceDiscountBeforeServiceChange": "The current discount exceeds the new total. Reduce the discount before changing the service.",
         "methodRequired": "Pick a payment method.",
         "paidAtInvalid": "That confirmation time is not valid.",
         "serviceRequired": "Pick a service.",

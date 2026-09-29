@@ -2548,6 +2548,7 @@
         "subtitle": "Chọn dịch vụ thực tế khách đã sử dụng.",
         "current": "Đang chọn",
         "pick": "Chọn",
+        "save": "Áp dụng dịch vụ & add-on",
         "close": "Đóng"
       },
       "lineItem": {
@@ -2594,6 +2595,14 @@
         "total": "Tổng thanh toán",
         "method": "Phương thức: <strong>{method}</strong>",
         "methodNotChosen": "Chưa chọn",
+        "statusUnpaid": "Chưa thanh toán",
+        "statusPaid": "Đã thanh toán",
+        "statusPartiallyRefunded": "Hoàn một phần",
+        "statusRefunded": "Hoàn toàn bộ",
+        "refunded": "Đã hoàn",
+        "netAmount": "Thực thu",
+        "transactionId": "Mã giao dịch",
+        "paidAt": "Thời gian thanh toán",
         "close": "Đóng",
         "print": "In hóa đơn"
       },
@@ -2627,6 +2636,7 @@
         "itemNotFoundEdit": "Không tìm thấy dịch vụ cần sửa.",
         "itemNotFoundDelete": "Không tìm thấy dịch vụ cần xóa.",
         "discountRange": "Giảm giá phải từ 0 đến tổng tiền dịch vụ.",
+        "reduceDiscountBeforeServiceChange": "Giảm giá hiện tại vượt tổng tiền mới. Hãy giảm số tiền giảm giá trước khi đổi dịch vụ.",
         "methodRequired": "Vui lòng chọn phương thức thanh toán.",
         "paidAtInvalid": "Thời gian xác nhận không hợp lệ.",
         "serviceRequired": "Vui lòng chọn một dịch vụ.",

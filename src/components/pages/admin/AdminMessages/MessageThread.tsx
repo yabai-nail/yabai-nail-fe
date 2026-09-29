@@ -189,6 +189,7 @@ export function MessageThread({
     back through the history.
   */
   const scroller = useRef<HTMLOListElement>(null);
+  const composerInput = useRef<HTMLInputElement>(null);
   const newestMessageId = messages.at(-1)?.id;
   useEffect(() => {
     const el = scroller.current;
@@ -359,14 +360,16 @@ export function MessageThread({
                 className="sr-only"
                 disabled={!canWrite || sendPending || attachments.length >= CHAT_IMAGE_LIMIT}
                 onChange={(event) => {
-                  onAttachPhotos(Array.from(event.target.files ?? []));
+                  const files = Array.from(event.target.files ?? []);
+                  onAttachPhotos(files);
                   event.target.value = "";
+                  if (files.length > 0) composerInput.current?.focus();
                 }}
               />
             </label>
           ) : null}
           <InputGroup fullWidth>
-            <InputGroup.Input aria-label={t("composeLabel")} maxLength={2000} disabled={!canWrite} placeholder={t("composeTo", { name: customer.name })} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
+            <InputGroup.Input ref={composerInput} aria-label={t("composeLabel")} maxLength={2000} disabled={!canWrite} placeholder={t("composeTo", { name: customer.name })} value={draft} onChange={(event) => onDraftChange(event.target.value)} />
             <InputGroup.Suffix><Button type="submit" size="sm" variant="primary" isDisabled={!canWrite || (!draft.trim() && attachments.length === 0) || sendPending} className="rounded-lg"><PaperAirplaneIcon className="size-4" />{sendPending ? t("sending") : t("send")}</Button></InputGroup.Suffix>
           </InputGroup>
         </div>

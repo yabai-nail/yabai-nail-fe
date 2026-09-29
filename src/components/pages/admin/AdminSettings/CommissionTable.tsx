@@ -14,7 +14,8 @@ function formatOptionalMoney(value: number | null): string {
 
 export function CommissionTable({
   policies,
-}: Readonly<{ policies: ReadonlyArray<CommissionPolicy> }>) {
+  branchId,
+}: Readonly<{ policies: ReadonlyArray<CommissionPolicy>; branchId: string | null }>) {
   const t = useTranslations("admin.settings");
   const router = useRouter();
   return (
@@ -69,7 +70,7 @@ export function CommissionTable({
                 <td className="px-3 py-3">
                   {/* The compensation form lives on the staff screen; this used to be a button
                       with no handler at all. */}
-                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PencilSquareIcon className="size-4" />{t("table.edit")}</Button>
+                  <Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push(`/admin/staff?branchId=${encodeURIComponent(branchId ?? "")}&id=${encodeURIComponent(policy.staffId)}`)}><PencilSquareIcon className="size-4" />{t("table.edit")}</Button>
                 </td>
               </tr>
             );
