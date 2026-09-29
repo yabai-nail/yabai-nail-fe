@@ -22,9 +22,15 @@ export type AmountReceivedState = {
   readonly error: string | null;
 };
 
+export type PointRedemptionState = {
+  readonly pointsRequested: number | null;
+  readonly maximumPoints: number;
+  readonly error: string | null;
+};
+
 export type PaymentCaptureInput =
-  | { readonly method: "CASH"; readonly cashTendered?: number }
-  | { readonly method: "PAYPAY" | "VISA"; readonly amountReceived: number };
+  | { readonly method: "CASH"; readonly cashTendered?: number; readonly pointsRequested: number }
+  | { readonly method: "PAYPAY" | "VISA"; readonly amountReceived: number; readonly pointsRequested: number };
 
 /** Parses whole-yen counter input; the backend still recalculates the authoritative change. */
 export function calculateCashTenderState(amountDue: number, input: string): CashTenderState {
@@ -50,11 +56,43 @@ export function calculateAmountReceivedState(amountDue: number, input: string): 
   return { amountReceived, error: null };
 }
 
-export function buildPaymentCaptureInput(method: PaymentMethod, receivedAmount: number | null): PaymentCaptureInput {
+export function buildPaymentCaptureInput(method: PaymentMethod, receivedAmount: number | null, pointsRequested: number): PaymentCaptureInput {
   if (method === "cash") {
-    return receivedAmount === null ? { method: "CASH" } : { method: "CASH", cashTendered: receivedAmount };
+    return receivedAmount === null ? { method: "CASH", pointsRequested } : { method: "CASH", cashTendered: receivedAmount, pointsRequested };
   }
-  return { method: method === "paypay" ? "PAYPAY" : "VISA", amountReceived: receivedAmount ?? 0 };
+  return { method: method === "paypay" ? "PAYPAY" : "VISA", amountReceived: receivedAmount ?? 0, pointsRequested };
+}
+
+/** Mirrors the server's point policy so staff get feedback before opening confirmation. */
+export function calculatePointRedemptionState(
+  subtotal: number,
+  nonPointBenefitDiscount: number,
+  manualDiscount: number,
+  pointBalance: number,
+  input: string,
+): PointRedemptionState {
+  const remainingAmount = Math.max(0, subtotal - nonPointBenefitDiscount - manualDiscount);
+  const policyCap = Math.floor(subtotal * 0.5);
+  const maximumPoints = Math.floor(Math.max(0, Math.min(pointBalance, policyCap, remainingAmount)));
+  const normalized = input.trim();
+  if (!normalized) return { pointsRequested: null, maximumPoints, error: "state.pointsRequired" };
+  if (!/^\d+$/.test(normalized)) return { pointsRequested: null, maximumPoints, error: "state.pointsInvalid" };
+  const pointsRequested = Number(normalized);
+  if (!Number.isSafeInteger(pointsRequested)) return { pointsRequested: null, maximumPoints, error: "state.pointsInvalid" };
+  if (pointsRequested > maximumPoints) return { pointsRequested, maximumPoints, error: "state.pointsLimit" };
+  return { pointsRequested, maximumPoints, error: null };
+}
+
+/** Replaces only the point portion of member benefits, preserving coupons and other benefits. */
+export function withPointRedemption(invoice: CheckoutInvoice, pointsRequested: number): CheckoutInvoice {
+  const nonPointBenefitDiscount = Math.max(0, invoice.benefitDiscount - invoice.pointsRequested);
+  const benefitDiscount = nonPointBenefitDiscount + pointsRequested;
+  return {
+    ...invoice,
+    pointsRequested,
+    benefitDiscount,
+    discount: benefitDiscount + invoice.manualDiscount,
+  };
 }
 
 export type PaymentTransitionResult =

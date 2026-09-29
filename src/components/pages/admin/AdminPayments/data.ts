@@ -14,6 +14,7 @@ export type PaymentCustomerSnapshot = {
   readonly birthday: string;
   readonly visits: number;
   readonly totalSpend: number;
+  readonly pointBalance: number;
   readonly preference: string;
 };
 
@@ -45,6 +46,7 @@ export type CheckoutInvoice = {
   readonly discount: number;
   readonly benefitDiscount: number;
   readonly manualDiscount: number;
+  readonly pointsRequested: number;
   readonly discountReason: string;
   readonly paymentMethod: PaymentMethod | null;
   readonly orderNote: string;
@@ -75,6 +77,7 @@ export const initialCheckoutInvoice: CheckoutInvoice = {
     birthday: "25/06/1996",
     visits: 12,
     totalSpend: 18_560_000,
+    pointBalance: 5_000,
     preference: "Thích tone hồng, nail dài vừa phải.",
   },
   appointment: {
@@ -93,6 +96,7 @@ export const initialCheckoutInvoice: CheckoutInvoice = {
   discount: 0,
   benefitDiscount: 0,
   manualDiscount: 0,
+  pointsRequested: 0,
   discountReason: "",
   paymentMethod: "cash",
   orderNote: "",

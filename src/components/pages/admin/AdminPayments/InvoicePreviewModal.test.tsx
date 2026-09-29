@@ -80,6 +80,15 @@ describe("invoice branch receipt", () => {
     expect(markup).toContain("¥200");
   });
 
+  it("shows redeemed points separately from other discounts", () => {
+    branchLookup.mockReturnValue({ data: { id: "appointment-branch", name: "HIRO", address: "Receipt address" }, isLoading: false });
+    const markup = render({ pointsRequested: 2_000, benefitDiscount: 3_000, manualDiscount: 500, discount: 3_500 });
+    expect(markup).toContain("Điểm đã dùng");
+    expect(markup).toContain("-¥2.000");
+    expect(markup).toContain("Giảm giá khác");
+    expect(markup).toContain("-¥1.500");
+  });
+
   it("keeps every line and the final note inside the printable receipt for long invoices", () => {
     branchLookup.mockReturnValue({ data: { id: "appointment-branch", name: "HIRO", address: "Receipt address" }, isLoading: false });
     const additionalItems = Array.from({ length: 50 }, (_, index) => ({ id: String(index), name: `Long receipt item ${index}`, price: 100, note: "", source: "catalog" as const }));

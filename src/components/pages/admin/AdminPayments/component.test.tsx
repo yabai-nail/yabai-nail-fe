@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import messages from "../../../../../messages/vi.json";
 import type { Translator } from "@/i18n/config";
 import type { AdminAppointment, AdminAppointmentPayment, AdminCustomer, AdminServiceAddonConfiguration, AdminServiceItem, AdminStaffMember } from "@/service";
-import { applyCustomerFacts, buildInvoiceFromServer, buildPaymentSettlementSummary, checkoutAddonOptions, lockedCheckoutAddonIds } from "./component";
+import { applyCustomerFacts, buildEffectivePaymentSettlementSummary, buildInvoiceFromServer, buildPaymentSettlementSummary, checkoutAddonOptions, lockedCheckoutAddonIds } from "./component";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import { initialCheckoutInvoice } from "./data";
 
@@ -31,10 +31,10 @@ describe("admin payment customer and appointment facts", () => {
     expect(applyCustomerFacts(invoice, { id: invoice.customer.id, version: 2 }).customer.segment).toBe(invoice.customer.segment);
   });
   it("shows the CRM totals and the completed server status", () => {
-    const customer = { id: "customer-1", displayName: "E2E Customer", phone: "0900000000", birthday: "1990-01-01", visitCount: 3, totalSpend: 25_500, preferenceSummary: "Pink", version: 1 } satisfies AdminCustomer;
+    const customer = { id: "customer-1", displayName: "E2E Customer", phone: "0900000000", birthday: "1990-01-01", visitCount: 3, totalSpend: 25_500, pointBalance: 7_000, preferenceSummary: "Pink", version: 1 } satisfies AdminCustomer;
     const service = { id: "service-1", name: "Gel", price: 5_000, durationMinutes: 60, active: true, version: 1 } satisfies AdminServiceItem;
     const staff = { id: "staff-1", displayName: "Nana" } as AdminStaffMember;
-    const appointment = { id: "appointment-1", customerId: customer.id, branchId: "branch-1", staffId: staff.id, serviceIds: [service.id], startsAt: "2026-09-25T00:00:00.000Z", endsAt: "2026-09-25T01:00:00.000Z", status: "COMPLETED", total: 5_000, discount: 0, version: 2 } satisfies AdminAppointment;
+    const appointment = { id: "appointment-1", customerId: customer.id, branchId: "branch-1", staffId: staff.id, serviceIds: [service.id], startsAt: "2026-09-25T00:00:00.000Z", endsAt: "2026-09-25T01:00:00.000Z", status: "COMPLETED", total: 5_000, discount: 2_000, pointRedemptionIntent: 2_000, version: 2 } satisfies AdminAppointment;
     const translate = Object.assign((key: string) => key, { has: () => true }) as Translator;
     const invoice = buildInvoiceFromServer(appointment, { customers: new Map([[customer.id, customer]]), services: new Map([[service.id, service]]), staff: new Map([[staff.id, staff]]) }, translate, () => "25/09/2026", () => "09:00");
 
@@ -44,7 +44,8 @@ describe("admin payment customer and appointment facts", () => {
       </NextIntlClientProvider>,
     );
 
-    expect(invoice.customer).toMatchObject({ birthday: "1990-01-01", visits: 3, totalSpend: 25_500, preference: "Pink" });
+    expect(invoice.customer).toMatchObject({ birthday: "1990-01-01", visits: 3, totalSpend: 25_500, pointBalance: 7_000, preference: "Pink" });
+    expect(invoice).toMatchObject({ pointsRequested: 2_000, benefitDiscount: 2_000, discount: 2_000 });
     expect(markup).toContain("Hoàn tất");
     expect(markup).toContain("25.500");
     expect(markup).not.toContain("Đã xác nhận");
@@ -53,7 +54,7 @@ describe("admin payment customer and appointment facts", () => {
   it("refreshes customer facts in the working invoice immediately after capture", () => {
     const invoice = {
       id: "appointment-1",
-      customer: { id: "customer-1", name: "E2E Customer", initials: "EC", avatarUrl: null, phone: "0900000000", birthday: "", visits: 0, totalSpend: 0, preference: "" },
+      customer: { id: "customer-1", name: "E2E Customer", initials: "EC", avatarUrl: null, phone: "0900000000", birthday: "", visits: 0, totalSpend: 0, pointBalance: 0, preference: "" },
       appointment: { date: "25/09/2026", time: "09:00", staffName: "Nana", note: "" },
       bookedService: { id: "service-1", name: "Gel", price: 5_000 },
       currentService: { id: "service-1", name: "Gel", price: 5_000 },
@@ -61,6 +62,7 @@ describe("admin payment customer and appointment facts", () => {
       discount: 0,
       benefitDiscount: 0,
       manualDiscount: 0,
+      pointsRequested: 0,
       discountReason: "",
       paymentMethod: "paypay" as const,
       orderNote: "",
@@ -146,5 +148,14 @@ describe("admin payment settlement summary", () => {
   it("keeps NO_CHARGE as the recorded backend method", () => {
     expect(buildPaymentSettlementSummary([payment({ method: "NO_CHARGE", amount: 0, cashTendered: null, cashChange: null })])).toMatchObject({ status: "paid", method: "NO_CHARGE", netAmount: 0 });
     expect(buildPaymentSettlementSummary([]).status).toBe("unpaid");
+  });
+
+  it("uses the successful capture response immediately while the payment list is still refreshing", () => {
+    expect(buildEffectivePaymentSettlementSummary([], payment({ cashTendered: 20_000, cashChange: 10_000, amount: 10_000 }))).toMatchObject({
+      status: "paid",
+      capturedAmount: 10_000,
+      cashTendered: 20_000,
+      cashChange: 10_000,
+    });
   });
 });
