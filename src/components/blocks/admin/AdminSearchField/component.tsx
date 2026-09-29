@@ -6,6 +6,7 @@ type AdminSearchFieldProps = {
   readonly placeholder: string;
   readonly value: string;
   readonly onChange: (value: string) => void;
+  readonly fullWidth?: boolean;
 };
 
 export function _AdminSearchField({
@@ -13,9 +14,10 @@ export function _AdminSearchField({
   placeholder,
   value,
   onChange,
+  fullWidth = false,
 }: AdminSearchFieldProps) {
   return (
-    <InputGroup className="w-full sm:w-64" fullWidth>
+    <InputGroup className={fullWidth ? "w-full" : "w-full sm:w-64"} fullWidth>
       <InputGroup.Prefix>
         <MagnifyingGlassIcon aria-hidden="true" className="size-4 text-admin-muted" />
       </InputGroup.Prefix>

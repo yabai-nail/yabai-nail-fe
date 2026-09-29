@@ -362,6 +362,61 @@ export interface AdminAppointmentPayment {
   readonly [field: string]: unknown;
 }
 
+export type AdminPaymentSettlementStatus = "PAID" | "PARTIALLY_REFUNDED" | "REFUNDED";
+
+export interface AdminPaymentParty {
+  readonly id: string;
+  readonly displayName: string;
+}
+
+export interface AdminPaymentCustomer extends AdminPaymentParty {
+  readonly phone: string;
+}
+
+export interface AdminPaymentServiceLine {
+  readonly id: string;
+  readonly name: string;
+  readonly unitPrice: number;
+  readonly durationMinutes: number;
+}
+
+export interface AdminPaymentHistoryItem extends AdminAppointmentPayment {
+  readonly kind: "CAPTURE";
+  readonly settlementStatus: AdminPaymentSettlementStatus;
+  readonly refundedAmount: number;
+  readonly netAmount: number;
+  readonly customer: AdminPaymentCustomer;
+  readonly staff: AdminPaymentParty;
+  readonly services: ReadonlyArray<AdminPaymentServiceLine>;
+  readonly paidAt: string;
+  readonly createdAt: string;
+}
+
+export interface AdminPaymentDetail extends AdminPaymentHistoryItem {
+  readonly appointment: {
+    readonly id: string;
+    readonly startsAt: string;
+    readonly completedAt: string | null;
+    readonly subtotal: number;
+    readonly benefitDiscount: number;
+    readonly manualDiscount: number;
+    readonly totalDiscount: number;
+    readonly discountReason: string;
+    readonly checkoutNote: string;
+  };
+  readonly refunds: ReadonlyArray<{
+    readonly id: string;
+    readonly amount: number;
+    readonly status: string;
+    readonly createdAt: string;
+  }>;
+  readonly points: {
+    readonly redeemed: number;
+    readonly earned: number;
+    readonly reversed: number;
+  };
+}
+
 /**
  * Shape confirmed against the live API. The amount to collect is `amountDue`;
  * there is no `total` and no `lines`, which is what this used to declare — so

@@ -38,6 +38,8 @@ import type {
   AdminNotificationCampaign,
   AdminNotificationCampaignMetrics,
   AdminPaymentRefund,
+  AdminPaymentDetail,
+  AdminPaymentHistoryItem,
   AdminPromotion,
   AdminReview,
   AdminReport,
@@ -111,6 +113,23 @@ export function useAdminAppointmentPayments(
       ? "GET /api/v1/admin/branches/{branchId}/appointments/{appointmentId}/payments"
       : null,
     { path: branchId && appointmentId ? { branchId, appointmentId } : undefined },
+  );
+}
+
+export function useAdminPayments(
+  branchId: string | null,
+  query?: Readonly<Record<string, string | number | undefined>>,
+) {
+  return usePaginatedApiOperation<AdminPaymentHistoryItem>(
+    branchId ? "GET /api/v1/admin/branches/{branchId}/payments" : null,
+    { path: branchId ? { branchId } : undefined, query },
+  );
+}
+
+export function useAdminPayment(branchId: string | null, paymentId: string | null) {
+  return useApiOperation<AdminPaymentDetail>(
+    branchId && paymentId ? "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}" : null,
+    { path: branchId && paymentId ? { branchId, paymentId } : undefined },
   );
 }
 

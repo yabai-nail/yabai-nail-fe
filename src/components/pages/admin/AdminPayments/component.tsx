@@ -37,6 +37,7 @@ import { PaymentMethodPicker } from "./PaymentMethodPicker";
 import { PaymentReviewDialog } from "./PaymentReviewDialog";
 import { PaymentSummaryPanel } from "./PaymentSummaryPanel";
 import { ServiceCheckoutPanel } from "./ServiceCheckoutPanel";
+import { PaymentHistoryScreen } from "./PaymentHistoryScreen";
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -226,13 +227,11 @@ export function lockedCheckoutAddonIds(
   }) ?? []);
 }
 
-export function AdminPaymentsComponent() {
+function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: string }) {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
   const tRefund = useTranslations("admin.operations.refund");
   const format = useFormatter();
-  const searchParams = useSearchParams();
-  const appointmentId = searchParams.get("appointmentId");
   const { branchId } = useAdminBranch();
   const hasServiceEditPermission = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const canRecordAssignedPayment = useAdminPermission(
@@ -501,15 +500,6 @@ export function AdminPaymentsComponent() {
     setIsReviewOpen(false);
   };
 
-  if (!appointmentId) {
-    return (
-      <AdminPageLayout>
-        <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
-          {t("empty")}
-        </p>
-      </AdminPageLayout>
-    );
-  }
   if (appointmentError) {
     return (
       <AdminPageLayout>
@@ -576,6 +566,11 @@ export function AdminPaymentsComponent() {
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>
   );
+}
+
+export function AdminPaymentsComponent() {
+  const appointmentId = useSearchParams().get("appointmentId");
+  return appointmentId ? <AdminCheckoutComponent appointmentId={appointmentId} /> : <PaymentHistoryScreen />;
 }
 
 export const meta = { world: "connected", domain: "admin-payments" } as const;

@@ -196,6 +196,7 @@ GET /api/v1/admin/branches/{branchId}/staff-performance
 GET /api/v1/admin/branches/{branchId}/overview
 GET /api/v1/admin/branches/{branchId}/settings
 PATCH /api/v1/admin/branches/{branchId}/settings
+GET /api/v1/admin/branches/{branchId}/payments
 GET /api/v1/admin/branches/{branchId}/payments/{paymentId}
 GET /api/v1/admin/nail-design-proposals/{proposalId}
 GET /api/v1/admin/nail-design-proposals
