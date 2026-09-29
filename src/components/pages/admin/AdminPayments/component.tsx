@@ -15,10 +15,13 @@ import {
   useAdminBranchDetail,
   useAdminCustomers,
   useAdminServices,
+  useAdminServiceAddons,
   useAdminStaff,
   useAdminPermission,
   type AdminAppointment as ServerAppointment,
   type AdminCustomer,
+  type AdminAppointmentPayment,
+  type AdminServiceAddonConfiguration,
   type AdminServiceItem,
   type AdminStaffMember,
 } from "@/service";
@@ -26,14 +29,15 @@ import { CashTenderPanel } from "./CashTenderPanel";
 import { AmountReceivedPanel } from "./AmountReceivedPanel";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import type { Translator } from "@/i18n/config";
-import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod } from "./data";
-import { buildPaymentCaptureInput, calculateAmountReceivedState, calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod } from "./payment-state";
-import { InvoicePreviewModal } from "./InvoicePreviewModal";
+import { paymentMethodLabel, paymentStatusLabel, type CheckoutInvoice, type PaymentMethod, type PaymentServiceSnapshot } from "./data";
+import { buildPaymentCaptureInput, calculateAmountReceivedState, calculateCashTenderState, calculatePaymentTotals, confirmPayment, setPaymentMethod, withPointRedemption } from "./payment-state";
+import { InvoicePreviewModal, type PaymentSettlementSummary } from "./InvoicePreviewModal";
 import { PaymentConfirmationDialog } from "./PaymentConfirmationDialog";
 import { PaymentMethodPicker } from "./PaymentMethodPicker";
 import { PaymentReviewDialog } from "./PaymentReviewDialog";
 import { PaymentSummaryPanel } from "./PaymentSummaryPanel";
 import { ServiceCheckoutPanel } from "./ServiceCheckoutPanel";
+import { PaymentHistoryScreen } from "./PaymentHistoryScreen";
 
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -45,6 +49,40 @@ function deriveInitials(name: string): string {
 function toPaymentMethod(method: string | null | undefined): PaymentMethod | null {
   const normalized = method?.toLowerCase();
   return normalized === "cash" || normalized === "paypay" || normalized === "visa" ? normalized : null;
+}
+
+export function buildPaymentSettlementSummary(
+  payments: ReadonlyArray<AdminAppointmentPayment>,
+): PaymentSettlementSummary {
+  const capture = payments.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
+  if (!capture) return { status: "unpaid", paymentId: null, paidAt: null, method: null, capturedAmount: 0, refundedAmount: 0, netAmount: 0, cashTendered: null, cashChange: null };
+  const refundedAmount = payments
+    .filter((payment) => payment.kind === "REFUND" && payment.status === "SUCCEEDED" && (!payment.parentPaymentId || payment.parentPaymentId === capture.id))
+    .reduce((total, payment) => total + payment.amount, 0);
+  return {
+    status: refundedAmount > 0 && refundedAmount >= capture.amount ? "refunded" : refundedAmount > 0 ? "partially_refunded" : "paid",
+    paymentId: capture.id,
+    paidAt: capture.paidAt ?? capture.createdAt ?? null,
+    method: capture.method,
+    capturedAmount: capture.amount,
+    refundedAmount,
+    netAmount: Math.max(0, capture.amount - refundedAmount),
+    cashTendered: capture.cashTendered ?? null,
+    cashChange: capture.cashChange ?? null,
+  };
+}
+
+export function buildEffectivePaymentSettlementSummary(
+  payments: ReadonlyArray<AdminAppointmentPayment>,
+  latestCapture?: AdminAppointmentPayment | null,
+): PaymentSettlementSummary {
+  if (!latestCapture || payments.some((payment) => payment.id === latestCapture.id)) {
+    return buildPaymentSettlementSummary(payments);
+  }
+  return buildPaymentSettlementSummary([
+    { ...latestCapture, kind: latestCapture.kind ?? "CAPTURE" },
+    ...payments,
+  ]);
 }
 
 /**
@@ -65,6 +103,7 @@ export function applyCustomerFacts(invoice: CheckoutInvoice, customer: AdminCust
       birthday: customer.birthday ?? "",
       visits: customer.visitCount ?? 0,
       totalSpend: customer.totalSpend ?? 0,
+      pointBalance: customer.pointBalance ?? 0,
       preference: customer.preferenceSummary ?? "",
     },
   };
@@ -115,6 +154,7 @@ export function buildInvoiceFromServer(
       birthday: "",
       visits: 0,
       totalSpend: 0,
+      pointBalance: 0,
       preference: "",
     },
     appointment: {
@@ -141,6 +181,7 @@ export function buildInvoiceFromServer(
     discount: (appointment.benefitDiscount ?? appointment.discount) + (appointment.manualDiscount ?? 0),
     benefitDiscount: appointment.benefitDiscount ?? appointment.discount,
     manualDiscount: appointment.manualDiscount ?? 0,
+    pointsRequested: appointment.pointRedemptionIntent ?? 0,
     discountReason: appointment.discountReason ?? appointment.manualDiscountReason ?? "",
     paymentMethod: toPaymentMethod(appointment.expectedPaymentMethod),
     orderNote: appointment.checkoutNote ?? "",
@@ -149,13 +190,48 @@ export function buildInvoiceFromServer(
   }, customer);
 }
 
-export function AdminPaymentsComponent() {
+export function checkoutAddonOptions(
+  configuration: AdminServiceAddonConfiguration | undefined,
+  branchId: string | null | undefined,
+  selectedIds: ReadonlyArray<string>,
+): ReadonlyArray<PaymentServiceSnapshot> {
+  if (!configuration || !branchId) return [];
+  const selected = new Set(selectedIds);
+  return configuration.groups.flatMap((group) => {
+    const selectedItems = group.items.filter((item) => selected.has(item.addonServiceId));
+    if (selectedItems.length >= group.maxSelections) return [];
+    const selectedNone = selectedItems.some((item) => item.addon.representsNoSelection);
+    const selectedActual = selectedItems.some((item) => !item.addon.representsNoSelection);
+    return group.items.flatMap((item) => {
+      const branch = item.branches.find((candidate) => candidate.branchId === branchId);
+      if (selected.has(item.addonServiceId) || !item.addon.active || branch?.enabled === false) return [];
+      if (selectedNone && !item.addon.representsNoSelection || selectedActual && item.addon.representsNoSelection) return [];
+      return [{
+        id: item.addonServiceId,
+        name: item.addon.name,
+        price: item.addon.representsNoSelection ? 0 : branch?.priceOverride ?? item.addon.price,
+      }];
+    });
+  });
+}
+
+export function lockedCheckoutAddonIds(
+  configuration: AdminServiceAddonConfiguration | undefined,
+  selectedIds: ReadonlyArray<string>,
+): ReadonlySet<string> {
+  const selected = new Set(selectedIds);
+  return new Set(configuration?.groups.flatMap((group) => {
+    const selectedInGroup = group.items.filter((item) => selected.has(item.addonServiceId));
+    const minimum = group.required ? Math.max(1, group.minSelections) : group.minSelections;
+    return selectedInGroup.length <= minimum ? selectedInGroup.map((item) => item.addonServiceId) : [];
+  }) ?? []);
+}
+
+function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: string }) {
   const t = useTranslations("admin.payments");
   const tMethod = useTranslations("admin.paymentMethod");
   const tRefund = useTranslations("admin.operations.refund");
   const format = useFormatter();
-  const searchParams = useSearchParams();
-  const appointmentId = searchParams.get("appointmentId");
   const { branchId } = useAdminBranch();
   const hasServiceEditPermission = useAdminPermission("catalog.write.branch", "catalog.write.all");
   const canRecordAssignedPayment = useAdminPermission(
@@ -178,8 +254,16 @@ export function AdminPaymentsComponent() {
   const branch = useAdminBranchDetail(appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
   const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
   const { data: staffData } = useAdminStaff();
-  const { data: servicesData } = useAdminServices();
+  const { data: servicesData } = useAdminServices({ branchId: branchId ?? undefined, status: "ACTIVE", limit: 100 });
   const payments = useAdminAppointmentPayments(branchId, appointmentId);
+  const [latestCapture, setLatestCapture] = useState<{ appointmentId: string; payment: AdminAppointmentPayment } | null>(null);
+  const settlement = useMemo(
+    () => buildEffectivePaymentSettlementSummary(
+      payments.data?.items ?? [],
+      latestCapture?.appointmentId === appointmentId ? latestCapture.payment : null,
+    ),
+    [appointmentId, latestCapture, payments.data?.items],
+  );
   const lookups = useMemo(() => ({
     customers: new Map((customersData?.items ?? []).map((c) => [c.id, c] as const)),
     staff: new Map((staffData?.items ?? []).map((s) => [s.id, s] as const)),
@@ -200,21 +284,22 @@ export function AdminPaymentsComponent() {
         (value, timeZone) => format.dateTime(value, { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }),
         branch.data?.timezone,
       );
-      const captured = payments.data?.items.find((payment) => payment.kind === "CAPTURE" && payment.status === "SUCCEEDED");
-      if (captured) {
+      if (settlement.status !== "unpaid") {
         return {
           ...invoice,
-          paymentMethod: toPaymentMethod(captured.method),
+          paymentMethod: toPaymentMethod(settlement.method),
           status: "paid",
-          paidAt: typeof captured.createdAt === "string" ? captured.createdAt : null,
+          paidAt: settlement.paidAt,
         };
       }
       return invoice;
     }
     return null;
-  }, [appointment, branch.data?.timezone, format, lookups, payments.data, t]);
+  }, [appointment, branch.data?.timezone, format, lookups, settlement, t]);
   const [override, setOverride] = useState<CheckoutInvoice | null>(null);
   const invoice = override ?? seededInvoice;
+  const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const addonConfiguration = useAdminServiceAddons(canEditServices ? invoice?.currentService.id ?? null : null);
   const setInvoice = (next: CheckoutInvoice | ((current: CheckoutInvoice) => CheckoutInvoice)) => {
     setOverride((current) => {
       const base = current ?? seededInvoice;
@@ -228,14 +313,25 @@ export function AdminPaymentsComponent() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [cashTendered, setCashTendered] = useState("");
   const [amountReceived, setAmountReceived] = useState("");
+  const [draftDiscount, setDraftDiscount] = useState<{ appointmentId: string; value: number } | null>(null);
+  const [draftPoints, setDraftPoints] = useState<{ appointmentId: string; value: number } | null>(null);
   const [cashResult, setCashResult] = useState<{ tendered: number; change: number } | null>(null);
   const paymentIdempotencyKey = useRef<string | null>(null);
   const reviewIdempotencyKey = useRef<string | null>(null);
-  const totals = useMemo(() => (invoice ? calculatePaymentTotals(invoice) : null), [invoice]);
+  const paymentInvoice = useMemo(() => {
+    if (!invoice) return null;
+    const manualDiscount = draftDiscount?.appointmentId === appointmentId ? draftDiscount.value : invoice.manualDiscount;
+    const pointsRequested = draftPoints?.appointmentId === appointmentId ? draftPoints.value : invoice.pointsRequested;
+    const withPoints = withPointRedemption(invoice, pointsRequested);
+    return { ...withPoints, manualDiscount, discount: withPoints.benefitDiscount + manualDiscount };
+  }, [appointmentId, draftDiscount, draftPoints, invoice]);
+  const totals = useMemo(() => paymentInvoice ? calculatePaymentTotals(paymentInvoice) : null, [paymentInvoice]);
 
   const isServerBacked = Boolean(appointmentId && branchId && appointment);
-  const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active).map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
-  const canEditServices = hasServiceEditPermission && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
+  const serviceCatalog = useMemo(() => (servicesData?.items ?? []).filter((service) => service.active && service.serviceType !== "ADD_ON").map((service) => ({ id: service.id, name: service.name, price: service.price })), [servicesData]);
+  const selectedAddonIds = useMemo(() => invoice?.additionalItems.map((item) => item.id) ?? [], [invoice?.additionalItems]);
+  const additionalServices = useMemo(() => checkoutAddonOptions(addonConfiguration.data, branchId, selectedAddonIds), [addonConfiguration.data, branchId, selectedAddonIds]);
+  const lockedAdditionalItemIds = useMemo(() => addonConfiguration.data ? lockedCheckoutAddonIds(addonConfiguration.data, selectedAddonIds) : new Set(selectedAddonIds), [addonConfiguration.data, selectedAddonIds]);
   const canAdjust = canAdjustPayment && Boolean(appointment && ["IN_SERVICE", "AWAITING_PAYMENT"].includes(appointment.status));
   const canCreatePayment = canRecordAssignedPayment && appointment?.status === "AWAITING_PAYMENT";
   const cashState = invoice?.paymentMethod === "cash" && totals
@@ -271,7 +367,7 @@ export function AdminPaymentsComponent() {
       const saved = await adminService.updateAppointmentCheckoutAdjustments(
         branchId,
         appointmentId,
-        { manualDiscount, discountReason, ...(checkoutNote ? { checkoutNote } : {}) },
+        { manualDiscount, discountReason, checkoutNote },
         appointment.version,
         crypto.randomUUID(),
       );
@@ -294,20 +390,33 @@ export function AdminPaymentsComponent() {
         checkoutNote: saved.checkoutNote,
         version: saved.version,
       }, { revalidate: false });
+      setDraftDiscount(null);
       return null;
     } catch (thrown) {
       return thrown instanceof Error ? thrown.message : t("error.adjustments");
     }
   };
+  const prepareConfirmation = async (manualDiscount: number, discountReason: string, checkoutNote: string, pointsRequested: number): Promise<string | null> => {
+    if (!invoice) return t("error.noAppointment");
+    const changed = manualDiscount !== invoice.manualDiscount || discountReason !== invoice.discountReason || checkoutNote !== invoice.orderNote;
+    if (changed) {
+      const error = await persistAdjustments(manualDiscount, discountReason, checkoutNote);
+      if (error) return error;
+    }
+    setDraftPoints(appointmentId ? { appointmentId, value: pointsRequested } : null);
+    setCashResult(null);
+    setIsConfirmOpen(true);
+    return null;
+  };
   const handleConfirm = (receivedAmount: number | null) => {
-    if (!invoice || !totals) return;
-    const paymentMethod = invoice.paymentMethod;
+    if (!paymentInvoice || !totals) return;
+    const paymentMethod = paymentInvoice.paymentMethod;
     if (!paymentMethod) {
       setConfirmError(t("state.methodRequired"));
       return;
     }
     // Local status change so the UI flips to paid immediately.
-    const result = confirmPayment(invoice, new Date().toISOString());
+    const result = confirmPayment(paymentInvoice, new Date().toISOString());
     setIsConfirmOpen(false);
     if (!result.ok) {
       // The validation message used to be dropped on the floor: the dialog
@@ -322,15 +431,14 @@ export function AdminPaymentsComponent() {
     }
     setConfirmPending(true);
     setConfirmError(null);
-    // Quote first, then record. The quote is what the backend will actually
-    // charge; it ignores its request body entirely and echoes the totals already
-    // stored on the appointment, so nothing is sent with it.
+    // Quote first, then record. Both calls carry the same point intent so the
+    // screen total and the atomically captured server total cannot diverge.
     void (async () => {
       try {
         const quote = await adminService.requestAppointmentPaymentQuote(
           branchId!,
           appointmentId!,
-          undefined,
+          { pointsRequested: paymentInvoice.pointsRequested },
           appointment?.version,
         );
         // The screen's own total is only ever a preview. If it disagrees with the
@@ -352,10 +460,9 @@ export function AdminPaymentsComponent() {
         const capture = await adminService.recordAppointmentPayment(
           branchId!,
           appointmentId!,
-          buildPaymentCaptureInput(paymentMethod, receivedAmount),
-          // Re-read the version: the quote above is itself a write, so the
-          // appointment may have moved on since this handler started. The
-          // quote's own field is loosely typed, so only trust a number.
+          buildPaymentCaptureInput(paymentMethod, receivedAmount, paymentInvoice.pointsRequested),
+          // Prefer the version returned with the authoritative quote. Only
+          // trust it when the response actually contains a number.
           typeof quote.version === "number" ? quote.version : appointment?.version,
           paymentIdempotencyKey.current,
         );
@@ -363,8 +470,10 @@ export function AdminPaymentsComponent() {
         if (capture.payment.cashTendered !== null && capture.payment.cashTendered !== undefined) {
           setCashResult({ tendered: capture.payment.cashTendered, change: capture.payment.cashChange ?? 0 });
         }
+        setLatestCapture({ appointmentId: appointmentId!, payment: capture.payment });
         notifySuccess(t("paymentRecorded"));
         setInvoice(result.value);
+        setDraftPoints(null);
         await mutateAppointment(capture.appointment, { revalidate: false });
         const [, customerRefresh] = await Promise.allSettled([payments.mutate(), mutateCustomers()]);
         if (customerRefresh.status === "fulfilled") {
@@ -391,15 +500,6 @@ export function AdminPaymentsComponent() {
     setIsReviewOpen(false);
   };
 
-  if (!appointmentId) {
-    return (
-      <AdminPageLayout>
-        <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
-          {t("empty")}
-        </p>
-      </AdminPageLayout>
-    );
-  }
   if (appointmentError) {
     return (
       <AdminPageLayout>
@@ -409,7 +509,7 @@ export function AdminPaymentsComponent() {
       </AdminPageLayout>
     );
   }
-  if (appointmentLoading || !appointment || !invoice || !totals) {
+  if (appointmentLoading || !appointment || !invoice || !paymentInvoice || !totals) {
     return (
       <AdminPageLayout>
         <p className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
@@ -456,16 +556,21 @@ export function AdminPaymentsComponent() {
           invoice={invoice}
           appointmentStatus={appointment.status}
         />
-        <ServiceCheckoutPanel invoice={invoice} services={serviceCatalog} canEdit={canEditServices} onSave={persistServices}>
+        <ServiceCheckoutPanel invoice={invoice} branchId={appointment.branchId} services={serviceCatalog} additionalServices={additionalServices} lockedAdditionalItemIds={lockedAdditionalItemIds} canEdit={canEditServices} onSave={persistServices}>
           <div className="border-t border-admin-border px-4 py-4"><div className="mb-3 flex items-center gap-2"><span className="grid size-6 place-items-center rounded-md border border-admin-accent text-xs font-bold text-admin-accent">3</span><h2 className="font-bold text-admin-ink">{t("step3")}</h2></div><PaymentMethodPicker value={invoice.paymentMethod} isDisabled={!canCreatePayment || invoice.status === "paid"} onChange={(method) => { const result = setPaymentMethod(invoice, method); if (result.ok) setInvoice(result.value); }} />{invoice.paymentMethod === "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <CashTenderPanel amountDue={totals.grandTotal} value={cashTendered} disabled={!canCreatePayment} onChange={setCashTendered} /> : null}{invoice.paymentMethod && invoice.paymentMethod !== "cash" && totals.grandTotal > 0 && invoice.status !== "paid" ? <AmountReceivedPanel amountDue={totals.grandTotal} value={amountReceived} disabled={!canCreatePayment} onChange={setAmountReceived} /> : null}<div className="mt-4 flex items-center justify-between border-t border-admin-border pt-4"><span className="text-sm font-semibold text-admin-ink">{t("grandTotalLabel")}</span><strong className="text-xl text-admin-accent">{formatMoney(totals.grandTotal)}</strong></div></div>
         </ServiceCheckoutPanel>
-        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={invoice} totals={totals} canAdjust={canAdjust} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={() => { setCashResult(null); setIsConfirmOpen(true); }} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
+        <PaymentSummaryPanel key={`${invoice.manualDiscount}:${invoice.discountReason}:${invoice.orderNote}`} invoice={paymentInvoice} totals={totals} canAdjust={canAdjust} canUsePoints={canCreatePayment} canConfirmPayment={canConfirmPayment} canCreateReview={canCreateReview} onSaveAdjustments={persistAdjustments} onConfirm={prepareConfirmation} onDraftDiscountChange={(value) => setDraftDiscount(value === null || !appointmentId ? null : { appointmentId, value })} onDraftPointsChange={(value) => setDraftPoints(appointmentId ? { appointmentId, value } : null)} onPreview={() => setIsPreviewOpen(true)} onReview={() => setIsReviewOpen(true)} />
       </div>
-      {isConfirmOpen ? <PaymentConfirmationDialog invoice={invoice} totals={totals} cashTendered={cashTendered} amountReceived={amountReceived} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
-      {isPreviewOpen ? <InvoicePreviewModal invoice={invoice} branchId={appointment.branchId} totals={totals} onClose={() => setIsPreviewOpen(false)} /> : null}
+      {isConfirmOpen ? <PaymentConfirmationDialog invoice={paymentInvoice} totals={totals} cashTendered={cashTendered} amountReceived={amountReceived} isServerBacked={isServerBacked} onClose={() => setIsConfirmOpen(false)} onConfirm={handleConfirm} /> : null}
+      {isPreviewOpen ? <InvoicePreviewModal invoice={paymentInvoice} branchId={appointment.branchId} totals={totals} settlement={settlement} onClose={() => setIsPreviewOpen(false)} /> : null}
       {isReviewOpen ? <PaymentReviewDialog customer={invoice.customer} onClose={() => setIsReviewOpen(false)} onSubmit={handleReviewSubmit} /> : null}
     </AdminPageLayout>
   );
+}
+
+export function AdminPaymentsComponent() {
+  const appointmentId = useSearchParams().get("appointmentId");
+  return appointmentId ? <AdminCheckoutComponent appointmentId={appointmentId} /> : <PaymentHistoryScreen />;
 }
 
 export const meta = { world: "connected", domain: "admin-payments" } as const;

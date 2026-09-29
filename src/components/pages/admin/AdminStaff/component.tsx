@@ -78,7 +78,10 @@ function toStaffMember(server: ServerStaff, performance: StaffPerformanceRow | u
   };
 }
 
-export function AdminStaffComponent() {
+export function AdminStaffComponent({
+  initialBranchId = "",
+  initialSelectedId = "",
+}: Readonly<{ initialBranchId?: string; initialSelectedId?: string }>) {
   const t = useTranslations("admin.staff");
   const tc = useTranslations("admin.common");
   const { branchId, branchIds } = useAdminBranch();
@@ -89,7 +92,7 @@ export function AdminStaffComponent() {
   // the header's branch by default made a transfer look like a deletion — the member dropped
   // out of the list the moment they were moved — and the API already scopes an unfiltered
   // read by role (an owner sees every branch, a manager only their own), so "all" is safe.
-  const [branchFilter, setBranchFilter] = useState<string>("");
+  const [branchFilter, setBranchFilter] = useState<string>(initialBranchId);
   const [page, setPage] = useState(1);
   // The roster is small per branch, so fetch a generous page and paginate in memory (same as
   // the accounts list) rather than juggle cursors for a page-numbered control.
@@ -117,7 +120,7 @@ export function AdminStaffComponent() {
     [branchIds, branchNameById, t],
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<StaffMember | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   // The member awaiting a deactivate confirmation (reactivation is applied without a prompt).
   const [confirmDeactivate, setConfirmDeactivate] = useState<StaffMember | null>(null);
@@ -130,8 +133,9 @@ export function AdminStaffComponent() {
     () => (data?.items ?? []).map((member) => toStaffMember(member, performanceById.get(member.id), t("unnamed"), branchNameById.get(member.branchId) ?? null)),
     [data, performanceById, t, branchNameById],
   );
+  const editing = source.find((member) => member.id === editingId) ?? null;
 
-  const [selectedId, setSelectedId] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<string>(initialSelectedId);
   const visibleStaff = useMemo(
     () => source.filter((member) => filter === "all" || member.status === filter),
     [source, filter],
@@ -286,7 +290,7 @@ export function AdminStaffComponent() {
                 onSelect={setSelectedId}
                 canWrite={canWriteStaff}
                 busyId={busyId}
-                onEdit={setEditing}
+                onEdit={(member) => setEditingId(member.id)}
                 onToggleActive={handleToggleActive}
               /></Card.Content>
             </Card>
@@ -302,7 +306,7 @@ export function AdminStaffComponent() {
                 member={detailedStaff}
                 branchId={detailedStaff.branchId}
                 period={period}
-                onEdit={canWriteStaff ? () => setEditing(detailedStaff) : undefined}
+                onEdit={canWriteStaff ? () => setEditingId(detailedStaff.id) : undefined}
               />
             ) : (
               <AdminEmptySelection
@@ -328,7 +332,7 @@ export function AdminStaffComponent() {
         <StaffEditModal
           member={editing}
           branches={branches.data?.items ?? []}
-          onClose={() => setEditing(null)}
+          onClose={() => setEditingId(null)}
           onSaved={() => {
             // The roster carries the branch the table prints, and the member read is what the
             // detail panel renders. A transfer changes both, so both have to be refetched.

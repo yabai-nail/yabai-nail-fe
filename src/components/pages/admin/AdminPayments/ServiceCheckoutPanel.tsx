@@ -4,14 +4,27 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { formatMoney } from "@/lib/admin-format";
-import type { CheckoutInvoice, PaymentServiceSnapshot } from "./data";
+import type { CheckoutInvoice, PaymentLineItem, PaymentServiceSnapshot } from "./data";
 import { addLineItem, removeLineItem, replaceCurrentService } from "./payment-state";
 import { LineItemModal } from "./LineItemModal";
 import { ServiceSelectionModal } from "./ServiceSelectionModal";
 
-export function ServiceCheckoutPanel({ invoice, services, canEdit, onSave, children }: Readonly<{
+export function replaceCheckoutService(invoice: CheckoutInvoice, service: PaymentServiceSnapshot, additionalItems: ReadonlyArray<PaymentLineItem>) {
+  const result = replaceCurrentService({ ...invoice, additionalItems }, service);
+  if (!result.ok) return result;
+  const subtotal = service.price + additionalItems.reduce((total, item) => total + item.price, 0);
+  if (invoice.manualDiscount > Math.max(0, subtotal - invoice.benefitDiscount)) {
+    return { ok: false as const, error: "state.reduceDiscountBeforeServiceChange" };
+  }
+  return result;
+}
+
+export function ServiceCheckoutPanel({ invoice, branchId, services, additionalServices, lockedAdditionalItemIds, canEdit, onSave, children }: Readonly<{
   invoice: CheckoutInvoice;
+  branchId: string;
   services: ReadonlyArray<PaymentServiceSnapshot>;
+  additionalServices: ReadonlyArray<PaymentServiceSnapshot>;
+  lockedAdditionalItemIds: ReadonlySet<string>;
   canEdit: boolean;
   onSave: (invoice: CheckoutInvoice) => Promise<string | null>;
   children: React.ReactNode;
@@ -32,11 +45,15 @@ export function ServiceCheckoutPanel({ invoice, services, canEdit, onSave, child
     return nextError;
   }
 
-  async function chooseService(service: PaymentServiceSnapshot) {
-    const result = replaceCurrentService(invoice, service);
-    if (!result.ok) return setError(t(result.error));
+  async function chooseService(service: PaymentServiceSnapshot, additionalItems: ReadonlyArray<PaymentLineItem>) {
+    const result = replaceCheckoutService(invoice, service, additionalItems);
+    if (!result.ok) {
+      const nextError = t(result.error);
+      setError(nextError);
+      return nextError;
+    }
     const nextError = await persist(result.value);
-    if (!nextError) setIsServiceOpen(false);
+    return nextError;
   }
 
   async function addService(service: PaymentServiceSnapshot) {
@@ -53,17 +70,17 @@ export function ServiceCheckoutPanel({ invoice, services, canEdit, onSave, child
     await persist(result.value);
   }
 
-  const availableAdditionalServices = services.filter((service) => service.id !== invoice.currentService.id && !invoice.additionalItems.some((item) => item.id === service.id));
+  const availableAdditionalServices = additionalServices.filter((service) => !invoice.additionalItems.some((item) => item.id === service.id));
 
   return <>
     <Card className="min-w-0 gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
       <Card.Header className="flex flex-row items-center justify-between gap-3 border-b border-admin-border px-4 py-3"><div className="flex items-center gap-2"><Step number="1" /><h2 className="font-bold text-admin-ink">{t("checkout.step1")}</h2></div><Button size="sm" variant="outline" className="rounded-lg border-admin-border" isDisabled={!canEdit || isPaid || busy} onPress={() => setIsServiceOpen(true)}>{t("checkout.changeService")}</Button></Card.Header>
       <Card.Content className="p-4"><div className="grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]"><ServiceCard label={t("checkout.bookedService")} service={invoice.bookedService} /><ArrowLongRightIcon aria-hidden="true" className="mx-auto size-5 rotate-90 text-admin-muted sm:rotate-0" /><ServiceCard label={t("checkout.currentService")} service={invoice.currentService} isChanged={invoice.currentService.id !== invoice.bookedService.id} /></div></Card.Content>
       <Card.Header className="flex flex-row items-center justify-between gap-3 border-y border-admin-border px-4 py-3"><div className="flex items-center gap-2"><Step number="2" /><h2 className="font-bold text-admin-ink">{t("checkout.step2")}</h2></div><Button size="sm" variant="outline" className="rounded-lg border-admin-border" isDisabled={!canEdit || isPaid || busy || availableAdditionalServices.length === 0} onPress={() => setIsLineItemOpen(true)}><PlusIcon className="size-4" />{t("checkout.addItem")}</Button></Card.Header>
-      <Card.Content className="p-0"><ul className="divide-y divide-admin-border" aria-label={t("checkout.step2")}>{invoice.additionalItems.map((item) => <li key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3"><p className="truncate text-sm font-semibold text-admin-ink">{item.name}</p><strong className="text-sm text-admin-ink">{formatMoney(item.price)}</strong><Button isIconOnly size="sm" variant="ghost" isDisabled={!canEdit || isPaid || busy} aria-label={t("checkout.deleteItem", { name: item.name })} onPress={() => void removeService(item.id)}><TrashIcon className="size-4" /></Button></li>)}</ul>{error ? <p role="alert" className="border-t border-admin-border px-4 py-3 text-xs text-admin-danger">{error}</p> : null}</Card.Content>
+      <Card.Content className="p-0"><ul className="divide-y divide-admin-border" aria-label={t("checkout.step2")}>{invoice.additionalItems.map((item) => <li key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3"><p className="truncate text-sm font-semibold text-admin-ink">{item.name}</p><strong className="text-sm text-admin-ink">{formatMoney(item.price)}</strong><Button isIconOnly size="sm" variant="ghost" isDisabled={!canEdit || isPaid || busy || lockedAdditionalItemIds.has(item.id)} aria-label={t("checkout.deleteItem", { name: item.name })} onPress={() => void removeService(item.id)}><TrashIcon className="size-4" /></Button></li>)}</ul>{error ? <p role="alert" className="border-t border-admin-border px-4 py-3 text-xs text-admin-danger">{error}</p> : null}</Card.Content>
       {children}
     </Card>
-    {isServiceOpen ? <ServiceSelectionModal currentId={invoice.currentService.id} services={services} onClose={() => setIsServiceOpen(false)} onSelect={(service) => void chooseService(service)} /> : null}
+    {isServiceOpen ? <ServiceSelectionModal currentId={invoice.currentService.id} currentAddonIds={invoice.additionalItems.map((item) => item.id)} branchId={branchId} services={services} onClose={() => setIsServiceOpen(false)} onSelect={chooseService} /> : null}
     {isLineItemOpen ? <LineItemModal services={availableAdditionalServices} onClose={() => setIsLineItemOpen(false)} onSubmit={addService} /> : null}
   </>;
 }

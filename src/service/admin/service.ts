@@ -102,6 +102,8 @@ import type {
   AdminNotificationCampaignDraft,
   AdminNotificationCampaignMetrics,
   AdminPaymentRefund,
+  AdminPaymentDetail,
+  AdminPaymentHistoryItem,
   AdminReview,
   AdminReviewHandlingPatch,
   AdminReviewInput,
@@ -578,9 +580,14 @@ export const adminService = {
       { path: { branchId, paymentId }, body: input, version, idempotencyKey },
     ),
   payment: (branchId: string, paymentId: string) =>
-    executeApiOperation<AdminAppointmentPayment>(
+    executeApiOperation<AdminPaymentDetail>(
       "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}",
       { path: { branchId, paymentId } },
+    ),
+  payments: (branchId: string, query?: Readonly<Record<string, string | number | undefined>>) =>
+    executeApiOperation<BackendList<AdminPaymentHistoryItem>>(
+      "GET /api/v1/admin/branches/{branchId}/payments",
+      { path: { branchId }, query },
     ),
   paymentRefund: (branchId: string, paymentId: string, refundId: string) =>
     executeApiOperation<AdminPaymentRefund>(

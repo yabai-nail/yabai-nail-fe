@@ -5,12 +5,14 @@ import {
   buildPaymentCaptureInput,
   calculateAmountReceivedState,
   calculateCashTenderState,
+  calculatePointRedemptionState,
   calculatePaymentTotals,
   confirmPayment,
   removeLineItem,
   replaceCurrentService,
   updateDiscount,
   updateLineItem,
+  withPointRedemption,
 } from "./payment-state";
 
 describe("payment totals", () => {
@@ -66,15 +68,54 @@ describe("PayPay and VISA amount received", () => {
   });
 
   it("builds the backend capture contract for all three methods", () => {
-    expect(buildPaymentCaptureInput("cash", 15_000)).toEqual({ method: "CASH", cashTendered: 15_000 });
-    expect(buildPaymentCaptureInput("paypay", 10_000)).toEqual({ method: "PAYPAY", amountReceived: 10_000 });
-    expect(buildPaymentCaptureInput("visa", 10_000)).toEqual({ method: "VISA", amountReceived: 10_000 });
+    expect(buildPaymentCaptureInput("cash", 15_000, 3_000)).toEqual({ method: "CASH", cashTendered: 15_000, pointsRequested: 3_000 });
+    expect(buildPaymentCaptureInput("paypay", 10_000, 0)).toEqual({ method: "PAYPAY", amountReceived: 10_000, pointsRequested: 0 });
+    expect(buildPaymentCaptureInput("visa", 10_000, 1_000)).toEqual({ method: "VISA", amountReceived: 10_000, pointsRequested: 1_000 });
   });
 
   it("rejects missing and malformed amounts and supports a zero-yen invoice", () => {
     expect(calculateAmountReceivedState(10_000, "").error).toBe("state.amountReceivedRequired");
     expect(calculateAmountReceivedState(10_000, "10000.5").error).toBe("state.amountReceivedInvalid");
     expect(calculateAmountReceivedState(0, "")).toEqual({ amountReceived: 0, error: null });
+  });
+});
+
+describe("point redemption", () => {
+  it("accepts any whole point from one point within the balance, 50% cap, and remaining amount", () => {
+    expect(calculatePointRedemptionState(999, 0, 0, 10, "10")).toEqual({
+      pointsRequested: 10,
+      maximumPoints: 10,
+      error: null,
+    });
+    expect(calculatePointRedemptionState(999, 0, 0, 10, "0")).toEqual({
+      pointsRequested: 0,
+      maximumPoints: 10,
+      error: null,
+    });
+  });
+
+  it("rejects malformed values and requests above the current allowed maximum", () => {
+    expect(calculatePointRedemptionState(12_000, 0, 0, 8_000, "").error).toBe("state.pointsRequired");
+    expect(calculatePointRedemptionState(12_000, 0, 0, 8_000, "10.5").error).toBe("state.pointsInvalid");
+    expect(calculatePointRedemptionState(12_000, 0, 0, 4_000, "5000").error).toBe("state.pointsLimit");
+    expect(calculatePointRedemptionState(12_000, 0, 0, 8_000, "7000").error).toBe("state.pointsLimit");
+  });
+
+  it("replaces the booking point intent without changing other benefit discounts", () => {
+    const invoice = {
+      ...initialCheckoutInvoice,
+      pointsRequested: 2_000,
+      benefitDiscount: 3_000,
+      manualDiscount: 500,
+      discount: 3_500,
+    };
+
+    expect(withPointRedemption(invoice, 4_000)).toMatchObject({
+      pointsRequested: 4_000,
+      benefitDiscount: 5_000,
+      manualDiscount: 500,
+      discount: 5_500,
+    });
   });
 });
 

@@ -39,25 +39,47 @@ function requiredMin(group: AdminServiceAddonGroup): number {
   return group.required ? Math.max(1, group.minSelections) : group.minSelections;
 }
 
+export function shouldKeepAddonGroup(group: AdminServiceAddonGroup): boolean {
+  return group.items.length > 0 || requiredMin(group) > 0;
+}
+
+export function toggleAppointmentAddonSelection(
+  group: AdminServiceAddonGroup,
+  addonServiceId: string,
+  current: ReadonlyArray<string>,
+): ReadonlyArray<string> {
+  const selected = new Set(current);
+  const groupIds = group.items.map((item) => item.addonServiceId);
+  if (group.selectionMode === "SINGLE") {
+    const withoutGroup = current.filter((id) => !groupIds.includes(id));
+    return selected.has(addonServiceId) ? withoutGroup : [...withoutGroup, addonServiceId];
+  }
+  if (selected.has(addonServiceId)) return current.filter((id) => id !== addonServiceId);
+  const chosen = groupIds.filter((id) => selected.has(id)).length;
+  return group.maxSelections && chosen >= group.maxSelections ? current : [...current, addonServiceId];
+}
+
 export function AppointmentAddonPicker({
   serviceId,
   branchId,
+  initialIds = [],
   onChange,
 }: Readonly<{
   serviceId: string;
   branchId: string | null;
+  initialIds?: ReadonlyArray<string>;
   onChange: (summary: AppointmentAddonSummary) => void;
 }>) {
   const locale = useLocale();
   const { data } = useAdminServiceAddons(serviceId || null);
-  const [selected, setSelected] = useState<ReadonlyArray<string>>([]);
+  const [selected, setSelected] = useState<ReadonlyArray<string>>(initialIds);
 
-  // Only add-ons enabled at this branch; drop groups that end up empty.
+  // Keep an unavailable required group so the form remains incomplete instead of sending an invalid payload.
   const groups = useMemo(() => {
     const source = data?.groups ?? [];
     return source
-      .map((group) => ({ ...group, items: group.items.filter((item) => branchConfig(item, branchId)?.enabled ?? true) }))
-      .filter((group) => group.items.length > 0);
+      .map((group) => ({ ...group, items: group.items.filter((item) => item.addon.active && (branchConfig(item, branchId)?.enabled ?? true)) }))
+      .filter(shouldKeepAddonGroup);
   }, [data, branchId]);
 
   const summarise = useCallback(
@@ -96,18 +118,7 @@ export function AppointmentAddonPicker({
   const selectedSet = new Set(selected);
 
   const toggle = (group: (typeof groups)[number], addonServiceId: string) => {
-    setSelected((current) => {
-      const set = new Set(current);
-      const groupIds = group.items.map((item) => item.addonServiceId);
-      if (group.selectionMode === "SINGLE") {
-        const without = current.filter((id) => !groupIds.includes(id));
-        return set.has(addonServiceId) ? without : [...without, addonServiceId];
-      }
-      if (set.has(addonServiceId)) return current.filter((id) => id !== addonServiceId);
-      const chosen = groupIds.filter((id) => set.has(id)).length;
-      if (group.maxSelections && chosen >= group.maxSelections) return current; // group is at its cap
-      return [...current, addonServiceId];
-    });
+    setSelected((current) => toggleAppointmentAddonSelection(group, addonServiceId, current));
   };
 
   const groupName = (group: (typeof groups)[number]) =>

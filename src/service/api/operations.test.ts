@@ -24,6 +24,7 @@ const expectedFeatureOperationIds = [
   "GET /api/v1/admin/branches/{branchId}/overview",
   "GET /api/v1/admin/branches/{branchId}/settings",
   "PATCH /api/v1/admin/branches/{branchId}/settings",
+  "GET /api/v1/admin/branches/{branchId}/payments",
   "GET /api/v1/admin/branches/{branchId}/payments/{paymentId}",
   "GET /api/v1/admin/nail-design-proposals/{proposalId}",
   "GET /api/v1/admin/nail-design-proposals",
@@ -77,11 +78,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(228);
+    expect(runtimeApiOperations).toHaveLength(229);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(228);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(219);
+    ).toBe(229);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(220);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);

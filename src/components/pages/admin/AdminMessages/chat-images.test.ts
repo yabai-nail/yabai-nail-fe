@@ -40,4 +40,12 @@ describe("chat photo attachments", () => {
       }
     }
   });
+
+  it("returns keyboard focus to the composer after picking photos so Enter submits instead of reopening the picker", () => {
+    const thread = readFileSync(join(process.cwd(), "src/components/pages/admin/AdminMessages/MessageThread.tsx"), "utf8");
+    expect(thread).toContain("composerInput.current?.focus()");
+    expect(thread).toContain("<InputGroup.Input ref={composerInput}");
+    expect(thread).toContain("<form onSubmit={submit}");
+    expect(thread).toContain('type="submit"');
+  });
 });

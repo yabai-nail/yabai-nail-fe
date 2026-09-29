@@ -128,6 +128,7 @@ export interface AdminAppointment {
   readonly discount: number;
   readonly benefitDiscount?: number;
   readonly manualDiscount?: number;
+  readonly pointRedemptionIntent?: number;
   readonly manualDiscountReason?: string;
   readonly discountReason?: string;
   readonly checkoutNote?: string;
@@ -153,6 +154,7 @@ export interface AdminCustomer {
   readonly birthday?: string | null;
   readonly visitCount?: number;
   readonly totalSpend?: number;
+  readonly pointBalance?: number;
   readonly preferenceSummary?: string | null;
   readonly locale?: string;
   readonly status?: string;
@@ -291,15 +293,15 @@ export interface AdminAppointmentServiceCompletionInput {
 }
 
 /**
- * What the backend actually reads when capturing a payment: `method`, and
- * `reference` for card/transfer receipts. The amount is recomputed server-side
- * from the appointment so a client can never set a price — `amount` and
- * `discount` used to be declared here and sent, and were silently dropped.
+ * Capture intent only. The backend recomputes the amount from the appointment
+ * and validates `pointsRequested` against the locked customer balance. Sending
+ * zero explicitly records that the customer declined point redemption.
  */
 export interface AdminAppointmentPaymentInput {
   readonly method: "CASH" | "PAYPAY" | "VISA";
   readonly cashTendered?: number;
   readonly amountReceived?: number;
+  readonly pointsRequested: number;
   readonly [field: string]: unknown;
 }
 
@@ -360,19 +362,78 @@ export interface AdminAppointmentPayment {
   readonly [field: string]: unknown;
 }
 
+export type AdminPaymentSettlementStatus = "PAID" | "PARTIALLY_REFUNDED" | "REFUNDED";
+
+export interface AdminPaymentParty {
+  readonly id: string;
+  readonly displayName: string;
+}
+
+export interface AdminPaymentCustomer extends AdminPaymentParty {
+  readonly phone: string;
+}
+
+export interface AdminPaymentServiceLine {
+  readonly id: string;
+  readonly name: string;
+  readonly unitPrice: number;
+  readonly durationMinutes: number;
+}
+
+export interface AdminPaymentHistoryItem extends AdminAppointmentPayment {
+  readonly kind: "CAPTURE";
+  readonly settlementStatus: AdminPaymentSettlementStatus;
+  readonly refundedAmount: number;
+  readonly netAmount: number;
+  readonly customer: AdminPaymentCustomer;
+  readonly staff: AdminPaymentParty;
+  readonly services: ReadonlyArray<AdminPaymentServiceLine>;
+  readonly paidAt: string;
+  readonly createdAt: string;
+}
+
+export interface AdminPaymentDetail extends AdminPaymentHistoryItem {
+  readonly appointment: {
+    readonly id: string;
+    readonly startsAt: string;
+    readonly completedAt: string | null;
+    readonly subtotal: number;
+    readonly benefitDiscount: number;
+    readonly manualDiscount: number;
+    readonly totalDiscount: number;
+    readonly discountReason: string;
+    readonly checkoutNote: string;
+  };
+  readonly refunds: ReadonlyArray<{
+    readonly id: string;
+    readonly amount: number;
+    readonly status: string;
+    readonly createdAt: string;
+  }>;
+  readonly points: {
+    readonly redeemed: number;
+    readonly earned: number;
+    readonly reversed: number;
+  };
+}
+
 /**
  * Shape confirmed against the live API. The amount to collect is `amountDue`;
  * there is no `total` and no `lines`, which is what this used to declare — so
  * a reader checking `quote.total` was checking a field that never arrives.
  *
- * The endpoint also ignores its request body entirely: it echoes the totals
- * already stored on the appointment. Sending serviceIds, customItems or a
- * discount changes nothing.
+ * The endpoint accepts only point-redemption intent from the checkout screen;
+ * service prices and other discounts remain server-owned.
  */
 export interface AdminAppointmentPaymentQuote {
   readonly appointmentId: string;
   readonly subtotal: number;
   readonly discount: number;
+  readonly benefitDiscount: number;
+  readonly manualDiscount: number;
+  readonly requestedPoints: number;
+  readonly acceptedPoints: number;
+  readonly pointBalance: number;
   readonly amountDue: number;
   readonly currency: string;
   readonly version: number;
@@ -1038,6 +1099,7 @@ export interface AdminAppointmentPaymentCapture {
   readonly appointment: AdminAppointment;
   readonly payment: AdminAppointmentPayment;
   readonly pointsEarned: number;
+  readonly pointsRedeemed: number;
   readonly pointBalance: number;
 }
 

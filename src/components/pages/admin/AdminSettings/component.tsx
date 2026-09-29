@@ -15,7 +15,7 @@ import {
   indexStaffPerformance,
   staffSalonShare,
 } from "@/lib/admin-staff-performance";
-import { useAdminBranch, useAdminPermission, useAdminStaff, useAdminStaffPerformance } from "@/service";
+import { useAdminBranch, useAdminBranchList, useAdminPermission, useAdminStaff, useAdminStaffPerformance } from "@/service";
 import { BranchSettingsForm } from "./BranchSettingsForm";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
@@ -49,8 +49,10 @@ function formatOptionalMoney(value: number | null): string {
 
 export function AdminSettingsComponent() {
   const t = useTranslations("admin.settings");
+  const tStaff = useTranslations("admin.staff");
   const { branchId } = useAdminBranch();
   const canReadBooking = useAdminPermission("branch.settings.read.branch");
+  const canReadBranches = useAdminPermission("branch.read.branch", "branch.read.all");
   const canReadStaff = useAdminPermission("staff.read.branch");
   const canReadStaffPerformance = useAdminPermission("report.staff.read.branch", "report.staff.read.all");
   const canReadCommission = canReadStaff && canReadStaffPerformance;
@@ -77,12 +79,18 @@ export function AdminSettingsComponent() {
   // staff-performance read model: the roster carries identity, role and the
   // active flag, the read model carries rate, revenue and commission for the
   // period. Two requests, no per-staff fan-out.
-  // Load the whole roster (not the default first page) so the commission table never hides staff.
-  const staff = useAdminStaff({ limit: 100 }, canReadCommission);
+  // The roster and performance must use the same branch scope. Filtering again after the
+  // request keeps a stale/cached org-level response from leaking staff from another salon.
+  const staff = useAdminStaff(
+    branchId ? { branchId, limit: 100 } : undefined,
+    canReadCommission && Boolean(branchId),
+  );
   const performance = useAdminStaffPerformance(branchId, { period }, canReadCommission);
+  const branches = useAdminBranchList(undefined, canReadBranches);
+  const branchName = (branches.data?.items ?? []).find((branch) => branch.id === branchId)?.name ?? branchId;
   const commissionPolicies = useMemo<ReadonlyArray<CommissionPolicy>>(() => {
     const byStaffId = indexStaffPerformance(performance.data?.rows);
-    return (staff.data?.items ?? []).map((member) => {
+    return (staff.data?.items ?? []).filter((member) => member.branchId === branchId).map((member) => {
       const row = byStaffId.get(member.id);
       const name = member.displayName || t("unnamedStaff");
       return {
@@ -102,7 +110,7 @@ export function AdminSettingsComponent() {
         payout: row?.commissionAmount ?? null,
       } satisfies CommissionPolicy;
     });
-  }, [staff.data, performance.data, t]);
+  }, [staff.data, performance.data, branchId, t]);
 
   const kpi = performance.data?.kpi;
   const commission = kpi?.commissionAmount ?? null;
@@ -177,6 +185,8 @@ export function AdminSettingsComponent() {
           isLoading={staff.isLoading}
           staffError={Boolean(staff.error)}
           performanceError={Boolean(performance.error)}
+          branchId={branchId}
+          branchName={branchName ? `${tStaff("branchFilter.label")}: ${branchName}` : MISSING}
         />
       )}
     </AdminPageLayout>
@@ -199,6 +209,8 @@ function CommissionSettings({
   isLoading,
   staffError,
   performanceError,
+  branchId,
+  branchName,
 }: Readonly<{
   metrics: ReadonlyArray<CommissionMetric>;
   period: string;
@@ -206,6 +218,8 @@ function CommissionSettings({
   isLoading: boolean;
   staffError: boolean;
   performanceError: boolean;
+  branchId: string | null;
+  branchName: string;
 }>) {
   const t = useTranslations("admin.settings");
   const router = useRouter();
@@ -215,7 +229,7 @@ function CommissionSettings({
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 id="commission-settings-heading" className="text-lg font-bold">{t("commission.heading")}</h2>
-            <p className="mt-1 text-sm text-admin-muted">{t("commission.periodDescription", { period })}</p>
+            <p className="mt-1 text-sm text-admin-muted">{t("commission.periodDescription", { period })} · {branchName}</p>
           </div>
           {/* "Hướng dẫn tính hoa hồng" pointed at documentation that does not exist. */}
         </div>
@@ -230,7 +244,7 @@ function CommissionSettings({
       <div className="mt-4">
         <AdminSplitLayout asideWidth="sm" aside={<SettingsAside />}>
           <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Header className="flex flex-row items-center justify-between px-4 pt-4"><h2 className="font-bold">{t("commission.listHeading")}</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push("/admin/staff")}><PlusIcon className="size-4" />{t("commission.addStaff")}</Button></Card.Header>
+            <Card.Header className="flex flex-row items-center justify-between px-4 pt-4"><h2 className="font-bold">{t("commission.listHeading")}</h2><Button size="sm" variant="outline" className="rounded-lg border-admin-accent/30 text-admin-accent" onPress={() => router.push(`/admin/staff?branchId=${encodeURIComponent(branchId ?? "")}`)}><PlusIcon className="size-4" />{t("commission.addStaff")}</Button></Card.Header>
             <Card.Content className="min-w-0 p-0 pt-2">
               {staffError ? (
                 <p role="alert" className="mx-4 mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -248,7 +262,7 @@ function CommissionSettings({
                   {staffError ? t("commission.retry") : t("commission.noStaff")}
                 </p>
               ) : (
-                <CommissionTable policies={policies} />
+                <CommissionTable policies={policies} branchId={branchId} />
               )}
               <CommissionGuide />
             </Card.Content>
