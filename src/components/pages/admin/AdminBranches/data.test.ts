@@ -27,6 +27,11 @@ describe("branch list derivation", () => {
     expect(adaptBranch({ id: "b2", name: "Y", active: false, version: 1 }).status).toBe("INACTIVE");
   });
 
+  it("carries the branch phone, defaulting a missing one to null", () => {
+    expect(adaptBranch({ id: "b1", name: "X", phone: "03-1234-5678", active: true, version: 1 }).phone).toBe("03-1234-5678");
+    expect(adaptBranch({ id: "b2", name: "Y", active: true, version: 1 }).phone).toBeNull();
+  });
+
   it("paginates and rejects invalid page size", () => {
     expect(paginate(branchFixtures, 1, 2).items).toHaveLength(2);
     expect(() => paginate(branchFixtures, 1, 0)).toThrow(RangeError);

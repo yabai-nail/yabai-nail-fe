@@ -31,13 +31,16 @@ export function BranchModal({
   const isEdit = branch !== null;
   const [name, setName] = useState(branch?.name ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
+  const [phone, setPhone] = useState(branch?.phone ?? "");
   const [timezone, setTimezone] = useState(() => initialBranchTimeZone(branch));
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">(branch?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const image = useAvatarField(branch?.imageUrl);
 
-  const canSubmit = name.trim().length >= 2 && address.trim().length >= 2 && !image.blocked && !busy;
+  // Optional, free-form; mirrors the backend rule so the form fails fast instead of eating a 422.
+  const phoneValid = phone.trim() === "" || /^[0-9+\-()\s]{1,32}$/.test(phone.trim());
+  const canSubmit = name.trim().length >= 2 && address.trim().length >= 2 && phoneValid && !image.blocked && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -52,7 +55,7 @@ export function BranchModal({
       if (isEdit && branch) {
         await adminService.updateBranch(
           branch.id,
-          { name: name.trim(), address: address.trim(), timeZone: timezone, status, ...imagePatch },
+          { name: name.trim(), address: address.trim(), phone: phone.trim(), timeZone: timezone, status, ...imagePatch },
           branch.version,
         );
         // The previous photo is now an orphan. Best-effort: the save has already succeeded.
@@ -70,6 +73,7 @@ export function BranchModal({
         await adminService.createBranch({
           name: name.trim(),
           address: address.trim(),
+          phone: phone.trim(),
           timezone,
           ...imagePatch,
         });
@@ -110,6 +114,11 @@ export function BranchModal({
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("columns.address")}</span>
                 <input className={inputClass} value={address} onChange={(event) => setAddress(event.target.value)} placeholder={t("modal.addressPlaceholder")} />
+              </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("columns.phone")}</span>
+                <input className={inputClass} value={phone} maxLength={32} inputMode="tel" onChange={(event) => setPhone(event.target.value)} placeholder={t("modal.phonePlaceholder")} />
+                {!phoneValid ? <span className="text-xs text-admin-danger" role="alert">{t("modal.phoneInvalid")}</span> : null}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {isEdit ? (
