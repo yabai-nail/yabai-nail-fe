@@ -2395,6 +2395,8 @@
         "loading": "Đang tải danh mục dịch vụ…",
         "loadFailed": "Không tải được danh mục dịch vụ.",
         "empty": "Chưa có dịch vụ nào.",
+        "baseService": "Dịch vụ chính",
+        "incomplete": "Vui lòng chọn đủ dịch vụ bổ sung bắt buộc.",
         "duration": "{minutes} phút",
         "close": "Đóng",
         "saving": "Đang lưu…",

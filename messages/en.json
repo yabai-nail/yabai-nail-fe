@@ -2387,6 +2387,8 @@
         "loading": "Loading the service menu…",
         "loadFailed": "The service menu could not be loaded.",
         "empty": "No services yet.",
+        "baseService": "Main service",
+        "incomplete": "Select all required add-ons.",
         "duration": "{minutes} min",
         "close": "Close",
         "saving": "Saving…",

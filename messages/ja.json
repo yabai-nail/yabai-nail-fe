@@ -2379,6 +2379,8 @@
         "loading": "メニュー一覧を読み込み中…",
         "loadFailed": "メニュー一覧を読み込めませんでした。",
         "empty": "メニューがまだありません。",
+        "baseService": "メインメニュー",
+        "incomplete": "必須の追加メニューを選択してください。",
         "duration": "{minutes}分",
         "close": "閉じる",
         "saving": "保存中…",
