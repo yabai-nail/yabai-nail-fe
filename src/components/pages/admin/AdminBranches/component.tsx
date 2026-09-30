@@ -45,6 +45,7 @@ export function AdminBranchesComponent() {
   const detailRows = detailRecord ? {
     [t("detail.name")]: String(detailRecord.name ?? t("detail.unnamed")),
     [t("columns.address")]: String(detailRecord.address ?? "—"),
+    [t("detail.phone")]: String(detailRecord.phone ?? "—"),
     [t("columns.status")]: typeof detailRecord.active === "boolean"
       ? statusLabel(detailRecord.active ? "ACTIVE" : "INACTIVE")
       : "—",
@@ -80,13 +81,14 @@ export function AdminBranchesComponent() {
                 <th className="w-20 px-4 py-3">{t("columns.photo")}</th>
                 <th className="px-4 py-3">{t("columns.branch")}</th>
                 <th className="px-4 py-3">{t("columns.address")}</th>
+                <th className="px-4 py-3">{t("columns.phone")}</th>
                 <th className="px-4 py-3">{t("columns.status")}</th>
                 <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
               ) : (
                 visible.map((row) => (
                   <tr key={row.id} className="border-b border-admin-border last:border-0">
@@ -102,6 +104,7 @@ export function AdminBranchesComponent() {
                     </td>
                     <td className="px-4 py-3 font-medium text-admin-ink">{row.name}</td>
                     <td className="max-w-xs px-4 py-3 text-admin-muted">{row.address ?? "—"}</td>
+                    <td className="px-4 py-3 text-admin-muted">{row.phone ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
                         {row.status ? statusLabel(row.status) : "—"}

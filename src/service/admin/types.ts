@@ -1337,6 +1337,8 @@ export interface AdminBranch {
   /** Backend trả về cờ boolean `active`, không phải chuỗi `status`. */
   readonly active?: boolean;
   readonly timezone?: string;
+  /** Optional contact phone; null when none is set. */
+  readonly phone?: string | null;
   /** Public media URL of the branch photo; null when none is set. */
   readonly imageUrl?: string | null;
   readonly version: number;
@@ -1347,6 +1349,8 @@ export interface AdminBranchDraft {
   readonly name: string;
   readonly address: string;
   readonly timezone?: string;
+  /** Optional contact phone; omit or "" for none. */
+  readonly phone?: string | null;
   /** Uploaded media id to publish as the branch photo. */
   readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;
@@ -1357,6 +1361,8 @@ export interface AdminBranchPatch {
   readonly address?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
   readonly timeZone?: string;
+  /** Omitted keeps the phone, "" clears it, a value replaces it. */
+  readonly phone?: string | null;
   /** Omitted keeps the photo, null clears it, an uploaded media id replaces it. */
   readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;

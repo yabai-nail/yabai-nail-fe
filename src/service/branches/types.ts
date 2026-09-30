@@ -3,6 +3,7 @@ export interface Branch {
   readonly name: string;
   readonly address: string;
   readonly timezone: string;
+  readonly phone?: string | null;
   readonly active: boolean;
   readonly version: number;
   readonly createdAt: string;
