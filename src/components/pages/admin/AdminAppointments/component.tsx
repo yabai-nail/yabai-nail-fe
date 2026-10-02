@@ -595,8 +595,9 @@ export function AdminAppointmentsComponent({
           error={assignError}
         />
       ) : null}
-      {canEditActualServices && isActualOpen && selectedAppointment ? (
+      {canEditActualServices && isActualOpen && selectedAppointment && branchId ? (
         <ActualServicesModal
+          branchId={branchId}
           appointment={selectedAppointment}
           onClose={() => setIsActualOpen(false)}
           onConfirm={confirmActualServices}
