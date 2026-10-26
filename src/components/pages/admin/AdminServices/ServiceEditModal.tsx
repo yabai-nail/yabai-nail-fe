@@ -8,6 +8,8 @@ import { API_BASE_URL, adminMediaService, adminService, useAdminServiceAddons, u
 import { notifySuccess } from "@/lib/app-toast";
 import type { SalonService } from "./data";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
+import { ServiceHighlightFields } from "./ServiceHighlightFields";
+import { normalizeHighlights } from "./service-highlights";
 import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
 import {
   serviceImagePatch,
@@ -44,6 +46,7 @@ export function ServiceEditModal({
   const [duration, setDuration] = useState(String(service.durationMinutes));
   const [warrantyDays, setWarrantyDays] = useState(String(service.warrantyDays ?? 0));
   const [description, setDescription] = useState(service.description ?? "");
+  const [highlights, setHighlights] = useState<string[]>([...(service.highlights ?? [])]);
   const [bookableStandalone, setBookableStandalone] = useState(Boolean(service.bookableStandalone));
   const [representsNoSelection, setRepresentsNoSelection] = useState(Boolean(service.representsNoSelection));
   const [imageMode, setImageMode] = useState<"keep" | "remove" | "replace">("keep");
@@ -116,6 +119,7 @@ export function ServiceEditModal({
           name: name.trim(),
           nameJa: nameJa.trim(),
           description: description.trim(),
+          highlights: normalizeHighlights(highlights),
           bookableStandalone: serviceType === "ADD_ON" && bookableStandalone,
           representsNoSelection: serviceType === "ADD_ON" && representsNoSelection,
           serviceType,
@@ -440,6 +444,7 @@ export function ServiceEditModal({
                 )}
                 {imageError ? <span role="alert" className="text-xs text-admin-danger">{t(`image.errors.${imageError}`)}</span> : null}
               </section>
+              <ServiceHighlightFields value={highlights} onChange={setHighlights} disabled={busy} />
               <ServiceVisibilityFields
                 allowFeatured={serviceType === "BASE"}
                 busy={busy}

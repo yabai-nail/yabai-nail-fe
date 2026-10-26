@@ -1110,6 +1110,16 @@
           "tooLarge": "The image must not exceed 10 MB."
         }
       },
+      "highlights": {
+        "title": "Service highlights",
+        "hint": "One benefit or note per field, displayed in this order. Up to 12 lines; empty fields are not saved.",
+        "line": "Highlight {number}",
+        "remove": "Remove highlight {number}",
+        "placeholder": "e.g. 4 large charms included",
+        "add": "Add a line",
+        "preview": "Content preview",
+        "empty": "Your highlights will appear here and on the customer's service card."
+      },
       "visibility": {
         "heading": "Visibility settings",
         "publicLabel": "Public to customers",

@@ -1110,6 +1110,16 @@
           "tooLarge": "Ảnh không được vượt quá 10 MB."
         }
       },
+      "highlights": {
+        "title": "Điểm nổi bật của dịch vụ",
+        "hint": "Mỗi ô là một quyền lợi hoặc lưu ý, hiển thị theo thứ tự nhập. Tối đa 12 dòng; ô trống không được lưu.",
+        "line": "Nội dung dòng {number}",
+        "remove": "Xóa dòng {number}",
+        "placeholder": "Ví dụ: Miễn phí 4 charm lớn",
+        "add": "Thêm dòng",
+        "preview": "Xem trước nội dung",
+        "empty": "Nội dung sẽ hiển thị ở đây và trên thẻ dịch vụ của khách."
+      },
       "visibility": {
         "heading": "Thiết lập hiển thị",
         "publicLabel": "Công khai cho khách",
