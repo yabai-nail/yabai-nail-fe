@@ -1114,8 +1114,8 @@
         "heading": "表示設定",
         "publicLabel": "お客様に公開",
         "publicDescription": "お客様がアプリでメニューを確認し、予約を開始できます。",
-        "featuredLabel": "モバイルで最も人気",
-        "featuredDescription": "選択できるメニューは1件のみです。新しい選択が現在のメニューに置き換わります。",
+        "featuredLabel": "モバイルのおすすめメニュー",
+        "featuredDescription": "複数のメニューを選択できます。選択した各メニューがモバイルのおすすめ一覧に表示されます。",
         "featuredRequiresPublic": "人気メニューに設定する前に公開を有効にしてください。"
       },
       "addonsTab": {

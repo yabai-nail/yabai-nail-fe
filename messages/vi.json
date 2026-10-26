@@ -1114,8 +1114,8 @@
         "heading": "Thiết lập hiển thị",
         "publicLabel": "Công khai cho khách",
         "publicDescription": "Khách có thể xem dịch vụ và bắt đầu đặt lịch trên ứng dụng.",
-        "featuredLabel": "Ưa chuộng nhất trên Mobile",
-        "featuredDescription": "Chỉ một dịch vụ được chọn; lựa chọn mới sẽ thay thế dịch vụ hiện tại.",
+        "featuredLabel": "Dịch vụ đề xuất trên Mobile",
+        "featuredDescription": "Có thể chọn nhiều dịch vụ. Mỗi dịch vụ được bật sẽ xuất hiện trong danh sách đề xuất trên Mobile.",
         "featuredRequiresPublic": "Bật công khai trước khi chọn dịch vụ nổi bật."
       },
       "addonsTab": {
