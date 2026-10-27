@@ -167,6 +167,7 @@ export interface AdminServiceItem {
   readonly name: string;
   readonly nameJa?: string | null;
   readonly description?: string;
+  readonly highlights?: readonly string[];
   readonly price: number;
   readonly durationMinutes: number;
   readonly warrantyDays?: number;
@@ -723,6 +724,7 @@ export interface AdminServiceItemDraft {
   readonly durationMinutes: number;
   readonly warrantyDays?: number;
   readonly description?: string;
+  readonly highlights?: readonly string[];
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
   readonly imageUrl?: string | null;
@@ -742,6 +744,7 @@ export interface AdminServiceItemPatch {
   readonly durationMinutes?: number;
   readonly warrantyDays?: number;
   readonly description?: string;
+  readonly highlights?: readonly string[];
   readonly nameJa?: string;
   readonly status?: "ACTIVE" | "INACTIVE";
   readonly imageUrl?: string | null;

@@ -10,6 +10,8 @@ import { notifySuccess } from "@/lib/app-toast";
 import { validateServiceImage } from "./service-image";
 import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
+import { ServiceHighlightFields } from "./ServiceHighlightFields";
+import { normalizeHighlights } from "./service-highlights";
 import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
 import { assignableCategories } from "./categories";
 
@@ -41,6 +43,7 @@ export function ServiceCreateModal({
   const [duration, setDuration] = useState("60");
   const [warrantyDays, setWarrantyDays] = useState("0");
   const [description, setDescription] = useState("");
+  const [highlights, setHighlights] = useState<string[]>([]);
   const [bookableStandalone, setBookableStandalone] = useState(false);
   const [representsNoSelection, setRepresentsNoSelection] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -99,6 +102,7 @@ export function ServiceCreateModal({
         name: name.trim(),
         nameJa: nameJa.trim() || undefined,
         description: description.trim(),
+        highlights: normalizeHighlights(highlights),
         bookableStandalone: serviceType === "ADD_ON" && bookableStandalone,
         serviceType,
         addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
@@ -359,6 +363,7 @@ export function ServiceCreateModal({
                 )}
                 {imageError ? <span role="alert" className="text-xs text-admin-danger">{t(`image.errors.${imageError}`)}</span> : null}
               </section>
+              <ServiceHighlightFields value={highlights} onChange={setHighlights} disabled={busy} />
               <ServiceVisibilityFields
                 allowFeatured={serviceType === "BASE"}
                 busy={busy}

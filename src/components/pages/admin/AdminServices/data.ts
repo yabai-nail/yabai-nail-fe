@@ -11,6 +11,7 @@ export type SalonService = {
   readonly name: string;
   readonly nameJa?: string | null;
   readonly description?: string;
+  readonly highlights?: readonly string[];
   // Null only for a row written before the backend made the category mandatory. The tabs
   // leave such a service out rather than filing it somewhere it does not belong.
   readonly category: ServiceCategoryRef | null;

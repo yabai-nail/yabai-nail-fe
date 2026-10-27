@@ -1110,12 +1110,22 @@
           "tooLarge": "画像は10 MB以下にしてください。"
         }
       },
+      "highlights": {
+        "title": "サービスの特徴・ご案内",
+        "hint": "特典や注意事項を1項目ずつ入力してください。入力順に表示されます。最大12項目。空欄は保存されません。",
+        "line": "項目 {number}",
+        "remove": "項目 {number} を削除",
+        "placeholder": "例：大パーツ4個まで無料♪",
+        "add": "項目を追加",
+        "preview": "表示プレビュー",
+        "empty": "入力した内容がここに表示され、お客様のメニューにも反映されます。"
+      },
       "visibility": {
         "heading": "表示設定",
         "publicLabel": "お客様に公開",
         "publicDescription": "お客様がアプリでメニューを確認し、予約を開始できます。",
-        "featuredLabel": "モバイルで最も人気",
-        "featuredDescription": "選択できるメニューは1件のみです。新しい選択が現在のメニューに置き換わります。",
+        "featuredLabel": "モバイルのおすすめメニュー",
+        "featuredDescription": "複数のメニューを選択できます。選択した各メニューがモバイルのおすすめ一覧に表示されます。",
         "featuredRequiresPublic": "人気メニューに設定する前に公開を有効にしてください。"
       },
       "addonsTab": {

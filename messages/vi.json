@@ -1110,12 +1110,22 @@
           "tooLarge": "Ảnh không được vượt quá 10 MB."
         }
       },
+      "highlights": {
+        "title": "Điểm nổi bật của dịch vụ",
+        "hint": "Mỗi ô là một quyền lợi hoặc lưu ý, hiển thị theo thứ tự nhập. Tối đa 12 dòng; ô trống không được lưu.",
+        "line": "Nội dung dòng {number}",
+        "remove": "Xóa dòng {number}",
+        "placeholder": "Ví dụ: Miễn phí 4 charm lớn",
+        "add": "Thêm dòng",
+        "preview": "Xem trước nội dung",
+        "empty": "Nội dung sẽ hiển thị ở đây và trên thẻ dịch vụ của khách."
+      },
       "visibility": {
         "heading": "Thiết lập hiển thị",
         "publicLabel": "Công khai cho khách",
         "publicDescription": "Khách có thể xem dịch vụ và bắt đầu đặt lịch trên ứng dụng.",
-        "featuredLabel": "Ưa chuộng nhất trên Mobile",
-        "featuredDescription": "Chỉ một dịch vụ được chọn; lựa chọn mới sẽ thay thế dịch vụ hiện tại.",
+        "featuredLabel": "Dịch vụ đề xuất trên Mobile",
+        "featuredDescription": "Có thể chọn nhiều dịch vụ. Mỗi dịch vụ được bật sẽ xuất hiện trong danh sách đề xuất trên Mobile.",
         "featuredRequiresPublic": "Bật công khai trước khi chọn dịch vụ nổi bật."
       },
       "addonsTab": {
