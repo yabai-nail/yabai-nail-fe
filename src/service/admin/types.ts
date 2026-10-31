@@ -1342,6 +1342,8 @@ export interface AdminBranch {
   readonly timezone?: string;
   /** Optional contact phone; null when none is set. */
   readonly phone?: string | null;
+  /** Optional "how to get here" line shown under the address in the app; null when none. */
+  readonly accessNote?: string | null;
   /** Public media URL of the branch photo; null when none is set. */
   readonly imageUrl?: string | null;
   readonly version: number;
@@ -1354,6 +1356,8 @@ export interface AdminBranchDraft {
   readonly timezone?: string;
   /** Optional contact phone; omit or "" for none. */
   readonly phone?: string | null;
+  /** Optional access note, max 120 chars; omit or "" for none. */
+  readonly accessNote?: string | null;
   /** Uploaded media id to publish as the branch photo. */
   readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;
@@ -1366,6 +1370,8 @@ export interface AdminBranchPatch {
   readonly timeZone?: string;
   /** Omitted keeps the phone, "" clears it, a value replaces it. */
   readonly phone?: string | null;
+  /** Omitted keeps the access note, "" clears it, a value replaces it. */
+  readonly accessNote?: string | null;
   /** Omitted keeps the photo, null clears it, an uploaded media id replaces it. */
   readonly imageMediaId?: string | null;
   readonly [field: string]: unknown;

@@ -4,6 +4,7 @@ export interface Branch {
   readonly address: string;
   readonly timezone: string;
   readonly phone?: string | null;
+  readonly accessNote?: string | null;
   readonly active: boolean;
   readonly version: number;
   readonly createdAt: string;

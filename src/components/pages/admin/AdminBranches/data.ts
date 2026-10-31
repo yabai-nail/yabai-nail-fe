@@ -8,6 +8,7 @@ export type BranchRow = {
   readonly status?: string;
   readonly timezone?: string;
   readonly phone?: string | null;
+  readonly accessNote?: string | null;
   readonly imageUrl?: string | null;
   readonly version: number;
 };
@@ -29,6 +30,7 @@ export function adaptBranch(branch: AdminBranch): BranchRow {
     status: branchStatusFromActive(branch.active),
     timezone: branch.timezone,
     phone: branch.phone ?? null,
+    accessNote: branch.accessNote ?? null,
     imageUrl: branch.imageUrl ?? null,
     version: branch.version,
   };
