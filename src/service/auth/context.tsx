@@ -14,6 +14,7 @@ import {
 import { setAdminAccessToken, setAdminTokenRefresher } from "../api";
 import { readAdminSession, writeAdminSession } from "./admin-session-store";
 import { authService } from "./service";
+import { grantsAfter, type SessionAdoption } from "./session-grants";
 import type {
   AdminLoginInput,
   AdminSession,
@@ -87,7 +88,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     setCapabilities(null);
   }, []);
 
-  const adoptSession = useCallback((session: AdminSession) => {
+  const adoptSession = useCallback((session: AdminSession, adoption: SessionAdoption) => {
     refreshTokenRef.current = session.refreshToken;
     writeAdminSession({
       sessionId: session.sessionId,
@@ -96,14 +97,14 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     setUser(session.user);
     setSessionId(session.sessionId);
     setStatus("authenticated");
-    setPermissions(null);
-    setCapabilities(null);
+    setPermissions((current) => grantsAfter(adoption, current));
+    setCapabilities((current) => grantsAfter(adoption, current));
   }, []);
 
   const login = useCallback(
     async (input: AdminLoginInput) => {
       const session = await authService.loginAdmin(input);
-      adoptSession(session);
+      adoptSession(session, "signed-in");
       // Ask the backend which branch this session is pinned to instead of
       // guessing from branchIds; a manager may be scoped to one of several.
       try {
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         if (!stored) throw new Error("NO_STORED_SESSION");
         const session = await refreshOnce(stored.refreshToken);
         if (cancelled) return;
-        adoptSession(session);
+        adoptSession(session, "signed-in");
         const summary = await authService.adminSession();
         if (!cancelled) {
           setActiveBranchId(summary.session.activeBranchId);
@@ -173,7 +174,18 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         // have three requests 401 at once, and three refreshes of one token
         // is exactly the reuse pattern the backend punishes by revoking.
         const session = await refreshOnce(token);
-        adoptSession(session);
+        adoptSession(session, "rotated");
+        // A rotation is also when a role/permission change made by an owner
+        // first reaches this tab (the old token failed its version check), so
+        // re-read the grants in the background; the shell keeps the old ones
+        // until then instead of falling back to the spinner.
+        void authService
+          .adminSession()
+          .then((summary) => {
+            setPermissions(summary.user.permissions);
+            setCapabilities(summary.user.capabilities);
+          })
+          .catch(() => undefined);
         return session.accessToken;
       } catch {
         clearSession();
