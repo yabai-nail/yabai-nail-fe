@@ -45,6 +45,7 @@ export function AdminBranchesComponent() {
   const detailRows = detailRecord ? {
     [t("detail.name")]: String(detailRecord.name ?? t("detail.unnamed")),
     [t("columns.address")]: String(detailRecord.address ?? "—"),
+    [t("detail.accessNote")]: String(detailRecord.accessNote ?? "—"),
     [t("detail.phone")]: String(detailRecord.phone ?? "—"),
     [t("columns.status")]: typeof detailRecord.active === "boolean"
       ? statusLabel(detailRecord.active ? "ACTIVE" : "INACTIVE")

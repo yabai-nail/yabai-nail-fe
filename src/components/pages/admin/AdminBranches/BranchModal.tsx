@@ -32,6 +32,7 @@ export function BranchModal({
   const [name, setName] = useState(branch?.name ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
   const [phone, setPhone] = useState(branch?.phone ?? "");
+  const [accessNote, setAccessNote] = useState(branch?.accessNote ?? "");
   const [timezone, setTimezone] = useState(() => initialBranchTimeZone(branch));
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">(branch?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE");
   const [busy, setBusy] = useState(false);
@@ -55,7 +56,7 @@ export function BranchModal({
       if (isEdit && branch) {
         await adminService.updateBranch(
           branch.id,
-          { name: name.trim(), address: address.trim(), phone: phone.trim(), timeZone: timezone, status, ...imagePatch },
+          { name: name.trim(), address: address.trim(), accessNote: accessNote.trim(), phone: phone.trim(), timeZone: timezone, status, ...imagePatch },
           branch.version,
         );
         // The previous photo is now an orphan. Best-effort: the save has already succeeded.
@@ -73,6 +74,7 @@ export function BranchModal({
         await adminService.createBranch({
           name: name.trim(),
           address: address.trim(),
+          accessNote: accessNote.trim(),
           phone: phone.trim(),
           timezone,
           ...imagePatch,
@@ -114,6 +116,11 @@ export function BranchModal({
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("columns.address")}</span>
                 <input className={inputClass} value={address} onChange={(event) => setAddress(event.target.value)} placeholder={t("modal.addressPlaceholder")} />
+              </label>
+              <label className="flex flex-col gap-2 text-sm">
+                <span className="font-semibold text-admin-ink">{t("detail.accessNote")}</span>
+                <input className={inputClass} value={accessNote} maxLength={120} onChange={(event) => setAccessNote(event.target.value)} placeholder={t("modal.accessNotePlaceholder")} />
+                <span className="text-xs text-admin-muted">{t("modal.accessNoteHint")}</span>
               </label>
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("columns.phone")}</span>
