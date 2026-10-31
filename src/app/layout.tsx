@@ -20,9 +20,9 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "YABAI Nail Atelier",
+  title: "YABAI Nail Studio",
   description: "Chăm sóc, thiết kế móng và đặt lịch tại YABAI.",
-  applicationName: "YABAI Nail Atelier",
+  applicationName: "YABAI Nail Studio",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

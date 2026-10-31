@@ -67,15 +67,7 @@ export function AdminLogin() {
     <div className="admin-shell grid min-h-screen place-items-center bg-admin-canvas px-4 py-10 text-admin-ink">
       <main className="w-full max-w-sm rounded-xl border border-admin-border bg-admin-surface p-6 shadow-sm">
         <div className="flex items-center gap-3">
-          <BrandMark className="size-12" />
-          <span className="leading-none">
-            <span className="font-display block text-lg font-semibold tracking-[0.16em] text-admin-ink">
-              YABAI
-            </span>
-            <span className="mt-1 block text-[0.625rem] font-bold tracking-[0.2em] text-admin-accent">
-              NAIL ATELIER
-            </span>
-          </span>
+          <BrandMark className="h-16" />
         </div>
         <h1 className="mt-5 text-xl font-bold text-admin-ink">{t("heading")}</h1>
         <p className="mt-1 text-sm leading-6 text-admin-muted">

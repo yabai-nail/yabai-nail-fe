@@ -36,7 +36,6 @@ export type ShellNavAccount =
 /** Resolved copy and state drawn by the navigation shell. */
 export type ShellNavData = {
   readonly brand: string;
-  readonly tagline: string;
   readonly routes: ReadonlyArray<ShellNavRoute>;
   readonly bookingHref: string;
   readonly bookingLabel: string;
@@ -85,15 +84,7 @@ export const _ShellNav = ({ props, on }: ShellNavProps) => (
         className="flex min-h-11 min-w-0 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`${props.brand} — Trang chủ`}
       >
-        <BrandMark className="size-11" />
-        <span className="min-w-0 leading-none">
-          <span className="font-display block truncate text-base font-semibold tracking-[0.18em] text-foreground">
-            {props.brand}
-          </span>
-          <span className="mt-1 block truncate text-xs text-muted">
-            {props.tagline}
-          </span>
-        </span>
+        <BrandMark className="h-11" />
       </Link>
 
       <nav

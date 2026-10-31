@@ -18,15 +18,7 @@ export function AdminBrand() {
       aria-label={t("brand")}
       className="flex min-h-16 items-center gap-3 rounded-lg px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
     >
-      <BrandMark className="size-12" />
-      <span className="leading-none">
-        <span className="font-display block text-lg font-semibold tracking-[0.16em] text-admin-ink">
-          YABAI
-        </span>
-        <span className="mt-1 block text-[0.625rem] font-bold tracking-[0.2em] text-admin-accent">
-          NAIL ATELIER
-        </span>
-      </span>
+      <BrandMark className="h-14" />
     </Link>
   );
 }

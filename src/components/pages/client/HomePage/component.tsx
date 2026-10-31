@@ -6,7 +6,7 @@ export const _HomePage = () => (
     <section className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-20">
       <div className="max-w-xl">
         <p className="text-sm font-bold uppercase tracking-[0.18em] text-accent-soft-foreground">
-          Nail atelier · Sài Gòn
+          Nail studio · Sài Gòn
         </p>
         <h1 className="font-display mt-5 text-6xl font-medium italic leading-[0.94] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
           Dịu dàng,
