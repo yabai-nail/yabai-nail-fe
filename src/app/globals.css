@@ -113,6 +113,18 @@
   --scrollbar-thumb: #765161;
 }
 
+/* BrandMark: the wordmark's black lettering swaps to its light twin when dark. */
+.brand-mark-dark,
+.dark .brand-mark-light,
+[data-theme="dark"] .brand-mark-light {
+  display: none;
+}
+
+.dark .brand-mark-dark,
+[data-theme="dark"] .brand-mark-dark {
+  display: block;
+}
+
 html {
   scroll-padding-top: 4rem;
 }

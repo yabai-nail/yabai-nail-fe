@@ -12,7 +12,6 @@ export const ShellFooter = () => (
   <_ShellFooter
     props={{
       brand: "YABAI",
-      tagline: "Nail atelier · Sài Gòn",
       description:
         "Một khoảng dừng nhẹ nhàng dành cho đôi tay, với dịch vụ chăm sóc và thiết kế móng chỉn chu.",
       navigationLabel: "Khám phá",

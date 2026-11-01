@@ -9,7 +9,6 @@ export type ShellFooterLink = {
 
 export type ShellFooterData = {
   readonly brand: string;
-  readonly tagline: string;
   readonly description: string;
   readonly navigationLabel: string;
   readonly links: ReadonlyArray<ShellFooterLink>;
@@ -37,15 +36,7 @@ export const _ShellFooter = ({ props }: ShellFooterProps) => (
           className="inline-flex min-h-11 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label={`${props.brand} — Trang chủ`}
         >
-          <BrandMark className="size-11" />
-          <span>
-            <span className="font-display block text-base font-semibold tracking-[0.18em] text-foreground">
-              {props.brand}
-            </span>
-            <span className="mt-1 block text-xs text-muted">
-              {props.tagline}
-            </span>
-          </span>
+          <BrandMark className="h-14" />
         </Link>
         <p className="mt-4 text-sm leading-6 text-muted">
           {props.description}

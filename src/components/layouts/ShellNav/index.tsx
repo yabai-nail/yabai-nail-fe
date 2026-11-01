@@ -91,7 +91,6 @@ export const ShellNav = () => {
       <_ShellNav
         props={{
           brand: "YABAI",
-          tagline: "Nail atelier · Sài Gòn",
           routes,
           bookingHref: BOOKING_HREF,
           bookingLabel: "Đặt lịch",
