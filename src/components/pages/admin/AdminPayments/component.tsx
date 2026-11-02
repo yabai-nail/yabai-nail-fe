@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
+import { Button } from "@heroui/react";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -366,13 +367,13 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
     }
   };
 
-  const persistAdjustments = async (manualDiscount: number, discountReason: string, checkoutNote: string): Promise<string | null> => {
+  const persistAdjustments = async (manualDiscount: number, discountReason: string, checkoutNote: string, removeCoupon = false): Promise<string | null> => {
     if (!branchId || !appointmentId || !appointment) return t("error.noAppointment");
     try {
       const saved = await adminService.updateAppointmentCheckoutAdjustments(
         branchId,
         appointmentId,
-        { manualDiscount, discountReason, checkoutNote },
+        { manualDiscount, discountReason, checkoutNote, ...(removeCoupon ? { removeCoupon: true } : {}) },
         appointment.version,
         crypto.randomUUID(),
       );
@@ -386,6 +387,7 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
       }));
       await mutateAppointment({
         ...appointment,
+        couponId: saved.couponId === undefined ? appointment.couponId : saved.couponId,
         total: saved.subtotal,
         discount: saved.benefitDiscount,
         benefitDiscount: saved.benefitDiscount,
@@ -551,6 +553,17 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         <p role="alert" className="mb-4 rounded-lg border border-admin-danger/40 bg-admin-surface px-4 py-2 text-xs text-admin-danger">
           {confirmError}
         </p>
+      ) : null}
+      {appointment.couponId && canAdjust ? (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-admin-border bg-admin-surface px-4 py-3">
+          <p className="text-sm text-admin-muted">{t("couponRemoval.description")}</p>
+          <Button variant="secondary" isDisabled={confirmPending} onPress={() => void (async () => {
+            setConfirmPending(true);
+            setConfirmError(null);
+            try { setConfirmError(await persistAdjustments(invoice.manualDiscount, invoice.discountReason, invoice.orderNote, true)); }
+            finally { setConfirmPending(false); }
+          })()}>{t("couponRemoval.action")}</Button>
+        </div>
       ) : null}
       {cashResult ? (
         <p role="status" className="mb-4 rounded-lg border border-admin-accent/40 bg-admin-soft px-4 py-3 text-sm font-semibold text-admin-accent">

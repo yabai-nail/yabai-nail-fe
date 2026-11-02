@@ -115,6 +115,7 @@ export interface AdminBranchOverview {
 }
 
 export interface AdminAppointment {
+  readonly couponId?: string | null;
   readonly checkoutCustomer?: { readonly id: string; readonly displayName: string; readonly phone: string; readonly pointBalance: number; readonly version: number } | null;
   readonly checkoutStaff?: { readonly id: string; readonly displayName: string } | null;
   readonly id: string;
@@ -324,12 +325,14 @@ export interface AdminAppointmentServiceSnapshot {
 }
 
 export interface AdminCheckoutAdjustmentInput {
+  readonly removeCoupon?: boolean;
   readonly manualDiscount: number;
   readonly discountReason: string;
   readonly checkoutNote?: string;
 }
 
 export interface AdminCheckoutAdjustment {
+  readonly couponId?: string | null;
   readonly appointmentId: string;
   readonly subtotal: number;
   readonly benefitDiscount: number;

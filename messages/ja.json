@@ -2462,6 +2462,7 @@
       "emptyDescription": "予約を選ぶと詳細が表示されます。"
     },
     "payments": {
+      "couponRemoval": {"action":"クーポンを外す","description":"クーポンを外して支払金額を再計算します。未使用のクーポンはお客様のウォレットに残ります。"},
       "history": {
         "title": "決済履歴",
         "description": "店舗の受取額、返金額、実収入を確認できます。",

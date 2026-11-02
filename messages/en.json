@@ -2470,6 +2470,7 @@
       "emptyDescription": "Pick an appointment to see everything about it."
     },
     "payments": {
+      "couponRemoval": {"action":"Remove coupon","description":"Remove the coupon to recalculate the amount due. Unused coupons remain in the customer wallet."},
       "history": {
         "title": "Payment history",
         "description": "Track collected, refunded and net payment amounts for this branch.",
