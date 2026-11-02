@@ -115,6 +115,8 @@ export interface AdminBranchOverview {
 }
 
 export interface AdminAppointment {
+  readonly checkoutCustomer?: { readonly id: string; readonly displayName: string; readonly phone: string; readonly pointBalance: number; readonly version: number } | null;
+  readonly checkoutStaff?: { readonly id: string; readonly displayName: string } | null;
   readonly id: string;
   readonly customerId: string;
   readonly branchId: string;

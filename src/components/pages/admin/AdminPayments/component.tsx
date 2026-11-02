@@ -121,8 +121,10 @@ export function buildInvoiceFromServer(
   formatTime: (value: Date, timeZone: string) => string,
   branchTimeZone?: string,
 ): CheckoutInvoice {
-  const customer = lookups.customers.get(appointment.customerId);
-  const staff = lookups.staff.get(appointment.staffId);
+  const customer = appointment.checkoutCustomer
+    ? { ...lookups.customers.get(appointment.customerId), ...appointment.checkoutCustomer }
+    : lookups.customers.get(appointment.customerId);
+  const staff = appointment.checkoutStaff ?? lookups.staff.get(appointment.staffId);
   const orderedSnapshots = [...(appointment.services ?? [])].sort((left, right) => left.sortOrder - right.sortOrder);
   const primaryServiceId = orderedSnapshots[0]?.serviceId ?? appointment.serviceIds[0] ?? "unknown";
   const primaryService = lookups.services.get(primaryServiceId);
@@ -251,9 +253,12 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
     branchId,
     appointmentId,
   );
-  const branch = useAdminBranchDetail(appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
-  const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
-  const { data: staffData } = useAdminStaff();
+  const canReadBranch = useAdminPermission("branch.read.branch", "branch.read.all");
+  const branch = useAdminBranchDetail(!canReadBranch || appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
+  const canReadCustomers = useAdminPermission("customer.read.branch");
+  const canReadStaff = useAdminPermission("staff.read.branch");
+  const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(canReadCustomers ? branchId : null);
+  const { data: staffData } = useAdminStaff(undefined, canReadStaff);
   const { data: servicesData } = useAdminServices({ branchId: branchId ?? undefined, status: "ACTIVE", limit: 100 });
   const payments = useAdminAppointmentPayments(branchId, appointmentId);
   const [latestCapture, setLatestCapture] = useState<{ appointmentId: string; payment: AdminAppointmentPayment } | null>(null);
@@ -354,7 +359,7 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         appointment.version,
       );
       setInvoice(nextInvoice);
-      await mutateAppointment(saved, { revalidate: false });
+      await mutateAppointment({ ...saved, checkoutCustomer: appointment.checkoutCustomer, checkoutStaff: appointment.checkoutStaff }, { revalidate: false });
       return null;
     } catch (thrown) {
       return thrown instanceof Error ? thrown.message : t("error.services");
@@ -472,9 +477,10 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         }
         setLatestCapture({ appointmentId: appointmentId!, payment: capture.payment });
         notifySuccess(t("paymentRecorded"));
-        setInvoice(result.value);
+        const checkoutCustomer = appointment.checkoutCustomer ? { ...appointment.checkoutCustomer, pointBalance: capture.pointBalance } : undefined;
+        setInvoice(applyCustomerFacts(result.value, checkoutCustomer));
         setDraftPoints(null);
-        await mutateAppointment(capture.appointment, { revalidate: false });
+        await mutateAppointment({ ...capture.appointment, checkoutCustomer, checkoutStaff: appointment.checkoutStaff }, { revalidate: false });
         const [, customerRefresh] = await Promise.allSettled([payments.mutate(), mutateCustomers()]);
         if (customerRefresh.status === "fulfilled") {
           const refreshedCustomer = customerRefresh.value?.items.find((customer) => customer.id === appointment.customerId);
