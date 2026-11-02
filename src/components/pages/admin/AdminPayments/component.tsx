@@ -52,6 +52,12 @@ function toPaymentMethod(method: string | null | undefined): PaymentMethod | nul
   return normalized === "cash" || normalized === "paypay" || normalized === "visa" ? normalized : null;
 }
 
+export function applyServerDiscounts(invoice: CheckoutInvoice, saved: Pick<ServerAppointment, "discount" | "benefitDiscount" | "manualDiscount" | "pointRedemptionIntent">): CheckoutInvoice {
+  const benefitDiscount = saved.benefitDiscount ?? saved.discount;
+  const manualDiscount = saved.manualDiscount ?? 0;
+  return { ...invoice, benefitDiscount, manualDiscount, discount: benefitDiscount + manualDiscount, pointsRequested: saved.pointRedemptionIntent ?? invoice.pointsRequested };
+}
+
 export function buildPaymentSettlementSummary(
   payments: ReadonlyArray<AdminAppointmentPayment>,
 ): PaymentSettlementSummary {
@@ -359,7 +365,7 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         { serviceIds: [nextInvoice.currentService.id, ...nextInvoice.additionalItems.map((item) => item.id)] },
         appointment.version,
       );
-      setInvoice(nextInvoice);
+      setInvoice(applyServerDiscounts(nextInvoice, saved));
       await mutateAppointment({ ...saved, checkoutCustomer: appointment.checkoutCustomer, checkoutStaff: appointment.checkoutStaff }, { revalidate: false });
       return null;
     } catch (thrown) {
