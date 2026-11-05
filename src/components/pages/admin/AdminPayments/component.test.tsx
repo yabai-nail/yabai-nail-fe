@@ -5,11 +5,21 @@ import { describe, expect, it } from "vitest";
 import messages from "../../../../../messages/vi.json";
 import type { Translator } from "@/i18n/config";
 import type { AdminAppointment, AdminAppointmentPayment, AdminCustomer, AdminServiceAddonConfiguration, AdminServiceItem, AdminStaffMember } from "@/service";
-import { applyCustomerFacts, buildEffectivePaymentSettlementSummary, buildInvoiceFromServer, buildPaymentSettlementSummary, checkoutAddonOptions, lockedCheckoutAddonIds } from "./component";
+import { applyCustomerFacts, applyServerDiscounts, buildEffectivePaymentSettlementSummary, buildInvoiceFromServer, buildPaymentSettlementSummary, checkoutAddonOptions, lockedCheckoutAddonIds } from "./component";
 import { CustomerAppointmentPanel } from "./CustomerAppointmentPanel";
 import { initialCheckoutInvoice } from "./data";
 
 describe("admin payment customer and appointment facts", () => {
+  it("uses the repriced server discount after changing services", () => {
+    expect(applyServerDiscounts({ ...initialCheckoutInvoice, benefitDiscount: 1000, discount: 1000 }, { discount: 2000, manualDiscount: 500, pointRedemptionIntent: 0 })).toMatchObject({ benefitDiscount: 2000, manualDiscount: 500, discount: 2500 });
+  });
+  it("uses scoped checkout context when staff cannot load CRM lists", () => {
+    const appointment: AdminAppointment = { id: "assigned", customerId: "customer", branchId: "branch", staffId: "staff", serviceIds: [], startsAt: "2026-11-02T02:00:00Z", endsAt: "2026-11-02T03:00:00Z", status: "AWAITING_PAYMENT", total: 10000, discount: 0, version: 1,
+      checkoutCustomer: { id: "customer", displayName: "Customer", phone: "09******78", pointBalance: 5000, version: 2 }, checkoutStaff: { id: "staff", displayName: "Technician" } };
+    const invoice = buildInvoiceFromServer(appointment, { customers: new Map(), staff: new Map(), services: new Map() }, ((key: string) => key) as Translator, () => "02/11/2026", () => "11:00");
+    expect(invoice.customer).toMatchObject({ name: "Customer", phone: "09******78", pointBalance: 5000 });
+    expect(invoice.appointment.staffName).toBe("Technician");
+  });
   it.each([
     ["Asia/Ho_Chi_Minh", "Asia/Tokyo", "2026-09-27T02:00:00Z", "27/09/2026", "09:00"],
     ["Asia/Tokyo", "Asia/Ho_Chi_Minh", "2026-09-27T02:00:00Z", "27/09/2026", "11:00"],

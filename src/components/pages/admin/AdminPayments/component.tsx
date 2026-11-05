@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
+import { Button } from "@heroui/react";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
@@ -49,6 +50,12 @@ function deriveInitials(name: string): string {
 function toPaymentMethod(method: string | null | undefined): PaymentMethod | null {
   const normalized = method?.toLowerCase();
   return normalized === "cash" || normalized === "paypay" || normalized === "visa" ? normalized : null;
+}
+
+export function applyServerDiscounts(invoice: CheckoutInvoice, saved: Pick<ServerAppointment, "discount" | "benefitDiscount" | "manualDiscount" | "pointRedemptionIntent">): CheckoutInvoice {
+  const benefitDiscount = saved.benefitDiscount ?? saved.discount;
+  const manualDiscount = saved.manualDiscount ?? 0;
+  return { ...invoice, benefitDiscount, manualDiscount, discount: benefitDiscount + manualDiscount, pointsRequested: saved.pointRedemptionIntent ?? invoice.pointsRequested };
 }
 
 export function buildPaymentSettlementSummary(
@@ -121,8 +128,10 @@ export function buildInvoiceFromServer(
   formatTime: (value: Date, timeZone: string) => string,
   branchTimeZone?: string,
 ): CheckoutInvoice {
-  const customer = lookups.customers.get(appointment.customerId);
-  const staff = lookups.staff.get(appointment.staffId);
+  const customer = appointment.checkoutCustomer
+    ? { ...lookups.customers.get(appointment.customerId), ...appointment.checkoutCustomer }
+    : lookups.customers.get(appointment.customerId);
+  const staff = appointment.checkoutStaff ?? lookups.staff.get(appointment.staffId);
   const orderedSnapshots = [...(appointment.services ?? [])].sort((left, right) => left.sortOrder - right.sortOrder);
   const primaryServiceId = orderedSnapshots[0]?.serviceId ?? appointment.serviceIds[0] ?? "unknown";
   const primaryService = lookups.services.get(primaryServiceId);
@@ -251,9 +260,12 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
     branchId,
     appointmentId,
   );
-  const branch = useAdminBranchDetail(appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
-  const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(branchId);
-  const { data: staffData } = useAdminStaff();
+  const canReadBranch = useAdminPermission("branch.read.branch", "branch.read.all");
+  const branch = useAdminBranchDetail(!canReadBranch || appointment?.branchTimeZone ? null : appointment?.branchId ?? branchId);
+  const canReadCustomers = useAdminPermission("customer.read.branch");
+  const canReadStaff = useAdminPermission("staff.read.branch");
+  const { data: customersData, mutate: mutateCustomers } = useAdminCustomers(canReadCustomers ? branchId : null);
+  const { data: staffData } = useAdminStaff(undefined, canReadStaff);
   const { data: servicesData } = useAdminServices({ branchId: branchId ?? undefined, status: "ACTIVE", limit: 100 });
   const payments = useAdminAppointmentPayments(branchId, appointmentId);
   const [latestCapture, setLatestCapture] = useState<{ appointmentId: string; payment: AdminAppointmentPayment } | null>(null);
@@ -353,21 +365,21 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         { serviceIds: [nextInvoice.currentService.id, ...nextInvoice.additionalItems.map((item) => item.id)] },
         appointment.version,
       );
-      setInvoice(nextInvoice);
-      await mutateAppointment(saved, { revalidate: false });
+      setInvoice(applyServerDiscounts(nextInvoice, saved));
+      await mutateAppointment({ ...saved, checkoutCustomer: appointment.checkoutCustomer, checkoutStaff: appointment.checkoutStaff }, { revalidate: false });
       return null;
     } catch (thrown) {
       return thrown instanceof Error ? thrown.message : t("error.services");
     }
   };
 
-  const persistAdjustments = async (manualDiscount: number, discountReason: string, checkoutNote: string): Promise<string | null> => {
+  const persistAdjustments = async (manualDiscount: number, discountReason: string, checkoutNote: string, removeCoupon = false): Promise<string | null> => {
     if (!branchId || !appointmentId || !appointment) return t("error.noAppointment");
     try {
       const saved = await adminService.updateAppointmentCheckoutAdjustments(
         branchId,
         appointmentId,
-        { manualDiscount, discountReason, checkoutNote },
+        { manualDiscount, discountReason, checkoutNote, ...(removeCoupon ? { removeCoupon: true } : {}) },
         appointment.version,
         crypto.randomUUID(),
       );
@@ -381,6 +393,7 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
       }));
       await mutateAppointment({
         ...appointment,
+        couponId: saved.couponId === undefined ? appointment.couponId : saved.couponId,
         total: saved.subtotal,
         discount: saved.benefitDiscount,
         benefitDiscount: saved.benefitDiscount,
@@ -472,9 +485,10 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         }
         setLatestCapture({ appointmentId: appointmentId!, payment: capture.payment });
         notifySuccess(t("paymentRecorded"));
-        setInvoice(result.value);
+        const checkoutCustomer = appointment.checkoutCustomer ? { ...appointment.checkoutCustomer, pointBalance: capture.pointBalance } : undefined;
+        setInvoice(applyCustomerFacts(result.value, checkoutCustomer));
         setDraftPoints(null);
-        await mutateAppointment(capture.appointment, { revalidate: false });
+        await mutateAppointment({ ...capture.appointment, checkoutCustomer, checkoutStaff: appointment.checkoutStaff }, { revalidate: false });
         const [, customerRefresh] = await Promise.allSettled([payments.mutate(), mutateCustomers()]);
         if (customerRefresh.status === "fulfilled") {
           const refreshedCustomer = customerRefresh.value?.items.find((customer) => customer.id === appointment.customerId);
@@ -545,6 +559,17 @@ function AdminCheckoutComponent({ appointmentId }: { readonly appointmentId: str
         <p role="alert" className="mb-4 rounded-lg border border-admin-danger/40 bg-admin-surface px-4 py-2 text-xs text-admin-danger">
           {confirmError}
         </p>
+      ) : null}
+      {appointment.couponId && canAdjust ? (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-admin-border bg-admin-surface px-4 py-3">
+          <p className="text-sm text-admin-muted">{t("couponRemoval.description")}</p>
+          <Button variant="secondary" isDisabled={confirmPending} onPress={() => void (async () => {
+            setConfirmPending(true);
+            setConfirmError(null);
+            try { setConfirmError(await persistAdjustments(invoice.manualDiscount, invoice.discountReason, invoice.orderNote, true)); }
+            finally { setConfirmPending(false); }
+          })()}>{t("couponRemoval.action")}</Button>
+        </div>
       ) : null}
       {cashResult ? (
         <p role="status" className="mb-4 rounded-lg border border-admin-accent/40 bg-admin-soft px-4 py-3 text-sm font-semibold text-admin-accent">

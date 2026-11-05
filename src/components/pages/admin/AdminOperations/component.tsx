@@ -34,15 +34,16 @@ import {
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const labelClass = "block text-xs font-semibold text-admin-ink";
 
-/** Vietnamese mobile numbers; anything else typed here is a scanned membership QR. */
-const PHONE_PATTERN = /^0\d{9}$/;
+/** Local VN/JP numbers and their international forms; signed QR tokens stay intact. */
+const PHONE_PATTERN = /^(?:0\d{9,10}|\+(?:81|84)\d{9,10})$/;
 
 /**
  * The resolution endpoints only understand a membership QR payload or a phone
  * number, so pick between the two rather than sending a `code` nobody reads.
  */
-function resolutionInput(value: string): { phone: string } | { qrPayload: string } {
-  return PHONE_PATTERN.test(value) ? { phone: value } : { qrPayload: value };
+export function resolutionInput(value: string): { phone: string } | { qrPayload: string } {
+  const trimmed = value.trim();
+  return PHONE_PATTERN.test(trimmed) ? { phone: trimmed } : { qrPayload: trimmed };
 }
 
 export function AdminOperationsComponent() {

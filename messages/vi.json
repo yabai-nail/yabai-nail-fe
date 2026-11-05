@@ -2478,6 +2478,7 @@
       "emptyDescription": "Chọn một lịch hẹn để xem đầy đủ thông tin."
     },
     "payments": {
+      "couponRemoval": {"action":"Gỡ coupon","description":"Gỡ coupon để tính lại số tiền cần thanh toán. Coupon chưa dùng vẫn được giữ trong ví khách."},
       "history": {
         "title": "Lịch sử thanh toán",
         "description": "Theo dõi các khoản đã thu, tiền hoàn và thực thu tại chi nhánh.",
