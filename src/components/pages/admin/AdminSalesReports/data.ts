@@ -44,11 +44,7 @@ export function summarize(items: ReadonlyArray<AdminSalesReport>): ReportSummary
   );
 }
 
-export function paginate<T>(items: ReadonlyArray<T>, page: number, pageSize: number): { readonly items: ReadonlyArray<T>; readonly page: number; readonly pageCount: number } {
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const current = Math.min(Math.max(1, page), pageCount);
-  return { items: items.slice((current - 1) * pageSize, current * pageSize), page: current, pageCount };
-}
+export { paginate } from "@/lib/admin-pagination";
 
 /** The selected reports a batch approval can actually take: pending and not locked. */
 export function decidableIds(items: ReadonlyArray<AdminSalesReport>, selected: ReadonlySet<string>): string[] {

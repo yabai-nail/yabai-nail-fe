@@ -1,6 +1,7 @@
 {
   "admin": {
     "common": {
+      "columnFilter": {"search":"Tìm trong danh sách","noMatch":"Không có mục phù hợp","reset":"Đặt lại","apply":"Lọc","clearAll":"Xóa bộ lọc"},
       "accountUpdated": "Đã cập nhật tài khoản", "accountCreated": "Đã thêm tài khoản", "systemSaved": "Đã lưu cấu hình hệ thống", "loyaltySaved": "Đã lưu cấu hình loyalty", "passwordReset": "Đã đặt lại mật khẩu", "passwordResetBody": "Thông báo đã được gửi cho {name}.",
       "appointmentCreated": "Đã tạo lịch hẹn", "appointmentUpdated": "Đã cập nhật lịch hẹn", "staffAssigned": "Đã phân công nhân viên", "actualServicesUpdated": "Đã cập nhật dịch vụ thực tế", "photoAttached": "Đã đính kèm ảnh vào lịch hẹn", "appointmentCancelled": "Đã hủy lịch hẹn", "checkInDone": "Đã check-in lịch hẹn", "serviceStarted": "Đã bắt đầu dịch vụ", "serviceCompleted": "Đã hoàn tất dịch vụ", "noShowDone": "Đã đánh dấu khách không đến",
       "branchUpdated": "Đã cập nhật chi nhánh", "branchCreated": "Đã thêm chi nhánh", "customerUpdated": "Đã cập nhật khách hàng", "customerCreated": "Đã thêm khách hàng", "pointsUpdated": "Đã cập nhật điểm khách hàng", "couponIssued": "Đã phát coupon cho khách hàng", "noteCreated": "Đã thêm ghi chú", "noteUpdated": "Đã cập nhật ghi chú",
@@ -920,7 +921,7 @@
         "addTitle": "Thêm tài khoản",
         "phone": "Số điện thoại",
         "displayName": "Tên hiển thị",
-        "phoneInvalid":"Số điện thoại phải là 10 số bắt đầu bằng 0.","displayNamePlaceholder": "Nguyễn Văn A",
+        "phoneInvalid":"Số điện thoại không hợp lệ. Nhập liền, không dấu gạch hay khoảng trắng, ví dụ 0901234567, 09012345678 hoặc +819012345678.","displayNamePlaceholder": "Nguyễn Văn A",
         "role": "Vai trò",
         "status": "Trạng thái",
         "statusLabel": "Trạng thái tài khoản",
@@ -965,12 +966,9 @@
       "viewLabel": "Khu vực quản lý dịch vụ",
       "categoriesTab": "Danh mục",
       "filterCategory": "Lọc theo danh mục",
+      "filterStatus": "Lọc theo trạng thái",
       "branchFilter": {"label":"Chi nhánh","all":"Mọi chi nhánh"},
-      "categoryPrefix": "Danh mục:",
-      "categorySearchLabel": "Tìm danh mục",
-      "categorySearchPlaceholder": "Tìm danh mục...",
-      "allServices": "Tất cả dịch vụ",
-      "uncategorizedWarning": "{count} dịch vụ chưa thuộc danh mục nào — chỉ thấy được ở “Tất cả dịch vụ”.",
+      "uncategorizedWarning": "{count} dịch vụ chưa thuộc danh mục nào — lọc cột Danh mục theo “Chưa phân loại” để xem và phân loại lại.",
       "showing": "Hiển thị {visible} trong tổng số {total} dịch vụ",
       "searchLabel": "Tìm dịch vụ",
       "searchPlaceholder": "Tìm kiếm dịch vụ...",
@@ -988,6 +986,7 @@
         "addonService": "Dịch vụ bổ sung",
         "addonGroup": "Mã nhóm tùy chọn",
         "nameJa": "Tên tiếng Nhật",
+        "nameJaHint": "Hiển thị cho khách dùng app bằng tiếng Nhật. Để trống thì dùng tên tiếng Việt.",
         "warrantyDays": "Bảo hành (ngày)",
         "warrantyHint": "Nhập 0 nếu không bảo hành. Ngày kết thúc sẽ tự tính sau khi thanh toán.",
         "categoryPlaceholder": "— Chọn danh mục —",
@@ -1007,11 +1006,16 @@
         "actions": "Thao tác",
         "visible": "Đang hiển thị",
         "hidden": "Đang ẩn",
+        "toggleStatus": "Hiện hoặc ẩn dịch vụ {name}", "switchOn": "Hiện", "switchOff": "Ẩn",
+        "shownSuccess": "Đã hiện dịch vụ {name}", "hiddenSuccess": "Đã ẩn dịch vụ {name}", "statusFailed": "Không đổi được trạng thái dịch vụ.",
+        "pinned": "Đã ghim", "pinService": "Ghim {name} lên đầu danh sách", "unpinService": "Bỏ ghim {name}",
+        "pinnedSuccess": "Đã ghim {name} lên đầu", "unpinnedSuccess": "Đã bỏ ghim {name}", "pinFailed": "Không ghim được dịch vụ.",
         "featured": "Ưa chuộng nhất",
         "uncategorized": "Chưa phân loại",
         "addon": "Dịch vụ bổ sung",
         "editService": "Sửa {name}",
         "deleteService": "Xóa {name}",
+        "noServices": "Chưa có dịch vụ nào.",
         "empty": "Không tìm thấy dịch vụ phù hợp."
       },
       "sidebar": {
@@ -1028,7 +1032,8 @@
         "popularityEmpty": "Chưa có dịch vụ nào được đặt.",
         "bookingCount": "{count} lượt",
         "noteHeading": "Ghi chú",
-        "noteBody": "Bạn có thể ẩn/hiện dịch vụ tại trang đặt lịch. Các dịch vụ ẩn sẽ không hiển thị cho khách hàng."
+        "noteSubtitle": "Dịch vụ khách thấy trên trang đặt lịch",
+        "noteBody": "Bật/tắt ở cột Trạng thái để hiện hoặc ẩn dịch vụ. Dịch vụ đang ẩn sẽ không hiển thị cho khách hàng."
       },
       "categoryTable": {
         "all": "Tất cả", "branchCount": "{count} chi nhánh", "allBranches": "Mọi chi nhánh",
@@ -1138,8 +1143,12 @@
         "createTitle": "Tạo tùy chọn bổ sung",
         "empty": "Chưa có tùy chọn bổ sung nào.",
         "name": "Tùy chọn",
-        "caption": "Tùy chọn bổ sung thuộc nhóm {group}",
-        "groupCount": "{count} tùy chọn"
+        "group": "Nhóm",
+        "filterGroup": "Lọc theo nhóm",
+        "searchLabel": "Tìm tùy chọn bổ sung",
+        "searchPlaceholder": "Tìm tùy chọn bổ sung...",
+        "noMatch": "Không tìm thấy tùy chọn phù hợp.",
+        "showing": "Hiển thị {visible} trong tổng số {total} tùy chọn"
       },
       "addons": {
         "title": "Tùy chọn bổ sung cho dịch vụ",
@@ -1175,6 +1184,7 @@
       },
       "surcharge": {
         "heading": "Phụ thu",
+        "description": "Khoản cộng thêm theo số tiền hoặc phần trăm",
         "add": "Thêm phụ thu",
         "loading": "Đang tải danh sách phụ thu…",
         "loadFailed": "Không tải được phụ thu.",
@@ -2002,6 +2012,9 @@
       "emptyHeading": "Chưa có nhân viên",
       "retry": "Thử tải lại trang.",
       "actionDeactivate": "Vô hiệu hoá",
+      "searchLabel": "Tìm nhân viên",
+      "searchPlaceholder": "Tìm theo tên hoặc số điện thoại...",
+      "delete": {"ariaLabel":"Xóa nhân viên {name}","title":"Xóa vĩnh viễn nhân viên?","confirm":"Xóa hẳn {name} cùng ca làm, kỹ năng và mức lương. Tài khoản đăng nhập của nhân viên này sẽ bị khóa. Không thể hoàn tác.","hint":"Chỉ xóa được nhân viên chưa có lịch hẹn, hoa hồng hay bảng lương. Nhân viên đã có dữ liệu sẽ được giữ lại để báo cáo không bị sai.","action":"Xóa vĩnh viễn","deleting":"Đang xóa…","cancel":"Hủy","close":"Đóng","success":"Đã xóa nhân viên {name}","failed":"Không xóa được nhân viên.","historyTitle":"Không thể xóa nhân viên này","hasHistory":"Nhân viên này đã có lịch hẹn, hoa hồng hoặc bảng lương, nên không xóa hẳn được để giữ đúng báo cáo. Hãy vô hiệu hoá: nhân viên sẽ bị ẩn khỏi danh sách đặt lịch và không đăng nhập được nữa.","hasHistoryInactive":"Nhân viên này đã có lịch hẹn, hoa hồng hoặc bảng lương nên được giữ lại để báo cáo không bị sai. Nhân viên đã được vô hiệu hoá: không hiện khi đặt lịch và không đăng nhập được.","openAppointments":"Nhân viên còn lịch hẹn chưa hoàn tất. Hãy chuyển các lịch đó sang thợ khác trước.","deactivateInstead":"Vô hiệu hoá thay thế"},
       "actionActivate": "Kích hoạt",
       "deactivateConfirm": "Vô hiệu hoá {name}? Nhân viên sẽ ẩn khỏi danh sách hoạt động và không nhận lịch mới; bạn có thể kích hoạt lại sau.",
       "firstStaff": "Thêm nhân viên đầu tiên để bắt đầu theo dõi doanh thu và hoa hồng.",
@@ -2052,6 +2065,7 @@
         "withAccount": "Tạo tài khoản đăng nhập cho nhân viên này",
         "withAccountHint": "Nhân viên dùng số điện thoại và mật khẩu này để đăng nhập xem ca làm của mình. Bỏ chọn nếu chưa cần.",
         "phone": "Số điện thoại",
+        "phoneInvalid": "Số điện thoại không hợp lệ. Nhập liền, không dấu gạch hay khoảng trắng, ví dụ 0901234567, 09012345678 hoặc +819012345678.",
         "password": "Mật khẩu tạm",
         "passwordHint": "Ít nhất 8 ký tự, có chữ hoa, chữ thường và số.",
         "accountKept": "Đã tạo tài khoản {phone}. Bấm lại để thử tạo hồ sơ nhân viên, tài khoản này sẽ được dùng lại chứ không tạo trùng.",
@@ -2114,6 +2128,7 @@
       "table": {
         "caption": "Danh sách nhân viên và doanh thu",
         "staff": "Nhân viên",
+        "revenue": "Doanh thu",
         "status": "Trạng thái",
         "commission": "Hoa hồng",
         "payout": "Nhận được",

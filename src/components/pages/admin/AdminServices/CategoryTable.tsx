@@ -1,11 +1,12 @@
 "use client";
 
 import { Bars3Icon, PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Button, Card, Switch } from "@heroui/react";
+import { Button, Card } from "@heroui/react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
+import { AdminStatusSwitch } from "@/components/blocks/admin/AdminStatusSwitch";
 import { adminService, useAdminBranchList, useAdminServiceCategories, type AdminServiceCategory } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import { CategoryEditor } from "./CategoryEditor";
@@ -163,33 +164,14 @@ export function CategoryTable({ services, canWrite }: Readonly<{ services: Reado
                       </td>
                       <td className="px-3 py-2 tabular-nums">{countIn(category)}</td>
                       <td className="px-3 py-2">
-                        <Switch
-                          isSelected={category.status === "ACTIVE"}
-                          isDisabled={!canWrite || busyId === category.id}
-                          onChange={() => void toggleStatus(category)}
-                          aria-label={t("toggleLabel", { name: category.nameVi ?? category.name })}
-                        >
-                          <Switch.Content>
-                            {/*
-                              The track widens to hold its own label, so the row needs no second
-                              piece of text saying the same thing. HeroUI slides the thumb with
-                              `margin-inline-start: calc(100% - 1.5rem)`, a percentage, so it still
-                              lands flush against the right edge at any width. The width is inline
-                              rather than a utility class because both are single-class selectors and
-                              which one wins would depend on CSS layer order.
-                            */}
-                            <Switch.Control style={{ width: "4.25rem" }}>
-                              <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center text-[0.625rem] font-semibold uppercase tracking-wide">
-                                {category.status === "ACTIVE" ? (
-                                  <span className="pl-2.5 text-admin-on-accent">{t("enabled")}</span>
-                                ) : (
-                                  <span className="ml-auto pr-2.5 text-admin-muted">{t("disabled")}</span>
-                                )}
-                              </span>
-                              <Switch.Thumb />
-                            </Switch.Control>
-                          </Switch.Content>
-                        </Switch>
+                        <AdminStatusSwitch
+                          isOn={category.status === "ACTIVE"}
+                          onToggle={canWrite ? () => void toggleStatus(category) : undefined}
+                          isBusy={busyId === category.id}
+                          label={t("toggleLabel", { name: category.nameVi ?? category.name })}
+                          onText={t("enabled")}
+                          offText={t("disabled")}
+                        />
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex gap-1">

@@ -240,6 +240,7 @@ export function ServiceEditModal({
                   value={nameJa}
                   onChange={(event) => setNameJa(event.target.value)}
                 />
+                <span className="text-xs text-admin-muted">{t("form.nameJaHint")}</span>
               </label>
               {serviceType === "ADD_ON" ? <label className="flex flex-col gap-2 text-sm sm:col-span-2"><span className="font-semibold text-admin-ink">{t("form.addonGroup")}</span><input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 uppercase text-admin-ink" value={addonGroup} onChange={(event) => setAddonGroup(event.target.value)} /></label> : null}
               {serviceType === "BASE" ? <label className="flex flex-col gap-2 text-sm">

@@ -205,6 +205,7 @@ GET /api/v1/admin/branches/{branchId}/leave-requests
 GET /api/v1/admin/notification-campaigns
 DELETE /api/v1/admin/services/{serviceId}
 DELETE /api/v1/admin/branches/{branchId}
+DELETE /api/v1/admin/staff/{staffId}
 GET /api/v1/admin/services/{serviceId}/add-ons
 PUT /api/v1/admin/services/{serviceId}/add-ons
 GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons

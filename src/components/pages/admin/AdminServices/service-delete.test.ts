@@ -7,12 +7,15 @@ const directory = join(root, "src", "components", "pages", "admin", "AdminServic
 
 describe("admin service deletion", () => {
   it("offers a translated delete action and confirmation dialog", () => {
+    // The row actions are shared by the services and add-ons tables, and each table renders them.
+    const actions = readFileSync(join(directory, "ServiceTableCells.tsx"), "utf8");
     const table = readFileSync(join(directory, "ServiceTable.tsx"), "utf8");
     const screen = readFileSync(join(directory, "component.tsx"), "utf8");
     const dialog = readFileSync(join(directory, "ServiceDeleteModal.tsx"), "utf8");
 
-    expect(table).toContain("TrashIcon");
-    expect(table).toContain('t("table.deleteService"');
+    expect(actions).toContain("TrashIcon");
+    expect(actions).toContain('t("table.deleteService"');
+    expect(table).toContain("<ServiceRowActions");
     expect(screen).toContain("<ServiceDeleteModal");
     expect(dialog).toContain("adminService.deleteService(service.id, service.version)");
     expect(dialog).toContain('t("delete.confirm",');

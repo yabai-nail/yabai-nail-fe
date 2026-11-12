@@ -34,6 +34,8 @@ function render(staff: ReadonlyArray<StaffMember>, canWrite = true) {
         busyId={null}
         onEdit={() => {}}
         onToggleActive={() => {}}
+        sort={null}
+        onSortChange={() => {}}
       />
     </NextIntlClientProvider>,
   );

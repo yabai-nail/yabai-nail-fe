@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { pageWindow } from "./admin-pagination";
+import { pageWindow, paginate } from "./admin-pagination";
+
+describe("paginate", () => {
+  const rows = Array.from({ length: 14 }, (_, index) => index + 1);
+
+  it("slices the requested page and clamps an out-of-range one", () => {
+    expect(paginate(rows, 2, 8)).toEqual({ items: [9, 10, 11, 12, 13, 14], page: 2, pageCount: 2 });
+    expect(paginate(rows, 9, 8).page).toBe(2);
+    expect(paginate([], 1, 8)).toEqual({ items: [], page: 1, pageCount: 1 });
+  });
+
+  it("refuses a page size that is not a positive integer", () => {
+    expect(() => paginate(rows, 1, 0)).toThrow(RangeError);
+    expect(() => paginate(rows, 1, 2.5)).toThrow(RangeError);
+  });
+});
 
 describe("pagination window", () => {
   it("shows every page while they all fit", () => {

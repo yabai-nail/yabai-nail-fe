@@ -1,6 +1,7 @@
 {
   "admin": {
     "common": {
+      "columnFilter": {"search":"リストを検索","noMatch":"該当する項目がありません","reset":"リセット","apply":"絞り込む","clearAll":"絞り込みを解除"},
       "accountUpdated": "アカウントを更新しました", "accountCreated": "アカウントを追加しました", "systemSaved": "システム設定を保存しました", "loyaltySaved": "ロイヤルティ設定を保存しました", "passwordReset": "パスワードをリセットしました", "passwordResetBody": "{name} に通知を送信しました。",
       "appointmentCreated": "予約を作成しました", "appointmentUpdated": "予約を更新しました", "staffAssigned": "スタッフを割り当てました", "actualServicesUpdated": "実施メニューを更新しました", "photoAttached": "予約に写真を添付しました", "appointmentCancelled": "予約をキャンセルしました", "checkInDone": "チェックインしました", "serviceStarted": "施術を開始しました", "serviceCompleted": "施術を完了しました", "noShowDone": "来店なしとして記録しました",
       "branchUpdated": "店舗を更新しました", "branchCreated": "店舗を追加しました", "customerUpdated": "顧客を更新しました", "customerCreated": "顧客を追加しました", "pointsUpdated": "顧客ポイントを更新しました", "couponIssued": "顧客にクーポンを発行しました", "noteCreated": "メモを追加しました", "noteUpdated": "メモを更新しました",
@@ -920,7 +921,7 @@
         "addTitle": "アカウントを追加",
         "phone": "電話番号",
         "displayName": "表示名",
-        "phoneInvalid":"電話番号は0から始まる10桁で入力してください。","displayNamePlaceholder": "山田 太郎",
+        "phoneInvalid":"電話番号が正しくありません。ハイフンや空白なしで入力してください（例: 09012345678、+819012345678）。","displayNamePlaceholder": "山田 太郎",
         "role": "役割",
         "status": "ステータス",
         "statusLabel": "アカウントのステータス",
@@ -965,12 +966,9 @@
       "viewLabel": "メニュー管理エリア",
       "categoriesTab": "カテゴリー",
       "filterCategory": "カテゴリーで絞り込む",
+      "filterStatus": "ステータスで絞り込む",
       "branchFilter": {"label":"店舗","all":"すべての店舗"},
-      "categoryPrefix": "カテゴリー：",
-      "categorySearchLabel": "カテゴリーを検索",
-      "categorySearchPlaceholder": "カテゴリーを検索…",
-      "allServices": "すべてのメニュー",
-      "uncategorizedWarning": "{count}件のメニューが未分類です。「すべてのメニュー」でのみ表示されます。",
+      "uncategorizedWarning": "{count}件のメニューが未分類です。カテゴリー列を「未分類」で絞り込むと確認・分類できます。",
       "showing": "全{total}件中{visible}件を表示",
       "searchLabel": "メニューを検索",
       "searchPlaceholder": "メニューを検索…",
@@ -988,6 +986,7 @@
         "addonService": "追加オプション",
         "addonGroup": "オプショングループコード",
         "nameJa": "日本語名",
+        "nameJaHint": "アプリを日本語で使うお客様に表示されます。空欄の場合はベトナム語名を使います。",
         "warrantyDays": "保証日数",
         "warrantyHint": "保証なしは0を入力してください。支払い後に終了日が自動計算されます。",
         "categoryPlaceholder": "— カテゴリーを選択 —",
@@ -1007,11 +1006,16 @@
         "actions": "操作",
         "visible": "表示中",
         "hidden": "非表示",
+        "toggleStatus": "メニュー {name} の表示/非表示を切り替える", "switchOn": "表示", "switchOff": "非表示",
+        "shownSuccess": "メニュー {name} を表示しました", "hiddenSuccess": "メニュー {name} を非表示にしました", "statusFailed": "メニューのステータスを変更できませんでした。",
+        "pinned": "ピン留め", "pinService": "{name} を先頭にピン留め", "unpinService": "{name} のピン留めを外す",
+        "pinnedSuccess": "{name} を先頭にピン留めしました", "unpinnedSuccess": "{name} のピン留めを外しました", "pinFailed": "メニューをピン留めできませんでした。",
         "featured": "最も人気",
         "uncategorized": "未分類",
         "addon": "追加オプション",
         "editService": "{name} を編集",
         "deleteService": "{name} を削除",
+        "noServices": "メニューがまだありません。",
         "empty": "該当するメニューがありません。"
       },
       "sidebar": {
@@ -1028,7 +1032,8 @@
         "popularityEmpty": "予約されたメニューはまだありません。",
         "bookingCount": "{count}件",
         "noteHeading": "メモ",
-        "noteBody": "予約ページでメニューの表示・非表示を切り替えられます。非表示のメニューはお客様には表示されません。"
+        "noteSubtitle": "予約ページでお客様に表示されるメニュー",
+        "noteBody": "ステータス列のスイッチでメニューの表示・非表示を切り替えます。非表示のメニューはお客様には表示されません。"
       },
       "categoryTable": {
         "all": "すべて", "branchCount": "{count}店舗", "allBranches": "全店舗",
@@ -1138,8 +1143,12 @@
         "createTitle": "追加オプションを作成",
         "empty": "追加オプションはまだありません。",
         "name": "オプション",
-        "caption": "グループ {group} の追加オプション",
-        "groupCount": "{count} 件"
+        "group": "グループ",
+        "filterGroup": "グループで絞り込む",
+        "searchLabel": "追加オプションを検索",
+        "searchPlaceholder": "追加オプションを検索…",
+        "noMatch": "該当する追加オプションがありません。",
+        "showing": "全{total}件中{visible}件を表示"
       },
       "addons": {
         "title": "追加オプション設定",
@@ -1175,6 +1184,7 @@
       },
       "surcharge": {
         "heading": "追加料金",
+        "description": "金額または割合で加算する料金",
         "add": "追加料金を追加",
         "loading": "追加料金を読み込み中…",
         "loadFailed": "追加料金を読み込めません。",
@@ -1992,6 +2002,9 @@
       "emptyHeading": "スタッフがいません",
       "retry": "ページを再読み込みしてください。",
       "actionDeactivate": "無効化",
+      "searchLabel": "スタッフを検索",
+      "searchPlaceholder": "名前または電話番号で検索…",
+      "delete": {"ariaLabel":"スタッフ {name} を削除","title":"このスタッフを完全に削除しますか？","confirm":"{name} をシフト・スキル・給与設定とともに完全に削除します。ログインは無効になります。元に戻せません。","hint":"予約・歩合・給与の記録がないスタッフのみ削除できます。記録があるスタッフはレポートを正しく保つため残ります。","action":"完全に削除","deleting":"削除中…","cancel":"キャンセル","close":"閉じる","success":"スタッフ {name} を削除しました","failed":"スタッフを削除できませんでした。","historyTitle":"このスタッフは削除できません","hasHistory":"このスタッフには予約・歩合・給与の記録があるため、レポートを正しく保つよう残します。代わりに無効化してください。予約に表示されなくなり、ログインもできなくなります。","hasHistoryInactive":"このスタッフには予約・歩合・給与の記録があるため、レポートを正しく保つよう残します。すでに無効化されており、予約に表示されず、ログインもできません。","openAppointments":"未完了の予約が残っています。先に別のスタッフへ振り替えてください。","deactivateInstead":"代わりに無効化"},
       "actionActivate": "有効化",
       "deactivateConfirm": "{name} を無効化しますか？稼働リストから非表示になり、新規予約を受けません。後で再有効化できます。",
       "firstStaff": "最初のスタッフを追加すると、売上と歩合の記録が始まります。",
@@ -2038,6 +2051,7 @@
         "submit": "スタッフを追加", "withAccount": "このスタッフのログインアカウントを作成する",
         "submit": "スタッフを追加", "withAccountHint": "スタッフはこの電話番号とパスワードでログインし、自分のシフトを確認します。不要な場合はチェックを外してください。",
         "submit": "スタッフを追加", "phone": "電話番号",
+        "phoneInvalid": "電話番号が正しくありません。ハイフンや空白なしで入力してください（例: 09012345678、+819012345678）。",
         "submit": "スタッフを追加", "password": "仮パスワード",
         "submit": "スタッフを追加", "passwordHint": "8文字以上で、大文字・小文字・数字を含めてください。",
         "submit": "スタッフを追加", "accountKept": "アカウント {phone} は作成済みです。もう一度押すとスタッフ情報の作成を再試行し、このアカウントを再利用します。",
@@ -2099,6 +2113,7 @@
       "table": {
         "caption": "スタッフと売上の一覧",
         "staff": "スタッフ",
+        "revenue": "売上",
         "status": "ステータス",
         "commission": "歩合",
         "payout": "受取額",

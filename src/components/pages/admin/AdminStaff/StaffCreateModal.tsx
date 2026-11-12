@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { adminMediaService, adminService, useAdminPermission } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
+import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
 import { AdminAvatarField, useAvatarField } from "@/components/blocks/admin/AdminAvatarField";
 import { StaffBranchField, type StaffBranchOption } from "./StaffBranchField";
 import { canCreateStaff } from "./data";
@@ -53,6 +54,9 @@ export function StaffCreateModal({
 
   const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
   const canSubmit = canCreateStaff({ name, withAccount, phone, password }) && !avatar.blocked && !busy;
+  // Flagged only once something is typed, so an untouched form does not open in red.
+  const phoneRejected = phone.trim() !== "" && !isAdminPhone(phone);
+  const passwordRejected = password !== "" && !isStrongTemporaryPassword(password);
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -177,9 +181,13 @@ export function StaffCreateModal({
                         value={phone}
                         onChange={(event) => setPhone(event.target.value)}
                         placeholder="0900000010"
-                        inputMode="numeric"
+                        inputMode="tel"
+                        aria-invalid={phoneRejected}
                         disabled={accountId !== null}
                       />
+                      {/* Without this the submit just stays disabled and nothing says which
+                          field is holding it back. */}
+                      {phoneRejected ? <span className="text-xs text-admin-danger">{t("create.phoneInvalid")}</span> : null}
                     </label>
                     <label className="flex flex-col gap-1 text-sm">
                       <span className="text-xs font-semibold text-admin-ink">{t("create.password")}</span>
@@ -188,9 +196,10 @@ export function StaffCreateModal({
                         className={inputClass}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
+                        aria-invalid={passwordRejected}
                         disabled={accountId !== null}
                       />
-                      <span className="text-xs text-admin-muted">{t("create.passwordHint")}</span>
+                      <span className={`text-xs ${passwordRejected ? "text-admin-danger" : "text-admin-muted"}`}>{t("create.passwordHint")}</span>
                     </label>
                   </>
                 ) : null}

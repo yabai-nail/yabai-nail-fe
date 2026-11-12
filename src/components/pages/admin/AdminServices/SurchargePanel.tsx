@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { Button, Card, Modal } from "@heroui/react";
+import { PencilSquareIcon, PlusIcon, ReceiptPercentIcon } from "@heroicons/react/24/outline";
+import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { formatMoney, parseWholeYen } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
@@ -12,6 +12,7 @@ import {
   type AdminSurcharge,
 } from "@/service";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { ServiceInfoCard, ServiceInfoEmpty } from "./ServiceInfoCard";
 
 // Compact org-scope surcharge management. Same-file editor mirrors the
 // pattern from CategoryEditor: one modal covers create + edit.
@@ -23,26 +24,29 @@ export function SurchargePanel() {
   const [creating, setCreating] = useState(false);
 
   return (
-    <Card className="gap-0 rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-      <Card.Header className="flex flex-row items-center justify-between px-4 pt-4">
-        <h2 className="font-bold">{t("surcharge.heading")}</h2>
+    <ServiceInfoCard
+      icon={ReceiptPercentIcon}
+      title={t("surcharge.heading")}
+      subtitle={t("surcharge.description")}
+      action={
         <Button
           isIconOnly
           size="sm"
-          variant="ghost"
+          variant="outline"
+          className="rounded-lg border-admin-border"
           aria-label={t("surcharge.add")}
           onPress={() => setCreating(true)}
         >
           <PlusIcon className="size-4" />
         </Button>
-      </Card.Header>
-      <Card.Content className="p-4">
+      }
+    >
         {isLoading ? (
           <p className="text-xs text-admin-muted">{t("surcharge.loading")}</p>
         ) : error ? (
           <p role="alert" className="text-xs text-admin-danger">{t("surcharge.loadFailed")}</p>
         ) : items.length === 0 ? (
-          <p className="text-xs text-admin-muted">{t("surcharge.empty")}</p>
+          <ServiceInfoEmpty icon={ReceiptPercentIcon}>{t("surcharge.empty")}</ServiceInfoEmpty>
         ) : (
           <ul className="space-y-1 text-xs">
             {items.map((surcharge) => (
@@ -50,15 +54,14 @@ export function SurchargePanel() {
                 key={surcharge.id}
                 className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-admin-soft"
               >
-                <span className="min-w-0 flex-1 truncate">
-                  <strong className="text-admin-ink">{surcharge.name}</strong>
-                  <span className="ml-2 text-admin-muted">
-                    {typeof surcharge.amount === "number"
-                      ? formatMoney(surcharge.amount)
-                      : typeof surcharge.percent === "number"
-                        ? `${surcharge.percent}%`
-                        : "—"}
-                  </span>
+                <strong className="min-w-0 flex-1 truncate text-admin-ink">{surcharge.name}</strong>
+                {/* Right-aligned like the booking counts in the best-sellers card beside it. */}
+                <span className="shrink-0 font-semibold tabular-nums text-admin-accent">
+                  {typeof surcharge.amount === "number"
+                    ? formatMoney(surcharge.amount)
+                    : typeof surcharge.percent === "number"
+                      ? `${surcharge.percent}%`
+                      : "—"}
                 </span>
                 <Button
                   isIconOnly
@@ -73,8 +76,8 @@ export function SurchargePanel() {
             ))}
           </ul>
         )}
-      </Card.Content>
 
+      {/* The editor is a modal and portals out, so its place inside the card body is incidental. */}
       {(creating || editing) ? (
         <SurchargeEditor
           surcharge={editing}
@@ -85,7 +88,7 @@ export function SurchargePanel() {
           onSaved={() => void mutate()}
         />
       ) : null}
-    </Card>
+    </ServiceInfoCard>
   );
 }
 

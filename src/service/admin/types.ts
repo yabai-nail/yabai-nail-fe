@@ -180,6 +180,8 @@ export interface AdminServiceItem {
   readonly imageUrl?: string | null;
   readonly soldCount?: number;
   readonly isFeatured?: boolean;
+  /** Admin-only: listed first in the console's service table. Absent before the API ships it. */
+  readonly isPinned?: boolean;
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
@@ -755,6 +757,7 @@ export interface AdminServiceItemPatch {
   readonly imageUrl?: string | null;
   readonly imageMediaId?: string | null;
   readonly isFeatured?: boolean;
+  readonly isPinned?: boolean;
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;

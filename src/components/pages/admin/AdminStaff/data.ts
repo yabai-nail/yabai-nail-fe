@@ -1,4 +1,6 @@
 import { isAdminPhone, isStrongTemporaryPassword } from "@/lib/admin-credentials";
+import { matchesSearch } from "@/lib/admin-search";
+import type { AdminTableSort } from "@/lib/admin-table-sort";
 
 export type StaffStatus = "working" | "leave";
 
@@ -37,6 +39,22 @@ export type StaffMember = {
 /** The code the backend rejects a transfer with while the member still has work booked. */
 export const OPEN_APPOINTMENTS_CODE = "RESOURCE_HAS_OPEN_APPOINTMENTS";
 
+/** The API's refusal to hard-delete a technician who has appointments, commissions or payroll. */
+export const STAFF_HAS_HISTORY_CODE = "STAFF_HAS_HISTORY";
+
+/**
+ * The delete refusals the dialog answers itself: history means "deactivate instead", open
+ * appointments means "reassign them first". Anything else shows the API's own message.
+ */
+export function staffDeleteRefusal(error: unknown): "hasHistory" | "openAppointments" | null {
+  return errorCode(error) === STAFF_HAS_HISTORY_CODE ? "hasHistory" : staffSaveErrorKey(error);
+}
+
+/** The API error code carried by a thrown value, if it carries one. */
+function errorCode(error: unknown): unknown {
+  return typeof error === "object" && error !== null && "code" in error ? (error as { readonly code?: unknown }).code : null;
+}
+
 /**
  * The one save failure this form explains in its own words.
  *
@@ -46,10 +64,7 @@ export const OPEN_APPOINTMENTS_CODE = "RESOURCE_HAS_OPEN_APPOINTMENTS";
  * finish or cancel those appointments, then move the technician.
  */
 export function staffSaveErrorKey(error: unknown): "openAppointments" | null {
-  const code = typeof error === "object" && error !== null && "code" in error
-    ? (error as { readonly code?: unknown }).code
-    : null;
-  return code === OPEN_APPOINTMENTS_CODE ? "openAppointments" : null;
+  return errorCode(error) === OPEN_APPOINTMENTS_CODE ? "openAppointments" : null;
 }
 
 /**
@@ -70,9 +85,32 @@ export function canCreateStaff(draft: {
   return isAdminPhone(draft.phone) && isStrongTemporaryPassword(draft.password);
 }
 
-/** Client-side page slice for the roster list (rows are fetched in one page, paged in memory). */
-export function paginate<T>(items: ReadonlyArray<T>, page: number, pageSize: number): { readonly items: ReadonlyArray<T>; readonly page: number; readonly pageCount: number } {
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const current = Math.min(Math.max(1, page), pageCount);
-  return { items: items.slice((current - 1) * pageSize, current * pageSize), page: current, pageCount };
+/** The staff table's free-text search: the name or the phone, the two things an admin knows. */
+export function searchStaff(members: ReadonlyArray<StaffMember>, query: string): ReadonlyArray<StaffMember> {
+  return members.filter((member) => matchesSearch(query, [member.name, member.phone]));
 }
+
+/** The staff table's sortable columns. */
+export type StaffSortKey = "name" | "revenue" | "commissionRate" | "commissionAmount" | "orders";
+
+/**
+ * Orders the roster for the clicked column; null keeps the API's order. A member with no figure
+ * for the period has no value rather than zero, so they stay after every member who has one,
+ * in either direction. Ties fall back to the name.
+ */
+export function sortStaff(
+  members: ReadonlyArray<StaffMember>,
+  sort: AdminTableSort<StaffSortKey> | null,
+): ReadonlyArray<StaffMember> {
+  if (!sort) return members;
+  const sign = sort.direction === "asc" ? 1 : -1;
+  const byName = (left: StaffMember, right: StaffMember) => left.name.localeCompare(right.name, "vi");
+  return [...members].sort((left, right) => {
+    if (sort.key === "name") return sign * byName(left, right);
+    const a = left[sort.key], b = right[sort.key];
+    if (a === null || b === null) return Number(a === null) - Number(b === null) || byName(left, right);
+    return sign * (a - b) || byName(left, right);
+  });
+}
+
+export { paginate } from "@/lib/admin-pagination";

@@ -7,6 +7,8 @@ type AdminSearchFieldProps = {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly fullWidth?: boolean;
+  /** Replaces the default width (and may add sizing) for a toolbar that wants a wider box. */
+  readonly className?: string;
 };
 
 export function _AdminSearchField({
@@ -15,9 +17,10 @@ export function _AdminSearchField({
   value,
   onChange,
   fullWidth = false,
+  className,
 }: AdminSearchFieldProps) {
   return (
-    <InputGroup className={fullWidth ? "w-full" : "w-full sm:w-64"} fullWidth>
+    <InputGroup className={className ?? (fullWidth ? "w-full" : "w-full sm:w-64")} fullWidth>
       <InputGroup.Prefix>
         <MagnifyingGlassIcon aria-hidden="true" className="size-4 text-admin-muted" />
       </InputGroup.Prefix>

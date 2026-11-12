@@ -474,6 +474,12 @@ export const adminService = {
       body: patch,
       version,
     }),
+  /** Hard delete; the API refuses anyone with history (STAFF_HAS_HISTORY), who is deactivated instead. */
+  deleteStaff: (staffId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/staff/{staffId}", {
+      path: { staffId },
+      version,
+    }),
   setStaffCompensation: (
     staffId: string,
     input: AdminStaffCompensationInput,

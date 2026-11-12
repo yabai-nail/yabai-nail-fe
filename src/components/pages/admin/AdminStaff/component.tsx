@@ -7,7 +7,9 @@ import { useMemo, useState } from "react";
 import { AdminEmptySelection } from "@/components/blocks/admin/AdminEmptySelection";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
+import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import type { AdminTableSort } from "@/lib/admin-table-sort";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
 import { formatMoney } from "@/lib/admin-format";
 import { resolveVisibleSelection } from "@/lib/admin-selection";
@@ -27,14 +29,16 @@ import {
   useAdminStaffMember,
   useAdminStaffPerformance,
   useAdminPermission,
+  useAuth,
   type AdminStaffMember as ServerStaff,
 } from "@/service";
 import { RecentOrdersTable } from "./RecentOrdersTable";
 import { StaffCreateModal } from "./StaffCreateModal";
+import { StaffDeleteModal } from "./StaffDeleteModal";
 import { StaffDetailPanel } from "./StaffDetailPanel";
 import { StaffEditModal } from "./StaffEditModal";
 import { StaffTable } from "./StaffTable";
-import { paginate } from "./data";
+import { paginate, searchStaff, sortStaff, type StaffSortKey } from "./data";
 import type { StaffMember, StaffStatus } from "./data";
 
 type StaffFilter = "all" | StaffStatus;
@@ -86,6 +90,8 @@ export function AdminStaffComponent({
   const tc = useTranslations("admin.common");
   const { branchId, branchIds } = useAdminBranch();
   const canWriteStaff = useAdminPermission("staff.write.branch");
+  // The API allows the hard delete to the owner alone, so only the owner sees the button.
+  const canDeleteStaff = useAuth().user?.role === "OWNER";
   const period = useMemo(() => currentMonthPeriod(new Date()), []);
   const [filter, setFilter] = useState<StaffFilter>("all");
   // The roster opens on every branch this admin may see and narrows from there. Asking for
@@ -124,6 +130,7 @@ export function AdminStaffComponent({
   const [busyId, setBusyId] = useState<string | null>(null);
   // The member awaiting a deactivate confirmation (reactivation is applied without a prompt).
   const [confirmDeactivate, setConfirmDeactivate] = useState<StaffMember | null>(null);
+  const [deleting, setDeleting] = useState<StaffMember | null>(null);
 
   const performanceById = useMemo(
     () => indexStaffPerformance(performance.data?.rows),
@@ -136,9 +143,12 @@ export function AdminStaffComponent({
   const editing = source.find((member) => member.id === editingId) ?? null;
 
   const [selectedId, setSelectedId] = useState<string>(initialSelectedId);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<AdminTableSort<StaffSortKey> | null>(null);
+  // Searched and sorted before paging, so both run across the whole roster, not one page.
   const visibleStaff = useMemo(
-    () => source.filter((member) => filter === "all" || member.status === filter),
-    [source, filter],
+    () => sortStaff(searchStaff(source.filter((member) => filter === "all" || member.status === filter), query), sort),
+    [source, filter, query, sort],
   );
   const { items: pagedStaff, page: currentPage, pageCount } = paginate(visibleStaff, page, 10);
   const selected = resolveVisibleSelection(visibleStaff, selectedId || visibleStaff[0]?.id || "");
@@ -250,6 +260,13 @@ export function AdminStaffComponent({
             options={branchFilterOptions}
           />
         ) : null}
+        <AdminSearchField
+          label={t("searchLabel")}
+          placeholder={t("searchPlaceholder")}
+          value={query}
+          onChange={(value) => { setQuery(value); setPage(1); }}
+          className="min-h-11 w-full rounded-lg sm:w-72 lg:w-80"
+        />
         </div>
         <Button
           variant="primary"
@@ -292,6 +309,9 @@ export function AdminStaffComponent({
                 busyId={busyId}
                 onEdit={(member) => setEditingId(member.id)}
                 onToggleActive={handleToggleActive}
+                onDelete={canDeleteStaff ? setDeleting : undefined}
+                sort={sort}
+                onSortChange={(next) => { setSort(next); setPage(1); }}
               /></Card.Content>
             </Card>
             <div className="flex justify-end">
@@ -338,6 +358,21 @@ export function AdminStaffComponent({
             // detail panel renders. A transfer changes both, so both have to be refetched.
             void mutateStaff();
             void staffDetail.mutate();
+          }}
+        />
+      ) : null}
+      {deleting ? (
+        <StaffDeleteModal
+          member={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => {
+            if (selectedId === deleting.id) setSelectedId("");
+            void mutateStaff();
+          }}
+          // Refused for history: hand over to the existing deactivate confirmation.
+          onDeactivate={() => {
+            setConfirmDeactivate(deleting);
+            setDeleting(null);
           }}
         />
       ) : null}
