@@ -13,6 +13,7 @@ type Window = { readonly startsAt: string; readonly endsAt: string };
 
 /** One end of the window: a date and a time, entered in Tokyo time and kept as a UTC instant. */
 function WhenField({
+  field,
   legend,
   dateLabel,
   timeLabel,
@@ -21,6 +22,8 @@ function WhenField({
   errorId,
   onChange,
 }: Readonly<{
+  /** The sale field this is, so the form can bring its error into view. */
+  field: "startsAt" | "endsAt";
   legend: string;
   dateLabel: string;
   timeLabel: string;
@@ -31,7 +34,7 @@ function WhenField({
 }>) {
   const parts = tokyoParts(value);
   return (
-    <fieldset className="grid gap-2 text-sm">
+    <fieldset data-sale-field={field} className="grid gap-2 text-sm">
       <legend className="mb-2 font-semibold text-admin-ink">{legend}</legend>
       <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
         <AdminDateField
@@ -80,6 +83,7 @@ export function SaleWindowFields({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <WhenField
+          field="startsAt"
           legend={t("start")}
           dateLabel={t("startDate")}
           timeLabel={t("startTime")}
@@ -89,6 +93,7 @@ export function SaleWindowFields({
           onChange={(startsAt) => onChange({ startsAt })}
         />
         <WhenField
+          field="endsAt"
           legend={t("end")}
           dateLabel={t("endDate")}
           timeLabel={t("endTime")}

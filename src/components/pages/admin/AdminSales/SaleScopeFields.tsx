@@ -3,9 +3,19 @@
 import { useTranslations } from "next-intl";
 
 import { SaleItemPicker } from "./SaleItemPicker";
-import type { SaleFormScope, SaleTarget } from "./data";
+import type { SaleFormScope, SaleOptionsStatus, SaleTarget } from "./data";
 
 export type SaleGroupOption = { readonly id: string; readonly label: string };
+
+/** Stands in for a list that is still loading or failed, so nothing reads as "none yet". */
+export function SaleOptionsNotice({ status }: Readonly<{ status: Exclude<SaleOptionsStatus, "ready"> }>) {
+  const t = useTranslations("admin.sales");
+  return status === "loading" ? (
+    <p role="status" className="text-xs text-admin-muted">{t("optionsLoading")}</p>
+  ) : (
+    <p role="alert" className="text-xs text-admin-danger">{t("optionsFailed")}</p>
+  );
+}
 
 const MODES = ["NONE", "ALL", "GROUPS", "ITEMS"] as const;
 
@@ -43,12 +53,16 @@ export function SaleScopeFields({
   onChange,
   groups,
   items,
+  groupsStatus,
+  itemsStatus,
 }: Readonly<{
   kind: keyof typeof COPY;
   value: SaleFormScope;
   onChange: (next: SaleFormScope) => void;
   groups: ReadonlyArray<SaleGroupOption>;
   items: ReadonlyArray<SaleTarget>;
+  groupsStatus: SaleOptionsStatus;
+  itemsStatus: SaleOptionsStatus;
 }>) {
   const t = useTranslations("admin.sales");
   const copy = COPY[kind];
@@ -80,9 +94,15 @@ export function SaleScopeFields({
       </div>
 
       {value.mode === "ALL" ? (
-        <p className="text-xs leading-5 text-admin-muted">{t(copy.all, { count: items.length })}</p>
+        itemsStatus === "ready" ? (
+          <p className="text-xs leading-5 text-admin-muted">{t(copy.all, { count: items.length })}</p>
+        ) : (
+          <SaleOptionsNotice status={itemsStatus} />
+        )
       ) : value.mode === "GROUPS" ? (
-        groups.length === 0 ? (
+        groupsStatus !== "ready" ? (
+          <SaleOptionsNotice status={groupsStatus} />
+        ) : groups.length === 0 ? (
           <p role="status" className="text-xs text-admin-muted">{t(copy.noGroups)}</p>
         ) : (
           <fieldset className="grid gap-2 rounded-lg border border-admin-border p-3">
@@ -103,14 +123,18 @@ export function SaleScopeFields({
           </fieldset>
         )
       ) : value.mode === "ITEMS" ? (
-        <SaleItemPicker
-          label={t(copy.pick)}
-          searchLabel={t(copy.search)}
-          emptyText={t(copy.noItems)}
-          items={items}
-          selected={value.itemIds}
-          onChange={(itemIds) => onChange({ ...value, itemIds })}
-        />
+        itemsStatus !== "ready" ? (
+          <SaleOptionsNotice status={itemsStatus} />
+        ) : (
+          <SaleItemPicker
+            label={t(copy.pick)}
+            searchLabel={t(copy.search)}
+            emptyText={t(copy.noItems)}
+            items={items}
+            selected={value.itemIds}
+            onChange={(itemIds) => onChange({ ...value, itemIds })}
+          />
+        )
       ) : null}
     </fieldset>
   );

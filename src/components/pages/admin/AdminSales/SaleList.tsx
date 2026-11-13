@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
 import { formatMoney } from "@/lib/admin-format";
 import type { AdminSale } from "@/service";
-import { describeSaleRule, saleCoverage, type SaleTarget } from "./data";
+import { describeSaleRule, saleLoweredCounts, type SaleTarget } from "./data";
 
 const statusColor = { ACTIVE: "success", UPCOMING: "warning", ENDED: "default" } as const;
 
@@ -64,10 +64,10 @@ export function SaleList({
   }
 
   const coverage = (sale: AdminSale) => {
-    const covered = saleCoverage(sale, designTargets, serviceTargets);
+    const lowered = saleLoweredCounts(sale, designTargets, serviceTargets);
     return [
-      sale.designs.mode === "NONE" ? null : t("list.coverageDesigns", { count: covered.designs.length }),
-      sale.services.mode === "NONE" ? null : t("list.coverageServices", { count: covered.services.length }),
+      sale.designs.mode === "NONE" ? null : t("list.coverageDesigns", { count: lowered.designs }),
+      sale.services.mode === "NONE" ? null : t("list.coverageServices", { count: lowered.services }),
     ].filter(Boolean).join(" · ");
   };
   const action = (label: string, icon: ReactNode, onPress: () => void, danger = false) => (

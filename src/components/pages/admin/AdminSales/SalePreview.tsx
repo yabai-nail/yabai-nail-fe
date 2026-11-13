@@ -4,7 +4,16 @@ import { ArrowRightIcon, ExclamationTriangleIcon } from "@heroicons/react/24/out
 import { useTranslations } from "next-intl";
 
 import { formatMoney } from "@/lib/admin-format";
-import { parseSaleRule, saleCoverage, saleFormScopes, salePreview, type SaleForm, type SaleTarget } from "./data";
+import { SaleOptionsNotice } from "./SaleScopeFields";
+import {
+  parseSaleRule,
+  saleCoverage,
+  saleFormScopes,
+  salePreview,
+  type SaleForm,
+  type SaleOptionsStatus,
+  type SaleTarget,
+} from "./data";
 
 /**
  * What the sale would do, before it is saved: up to six items with original → sale price, how
@@ -14,7 +23,14 @@ export function SalePreview({
   form,
   designTargets,
   serviceTargets,
-}: Readonly<{ form: SaleForm; designTargets: ReadonlyArray<SaleTarget>; serviceTargets: ReadonlyArray<SaleTarget> }>) {
+  status,
+}: Readonly<{
+  form: SaleForm;
+  designTargets: ReadonlyArray<SaleTarget>;
+  serviceTargets: ReadonlyArray<SaleTarget>;
+  /** The designs and services lists together; the preview waits for both. */
+  status: SaleOptionsStatus;
+}>) {
   const t = useTranslations("admin.sales.preview");
   const covered = saleCoverage(saleFormScopes(form), designTargets, serviceTargets);
   const targets = [...covered.designs, ...covered.services];
@@ -25,7 +41,9 @@ export function SalePreview({
   return (
     <aside aria-labelledby="sale-preview-title" className="grid content-start gap-3 rounded-lg border border-admin-border bg-admin-soft/60 p-4 lg:sticky lg:top-0 lg:self-start">
       <h3 id="sale-preview-title" className="text-sm font-semibold text-admin-ink">{t("title")}</h3>
-      {targets.length === 0 ? (
+      {status !== "ready" ? (
+        <SaleOptionsNotice status={status} />
+      ) : targets.length === 0 ? (
         <p className="text-xs leading-5 text-admin-muted">{t("empty")}</p>
       ) : !preview ? (
         <p className="text-xs leading-5 text-admin-muted">{t("needRule")}</p>
@@ -59,7 +77,7 @@ export function SalePreview({
           ) : null}
         </>
       )}
-      {unpriced > 0 ? <p className="text-xs leading-5 text-admin-muted">{t("unpriced", { count: unpriced })}</p> : null}
+      {status === "ready" && unpriced > 0 ? <p className="text-xs leading-5 text-admin-muted">{t("unpriced", { count: unpriced })}</p> : null}
     </aside>
   );
 }

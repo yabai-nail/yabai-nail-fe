@@ -20,6 +20,9 @@
       "readOnly": "You can only view sales. Creating or editing a sale needs the promotion management permission.",
       "loading": "Loading sales…",
       "loadFailed": "Could not load the sales. Reload the page.",
+      "conflict": "This item was just changed somewhere else. It has been reloaded, please try again.",
+      "optionsLoading": "Loading…",
+      "optionsFailed": "Could not load the list. Reload the page to try again.",
       "empty": "No sales yet. Create a sale to lower the price of nail designs or services for a set time.",
       "status": {
         "UPCOMING": "Upcoming",
@@ -686,6 +689,7 @@
         "add": "Add price tier",
         "loading": "Loading price tiers…",
         "loadFailed": "Could not load the price tiers. Reload the page.",
+        "conflict": "This item was just changed somewhere else. It has been reloaded, please try again.",
         "empty": "No price tiers yet. Add a price tier to pick it quickly when you add a nail design.",
         "caption": "Price tiers",
         "columns": {
@@ -720,6 +724,7 @@
           "confirm": "Delete the price tier “{name}”?",
           "inUse": "{count, plural, one {# nail design uses this tier and keeps} other {# nail designs use this tier and keep}} the price {amount} as a typed price.",
           "unused": "No nail design uses this tier yet.",
+          "sales": "{count, plural, one {# sale that targets this price tier} other {# sales that target this price tier}} will no longer apply to it.",
           "cancel": "Cancel",
           "action": "Delete price tier",
           "deleting": "Deleting…",

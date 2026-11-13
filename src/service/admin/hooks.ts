@@ -408,8 +408,8 @@ export function useAdminPriceTiers(enabled = true) {
   );
 }
 
-export function useAdminSales() {
-  return useApiOperation<{ items: ReadonlyArray<AdminSale> }>("GET /api/v1/admin/sales");
+export function useAdminSales(enabled = true) {
+  return useApiOperation<{ items: ReadonlyArray<AdminSale> }>(enabled ? "GET /api/v1/admin/sales" : null);
 }
 
 export function useAdminHomeBanners() {

@@ -6,9 +6,11 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
+import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-announcements";
+import { salesOnTier } from "@/components/pages/admin/AdminSales/data";
 import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, type AdminPriceTier } from "@/service";
+import { adminService, useAdminPermission, useAdminSales, type AdminPriceTier } from "@/service";
 import { PriceTierModal } from "./PriceTierModal";
 
 /**
@@ -30,6 +32,8 @@ export function PriceTierPanel({
   // `null` opens the form for a new tier; a tier opens it for editing.
   const [editing, setEditing] = useState<AdminPriceTier | null | undefined>(undefined);
   const [deleting, setDeleting] = useState<AdminPriceTier | null>(null);
+  // After a reload (e.g. on a version conflict) a retry must send the tier's fresh version.
+  const latest = (tier: AdminPriceTier) => tiers.find((item) => item.id === tier.id) ?? tier;
   const addButton = (
     <Button variant="primary" className="rounded-lg" onPress={() => setEditing(null)}>
       <PlusIcon className="size-4" />{t("add")}
@@ -89,13 +93,16 @@ export function PriceTierPanel({
         </Card>
       ) : null}
 
-      {editing !== undefined ? <PriceTierModal tier={editing} onClose={() => setEditing(undefined)} onSaved={onChanged} /> : null}
-      {deleting ? <PriceTierDeleteModal tier={deleting} onClose={() => setDeleting(null)} onDeleted={onChanged} /> : null}
+      {editing !== undefined ? <PriceTierModal tier={editing && latest(editing)} onClose={() => setEditing(undefined)} onSaved={onChanged} /> : null}
+      {deleting ? <PriceTierDeleteModal tier={latest(deleting)} onClose={() => setDeleting(null)} onDeleted={onChanged} /> : null}
     </>
   );
 }
 
-/** Says how many designs move to a typed price, so the owner knows no design loses its price. */
+/**
+ * Says how many designs move to a typed price, so the owner knows no design loses its price, and
+ * how many sales picking designs by this tier stop covering it.
+ */
 function PriceTierDeleteModal({
   tier,
   onClose,
@@ -104,6 +111,9 @@ function PriceTierDeleteModal({
   const t = useTranslations("admin.nailDesigns.tiers");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Without the sales permission there is nothing to read, and the sales line is left out.
+  const sales = useAdminSales(useAdminPermission("promotion.read.all"));
+  const saleCount = salesOnTier(sales.data?.items ?? [], tier.id);
 
   const remove = async () => {
     if (busy) return;
@@ -114,8 +124,11 @@ function PriceTierDeleteModal({
       notifySuccess(t("delete.success", { name: tier.name }));
       onDeleted();
       onClose();
-    } catch {
-      setError(t("delete.failed"));
+    } catch (thrown) {
+      // Changed in another tab: reload, so a retry carries the fresh version.
+      const conflict = isVersionConflict(thrown);
+      if (conflict) onDeleted();
+      setError(conflict ? t("conflict") : t("delete.failed"));
     } finally {
       setBusy(false);
     }
@@ -139,6 +152,11 @@ function PriceTierDeleteModal({
                   ? t("delete.inUse", { count: tier.designCount, amount: formatMoney(tier.amount) })
                   : t("delete.unused")}
               </p>
+              {saleCount > 0 ? (
+                <p className="rounded-lg border border-admin-border bg-admin-soft px-3 py-2 text-xs leading-5 text-admin-muted">
+                  {t("delete.sales", { count: saleCount })}
+                </p>
+              ) : null}
               {error ? <p role="alert" className="text-sm text-admin-danger">{error}</p> : null}
             </Modal.Body>
             <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">

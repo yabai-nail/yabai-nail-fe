@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { parseWholeYen } from "@/lib/admin-format";
+import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-announcements";
 import { notifySuccess } from "@/lib/app-toast";
 import { adminService, ApiClientError, type AdminPriceTier } from "@/service";
 
@@ -25,6 +26,7 @@ export function PriceTierModal({
   onSaved,
 }: Readonly<{ tier: AdminPriceTier | null; onClose: () => void; onSaved: () => void }>) {
   const t = useTranslations("admin.nailDesigns.tiers.modal");
+  const tTiers = useTranslations("admin.nailDesigns.tiers");
   const [name, setName] = useState(tier?.name ?? "");
   const [amount, setAmount] = useState(tier ? String(tier.amount) : "");
   const [touched, setTouched] = useState<ReadonlySet<Field>>(new Set());
@@ -55,8 +57,11 @@ export function PriceTierModal({
       onClose();
     } catch (thrown) {
       const field = refusedField(thrown);
+      // Changed in another tab: reload, so a retry carries the fresh version.
+      const conflict = isVersionConflict(thrown);
+      if (conflict) onSaved();
       setServerField(field);
-      setError(field ? null : t("saveFailed"));
+      setError(field ? null : conflict ? tTiers("conflict") : t("saveFailed"));
     } finally {
       setBusy(false);
     }

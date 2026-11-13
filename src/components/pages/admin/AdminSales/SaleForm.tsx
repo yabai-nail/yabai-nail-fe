@@ -2,8 +2,9 @@
 
 import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-announcements";
 import { notifySuccess } from "@/lib/app-toast";
 import { adminService, ApiClientError, type AdminSale } from "@/service";
 import { SalePreview } from "./SalePreview";
@@ -15,6 +16,7 @@ import {
   saleFormErrors,
   type SaleField,
   type SaleForm as SaleFormState,
+  type SaleFormStatus,
   type SaleTarget,
 } from "./data";
 
@@ -56,6 +58,7 @@ export function SaleForm({
   serviceTargets,
   tierGroups,
   categoryGroups,
+  status,
   onClose,
   onSaved,
 }: Readonly<{
@@ -65,6 +68,7 @@ export function SaleForm({
   serviceTargets: ReadonlyArray<SaleTarget>;
   tierGroups: ReadonlyArray<SaleGroupOption>;
   categoryGroups: ReadonlyArray<SaleGroupOption>;
+  status: SaleFormStatus;
   onClose: () => void;
   onSaved: () => void;
 }>) {
@@ -75,6 +79,19 @@ export function SaleForm({
   const [serverField, setServerField] = useState<SaleField | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Set when a save is blocked or refused; the effect brings that error into view once it shows,
+  // since it may sit below the fold of the scrolling modal. A new object each time re-runs it.
+  const [reveal, setReveal] = useState<{ target: SaleField | "general" } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const at = reveal && formRef.current?.querySelector<HTMLElement>(`[data-sale-field="${reveal.target}"]`);
+    if (!at) return;
+    at.scrollIntoView({ block: "center" });
+    if (reveal.target === "general") return;
+    const focusable = at.matches("input, button") ? at : at.querySelector<HTMLElement>("input, button");
+    (focusable ?? at).focus({ preventScroll: true });
+  }, [reveal]);
 
   const errors = saleFormErrors(form);
   const shows = (field: SaleField) => serverField === field || (attempted && Boolean(errors[field]));
@@ -86,7 +103,13 @@ export function SaleForm({
   const submit = async () => {
     setAttempted(true);
     const input = buildSaleInput(form);
-    if (busy || !input || Object.keys(errors).length > 0) return;
+    if (busy) return;
+    if (!input || Object.keys(errors).length > 0) {
+      // An unreadable rule is always one of the errors, so a first field is always found.
+      const first = FIELDS.find((field) => errors[field]);
+      if (first) setReveal({ target: first });
+      return;
+    }
     setBusy(true);
     setError(null);
     setServerField(null);
@@ -98,8 +121,12 @@ export function SaleForm({
       onClose();
     } catch (thrown) {
       const field = refusedField(thrown);
+      const conflict = isVersionConflict(thrown);
+      // Changed in another tab: reload, so the next save carries the fresh version.
+      if (conflict) onSaved();
       setServerField(field);
-      setError(field ? null : t("form.errors.saveFailed"));
+      setError(field ? null : conflict ? t("conflict") : t("form.errors.saveFailed"));
+      setReveal({ target: field ?? "general" });
     } finally {
       setBusy(false);
     }
@@ -115,13 +142,14 @@ export function SaleForm({
                 {sale ? t("form.editTitle") : t("form.createTitle")}
               </Modal.Heading>
             </Modal.Header>
-            <form noValidate className="contents" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
+            <form ref={formRef} noValidate className="contents" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
               <Modal.Body className="grid gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
                 <div className="grid min-w-0 content-start gap-6">
                   <Section step={1} title={t("form.basics")}>
                     <label className="flex flex-col gap-2 text-sm">
                       <span className="font-semibold text-admin-ink">{t("form.name")}</span>
                       <input
+                        data-sale-field="name"
                         className={`${inputClass} ${shows("name") ? "border-admin-danger" : "border-admin-border"}`}
                         value={form.name}
                         maxLength={SALE_NAME_MAX}
@@ -163,6 +191,7 @@ export function SaleForm({
                         {form.ruleType === "FIXED" ? t("form.fixedValue") : t("form.percentValue")}
                       </span>
                       <input
+                        data-sale-field="rule"
                         inputMode="numeric"
                         className={`${inputClass} ${shows("rule") ? "border-admin-danger" : "border-admin-border"}`}
                         value={form.ruleValue}
@@ -186,6 +215,8 @@ export function SaleForm({
                       onChange={(designs) => update({ designs }, "scope")}
                       groups={tierGroups}
                       items={designTargets}
+                      groupsStatus={status.tiers}
+                      itemsStatus={status.designs}
                     />
                     <SaleScopeFields
                       kind="services"
@@ -193,13 +224,19 @@ export function SaleForm({
                       onChange={(services) => update({ services }, "scope")}
                       groups={categoryGroups}
                       items={serviceTargets}
+                      groupsStatus={status.categories}
+                      itemsStatus={status.services}
                     />
-                    {shows("scope") ? <p role="alert" className="text-xs text-admin-danger">{t("form.errors.scope")}</p> : null}
+                    {shows("scope") ? (
+                      <p data-sale-field="scope" tabIndex={-1} role="alert" className="text-xs text-admin-danger focus:outline-none">
+                        {t("form.errors.scope")}
+                      </p>
+                    ) : null}
                   </Section>
                 </div>
 
-                <SalePreview form={form} designTargets={designTargets} serviceTargets={serviceTargets} />
-                {error ? <p role="alert" className="text-sm text-admin-danger lg:col-span-2">{error}</p> : null}
+                <SalePreview form={form} designTargets={designTargets} serviceTargets={serviceTargets} status={status.preview} />
+                {error ? <p data-sale-field="general" role="alert" className="text-sm text-admin-danger lg:col-span-2">{error}</p> : null}
               </Modal.Body>
               <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
                 <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{t("form.cancel")}</Button>

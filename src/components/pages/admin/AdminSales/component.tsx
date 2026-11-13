@@ -26,9 +26,11 @@ import {
   duplicateSaleForm,
   newSaleForm,
   saleFormFromSale,
+  saleOptionsStatus,
   salePrefill,
   serviceTarget,
   type SaleForm as SaleFormState,
+  type SaleFormStatus,
 } from "./data";
 
 /** Which sale the form edits (null for a new one) and the values it opens with. */
@@ -69,6 +71,16 @@ export function AdminSalesComponent() {
       })),
     [categories.data],
   );
+  // While a list loads, or if it failed, the form says so instead of "none yet" or a count of 0.
+  const formStatus: SaleFormStatus = {
+    designs: saleOptionsStatus(designs),
+    services: saleOptionsStatus(services),
+    tiers: saleOptionsStatus(tiers),
+    categories: saleOptionsStatus(categories),
+    preview: saleOptionsStatus(designs, services),
+  };
+  // After a reload (e.g. on a version conflict) a retry must send the sale's fresh version.
+  const latest = (sale: AdminSale) => sales.data?.items.find((item) => item.id === sale.id) ?? sale;
 
   // "/admin/sales?new=1&designs=…" (the tables' "Tạo sale" bar) opens the form with those picks.
   const [editor, setEditor] = useState<Editor | null>(() =>
@@ -121,18 +133,19 @@ export function AdminSalesComponent() {
 
       {canWrite && editor ? (
         <SaleForm
-          sale={editor.sale}
+          sale={editor.sale && latest(editor.sale)}
           initial={editor.initial}
           designTargets={designTargets}
           serviceTargets={serviceTargets}
           tierGroups={tierGroups}
           categoryGroups={categoryGroups}
+          status={formStatus}
           onClose={closeEditor}
           onSaved={refresh}
         />
       ) : null}
       {canWrite && pending ? (
-        <SaleActionModal sale={pending.sale} action={pending.action} onClose={() => setPending(null)} onDone={refresh} />
+        <SaleActionModal sale={latest(pending.sale)} action={pending.action} onClose={() => setPending(null)} onDone={refresh} />
       ) : null}
     </AdminPageLayout>
   );

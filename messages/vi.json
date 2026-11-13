@@ -20,6 +20,9 @@
       "readOnly": "Bạn chỉ có quyền xem sale. Cần quyền quản lý khuyến mãi để tạo hoặc sửa sale.",
       "loading": "Đang tải danh sách sale…",
       "loadFailed": "Không tải được danh sách sale. Hãy tải lại trang.",
+      "conflict": "Mục này vừa được thay đổi ở nơi khác. Đã tải lại, hãy thử lại.",
+      "optionsLoading": "Đang tải…",
+      "optionsFailed": "Không tải được danh sách. Tải lại trang để thử lại.",
       "empty": "Chưa có sale nào. Tạo sale để giảm giá mẫu nail hoặc dịch vụ trong một khoảng thời gian.",
       "status": {
         "UPCOMING": "Sắp diễn ra",
@@ -686,6 +689,7 @@
         "add": "Thêm mức giá",
         "loading": "Đang tải mức giá…",
         "loadFailed": "Không tải được mức giá. Hãy tải lại trang.",
+        "conflict": "Mục này vừa được thay đổi ở nơi khác. Đã tải lại, hãy thử lại.",
         "empty": "Chưa có mức giá nào. Thêm mức giá để chọn nhanh khi tạo mẫu nail.",
         "caption": "Danh sách mức giá",
         "columns": {
@@ -720,6 +724,7 @@
           "confirm": "Xóa mức giá “{name}”?",
           "inUse": "{count} mẫu nail đang dùng mức này sẽ giữ giá {amount} dưới dạng giá tự nhập.",
           "unused": "Chưa có mẫu nail nào dùng mức này.",
+          "sales": "{count} đợt sale đang áp dụng theo mức giá này sẽ không còn áp dụng cho nó nữa.",
           "cancel": "Hủy",
           "action": "Xóa mức giá",
           "deleting": "Đang xóa…",

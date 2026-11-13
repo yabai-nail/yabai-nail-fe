@@ -14,7 +14,10 @@ import {
   saleFormErrors,
   saleFormFromSale,
   saleFormScopes,
+  saleLoweredCounts,
+  saleOptionsStatus,
   salePreview,
+  salesOnTier,
   saleWindowPreset,
   salePrefill,
   serviceTarget,
@@ -47,6 +50,10 @@ describe("previewSalePrice", () => {
       price: 5500,
       applies: true,
     });
+  });
+
+  it("never applies a price below ¥1, like the API", () => {
+    expect(previewSalePrice(50, { type: "PERCENT", value: 99 })).toEqual({ price: 0, applies: false });
   });
 });
 
@@ -272,6 +279,43 @@ describe("saleCoverage and salePreview", () => {
     expect(preview.total).toBe(4);
     expect(preview.notCheaper).toBe(2);
     expect(preview.rows).toHaveLength(4);
+  });
+
+  it("counts only the items a sale actually lowers, like the tables' SALE chips", () => {
+    const counts = (rule: AdminSale["rule"]) =>
+      saleLoweredCounts({ rule, designs: { mode: "ALL", ids: [] }, services: { mode: "ALL", ids: [] } }, designs, services);
+    // The unpriced design never counts; a fixed ¥5,500 lowers D1 and D2 but neither service.
+    expect(counts({ type: "FIXED", value: 5500 })).toEqual({ designs: 2, services: 0 });
+    expect(counts({ type: "PERCENT", value: 10 })).toEqual({ designs: 2, services: 2 });
+    expect(
+      saleLoweredCounts(
+        { rule: { type: "PERCENT", value: 10 }, designs: { mode: "TIERS", ids: ["t1"] }, services: { mode: "NONE", ids: [] } },
+        designs,
+        services,
+      ),
+    ).toEqual({ designs: 1, services: 0 });
+  });
+});
+
+describe("saleOptionsStatus", () => {
+  it("is loading while any read loads, failed when one failed, else ready", () => {
+    expect(saleOptionsStatus({ isLoading: true }, { isLoading: false, error: new Error("x") })).toBe("loading");
+    expect(saleOptionsStatus({ isLoading: false }, { isLoading: false, error: new Error("x") })).toBe("failed");
+    expect(saleOptionsStatus({ isLoading: false, error: undefined }, { isLoading: false })).toBe("ready");
+  });
+});
+
+describe("salesOnTier", () => {
+  it("counts the sales that pick designs by that tier", () => {
+    const sales: Array<Pick<AdminSale, "designs">> = [
+      { designs: { mode: "TIERS", ids: ["t1", "t2"] } },
+      { designs: { mode: "TIERS", ids: ["t2"] } },
+      { designs: { mode: "ITEMS", ids: ["t1"] } },
+      { designs: { mode: "ALL", ids: [] } },
+    ];
+    expect(salesOnTier(sales, "t1")).toBe(1);
+    expect(salesOnTier(sales, "t2")).toBe(2);
+    expect(salesOnTier(sales, "t3")).toBe(0);
   });
 });
 

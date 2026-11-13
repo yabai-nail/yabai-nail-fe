@@ -5,6 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-announcements";
 import { notifySuccess } from "@/lib/app-toast";
 import { adminService, ApiClientError, type AdminSale } from "@/service";
 
@@ -41,8 +42,12 @@ export function SaleActionModal({
       onClose();
     } catch (thrown) {
       const alreadyEnded = thrown instanceof ApiClientError && thrown.code === "SALE_ALREADY_ENDED";
-      if (alreadyEnded) onDone();
-      setError(alreadyEnded ? t("end.alreadyEnded") : action === "end" ? t("end.failed") : t("delete.failed"));
+      // Changed in another tab: reload, so a retry carries the fresh version.
+      const conflict = isVersionConflict(thrown);
+      if (alreadyEnded || conflict) onDone();
+      setError(
+        alreadyEnded ? t("end.alreadyEnded") : conflict ? t("conflict") : action === "end" ? t("end.failed") : t("delete.failed"),
+      );
     } finally {
       setBusy(false);
     }

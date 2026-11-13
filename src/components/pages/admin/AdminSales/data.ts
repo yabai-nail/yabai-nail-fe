@@ -19,7 +19,8 @@ export function previewSalePrice(
 ): { price: number; applies: boolean } {
   const price =
     rule.type === "FIXED" ? rule.value : Math.floor((original * (100 - rule.value)) / 100);
-  return { price, applies: price < original };
+  // Same guard as the API: a price below ¥1 never applies.
+  return { price, applies: price >= 1 && price < original };
 }
 
 /** Start of the Tokyo calendar day containing `now`, as a UTC timestamp. */
@@ -215,6 +216,23 @@ export type SaleTarget = {
   readonly imageUrl?: string | null;
 };
 
+/** Where a list the form picks from stands: still loading, failed to load, or ready. */
+export type SaleOptionsStatus = "loading" | "failed" | "ready";
+
+/** Loading while any read is, failed if any read failed, otherwise ready. */
+export function saleOptionsStatus(...reads: ReadonlyArray<{ readonly isLoading: boolean; readonly error?: unknown }>): SaleOptionsStatus {
+  if (reads.some((read) => read.isLoading)) return "loading";
+  return reads.some((read) => Boolean(read.error)) ? "failed" : "ready";
+}
+
+/** Each list the sale form reads, and `preview` for designs and services together. */
+export type SaleFormStatus = Readonly<Record<"designs" | "services" | "tiers" | "categories" | "preview", SaleOptionsStatus>>;
+
+/** How many sales pick designs by this tier, so deleting the tier can say what it changes. */
+export function salesOnTier(sales: ReadonlyArray<Pick<AdminSale, "designs">>, tierId: string): number {
+  return sales.filter((sale) => sale.designs.mode === "TIERS" && sale.designs.ids.includes(tierId)).length;
+}
+
 /** A design as a sale target: its tier is the group, its cover photo the thumbnail. */
 export function designTarget(design: AdminNailDesign): SaleTarget {
   return {
@@ -264,6 +282,21 @@ export function saleCoverage<T extends SaleTarget>(
     designs: designs.filter((target) => covers(sale.designs, target)),
     services: services.filter((target) => covers(sale.services, target)),
   };
+}
+
+/**
+ * How many designs and services a sale actually lowers: covered, priced, and cheaper under its
+ * rule. This is what the tables mark SALE, so the list's count matches them.
+ */
+export function saleLoweredCounts(
+  sale: Pick<AdminSaleInput, "designs" | "services" | "rule">,
+  designs: ReadonlyArray<SaleTarget>,
+  services: ReadonlyArray<SaleTarget>,
+): { designs: number; services: number } {
+  const covered = saleCoverage(sale, designs, services);
+  const lowered = (targets: ReadonlyArray<SaleTarget>) =>
+    targets.filter((target) => target.price !== null && previewSalePrice(target.price, sale.rule).applies).length;
+  return { designs: lowered(covered.designs), services: lowered(covered.services) };
 }
 
 export type SalePreviewRow<T extends SaleTarget = SaleTarget> = {
