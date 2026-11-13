@@ -10,7 +10,159 @@
       "promotionActivated": "Promotion activated", "promotionPaused": "Promotion paused", "campaignCreated": "Campaign created", "campaignStatus": "Status: {status}.", "campaignCancelled": "Campaign cancelled", "promotionIssued": "Promotion issued", "promotionIssuedBody": "Sent to {count} customers.", "promotionUpdated": "Promotion updated", "promotionCreated": "Promotion added",
       "conversationArchived": "Conversation archived", "conversationUpdated": "Conversation status updated", "membershipFound": "Membership found for {name}.", "customersFound": "Found {count} customers.", "reportExportCreated": "Report export requested", "reviewResolved": "Review resolved", "reviewReopened": "Review reopened", "reviewReplySent": "Review reply sent", "surchargeUpdated": "Surcharge updated", "surchargeCreated": "Surcharge added", "settingsSaved": "Settings updated", "compensationSaved": "Salary and commission updated", "staffCreated": "Staff member added", "staffUpdated": "Staff member updated", "leaveApproved": "Leave request approved", "leaveRejected": "Leave request rejected", "shiftCreated": "Shift added", "shiftsCreated": "{created, plural, one {Added # shift} other {Added # shifts}}", "shiftsCreatedSkipped": "Added {created}, skipped {skipped} {skipped, plural, one {day} other {days}} that already had a shift", "leaveRequested": "Leave request submitted", "skillsSaved": "Staff skills updated"
     },
-    "sales": { "rule": { "fixed": "Flat price {amount}", "percent": "{percent}% off" } },
+    "sales": {
+      "rule": {
+        "fixed": "Flat price {amount}",
+        "percent": "{percent}% off"
+      },
+      "description": "Each sale lowers the price of the nail designs or services you pick for a set time (Japan time). When it ends, prices go back by themselves.",
+      "create": "Create sale",
+      "readOnly": "You can only view sales. Creating or editing a sale needs the promotion management permission.",
+      "loading": "Loading sales…",
+      "loadFailed": "Could not load the sales. Reload the page.",
+      "empty": "No sales yet. Create a sale to lower the price of nail designs or services for a set time.",
+      "status": {
+        "UPCOMING": "Upcoming",
+        "ACTIVE": "Running",
+        "ENDED": "Ended"
+      },
+      "list": {
+        "caption": "Sales",
+        "columns": {
+          "status": "Status",
+          "name": "Sale name",
+          "window": "Time (Japan)",
+          "coverage": "Applies to",
+          "rule": "Sale price",
+          "actions": "Actions"
+        },
+        "endedEarly": "Ended early at {time}",
+        "coverageDesigns": "{count, plural, one {# nail design} other {# nail designs}}",
+        "coverageServices": "{count, plural, one {# service} other {# services}}",
+        "edit": "Edit",
+        "end": "End now",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "editLabel": "Edit sale {name}",
+        "endLabel": "End now: sale {name}",
+        "duplicateLabel": "Duplicate sale {name}",
+        "deleteLabel": "Delete sale {name}"
+      },
+      "end": {
+        "title": "End sale",
+        "confirmActive": "End the sale “{name}” now?",
+        "hintActive": "Prices go back to the original right away.",
+        "confirmUpcoming": "The sale “{name}” has not started. Ending it now cancels it.",
+        "hintUpcoming": "It will not start. To run it later, duplicate it.",
+        "action": "End sale",
+        "ending": "Ending…",
+        "back": "Go back",
+        "success": "Sale {name} ended",
+        "alreadyEnded": "This sale has already ended. The list has been reloaded.",
+        "failed": "Couldn't end the sale. Reload the page and try again."
+      },
+      "delete": {
+        "title": "Delete sale",
+        "confirm": "Delete the sale “{name}”? This can't be undone.",
+        "hint": "To keep the sale in the list, choose End now instead of deleting it.",
+        "action": "Delete sale",
+        "deleting": "Deleting…",
+        "back": "Go back",
+        "success": "Sale {name} deleted",
+        "failed": "Couldn't delete the sale. Reload the page and try again."
+      },
+      "form": {
+        "createTitle": "Create sale",
+        "editTitle": "Edit sale",
+        "duplicateName": "{name} (copy)",
+        "basics": "Name and time",
+        "name": "Sale name",
+        "namePlaceholder": "For example: Weekend sale",
+        "start": "Starts",
+        "end": "Ends",
+        "startDate": "Start date",
+        "startTime": "Start time",
+        "endDate": "End date",
+        "endTime": "End time",
+        "timezone": "In Japan time.",
+        "presets": "Quick pick",
+        "preset": {
+          "today": "Today",
+          "weekend": "This weekend",
+          "week": "7 days"
+        },
+        "price": "Sale price",
+        "ruleType": "How to discount",
+        "ruleTypes": {
+          "FIXED": "Flat price ¥",
+          "PERCENT": "Percent off"
+        },
+        "fixedValue": "Sale price (¥)",
+        "fixedPlaceholder": "For example: 5500",
+        "fixedHint": "Every item it applies to sells at this price. Items that already cost less keep their own price.",
+        "percentValue": "Percent off",
+        "percentPlaceholder": "For example: 20",
+        "percentHint": "The discounted price is rounded down to the yen.",
+        "appliesTo": "Applies to",
+        "designs": "Nail designs",
+        "services": "Services",
+        "designModes": {
+          "NONE": "None",
+          "ALL": "All",
+          "GROUPS": "By price tier",
+          "ITEMS": "Pick designs"
+        },
+        "serviceModes": {
+          "NONE": "None",
+          "ALL": "All",
+          "GROUPS": "By category",
+          "ITEMS": "Pick services"
+        },
+        "allDesigns": "Applies to all {count} nail designs, including ones added later.",
+        "allServices": "Applies to all {count} main services, including ones added later. Add-ons are never discounted.",
+        "tiersLabel": "Choose price tiers",
+        "noTiers": "No price tiers yet. Add them on the Nail designs screen, Price tiers tab, or pick designs.",
+        "categoriesLabel": "Choose categories",
+        "noCategories": "No service categories yet. Pick services instead.",
+        "pickDesigns": "Pick nail designs",
+        "pickServices": "Pick services",
+        "searchDesigns": "Search nail designs",
+        "searchServices": "Search services",
+        "noDesigns": "No nail designs yet. Add some on the Nail designs screen first.",
+        "noServices": "No services yet. Add some on the Services screen first.",
+        "errors": {
+          "name": "Enter a sale name, up to 120 characters.",
+          "startsAt": "Choose the start time again.",
+          "endsAt": "The end must be after the start.",
+          "ruleFixed": "Enter the sale price in whole yen, ¥1 or more.",
+          "rulePercent": "Enter a percentage from 1 to 99.",
+          "scope": "Choose at least one nail design or service for the sale.",
+          "saveFailed": "Couldn't save the sale. Try again."
+        },
+        "cancel": "Cancel",
+        "create": "Create sale",
+        "save": "Save sale",
+        "saving": "Saving…",
+        "created": "Sale {name} created",
+        "updated": "Sale {name} saved"
+      },
+      "picker": {
+        "selectAll": "Select all {count} shown",
+        "selected": "{count} selected",
+        "noMatch": "Nothing matches. Try another word.",
+        "noPrice": "No price"
+      },
+      "preview": {
+        "title": "Preview",
+        "empty": "Choose nail designs or services to see their sale prices.",
+        "needRule": "Enter the sale price to see the discounted prices.",
+        "total": "{count, plural, one {Applies to # item} other {Applies to # items}}",
+        "more": "and {count} more",
+        "keepsPrice": "keeps its price",
+        "notCheaper": "{count, plural, one {# item already costs} other {# items already cost}} the sale price or less, so they keep their own price.",
+        "unpriced": "{count, plural, one {# nail design has} other {# nail designs have}} no price, so they are not discounted."
+      }
+    },
     "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
     "avatar": {"title":"Profile photo","requirements":"JPG, PNG or WebP · up to 5 MB","pick":"Choose a file","replace":"Replace photo","remove":"Remove photo","cancel":"Discard selection","undo":"Undo","removalPending":"The photo will be removed when you save.","alt":"{name}'s profile photo","zoomOpen":"Enlarge {name}'s photo","close":"Close","errors":{"unsupportedType":"Only JPG, PNG or WebP images are supported.","empty":"The image file is empty.","tooLarge":"The image must not exceed 5 MB."}},
     "settings": {
@@ -194,6 +346,11 @@
         "label": "Nail designs",
         "title": "Nail design library",
         "description": "Manage nail designs and approve submissions from customers and staff."
+      },
+      "sales": {
+        "label": "Sales",
+        "title": "Sales",
+        "description": "Lower the price of nail designs and services for a set time. Prices go back by themselves when the sale ends."
       },
       "reviews": {
         "label": "Reviews",

@@ -15,6 +15,7 @@ import {
   ShieldCheckIcon,
   StarIcon,
   SwatchIcon,
+  TagIcon,
   UserGroupIcon,
   UsersIcon,
   WalletIcon,
@@ -55,6 +56,7 @@ export type AdminRoute = {
     | "staff"
     | "services"
     | "nail-designs"
+    | "sales"
     | "reviews"
     | "marketing"
     | "reports"
@@ -133,6 +135,13 @@ export const adminRoutes: ReadonlyArray<AdminRoute> = [
     icon: SwatchIcon,
     isAvailable: true,
     requiredAnyPermission: ["design.propose.branch", "design.manage.all"],
+  },
+  {
+    id: "sales",
+    href: "/admin/sales",
+    icon: TagIcon,
+    isAvailable: true,
+    requiredAnyPermission: ["promotion.read.all"],
   },
   {
     id: "reviews",
@@ -261,6 +270,7 @@ const adminNavGroupById: Record<AdminRoute["id"], AdminNavGroup> = {
   operations: "operations",
   services: "catalog",
   "nail-designs": "catalog",
+  sales: "catalog",
   marketing: "catalog",
   reviews: "catalog",
   reports: "finance",

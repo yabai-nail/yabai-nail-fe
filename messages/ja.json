@@ -10,7 +10,159 @@
       "promotionActivated": "キャンペーンを有効にしました", "promotionPaused": "キャンペーンを一時停止しました", "campaignCreated": "配信キャンペーンを作成しました", "campaignStatus": "ステータス: {status}。", "campaignCancelled": "配信キャンペーンをキャンセルしました", "promotionIssued": "キャンペーンを発行しました", "promotionIssuedBody": "{count}人の顧客に送信しました。", "promotionUpdated": "キャンペーンを更新しました", "promotionCreated": "キャンペーンを追加しました",
       "conversationArchived": "会話をアーカイブしました", "conversationUpdated": "会話のステータスを更新しました", "membershipFound": "{name} の会員情報を確認しました。", "customersFound": "{count}人の顧客が見つかりました。", "reportExportCreated": "レポートのエクスポートを開始しました", "reviewResolved": "レビューを対応済みにしました", "reviewReopened": "レビューを再開しました", "reviewReplySent": "レビューへの返信を送信しました", "surchargeUpdated": "追加料金を更新しました", "surchargeCreated": "追加料金を追加しました", "settingsSaved": "設定を更新しました", "compensationSaved": "給与と歩合を更新しました", "staffCreated": "スタッフを追加しました", "staffUpdated": "スタッフを更新しました", "leaveApproved": "休暇申請を承認しました", "leaveRejected": "休暇申請を却下しました", "shiftCreated": "シフトを追加しました", "shiftsCreated": "シフトを{created}件追加しました", "shiftsCreatedSkipped": "シフトを{created}件追加し、既存シフトのある{skipped}日をスキップしました", "leaveRequested": "休暇申請を送信しました", "skillsSaved": "スタッフのスキルを更新しました"
     },
-    "sales": { "rule": { "fixed": "均一価格 {amount}", "percent": "{percent}%オフ" } },
+    "sales": {
+      "rule": {
+        "fixed": "均一価格 {amount}",
+        "percent": "{percent}%オフ"
+      },
+      "description": "セールは、選んだネイルデザインやメニューを決まった期間（日本時間）だけ値下げします。期間が終わると価格は自動で元に戻ります。",
+      "create": "セールを作成",
+      "readOnly": "セールは閲覧のみ可能です。作成・編集にはキャンペーン管理の権限が必要です。",
+      "loading": "セールを読み込み中…",
+      "loadFailed": "セールを読み込めませんでした。ページを再読み込みしてください。",
+      "empty": "セールはまだありません。セールを作成して、ネイルデザインやメニューを期間限定で値下げしましょう。",
+      "status": {
+        "UPCOMING": "開始前",
+        "ACTIVE": "開催中",
+        "ENDED": "終了"
+      },
+      "list": {
+        "caption": "セール一覧",
+        "columns": {
+          "status": "ステータス",
+          "name": "セール名",
+          "window": "期間（日本時間）",
+          "coverage": "対象",
+          "rule": "セール価格",
+          "actions": "操作"
+        },
+        "endedEarly": "{time}に早期終了",
+        "coverageDesigns": "ネイルデザイン{count}件",
+        "coverageServices": "メニュー{count}件",
+        "edit": "編集",
+        "end": "今すぐ終了",
+        "duplicate": "複製",
+        "delete": "削除",
+        "editLabel": "セール「{name}」を編集",
+        "endLabel": "セール「{name}」を今すぐ終了",
+        "duplicateLabel": "セール「{name}」を複製",
+        "deleteLabel": "セール「{name}」を削除"
+      },
+      "end": {
+        "title": "セールを終了",
+        "confirmActive": "セール「{name}」を今すぐ終了しますか？",
+        "hintActive": "対象の価格はすぐに元に戻ります。",
+        "confirmUpcoming": "セール「{name}」はまだ始まっていません。今すぐ終了すると、このセールは取り消されます。",
+        "hintUpcoming": "このセールは開始されません。あとで行う場合は複製してください。",
+        "action": "セールを終了",
+        "ending": "終了しています…",
+        "back": "戻る",
+        "success": "セール「{name}」を終了しました",
+        "alreadyEnded": "このセールはすでに終了しています。一覧を再読み込みしました。",
+        "failed": "セールを終了できませんでした。ページを再読み込みしてもう一度お試しください。"
+      },
+      "delete": {
+        "title": "セールを削除",
+        "confirm": "セール「{name}」を削除しますか？元に戻せません。",
+        "hint": "一覧に残したい場合は、削除ではなく「今すぐ終了」を選んでください。",
+        "action": "セールを削除",
+        "deleting": "削除しています…",
+        "back": "戻る",
+        "success": "セール「{name}」を削除しました",
+        "failed": "セールを削除できませんでした。ページを再読み込みしてもう一度お試しください。"
+      },
+      "form": {
+        "createTitle": "セールを作成",
+        "editTitle": "セールを編集",
+        "duplicateName": "{name}（コピー）",
+        "basics": "名前と期間",
+        "name": "セール名",
+        "namePlaceholder": "例：週末セール",
+        "start": "開始",
+        "end": "終了",
+        "startDate": "開始日",
+        "startTime": "開始時刻",
+        "endDate": "終了日",
+        "endTime": "終了時刻",
+        "timezone": "日本時間です。",
+        "presets": "すぐに選ぶ",
+        "preset": {
+          "today": "今日",
+          "weekend": "今週末",
+          "week": "7日間"
+        },
+        "price": "セール価格",
+        "ruleType": "値下げの方法",
+        "ruleTypes": {
+          "FIXED": "均一価格 ¥",
+          "PERCENT": "％オフ"
+        },
+        "fixedValue": "セール価格（¥）",
+        "fixedPlaceholder": "例：5500",
+        "fixedHint": "対象はすべてこの価格になります。もともと安いものは元の価格のままです。",
+        "percentValue": "何％オフ",
+        "percentPlaceholder": "例：20",
+        "percentHint": "値下げ後の価格は1円未満を切り捨てます。",
+        "appliesTo": "対象",
+        "designs": "ネイルデザイン",
+        "services": "メニュー",
+        "designModes": {
+          "NONE": "対象外",
+          "ALL": "すべて",
+          "GROUPS": "価格帯で選ぶ",
+          "ITEMS": "デザインを選ぶ"
+        },
+        "serviceModes": {
+          "NONE": "対象外",
+          "ALL": "すべて",
+          "GROUPS": "カテゴリで選ぶ",
+          "ITEMS": "メニューを選ぶ"
+        },
+        "allDesigns": "ネイルデザイン{count}件すべてが対象です。あとで追加したものも含みます。",
+        "allServices": "メインメニュー{count}件すべてが対象です。あとで追加したものも含みます。オプションは値下げされません。",
+        "tiersLabel": "価格帯を選ぶ",
+        "noTiers": "価格帯がまだありません。ネイルデザイン画面の「価格帯」タブで追加するか、デザインを選んでください。",
+        "categoriesLabel": "カテゴリを選ぶ",
+        "noCategories": "メニューのカテゴリがまだありません。メニューを選んでください。",
+        "pickDesigns": "ネイルデザインを選ぶ",
+        "pickServices": "メニューを選ぶ",
+        "searchDesigns": "ネイルデザインを検索",
+        "searchServices": "メニューを検索",
+        "noDesigns": "ネイルデザインがまだありません。先にネイルデザイン画面で追加してください。",
+        "noServices": "メニューがまだありません。先にメニュー画面で追加してください。",
+        "errors": {
+          "name": "セール名を120文字以内で入力してください。",
+          "startsAt": "開始日時を選び直してください。",
+          "endsAt": "終了は開始より後にしてください。",
+          "ruleFixed": "セール価格を1円以上の整数で入力してください。",
+          "rulePercent": "1〜99の数字を入力してください。",
+          "scope": "セールの対象となるネイルデザインかメニューを1つ以上選んでください。",
+          "saveFailed": "セールを保存できませんでした。もう一度お試しください。"
+        },
+        "cancel": "キャンセル",
+        "create": "セールを作成",
+        "save": "セールを保存",
+        "saving": "保存しています…",
+        "created": "セール「{name}」を作成しました",
+        "updated": "セール「{name}」を保存しました"
+      },
+      "picker": {
+        "selectAll": "表示中の{count}件をすべて選択",
+        "selected": "{count}件を選択中",
+        "noMatch": "該当する項目がありません。別の言葉で検索してください。",
+        "noPrice": "価格未設定"
+      },
+      "preview": {
+        "title": "プレビュー",
+        "empty": "ネイルデザインかメニューを選ぶと、セール価格を確認できます。",
+        "needRule": "セール価格を入力すると、値下げ後の価格を確認できます。",
+        "total": "対象{count}件",
+        "more": "ほか{count}件",
+        "keepsPrice": "元の価格のまま",
+        "notCheaper": "{count}件はもともとセール価格以下のため、元の価格のままです。",
+        "unpriced": "ネイルデザイン{count}件は価格が未設定のため、値下げされません。"
+      }
+    },
     "pagination": { "label": "ページネーション", "previous": "前のページ", "next": "次のページ", "page": "{page}ページ" },
     "avatar": {"title":"プロフィール画像","requirements":"JPG・PNG・WebP・最大5MB","pick":"画像を選択","replace":"画像を変更","remove":"画像を削除","cancel":"選択を取り消す","undo":"元に戻す","removalPending":"保存時に画像を削除します。","alt":"{name}のプロフィール画像","zoomOpen":"{name}の画像を拡大","close":"閉じる","errors":{"unsupportedType":"JPG・PNG・WebP形式のみ対応しています。","empty":"画像ファイルが空です。","tooLarge":"画像は5MBを超えられません。"}},
     "settings": {
@@ -194,6 +346,11 @@
         "label": "ネイルデザイン",
         "title": "ネイルデザイン一覧",
         "description": "ネイルデザインを管理し、顧客・スタッフからの提案を承認します。"
+      },
+      "sales": {
+        "label": "セール",
+        "title": "セール",
+        "description": "ネイルデザインやメニューを期間限定で値下げします。セールが終わると価格は自動で元に戻ります。"
       },
       "reviews": {
         "label": "レビュー",

@@ -10,7 +10,159 @@
       "promotionActivated": "Đã kích hoạt khuyến mãi", "promotionPaused": "Đã tạm ngưng khuyến mãi", "campaignCreated": "Đã tạo chiến dịch", "campaignStatus": "Trạng thái: {status}.", "campaignCancelled": "Đã hủy chiến dịch", "promotionIssued": "Đã phát hành khuyến mãi", "promotionIssuedBody": "Đã gửi cho {count} khách hàng.", "promotionUpdated": "Đã cập nhật khuyến mãi", "promotionCreated": "Đã thêm khuyến mãi",
       "conversationArchived": "Đã lưu trữ hội thoại", "conversationUpdated": "Đã cập nhật trạng thái hội thoại", "membershipFound": "Đã tra cứu thẻ của {name}.", "customersFound": "Tìm thấy {count} khách.", "reportExportCreated": "Đã tạo yêu cầu xuất báo cáo", "reviewResolved": "Đã xử lý đánh giá", "reviewReopened": "Đã mở lại đánh giá", "reviewReplySent": "Đã gửi phản hồi đánh giá", "surchargeUpdated": "Đã cập nhật phụ thu", "surchargeCreated": "Đã thêm phụ thu", "settingsSaved": "Đã cập nhật cài đặt", "compensationSaved": "Đã cập nhật lương và hoa hồng", "staffCreated": "Đã thêm nhân viên", "staffUpdated": "Đã cập nhật nhân viên", "leaveApproved": "Đã duyệt yêu cầu nghỉ", "leaveRejected": "Đã từ chối yêu cầu nghỉ", "shiftCreated": "Đã thêm ca làm việc", "shiftsCreated": "Đã thêm {created} ca làm", "shiftsCreatedSkipped": "Đã thêm {created} ca, bỏ qua {skipped} ngày đã có ca", "leaveRequested": "Đã gửi yêu cầu nghỉ", "skillsSaved": "Đã cập nhật kỹ năng nhân viên"
     },
-    "sales": { "rule": { "fixed": "Đồng giá {amount}", "percent": "Giảm {percent}%" } },
+    "sales": {
+      "rule": {
+        "fixed": "Đồng giá {amount}",
+        "percent": "Giảm {percent}%"
+      },
+      "description": "Mỗi sale giảm giá các mẫu nail hoặc dịch vụ bạn chọn trong một khoảng thời gian (giờ Nhật). Hết thời gian, giá tự trở về giá gốc.",
+      "create": "Tạo sale",
+      "readOnly": "Bạn chỉ có quyền xem sale. Cần quyền quản lý khuyến mãi để tạo hoặc sửa sale.",
+      "loading": "Đang tải danh sách sale…",
+      "loadFailed": "Không tải được danh sách sale. Hãy tải lại trang.",
+      "empty": "Chưa có sale nào. Tạo sale để giảm giá mẫu nail hoặc dịch vụ trong một khoảng thời gian.",
+      "status": {
+        "UPCOMING": "Sắp diễn ra",
+        "ACTIVE": "Đang diễn ra",
+        "ENDED": "Đã kết thúc"
+      },
+      "list": {
+        "caption": "Danh sách sale",
+        "columns": {
+          "status": "Trạng thái",
+          "name": "Tên sale",
+          "window": "Thời gian (giờ Nhật)",
+          "coverage": "Áp dụng cho",
+          "rule": "Giá sale",
+          "actions": "Thao tác"
+        },
+        "endedEarly": "Đã kết thúc sớm lúc {time}",
+        "coverageDesigns": "{count} mẫu nail",
+        "coverageServices": "{count} dịch vụ",
+        "edit": "Sửa",
+        "end": "Kết thúc ngay",
+        "duplicate": "Nhân bản",
+        "delete": "Xoá",
+        "editLabel": "Sửa sale {name}",
+        "endLabel": "Kết thúc ngay sale {name}",
+        "duplicateLabel": "Nhân bản sale {name}",
+        "deleteLabel": "Xoá sale {name}"
+      },
+      "end": {
+        "title": "Kết thúc sale",
+        "confirmActive": "Kết thúc sale “{name}” ngay bây giờ?",
+        "hintActive": "Giá các mục trở về giá gốc ngay lập tức.",
+        "confirmUpcoming": "Sale “{name}” chưa bắt đầu. Kết thúc ngay sẽ huỷ sale này.",
+        "hintUpcoming": "Sale sẽ không bắt đầu nữa. Muốn chạy lại, hãy nhân bản sale.",
+        "action": "Kết thúc sale",
+        "ending": "Đang kết thúc…",
+        "back": "Quay lại",
+        "success": "Đã kết thúc sale {name}",
+        "alreadyEnded": "Sale này đã kết thúc rồi. Danh sách đã được tải lại.",
+        "failed": "Không kết thúc được sale. Hãy tải lại trang và thử lại."
+      },
+      "delete": {
+        "title": "Xoá sale",
+        "confirm": "Xoá sale “{name}”? Không thể hoàn tác.",
+        "hint": "Muốn giữ sale trong danh sách, hãy chọn Kết thúc ngay thay vì xoá.",
+        "action": "Xoá sale",
+        "deleting": "Đang xoá…",
+        "back": "Quay lại",
+        "success": "Đã xoá sale {name}",
+        "failed": "Không xoá được sale. Hãy tải lại trang và thử lại."
+      },
+      "form": {
+        "createTitle": "Tạo sale",
+        "editTitle": "Sửa sale",
+        "duplicateName": "{name} (bản sao)",
+        "basics": "Tên và thời gian",
+        "name": "Tên sale",
+        "namePlaceholder": "Ví dụ: Sale cuối tuần",
+        "start": "Bắt đầu",
+        "end": "Kết thúc",
+        "startDate": "Ngày bắt đầu",
+        "startTime": "Giờ bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "endTime": "Giờ kết thúc",
+        "timezone": "Theo giờ Nhật Bản.",
+        "presets": "Chọn nhanh",
+        "preset": {
+          "today": "Hôm nay",
+          "weekend": "Cuối tuần này",
+          "week": "7 ngày"
+        },
+        "price": "Giá sale",
+        "ruleType": "Cách giảm giá",
+        "ruleTypes": {
+          "FIXED": "Đồng giá ¥",
+          "PERCENT": "Giảm %"
+        },
+        "fixedValue": "Giá sale (¥)",
+        "fixedPlaceholder": "Ví dụ: 5500",
+        "fixedHint": "Mọi mục được áp dụng đều bán đúng giá này. Mục đã rẻ hơn thì giữ giá của nó.",
+        "percentValue": "Giảm bao nhiêu %",
+        "percentPlaceholder": "Ví dụ: 20",
+        "percentHint": "Giá sau giảm được làm tròn xuống đến từng yên.",
+        "appliesTo": "Áp dụng cho",
+        "designs": "Mẫu nail",
+        "services": "Dịch vụ",
+        "designModes": {
+          "NONE": "Không áp dụng",
+          "ALL": "Tất cả",
+          "GROUPS": "Theo mức giá",
+          "ITEMS": "Chọn từng mẫu"
+        },
+        "serviceModes": {
+          "NONE": "Không áp dụng",
+          "ALL": "Tất cả",
+          "GROUPS": "Theo danh mục",
+          "ITEMS": "Chọn từng dịch vụ"
+        },
+        "allDesigns": "Áp dụng cho cả {count} mẫu nail, kể cả mẫu thêm sau này.",
+        "allServices": "Áp dụng cho cả {count} dịch vụ chính, kể cả dịch vụ thêm sau này. Món thêm (add-on) không được giảm.",
+        "tiersLabel": "Chọn mức giá",
+        "noTiers": "Chưa có mức giá nào. Thêm ở màn Mẫu nail, thẻ Mức giá, hoặc chọn từng mẫu.",
+        "categoriesLabel": "Chọn danh mục",
+        "noCategories": "Chưa có danh mục dịch vụ nào. Hãy chọn từng dịch vụ.",
+        "pickDesigns": "Chọn mẫu nail",
+        "pickServices": "Chọn dịch vụ",
+        "searchDesigns": "Tìm mẫu nail",
+        "searchServices": "Tìm dịch vụ",
+        "noDesigns": "Chưa có mẫu nail nào. Thêm ở màn Mẫu nail trước.",
+        "noServices": "Chưa có dịch vụ nào. Thêm ở màn Dịch vụ trước.",
+        "errors": {
+          "name": "Nhập tên sale, tối đa 120 ký tự.",
+          "startsAt": "Chọn lại thời gian bắt đầu.",
+          "endsAt": "Thời gian kết thúc phải sau thời gian bắt đầu.",
+          "ruleFixed": "Nhập giá sale bằng số yên, từ ¥1 trở lên.",
+          "rulePercent": "Nhập số phần trăm từ 1 đến 99.",
+          "scope": "Chọn ít nhất một mẫu nail hoặc dịch vụ để áp dụng sale.",
+          "saveFailed": "Không lưu được sale. Hãy thử lại."
+        },
+        "cancel": "Huỷ",
+        "create": "Tạo sale",
+        "save": "Lưu sale",
+        "saving": "Đang lưu…",
+        "created": "Đã tạo sale {name}",
+        "updated": "Đã lưu sale {name}"
+      },
+      "picker": {
+        "selectAll": "Chọn tất cả {count} mục đang hiện",
+        "selected": "Đã chọn {count}",
+        "noMatch": "Không có mục phù hợp. Thử từ khoá khác.",
+        "noPrice": "Chưa có giá"
+      },
+      "preview": {
+        "title": "Xem trước",
+        "empty": "Chọn mẫu nail hoặc dịch vụ để xem giá sau khi giảm.",
+        "needRule": "Nhập giá sale để xem giá sau khi giảm.",
+        "total": "Áp dụng cho {count} mục",
+        "more": "và {count} mục khác",
+        "keepsPrice": "giữ giá",
+        "notCheaper": "{count} mục có giá gốc thấp hơn hoặc bằng giá sale nên giữ nguyên giá.",
+        "unpriced": "{count} mẫu nail chưa có giá nên không được giảm."
+      }
+    },
     "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
     "avatar": {"title":"Ảnh đại diện","requirements":"JPG, PNG hoặc WebP · tối đa 5 MB","pick":"Chọn ảnh từ máy","replace":"Đổi ảnh","remove":"Xóa ảnh","cancel":"Bỏ ảnh đã chọn","undo":"Hoàn tác","removalPending":"Ảnh sẽ bị xóa khi lưu.","alt":"Ảnh đại diện của {name}","zoomOpen":"Phóng to ảnh của {name}","close":"Đóng","errors":{"unsupportedType":"Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.","empty":"Tệp ảnh đang trống.","tooLarge":"Ảnh không được vượt quá 5 MB."}},
     "settings": {
@@ -194,6 +346,11 @@
         "label": "Mẫu nail",
         "title": "Thư viện mẫu nail",
         "description": "Quản lý mẫu nail và duyệt đề xuất từ khách/nhân viên."
+      },
+      "sales": {
+        "label": "Sale",
+        "title": "Sale giảm giá",
+        "description": "Giảm giá mẫu nail và dịch vụ trong một khoảng thời gian. Hết sale, giá tự trở về giá gốc."
       },
       "reviews": {
         "label": "Đánh giá",
