@@ -1,32 +1,42 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Button, Card } from "@heroui/react";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Button, Card, Tabs } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { useAdminNailDesignProposals, useAdminNailDesigns, useAuth, type AdminNailDesign, type AdminNailDesignProposal } from "@/service";
+import { AdminSelectionBar } from "@/components/blocks/admin/AdminSelectionBar";
+import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
+import { useAdminNailDesignProposals, useAdminNailDesigns, useAdminPriceTiers, useAuth, type AdminNailDesign, type AdminNailDesignProposal } from "@/service";
 import { DesignModal } from "./DesignModal";
 import { DesignDeleteModal } from "./DesignDeleteModal";
+import { DesignTable, type SaleFilter } from "./DesignTable";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
+import { PriceTierPanel } from "./PriceTierPanel";
 import { ProposalReviewModal } from "./ProposalReviewModal";
-import { formatMoney } from "@/lib/admin-format";
 import {
   adaptDesign,
+  CUSTOM_PRICE,
   designStatuses,
   filterDesigns,
+  filterDesignsByTier,
+  isOnSale,
   paginate,
   upsertDesignInList,
   type DesignRow,
 } from "./data";
 
 const pageSize = 8;
+type View = "catalog" | "tiers" | "proposals";
 
 export function AdminNailDesignsComponent() {
   const t = useTranslations("admin.nailDesigns");
+  const tc = useTranslations("admin.common");
+  const router = useRouter();
   const statusLabel = (code: string) =>
     t.has(`status.${code}`) ? t(`status.${code}`) : code;
   const { permissions } = useAuth();
@@ -39,6 +49,10 @@ export function AdminNailDesignsComponent() {
     status: status === "all" ? undefined : status,
   }, canManageCatalog);
   const proposals = useAdminNailDesignProposals({ status: "PENDING" }, canReviewProposals);
+  // Tiers are read with the same permission as the catalogue they price.
+  const tierQuery = useAdminPriceTiers(canManageCatalog);
+  const tiers = useMemo(() => tierQuery.data?.items ?? [], [tierQuery.data]);
+  const tierNames = useMemo(() => new Map(tiers.map((tier) => [tier.id, tier.name] as const)), [tiers]);
 
   const source = useMemo<ReadonlyArray<DesignRow>>(
     () => (data?.items ? data.items.map(adaptDesign) : []),
@@ -46,42 +60,89 @@ export function AdminNailDesignsComponent() {
   );
 
   const [page, setPage] = useState(1);
+  const [tierFilter, setTierFilter] = useState<ReadonlyArray<string>>([]);
+  const [saleFilter, setSaleFilter] = useState<SaleFilter>([]);
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [editing, setEditing] = useState<DesignRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<DesignRow | null>(null);
-  const [view, setView] = useState<"catalog" | "proposals">(canManageCatalog ? "catalog" : "proposals");
+  const [view, setView] = useState<View>(canManageCatalog ? "catalog" : "proposals");
   const [reviewing, setReviewing] = useState<{ proposal: AdminNailDesignProposal; decision: "APPROVE" | "REJECT" } | null>(null);
 
   const statuses = useMemo(
     () => Array.from(new Set(["ACTIVE", "ARCHIVED", "DRAFT", "HIDDEN", "PUBLISHED", ...designStatuses(source)])),
     [source],
   );
-  const filtered = useMemo(() => filterDesigns(source, status, query), [source, status, query]);
+  const searched = useMemo(() => filterDesigns(source, status, query), [source, status, query]);
+  const filtered = useMemo(() => {
+    const byTier = filterDesignsByTier(searched, tierFilter, CUSTOM_PRICE);
+    return saleFilter.length > 0 ? byTier.filter(isOnSale) : byTier;
+  }, [searched, tierFilter, saleFilter]);
+  // Counted over the searched rows, so a count matches what ticking that option shows.
+  const tierOptions = useMemo(() => [
+    ...tiers.map((tier) => ({ value: tier.id, label: tier.name, count: filterDesignsByTier(searched, [tier.id]).length })),
+    { value: CUSTOM_PRICE, label: t("table.customPrice"), count: filterDesignsByTier(searched, [CUSTOM_PRICE]).length },
+  ], [tiers, searched, t]);
+  const isColumnFiltered = tierFilter.length > 0 || saleFilter.length > 0;
   const { items: visible, page: currentPage, pageCount } = paginate(filtered, page, pageSize);
+  // A tier's count and a design's price follow each other, so a write to either refreshes both.
+  const refreshPrices = () => {
+    void tierQuery.mutate();
+    void mutate();
+  };
   const syncSavedDesign = async (saved: AdminNailDesign) => {
     await mutate((current) => upsertDesignInList(current, saved), { revalidate: false });
-    void mutate();
+    refreshPrices();
   };
 
   return (
     <AdminPageLayout>
-      <div className="mb-4 flex gap-2 border-b border-admin-border pb-3">
-        {canManageCatalog ? <Button variant={view === "catalog" ? "primary" : "outline"} className="rounded-lg" onPress={() => setView("catalog")}>{t("catalogTab")}</Button> : null}
-        {canReviewProposals ? <Button variant={view === "proposals" ? "primary" : "outline"} className="rounded-lg" onPress={() => setView("proposals")}>{t("proposalsTab")} ({proposals.data?.items.length ?? 0})</Button> : null}
-      </div>
+      <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as View)} variant="secondary">
+        <Tabs.ListContainer className="mb-4 w-fit max-w-full overflow-x-auto">
+          <Tabs.List aria-label={t("viewLabel")}>
+            {canManageCatalog ? (
+              <Tabs.Tab id="catalog">
+                <AdminTabLabel count={source.length}>{t("catalogTab")}</AdminTabLabel>
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ) : null}
+            {canManageCatalog ? (
+              <Tabs.Tab id="tiers">
+                <AdminTabLabel count={tiers.length}>{t("tiers.tab")}</AdminTabLabel>
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ) : null}
+            {canReviewProposals ? (
+              <Tabs.Tab id="proposals">
+                <AdminTabLabel count={proposals.data?.items.length ?? 0}>{t("proposalsTab")}</AdminTabLabel>
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ) : null}
+          </Tabs.List>
+        </Tabs.ListContainer>
+      </Tabs>
 
-      {view === "catalog" ? <><div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
-          {t("statusLabel")}
-          <AdminSelectField
-            label={t("filterLabel")}
-            value={status}
-            onChange={(value) => { setStatus(value); setPage(1); }}
-            options={[
-              { value: "all", label: t("all") },
-              ...statuses.map((code) => ({ value: code, label: statusLabel(code) })),
-            ]}
-          />
+      {view === "tiers" ? (
+        <PriceTierPanel tiers={tiers} isLoading={tierQuery.isLoading} failed={Boolean(tierQuery.error)} onChanged={refreshPrices} />
+      ) : view === "catalog" ? <><div className="mb-4 flex min-w-0 flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-col gap-1 text-xs font-semibold text-admin-muted">
+            {t("statusLabel")}
+            <AdminSelectField
+              label={t("filterLabel")}
+              value={status}
+              onChange={(value) => { setStatus(value); setPage(1); }}
+              options={[
+                { value: "all", label: t("all") },
+                ...statuses.map((code) => ({ value: code, label: statusLabel(code) })),
+              ]}
+            />
+          </div>
+          {isColumnFiltered ? (
+            <Button variant="ghost" className="rounded-lg text-admin-muted" onPress={() => { setTierFilter([]); setSaleFilter([]); setPage(1); }}>
+              <XMarkIcon className="size-4" />{tc("columnFilter.clearAll")}
+            </Button>
+          ) : null}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
@@ -95,62 +156,51 @@ export function AdminNailDesignsComponent() {
         <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
       ) : null}
 
-      <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-        <Card.Content className="min-w-0 overflow-x-auto p-0">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-admin-border text-left text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                <th className="px-4 py-3">{t("columns.design")}</th>
-                <th className="px-4 py-3">{t("columns.price")}</th>
-                <th className="px-4 py-3">{t("statusLabel")}</th>
-                <th className="px-4 py-3 text-right">{t("columns.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-admin-muted">{t("empty")}</td></tr>
-              ) : (
-                visible.map((row) => (
-                  <tr key={row.id} className="border-b border-admin-border last:border-0">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <AdminNailDesignThumbnail imageUrl={row.thumbnailUrl} mediaId={row.mediaIds[0]} alt={row.title} />
-                        <span className="font-medium text-admin-ink">{row.title}</span>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-admin-ink">
-                      {row.indicativePrice === null ? t("priceMissing") : formatMoney(row.indicativePrice)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full bg-admin-soft px-2.5 py-1 text-xs font-semibold text-admin-accent">
-                        {statusLabel(row.status)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {canManageCatalog ? (
-                        <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="outline" className="rounded-lg" onPress={() => setEditing(row)}>{t("edit")}</Button>
-                          <Button isIconOnly size="sm" variant="ghost" className="rounded-lg text-admin-danger" aria-label={t("deleteDesign", { name: row.title })} onPress={() => setDeleting(row)}>
-                            <TrashIcon className="size-4" />
-                          </Button>
-                        </div>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      <Card className="mb-4 min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+        <Card.Content className="min-w-0 p-0">
+          <DesignTable
+            rows={visible}
+            tierNames={tierNames}
+            tierOptions={tierOptions}
+            tierFilter={tierFilter}
+            onTierFilterChange={(next) => { setTierFilter(next); setPage(1); }}
+            saleFilter={saleFilter}
+            onSaleFilterChange={(next) => { setSaleFilter(next); setPage(1); }}
+            selected={selected}
+            onSelectedChange={setSelected}
+            emptyText={t("empty")}
+            onEdit={canManageCatalog ? setEditing : undefined}
+            onDelete={canManageCatalog ? setDeleting : undefined}
+          />
         </Card.Content>
         <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
           <span>{t("pagination", { shown: visible.length, total: filtered.length })}</span>
           <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
         </Card.Footer>
-      </Card></> : <ProposalList data={proposals.data?.items ?? []} isLoading={proposals.isLoading} error={proposals.error} canReview={canReviewProposals} onReview={(proposal, decision) => setReviewing({ proposal, decision })} />}
+      </Card>
+      {/* A direct child of the page, so its sticky bottom follows the page while it scrolls. */}
+      {selected.size > 0 ? (
+        <AdminSelectionBar
+          count={selected.size}
+          actionLabel={t("table.createSale")}
+          onAction={() => router.push("/admin/sales?new=1&designs=" + [...selected].join(","))}
+          onClear={() => setSelected(new Set())}
+        />
+      ) : null}</> : <ProposalList data={proposals.data?.items ?? []} isLoading={proposals.isLoading} error={proposals.error} canReview={canReviewProposals} onReview={(proposal, decision) => setReviewing({ proposal, decision })} />}
 
-      {canManageCatalog && creating ? <DesignModal design={null} onClose={() => setCreating(false)} onSaved={syncSavedDesign} /> : null}
-      {canManageCatalog && editing ? <DesignModal design={editing} onClose={() => setEditing(null)} onSaved={syncSavedDesign} /> : null}
-      {canManageCatalog && deleting ? <DesignDeleteModal design={deleting} onClose={() => setDeleting(null)} onDeleted={() => void mutate()} /> : null}
+      {canManageCatalog && creating ? <DesignModal design={null} tiers={tiers} onClose={() => setCreating(false)} onSaved={syncSavedDesign} /> : null}
+      {canManageCatalog && editing ? <DesignModal design={editing} tiers={tiers} onClose={() => setEditing(null)} onSaved={syncSavedDesign} /> : null}
+      {canManageCatalog && deleting ? (
+        <DesignDeleteModal
+          design={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => {
+            const removed = deleting.id;
+            setSelected((current) => new Set([...current].filter((id) => id !== removed)));
+            refreshPrices();
+          }}
+        />
+      ) : null}
       {canReviewProposals && reviewing ? <ProposalReviewModal proposal={reviewing.proposal} decision={reviewing.decision} onClose={() => setReviewing(null)} onSaved={() => { void proposals.mutate(); void mutate(); }} /> : null}
     </AdminPageLayout>
   );

@@ -460,15 +460,27 @@
         "failed": "Không xóa được mẫu nail. Vui lòng tải lại và thử lại.",
         "failedWithDetails": "Không xóa được mẫu nail: {details}"
       },
-      "catalogTab": "Kho mẫu",
+      "viewLabel": "Các mục của trang mẫu nail",
+      "catalogTab": "Mẫu nail",
       "proposalsTab": "Đề xuất chờ duyệt",
       "loading": "Đang tải mẫu nail…",
       "loadFailed": "Không tải được danh sách mẫu nail.",
       "columns": {
         "design": "Mẫu",
         "price": "Giá tham khảo",
+        "tier": "Mức giá",
         "status": "Trạng thái",
         "actions": "Thao tác"
+      },
+      "table": {
+        "caption": "Danh sách mẫu nail",
+        "selectPage": "Chọn tất cả mẫu trên trang này",
+        "selectDesign": "Chọn {name}",
+        "filterTier": "Lọc theo mức giá",
+        "filterPrice": "Lọc theo giá sale",
+        "onSale": "Đang sale",
+        "customPrice": "Giá tự nhập",
+        "createSale": "Tạo sale cho các mục này"
       },
       "priceMissing": "Chưa có giá",
       "empty": "Không có mẫu phù hợp.",
@@ -501,7 +513,62 @@
         "imageEmpty": "Tệp ảnh đang trống.",
         "imageTooLarge": "Ảnh không được lớn hơn 10 MB.",
         "updated": "Đã cập nhật mẫu nail",
-        "created": "Đã thêm mẫu nail"
+        "created": "Đã thêm mẫu nail",
+        "priceMode": {
+          "label": "Cách đặt giá",
+          "tier": "Chọn mức giá",
+          "custom": "Tự nhập",
+          "tierLabel": "Mức giá",
+          "tierHint": "Giá mẫu đi theo mức giá: đổi giá của mức này thì giá mẫu đổi theo.",
+          "noTiers": "Chưa có mức giá nào. Thêm ở thẻ Mức giá, hoặc chọn Tự nhập."
+        }
+      },
+      "tiers": {
+        "tab": "Mức giá",
+        "description": "Đặt sẵn vài mức giá để chọn nhanh khi tạo mẫu nail. Đổi giá một mức thì mọi mẫu đang dùng mức đó đổi theo.",
+        "add": "Thêm mức giá",
+        "loading": "Đang tải mức giá…",
+        "loadFailed": "Không tải được mức giá. Hãy tải lại trang.",
+        "empty": "Chưa có mức giá nào. Thêm mức giá để chọn nhanh khi tạo mẫu nail.",
+        "caption": "Danh sách mức giá",
+        "columns": {
+          "name": "Tên mức giá",
+          "amount": "Giá",
+          "designs": "Số mẫu nail",
+          "actions": "Thao tác"
+        },
+        "designCount": "{count} mẫu",
+        "editTier": "Sửa {name}",
+        "deleteTier": "Xóa {name}",
+        "modal": {
+          "addTitle": "Thêm mức giá",
+          "editTitle": "Sửa mức giá",
+          "name": "Tên mức giá",
+          "namePlaceholder": "Ví dụ: Đồng giá ¥6,600",
+          "nameInvalid": "Nhập tên từ 1 đến 60 ký tự.",
+          "amount": "Giá (¥)",
+          "amountPlaceholder": "Ví dụ: 6600",
+          "amountHint": "Đổi giá ở đây thì mọi mẫu nail đang dùng mức này đổi giá theo.",
+          "amountInvalid": "Nhập số nguyên từ 1 trở lên.",
+          "cancel": "Hủy",
+          "saving": "Đang lưu…",
+          "save": "Lưu mức giá",
+          "add": "Thêm mức giá",
+          "saveFailed": "Không lưu được mức giá. Hãy tải lại và thử lại.",
+          "created": "Đã thêm mức giá {name}",
+          "updated": "Đã cập nhật mức giá {name}"
+        },
+        "delete": {
+          "title": "Xóa mức giá",
+          "confirm": "Xóa mức giá “{name}”?",
+          "inUse": "{count} mẫu nail đang dùng mức này sẽ giữ giá {amount} dưới dạng giá tự nhập.",
+          "unused": "Chưa có mẫu nail nào dùng mức này.",
+          "cancel": "Hủy",
+          "action": "Xóa mức giá",
+          "deleting": "Đang xóa…",
+          "success": "Đã xóa mức giá {name}",
+          "failed": "Không xóa được mức giá. Hãy tải lại và thử lại."
+        }
       },
       "proposals": {
         "loading": "Đang tải đề xuất…",

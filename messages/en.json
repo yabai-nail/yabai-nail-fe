@@ -460,15 +460,27 @@
         "failed": "Could not delete the design. Reload and try again.",
         "failedWithDetails": "Could not delete the design: {details}"
       },
-      "catalogTab": "Design catalog",
+      "viewLabel": "Nail design sections",
+      "catalogTab": "Nail designs",
       "proposalsTab": "Pending proposals",
       "loading": "Loading nail designs…",
       "loadFailed": "Could not load the nail designs.",
       "columns": {
         "design": "Design",
         "price": "Reference price",
+        "tier": "Price tier",
         "status": "Status",
         "actions": "Actions"
+      },
+      "table": {
+        "caption": "Nail designs",
+        "selectPage": "Select every design on this page",
+        "selectDesign": "Select {name}",
+        "filterTier": "Filter by price tier",
+        "filterPrice": "Filter by sale",
+        "onSale": "On sale",
+        "customPrice": "Typed price",
+        "createSale": "Create a sale for these items"
       },
       "priceMissing": "No price yet",
       "empty": "No matching designs.",
@@ -501,7 +513,62 @@
         "imageEmpty": "The image file is empty.",
         "imageTooLarge": "The image must not exceed 10 MB.",
         "updated": "Nail design updated",
-        "created": "Nail design added"
+        "created": "Nail design added",
+        "priceMode": {
+          "label": "How to set the price",
+          "tier": "Pick a price tier",
+          "custom": "Type a price",
+          "tierLabel": "Price tier",
+          "tierHint": "The design follows the tier: change the tier's price and this design's price changes too.",
+          "noTiers": "No price tiers yet. Add one on the Price tiers tab, or choose Type a price."
+        }
+      },
+      "tiers": {
+        "tab": "Price tiers",
+        "description": "Set up a few ready-made prices to pick quickly when you add a nail design. Changing a tier's price changes every design on it.",
+        "add": "Add price tier",
+        "loading": "Loading price tiers…",
+        "loadFailed": "Could not load the price tiers. Reload the page.",
+        "empty": "No price tiers yet. Add a price tier to pick it quickly when you add a nail design.",
+        "caption": "Price tiers",
+        "columns": {
+          "name": "Tier name",
+          "amount": "Price",
+          "designs": "Nail designs",
+          "actions": "Actions"
+        },
+        "designCount": "{count, plural, one {# design} other {# designs}}",
+        "editTier": "Edit {name}",
+        "deleteTier": "Delete {name}",
+        "modal": {
+          "addTitle": "Add price tier",
+          "editTitle": "Edit price tier",
+          "name": "Tier name",
+          "namePlaceholder": "For example: Flat price ¥6,600",
+          "nameInvalid": "Enter a name of 1 to 60 characters.",
+          "amount": "Price (¥)",
+          "amountPlaceholder": "For example: 6600",
+          "amountHint": "Changing the price here changes it on every nail design that uses this tier.",
+          "amountInvalid": "Enter a whole number of 1 or more.",
+          "cancel": "Cancel",
+          "saving": "Saving…",
+          "save": "Save price tier",
+          "add": "Add price tier",
+          "saveFailed": "Could not save the price tier. Reload and try again.",
+          "created": "Price tier {name} added",
+          "updated": "Price tier {name} updated"
+        },
+        "delete": {
+          "title": "Delete price tier",
+          "confirm": "Delete the price tier “{name}”?",
+          "inUse": "{count, plural, one {# nail design uses this tier and keeps} other {# nail designs use this tier and keep}} the price {amount} as a typed price.",
+          "unused": "No nail design uses this tier yet.",
+          "cancel": "Cancel",
+          "action": "Delete price tier",
+          "deleting": "Deleting…",
+          "success": "Deleted price tier {name}",
+          "failed": "Could not delete the price tier. Reload and try again."
+        }
       },
       "proposals": {
         "loading": "Loading proposals…",

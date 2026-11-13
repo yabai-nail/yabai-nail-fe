@@ -1,12 +1,53 @@
 import { describe, expect, it } from "vitest";
 import {
   adaptDesign,
+  CUSTOM_PRICE,
   designFixtures,
   designStatuses,
   filterDesigns,
+  filterDesignsByTier,
+  isOnSale,
   paginate,
   upsertDesignInList,
 } from "./data";
+
+describe("design price tiers and sales", () => {
+  const sale = { saleId: "s1", name: "Tết", price: 5000, endsAt: "2026-12-01T00:00:00.000Z" };
+  const rows = [
+    adaptDesign({ id: "a", title: "A", status: "DRAFT", version: 1, indicativePrice: 6600, priceTierId: "t1" }),
+    adaptDesign({ id: "b", title: "B", status: "DRAFT", version: 1, indicativePrice: 8800, priceTierId: "t2", sale }),
+    adaptDesign({ id: "c", title: "C", status: "DRAFT", version: 1, indicativePrice: 7000, priceTierId: null }),
+    adaptDesign({ id: "d", title: "D", status: "DRAFT", version: 1 }),
+  ];
+
+  it("reads the tier and the running sale off a backend design", () => {
+    expect(rows[1]).toMatchObject({ priceTierId: "t2", sale });
+    expect(rows[3]).toMatchObject({ priceTierId: null, sale: null });
+  });
+
+  it("keeps every row when no tier is ticked", () => {
+    expect(filterDesignsByTier(rows, []).map((row) => row.id)).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("keeps the rows on the ticked tiers", () => {
+    expect(filterDesignsByTier(rows, ["t2"]).map((row) => row.id)).toEqual(["b"]);
+    expect(filterDesignsByTier(rows, ["t1", "t2"]).map((row) => row.id)).toEqual(["a", "b"]);
+  });
+
+  it("treats the custom option as every design with its own typed price", () => {
+    expect(CUSTOM_PRICE).toBe("custom");
+    expect(filterDesignsByTier(rows, [CUSTOM_PRICE]).map((row) => row.id)).toEqual(["c", "d"]);
+    expect(filterDesignsByTier(rows, ["t1", CUSTOM_PRICE]).map((row) => row.id)).toEqual(["a", "c", "d"]);
+  });
+
+  it("accepts another value for the custom option", () => {
+    expect(filterDesignsByTier(rows, ["own"], "own").map((row) => row.id)).toEqual(["c", "d"]);
+  });
+
+  it("is on sale only while the API reports a sale", () => {
+    expect(rows.map(isOnSale)).toEqual([false, true, false, false]);
+  });
+});
 
 describe("nail design derivation", () => {
   it("filters by status and name query", () => {

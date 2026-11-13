@@ -460,15 +460,27 @@
         "failed": "デザインを削除できませんでした。再読み込みしてもう一度お試しください。",
         "failedWithDetails": "デザインを削除できませんでした: {details}"
       },
-      "catalogTab": "デザイン一覧",
+      "viewLabel": "ネイルデザインの表示切り替え",
+      "catalogTab": "ネイルデザイン",
       "proposalsTab": "承認待ち",
       "loading": "ネイルデザインを読み込み中…",
       "loadFailed": "ネイルデザイン一覧を読み込めません。",
       "columns": {
         "design": "デザイン",
         "price": "参考価格",
+        "tier": "価格帯",
         "status": "ステータス",
         "actions": "操作"
+      },
+      "table": {
+        "caption": "ネイルデザイン一覧",
+        "selectPage": "このページのデザインをすべて選択",
+        "selectDesign": "{name} を選択",
+        "filterTier": "価格帯で絞り込み",
+        "filterPrice": "セールで絞り込み",
+        "onSale": "セール中",
+        "customPrice": "手入力の価格",
+        "createSale": "選択した項目でセールを作成"
       },
       "priceMissing": "価格未設定",
       "empty": "該当するデザインがありません。",
@@ -501,7 +513,62 @@
         "imageEmpty": "画像ファイルが空です。",
         "imageTooLarge": "画像は10 MB以下にしてください。",
         "updated": "ネイルデザインを更新しました",
-        "created": "ネイルデザインを追加しました"
+        "created": "ネイルデザインを追加しました",
+        "priceMode": {
+          "label": "価格の決め方",
+          "tier": "価格帯から選ぶ",
+          "custom": "手入力",
+          "tierLabel": "価格帯",
+          "tierHint": "このデザインの価格は価格帯に連動します。価格帯の価格を変えるとこのデザインも変わります。",
+          "noTiers": "価格帯がまだありません。「価格帯」タブで追加するか、「手入力」を選んでください。"
+        }
+      },
+      "tiers": {
+        "tab": "価格帯",
+        "description": "よく使う価格を登録しておくと、ネイルデザインの追加時にすぐ選べます。価格帯の価格を変えると、その価格帯のデザインもすべて変わります。",
+        "add": "価格帯を追加",
+        "loading": "価格帯を読み込み中…",
+        "loadFailed": "価格帯を読み込めません。ページを再読み込みしてください。",
+        "empty": "価格帯がまだありません。価格帯を追加すると、ネイルデザインの追加時にすぐ選べます。",
+        "caption": "価格帯一覧",
+        "columns": {
+          "name": "価格帯名",
+          "amount": "価格",
+          "designs": "ネイルデザイン数",
+          "actions": "操作"
+        },
+        "designCount": "{count}件",
+        "editTier": "{name} を編集",
+        "deleteTier": "{name} を削除",
+        "modal": {
+          "addTitle": "価格帯を追加",
+          "editTitle": "価格帯を編集",
+          "name": "価格帯名",
+          "namePlaceholder": "例: 均一価格 ¥6,600",
+          "nameInvalid": "1〜60文字で入力してください。",
+          "amount": "価格 (¥)",
+          "amountPlaceholder": "例: 6600",
+          "amountHint": "ここで価格を変えると、この価格帯を使うすべてのネイルデザインの価格が変わります。",
+          "amountInvalid": "1以上の整数を入力してください。",
+          "cancel": "キャンセル",
+          "saving": "保存しています…",
+          "save": "価格帯を保存",
+          "add": "価格帯を追加",
+          "saveFailed": "価格帯を保存できません。再読み込みしてもう一度お試しください。",
+          "created": "価格帯 {name} を追加しました",
+          "updated": "価格帯 {name} を更新しました"
+        },
+        "delete": {
+          "title": "価格帯を削除",
+          "confirm": "価格帯「{name}」を削除しますか？",
+          "inUse": "この価格帯を使っている{count}件のネイルデザインは、{amount}を手入力の価格として保持します。",
+          "unused": "この価格帯を使っているネイルデザインはありません。",
+          "cancel": "キャンセル",
+          "action": "価格帯を削除",
+          "deleting": "削除中…",
+          "success": "価格帯 {name} を削除しました",
+          "failed": "価格帯を削除できませんでした。再読み込みしてもう一度お試しください。"
+        }
       },
       "proposals": {
         "loading": "提案を読み込み中…",

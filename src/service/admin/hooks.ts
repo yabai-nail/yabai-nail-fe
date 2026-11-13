@@ -402,9 +402,9 @@ export function useAdminBranchSettings(branchId: string | null) {
   );
 }
 
-export function useAdminPriceTiers() {
+export function useAdminPriceTiers(enabled = true) {
   return useApiOperation<{ items: ReadonlyArray<AdminPriceTier> }>(
-    "GET /api/v1/admin/price-tiers",
+    enabled ? "GET /api/v1/admin/price-tiers" : null,
   );
 }
 
