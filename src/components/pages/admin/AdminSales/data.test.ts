@@ -11,6 +11,13 @@ describe("previewSalePrice", () => {
     });
   });
 
+  it("floors a non-integer percent price like the API", () => {
+    expect(previewSalePrice(1001, { type: "PERCENT", value: 15 })).toEqual({
+      price: 850,
+      applies: true,
+    });
+  });
+
   it("does not apply a fixed price above the original", () => {
     expect(previewSalePrice(5000, { type: "FIXED", value: 5500 }).applies).toBe(false);
   });

@@ -10,7 +10,7 @@ export function previewSalePrice(
   rule: AdminSaleRule,
 ): { price: number; applies: boolean } {
   const price =
-    rule.type === "FIXED" ? rule.value : Math.round((original * (100 - rule.value)) / 100);
+    rule.type === "FIXED" ? rule.value : Math.floor((original * (100 - rule.value)) / 100);
   return { price, applies: price < original };
 }
 
