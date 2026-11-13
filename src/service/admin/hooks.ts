@@ -18,6 +18,8 @@ import type {
   AdminServiceItem,
   AdminServiceAddonConfiguration,
   AdminHomeBanners,
+  AdminPriceTier,
+  AdminSale,
   AdminHomeAnnouncements,
   AdminSurcharge,
   AdminStaffMember,
@@ -398,6 +400,16 @@ export function useAdminBranchSettings(branchId: string | null) {
     branchId ? "GET /api/v1/admin/branches/{branchId}/settings" : null,
     { path: branchId ? { branchId } : undefined },
   );
+}
+
+export function useAdminPriceTiers() {
+  return useApiOperation<{ items: ReadonlyArray<AdminPriceTier> }>(
+    "GET /api/v1/admin/price-tiers",
+  );
+}
+
+export function useAdminSales() {
+  return useApiOperation<{ items: ReadonlyArray<AdminSale> }>("GET /api/v1/admin/sales");
 }
 
 export function useAdminHomeBanners() {

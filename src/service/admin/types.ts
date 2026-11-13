@@ -188,6 +188,49 @@ export interface AdminServiceItem {
   /** Marks the explicit customer choice that means no option from its add-on group. */
   readonly representsNoSelection?: boolean;
   readonly active: boolean;
+  /** The running sale that currently discounts this service, if any. */
+  readonly sale?: AdminAppliedSale | null;
+  readonly version: number;
+}
+
+export interface AdminSaleRule {
+  readonly type: "FIXED" | "PERCENT";
+  readonly value: number;
+}
+
+export interface AdminSaleScope<M extends string> {
+  readonly mode: "NONE" | "ALL" | M | "ITEMS";
+  readonly ids: readonly string[];
+}
+
+export interface AdminSaleInput {
+  readonly name: string;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly rule: AdminSaleRule;
+  readonly designs: AdminSaleScope<"TIERS">;
+  readonly services: AdminSaleScope<"CATEGORIES">;
+}
+
+export interface AdminSale extends AdminSaleInput {
+  readonly id: string;
+  readonly endedAt: string | null;
+  readonly status: "UPCOMING" | "ACTIVE" | "ENDED";
+  readonly version: number;
+}
+
+export interface AdminAppliedSale {
+  readonly saleId: string;
+  readonly name: string;
+  readonly price: number;
+  readonly endsAt: string;
+}
+
+export interface AdminPriceTier {
+  readonly id: string;
+  readonly name: string;
+  readonly amount: number;
+  readonly designCount: number;
   readonly version: number;
 }
 
@@ -1294,6 +1337,8 @@ export interface AdminNailDesign {
   readonly thumbnailUrl?: string | null;
   /** Optional whole-yen reference price shown with the design; it is not a booking quote. */
   readonly indicativePrice?: number | null;
+  readonly priceTierId?: string | null;
+  readonly sale?: AdminAppliedSale | null;
   readonly tags?: ReadonlyArray<string>;
   readonly visibility?: string;
   readonly consentToPublish?: boolean;
@@ -1305,6 +1350,7 @@ export interface AdminNailDesign {
 export interface AdminNailDesignDraft {
   readonly title: string;
   readonly indicativePrice?: number | null;
+  readonly priceTierId?: string | null;
   readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   /** Required by the backend before a design may be PUBLISHED. */
@@ -1315,6 +1361,7 @@ export interface AdminNailDesignDraft {
 export interface AdminNailDesignPatch {
   readonly title?: string;
   readonly indicativePrice?: number | null;
+  readonly priceTierId?: string | null;
   readonly mediaIds?: ReadonlyArray<string>;
   readonly status?: string;
   readonly consentToPublish?: boolean;

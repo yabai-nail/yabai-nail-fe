@@ -226,6 +226,15 @@ POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/payments
 POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/unlock
 GET /api/v1/admin/me/payroll
 GET /api/v1/admin/accounts/roles
+GET /api/v1/admin/price-tiers
+POST /api/v1/admin/price-tiers
+PATCH /api/v1/admin/price-tiers/{tierId}
+DELETE /api/v1/admin/price-tiers/{tierId}
+GET /api/v1/admin/sales
+POST /api/v1/admin/sales
+PATCH /api/v1/admin/sales/{saleId}
+POST /api/v1/admin/sales/{saleId}/end
+DELETE /api/v1/admin/sales/{saleId}
 `;
 
 // Concrete NestJS controller routes present in runtime Swagger but absent from

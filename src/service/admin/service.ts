@@ -76,6 +76,9 @@ import type {
   AdminBranchSettingsPatch,
   AdminHomeBannerInput,
   AdminHomeBanners,
+  AdminPriceTier,
+  AdminSale,
+  AdminSaleInput,
   AdminHomeAnnouncementInput,
   AdminHomeAnnouncements,
   AdminMyPayroll,
@@ -711,6 +714,45 @@ export const adminService = {
     ),
   reviews: (query?: Readonly<Record<string, string | number | undefined>>) =>
     executeApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query }),
+  priceTiers: () =>
+    executeApiOperation<{ items: ReadonlyArray<AdminPriceTier> }>("GET /api/v1/admin/price-tiers"),
+  createPriceTier: (input: { name: string; amount: number }) =>
+    executeApiOperation<AdminPriceTier>("POST /api/v1/admin/price-tiers", { body: input }),
+  updatePriceTier: (
+    tierId: string,
+    patch: { name?: string; amount?: number },
+    version?: string | number,
+  ) =>
+    executeApiOperation<AdminPriceTier>("PATCH /api/v1/admin/price-tiers/{tierId}", {
+      path: { tierId },
+      body: patch,
+      version,
+    }),
+  deletePriceTier: (tierId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/price-tiers/{tierId}", {
+      path: { tierId },
+      version,
+    }),
+  sales: () =>
+    executeApiOperation<{ items: ReadonlyArray<AdminSale> }>("GET /api/v1/admin/sales"),
+  createSale: (input: AdminSaleInput) =>
+    executeApiOperation<AdminSale>("POST /api/v1/admin/sales", { body: input }),
+  updateSale: (saleId: string, patch: Partial<AdminSaleInput>, version?: string | number) =>
+    executeApiOperation<AdminSale>("PATCH /api/v1/admin/sales/{saleId}", {
+      path: { saleId },
+      body: patch,
+      version,
+    }),
+  endSale: (saleId: string, version?: string | number) =>
+    executeApiOperation<AdminSale>("POST /api/v1/admin/sales/{saleId}/end", {
+      path: { saleId },
+      version,
+    }),
+  deleteSale: (saleId: string, version?: string | number) =>
+    executeApiOperation<void>("DELETE /api/v1/admin/sales/{saleId}", {
+      path: { saleId },
+      version,
+    }),
   homeBanners: () =>
     executeApiOperation<AdminHomeBanners>("GET /api/v1/admin/home-banners"),
   updateHomeBanners: (items: ReadonlyArray<AdminHomeBannerInput>, version?: string | number) =>
