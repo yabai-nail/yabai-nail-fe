@@ -1,6 +1,8 @@
 {
   "admin": {
     "common": {
+      "selection": { "count": "Đã chọn {count} mục", "clear": "Bỏ chọn" },
+      "sale": { "badge": "SALE", "tooltip": "{name} · đến {endsAt}" },
       "columnFilter": {"search":"Tìm trong danh sách","noMatch":"Không có mục phù hợp","reset":"Đặt lại","apply":"Lọc","clearAll":"Xóa bộ lọc"},
       "accountUpdated": "Đã cập nhật tài khoản", "accountCreated": "Đã thêm tài khoản", "systemSaved": "Đã lưu cấu hình hệ thống", "loyaltySaved": "Đã lưu cấu hình loyalty", "passwordReset": "Đã đặt lại mật khẩu", "passwordResetBody": "Thông báo đã được gửi cho {name}.",
       "appointmentCreated": "Đã tạo lịch hẹn", "appointmentUpdated": "Đã cập nhật lịch hẹn", "staffAssigned": "Đã phân công nhân viên", "actualServicesUpdated": "Đã cập nhật dịch vụ thực tế", "photoAttached": "Đã đính kèm ảnh vào lịch hẹn", "appointmentCancelled": "Đã hủy lịch hẹn", "checkInDone": "Đã check-in lịch hẹn", "serviceStarted": "Đã bắt đầu dịch vụ", "serviceCompleted": "Đã hoàn tất dịch vụ", "noShowDone": "Đã đánh dấu khách không đến",
@@ -8,6 +10,7 @@
       "promotionActivated": "Đã kích hoạt khuyến mãi", "promotionPaused": "Đã tạm ngưng khuyến mãi", "campaignCreated": "Đã tạo chiến dịch", "campaignStatus": "Trạng thái: {status}.", "campaignCancelled": "Đã hủy chiến dịch", "promotionIssued": "Đã phát hành khuyến mãi", "promotionIssuedBody": "Đã gửi cho {count} khách hàng.", "promotionUpdated": "Đã cập nhật khuyến mãi", "promotionCreated": "Đã thêm khuyến mãi",
       "conversationArchived": "Đã lưu trữ hội thoại", "conversationUpdated": "Đã cập nhật trạng thái hội thoại", "membershipFound": "Đã tra cứu thẻ của {name}.", "customersFound": "Tìm thấy {count} khách.", "reportExportCreated": "Đã tạo yêu cầu xuất báo cáo", "reviewResolved": "Đã xử lý đánh giá", "reviewReopened": "Đã mở lại đánh giá", "reviewReplySent": "Đã gửi phản hồi đánh giá", "surchargeUpdated": "Đã cập nhật phụ thu", "surchargeCreated": "Đã thêm phụ thu", "settingsSaved": "Đã cập nhật cài đặt", "compensationSaved": "Đã cập nhật lương và hoa hồng", "staffCreated": "Đã thêm nhân viên", "staffUpdated": "Đã cập nhật nhân viên", "leaveApproved": "Đã duyệt yêu cầu nghỉ", "leaveRejected": "Đã từ chối yêu cầu nghỉ", "shiftCreated": "Đã thêm ca làm việc", "shiftsCreated": "Đã thêm {created} ca làm", "shiftsCreatedSkipped": "Đã thêm {created} ca, bỏ qua {skipped} ngày đã có ca", "leaveRequested": "Đã gửi yêu cầu nghỉ", "skillsSaved": "Đã cập nhật kỹ năng nhân viên"
     },
+    "sales": { "rule": { "fixed": "Đồng giá {amount}", "percent": "Giảm {percent}%" } },
     "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
     "avatar": {"title":"Ảnh đại diện","requirements":"JPG, PNG hoặc WebP · tối đa 5 MB","pick":"Chọn ảnh từ máy","replace":"Đổi ảnh","remove":"Xóa ảnh","cancel":"Bỏ ảnh đã chọn","undo":"Hoàn tác","removalPending":"Ảnh sẽ bị xóa khi lưu.","alt":"Ảnh đại diện của {name}","zoomOpen":"Phóng to ảnh của {name}","close":"Đóng","errors":{"unsupportedType":"Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.","empty":"Tệp ảnh đang trống.","tooLarge":"Ảnh không được vượt quá 5 MB."}},
     "settings": {
