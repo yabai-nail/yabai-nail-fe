@@ -1237,6 +1237,8 @@
         "shownSuccess": "メニュー {name} を表示しました", "hiddenSuccess": "メニュー {name} を非表示にしました", "statusFailed": "メニューのステータスを変更できませんでした。",
         "pinned": "ピン留め", "pinService": "{name} を先頭にピン留め", "unpinService": "{name} のピン留めを外す",
         "pinnedSuccess": "{name} を先頭にピン留めしました", "unpinnedSuccess": "{name} のピン留めを外しました", "pinFailed": "メニューをピン留めできませんでした。",
+        "selectPage": "このページのメニューをすべて選択", "selectService": "{name} を選択",
+        "filterPrice": "セールで絞り込み", "onSale": "セール中", "createSale": "選択した項目でセールを作成",
         "featured": "最も人気",
         "uncategorized": "未分類",
         "addon": "追加オプション",

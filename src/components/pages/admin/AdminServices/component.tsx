@@ -3,9 +3,11 @@
 import { useTranslations } from "next-intl";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button, Card, Tabs } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminSelectionBar } from "@/components/blocks/admin/AdminSelectionBar";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
@@ -61,6 +63,7 @@ function toScreenService(server: ServerService): SalonService {
     bookableStandalone: server.bookableStandalone ?? false,
     representsNoSelection: server.representsNoSelection ?? false,
     version: server.version,
+    sale: server.sale ?? null,
   };
 }
 
@@ -118,6 +121,7 @@ function ListCard({
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
   const tBranch = useTranslations("admin.branchSelector");
+  const router = useRouter();
   const { branchIds } = useAdminBranch();
   // Service/category CRUD changes the chain-wide catalogue. Branch-level
   // catalogue write is reserved for appointment actual-service adjustments.
@@ -153,6 +157,8 @@ export function AdminServicesComponent() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
   const [deleting, setDeleting] = useState<SalonService | null>(null);
+  // Ticked services for "create a sale"; kept across search, filter, sort and page.
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const source = useMemo<ReadonlyArray<SalonService>>(
     () => (data?.items ?? []).map(toScreenService),
     [data],
@@ -319,7 +325,7 @@ export function AdminServicesComponent() {
               <AdminSelectField
                 label={t("branchFilter.label")}
                 value={branchFilter}
-                onChange={(value) => { setBranchFilter(value); serviceList.setPage(1); }}
+                onChange={(value) => { setBranchFilter(value); setSelected(new Set()); serviceList.setPage(1); }}
                 options={[
                   { value: "", label: t("branchFilter.all") },
                   ...branchIds.map((id) => ({ value: id, label: branchNameById.get(id) ?? tBranch("unnamed") })),
@@ -347,12 +353,23 @@ export function AdminServicesComponent() {
               // The search goes to the API, so an empty result under a search is "no match".
               emptyText={baseServices.length === 0 && !serviceList.isFiltered ? t("table.noServices") : t("table.empty")}
               busyIds={busyIds}
+              selected={selected}
+              onSelectedChange={setSelected}
               onToggleStatus={canWrite ? toggleStatus : undefined}
               onTogglePin={canWrite ? togglePin : undefined}
               onEdit={canWrite ? setEditing : undefined}
               onDelete={canWrite ? setDeleting : undefined}
             />
           </ListCard>
+          {/* A direct child of the page, so its sticky bottom follows the page while it scrolls. */}
+          {selected.size > 0 ? (
+            <AdminSelectionBar
+              count={selected.size}
+              actionLabel={t("table.createSale")}
+              onAction={() => router.push("/admin/sales?new=1&services=" + [...selected].join(","))}
+              onClear={() => setSelected(new Set())}
+            />
+          ) : null}
         </>
       )}
 
@@ -374,7 +391,11 @@ export function AdminServicesComponent() {
         <ServiceDeleteModal
           service={deleting}
           onClose={() => setDeleting(null)}
-          onDeleted={refreshCatalogue}
+          onDeleted={() => {
+            const removed = deleting.id;
+            setSelected((current) => new Set([...current].filter((id) => id !== removed)));
+            refreshCatalogue();
+          }}
         />
       ) : null}
     </AdminPageLayout>

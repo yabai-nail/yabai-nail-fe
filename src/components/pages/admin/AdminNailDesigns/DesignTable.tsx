@@ -14,7 +14,7 @@ import type { DesignRow } from "./data";
 export type SaleFilter = ReadonlyArray<"onSale">;
 
 /** Ticks every row on the page; shows a dash while only some of them are ticked. */
-function PageCheckbox({ checked, mixed, disabled, label, onChange }: Readonly<{ checked: boolean; mixed: boolean; disabled: boolean; label: string; onChange: () => void }>) {
+export function PageCheckbox({ checked, mixed, disabled, label, onChange }: Readonly<{ checked: boolean; mixed: boolean; disabled: boolean; label: string; onChange: () => void }>) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (ref.current) ref.current.indeterminate = mixed;

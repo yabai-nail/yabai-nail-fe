@@ -165,6 +165,15 @@ describe("service list derivation", () => {
     expect(ids(["visible", "hidden"])).toHaveLength(salonServices.length);
   });
 
+  it("filters to the services on sale", () => {
+    const sale = { saleId: "s1", name: "Sale", price: 700000, endsAt: "2026-12-01T00:00:00.000Z" };
+    const pool = salonServices.map((service) => (service.id === "sv2" ? { ...service, sale } : service));
+
+    expect(filterServices(pool, { ...NO_COLUMN_FILTERS, onSale: ["onSale"] }, "").map((service) => service.id)).toEqual(["sv2"]);
+    expect(filterServices(pool, NO_COLUMN_FILTERS, "")).toHaveLength(salonServices.length);
+    expect(hasColumnFilters({ ...NO_COLUMN_FILTERS, onSale: ["onSale"] })).toBe(true);
+  });
+
   it("returns the requested page without mutating the source list", () => {
     const originalIds = salonServices.map((service) => service.id);
     const result = paginate(salonServices, 2, 8);

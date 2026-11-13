@@ -1,6 +1,7 @@
 import { paginate } from "@/lib/admin-pagination";
 import { matchesSearch } from "@/lib/admin-search";
 import type { AdminTableSort } from "@/lib/admin-table-sort";
+import type { AdminAppliedSale } from "@/service";
 import { UNGROUPED } from "./addon-groups";
 
 /** The category a service belongs to, named by the admin API rather than by this file. */
@@ -18,11 +19,13 @@ export type ServiceColumnFilters = {
   /** Add-on group codes; the add-ons tab's counterpart of `categories`. */
   readonly groups: ReadonlyArray<string>;
   readonly statuses: ReadonlyArray<ServiceStatusFilter>;
+  /** The price column's one option: only the services with a sale running. */
+  readonly onSale: ReadonlyArray<"onSale">;
 };
 
 export type ServiceStatusFilter = "visible" | "hidden";
 
-export const NO_COLUMN_FILTERS: ServiceColumnFilters = { categories: [], groups: [], statuses: [] };
+export const NO_COLUMN_FILTERS: ServiceColumnFilters = { categories: [], groups: [], statuses: [], onSale: [] };
 
 export function hasColumnFilters(filters: ServiceColumnFilters): boolean {
   return Object.values(filters).some((values) => values.length > 0);
@@ -53,6 +56,8 @@ export type SalonService = {
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;
+  /** The sale running on this service right now, if any. */
+  readonly sale?: AdminAppliedSale | null;
 };
 
 const primary: ServiceCategoryRef = { id: "cat-primary", name: "Dịch vụ chính" };
@@ -106,6 +111,7 @@ export function filterServices(
       (filters.categories.length === 0 || filters.categories.includes(service.category?.id ?? UNCATEGORIZED)) &&
       (filters.groups.length === 0 || filters.groups.includes(service.addonGroup ?? UNGROUPED)) &&
       (filters.statuses.length === 0 || filters.statuses.includes(service.isVisible ? "visible" : "hidden")) &&
+      (filters.onSale.length === 0 || Boolean(service.sale)) &&
       matchesSearch(query, [service.name]),
   );
 }

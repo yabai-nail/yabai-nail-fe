@@ -1,8 +1,9 @@
 import { useTranslations } from "next-intl";
 import { Button, Chip } from "@heroui/react";
 import { AdminColumnFilter, type ColumnFilterOption } from "@/components/blocks/admin/AdminColumnFilter";
+import { AdminSalePrice } from "@/components/blocks/admin/AdminSalePrice";
 import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
-import { formatMoney } from "@/lib/admin-format";
+import { PageCheckbox } from "../AdminNailDesigns/DesignTable";
 import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader } from "./ServiceTableCells";
 import type { SalonService } from "./data";
 import type { ServiceListState } from "./useServiceListState";
@@ -22,6 +23,8 @@ export function ServiceTable({
   categoryOptions,
   emptyText,
   busyIds,
+  selected,
+  onSelectedChange,
   onToggleStatus,
   onTogglePin,
   onEdit,
@@ -36,6 +39,9 @@ export function ServiceTable({
   emptyText: string;
   /** Services with a status or pin change in flight; their controls stay disabled until it lands. */
   busyIds: ReadonlySet<string>;
+  /** Ticked service ids, kept across pages and filters. */
+  selected: ReadonlySet<string>;
+  onSelectedChange: (next: ReadonlySet<string>) => void;
   /** Each handler is omitted for an admin who may not write, which leaves its control read-only. */
   onToggleStatus?: (service: SalonService) => void;
   onTogglePin?: (service: SalonService) => void;
@@ -44,13 +50,31 @@ export function ServiceTable({
 }>) {
   const t = useTranslations("admin.services");
   const sortProps = { sort: list.sort, onSortChange: list.setSort };
+  const tickedOnPage = services.filter((service) => selected.has(service.id)).length;
+  const allOnPage = services.length > 0 && tickedOnPage === services.length;
+  const toggleRow = (id: string) => {
+    const next = new Set(selected);
+    if (!next.delete(id)) next.add(id);
+    onSelectedChange(next);
+  };
+  const togglePage = () => {
+    const next = new Set(selected);
+    for (const service of services) {
+      if (allOnPage) next.delete(service.id);
+      else next.add(service.id);
+    }
+    onSelectedChange(next);
+  };
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[860px] text-left text-sm">
         <caption className="sr-only">{t("table.caption")}</caption>
         <thead className="border-b border-admin-border bg-admin-soft/60 text-xs font-semibold text-admin-ink">
           <tr>
-            <AdminSortableHeader sortKey="name" className="px-4" {...sortProps}>{t("table.service")}</AdminSortableHeader>
+            <th scope="col" className="w-10 py-2 pl-4">
+              <PageCheckbox checked={allOnPage} mixed={tickedOnPage > 0 && !allOnPage} disabled={services.length === 0} label={t("table.selectPage")} onChange={togglePage} />
+            </th>
+            <AdminSortableHeader sortKey="name" className="px-3" {...sortProps}>{t("table.service")}</AdminSortableHeader>
             <AdminSortableHeader
               sortKey="category"
               {...sortProps}
@@ -66,7 +90,20 @@ export function ServiceTable({
             >
               {t("table.category")}
             </AdminSortableHeader>
-            <AdminSortableHeader sortKey="price" {...sortProps}>{t("table.price")}</AdminSortableHeader>
+            <AdminSortableHeader
+              sortKey="price"
+              {...sortProps}
+              filter={
+                <AdminColumnFilter
+                  label={t("table.filterPrice")}
+                  options={[{ value: "onSale" as const, label: t("table.onSale") }]}
+                  selected={list.filters.onSale}
+                  onApply={(onSale) => list.setFilters({ ...list.filters, onSale })}
+                />
+              }
+            >
+              {t("table.price")}
+            </AdminSortableHeader>
             <AdminSortableHeader sortKey="duration" {...sortProps}>{t("table.duration")}</AdminSortableHeader>
             <AdminSortableHeader sortKey="soldCount" {...sortProps}>{t("table.bookingCount90Days")}</AdminSortableHeader>
             <ServiceStatusHeader list={list} />
@@ -77,8 +114,17 @@ export function ServiceTable({
           {services.map((service, index) => {
             const isPinned = Boolean(service.isPinned);
             return (
-              <tr key={service.id} className={isPinned ? "bg-admin-soft/40" : undefined}>
-                <td className="px-4 py-2">
+              <tr key={service.id} className={isPinned || selected.has(service.id) ? "bg-admin-soft/40" : undefined}>
+                <td className="py-2 pl-4">
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-admin-accent"
+                    checked={selected.has(service.id)}
+                    aria-label={t("table.selectService", { name: service.name })}
+                    onChange={() => toggleRow(service.id)}
+                  />
+                </td>
+                <td className="px-3 py-2">
                   <div className="flex items-center gap-3">
                     {service.imageUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -115,7 +161,7 @@ export function ServiceTable({
                 </td>
                 {/* Pinning the short value cells to one line makes the browser take the width out
                     of the service name instead — the only column that reads fine wrapped. */}
-                <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(service.price)}</td>
+                <td className="whitespace-nowrap px-3 py-2 font-semibold"><AdminSalePrice original={service.price} sale={service.sale} /></td>
                 <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: service.durationMinutes })}</td>
                 <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums">{service.soldCount}</td>
                 <ServiceStatusCell service={service} onToggle={onToggleStatus} isBusy={busyIds.has(service.id)} />

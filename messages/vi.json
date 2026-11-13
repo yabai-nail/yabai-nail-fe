@@ -1237,6 +1237,8 @@
         "shownSuccess": "Đã hiện dịch vụ {name}", "hiddenSuccess": "Đã ẩn dịch vụ {name}", "statusFailed": "Không đổi được trạng thái dịch vụ.",
         "pinned": "Đã ghim", "pinService": "Ghim {name} lên đầu danh sách", "unpinService": "Bỏ ghim {name}",
         "pinnedSuccess": "Đã ghim {name} lên đầu", "unpinnedSuccess": "Đã bỏ ghim {name}", "pinFailed": "Không ghim được dịch vụ.",
+        "selectPage": "Chọn tất cả dịch vụ trên trang này", "selectService": "Chọn {name}",
+        "filterPrice": "Lọc theo giá sale", "onSale": "Đang sale", "createSale": "Tạo sale cho các mục này",
         "featured": "Ưa chuộng nhất",
         "uncategorized": "Chưa phân loại",
         "addon": "Dịch vụ bổ sung",

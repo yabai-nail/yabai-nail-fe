@@ -1237,6 +1237,8 @@
         "shownSuccess": "Service {name} is now shown", "hiddenSuccess": "Service {name} is now hidden", "statusFailed": "Could not change the service status.",
         "pinned": "Pinned", "pinService": "Pin {name} to the top", "unpinService": "Unpin {name}",
         "pinnedSuccess": "Pinned {name} to the top", "unpinnedSuccess": "Unpinned {name}", "pinFailed": "Could not pin the service.",
+        "selectPage": "Select every service on this page", "selectService": "Select {name}",
+        "filterPrice": "Filter by sale", "onSale": "On sale", "createSale": "Create a sale for these items",
         "featured": "Most popular",
         "uncategorized": "Uncategorized",
         "addon": "Add-on",
