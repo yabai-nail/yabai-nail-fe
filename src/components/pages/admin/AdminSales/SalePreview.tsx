@@ -17,7 +17,8 @@ import {
 
 /**
  * What the sale would do, before it is saved: up to six items with original → sale price, how
- * many items it reaches, and a warning (not a block) when a flat price would not lower some.
+ * many items it reaches, and warnings (not blocks) when a flat price would not lower some or a
+ * price cuts some to half or less.
  */
 export function SalePreview({
   form,
@@ -41,6 +42,7 @@ export function SalePreview({
   return (
     <aside aria-labelledby="sale-preview-title" className="grid content-start gap-3 rounded-lg border border-admin-border bg-admin-soft/60 p-4 lg:sticky lg:top-0 lg:self-start">
       <h3 id="sale-preview-title" className="text-sm font-semibold text-admin-ink">{t("title")}</h3>
+      <p className="text-xs leading-5 text-admin-muted">{t("ruleOnly")}</p>
       {status !== "ready" ? (
         <SaleOptionsNotice status={status} />
       ) : targets.length === 0 ? (
@@ -73,6 +75,12 @@ export function SalePreview({
             <p role="status" className="flex gap-2 rounded-lg border border-admin-warning/40 bg-admin-surface px-3 py-2 text-xs leading-5 text-admin-ink">
               <ExclamationTriangleIcon aria-hidden className="size-4 shrink-0 text-admin-warning" />
               {t("notCheaper", { count: preview.notCheaper })}
+            </p>
+          ) : null}
+          {preview.deep > 0 ? (
+            <p role="status" className="flex gap-2 rounded-lg border border-admin-warning/40 bg-admin-surface px-3 py-2 text-xs leading-5 text-admin-ink">
+              <ExclamationTriangleIcon aria-hidden className="size-4 shrink-0 text-admin-warning" />
+              {t("deep", { count: preview.deep })}
             </p>
           ) : null}
         </>

@@ -229,8 +229,9 @@ export function saleOptionsStatus(...reads: ReadonlyArray<{ readonly isLoading: 
 export type SaleFormStatus = Readonly<Record<"designs" | "services" | "tiers" | "categories" | "preview", SaleOptionsStatus>>;
 
 /** How many sales pick designs by this tier, so deleting the tier can say what it changes. */
-export function salesOnTier(sales: ReadonlyArray<Pick<AdminSale, "designs">>, tierId: string): number {
-  return sales.filter((sale) => sale.designs.mode === "TIERS" && sale.designs.ids.includes(tierId)).length;
+export function salesOnTier(sales: ReadonlyArray<Pick<AdminSale, "designs" | "status">>, tierId: string): number {
+  // An ended sale no longer applies, so it is not one the delete changes.
+  return sales.filter((sale) => sale.status !== "ENDED" && sale.designs.mode === "TIERS" && sale.designs.ids.includes(tierId)).length;
 }
 
 /** A design as a sale target: its tier is the group, its cover photo the thumbnail. */
@@ -257,6 +258,14 @@ export function serviceTarget(service: AdminServiceItem): SaleTarget {
 
 function folded(text: string): string {
   return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
+}
+
+export type SaleListStatus = "ALL" | AdminSale["status"];
+
+/** Search and status narrow the list together, preserving the API's priority order. */
+export function filterSales(sales: ReadonlyArray<AdminSale>, query: string, status: SaleListStatus): ReadonlyArray<AdminSale> {
+  const needle = folded(query.trim());
+  return sales.filter(sale => (status === "ALL" || sale.status === status) && folded(sale.name).includes(needle));
 }
 
 /** The picker's search: by name, ignoring case and Vietnamese accents. */
@@ -308,13 +317,14 @@ export type SalePreviewRow<T extends SaleTarget = SaleTarget> = {
 
 /**
  * The first `limit` priced items with their sale price, how many priced items the sale reaches,
- * and how many of those a fixed price would not lower (they keep their own price).
+ * how many of those a fixed price would not lower (they keep their own price), and how many it
+ * cuts to half price or less (`deep`), which is usually a mistyped price.
  */
 export function salePreview<T extends SaleTarget>(
   targets: ReadonlyArray<T>,
   rule: AdminSaleRule,
   limit = 6,
-): { rows: SalePreviewRow<T>[]; total: number; notCheaper: number } {
+): { rows: SalePreviewRow<T>[]; total: number; notCheaper: number; deep: number } {
   const priced = targets.flatMap((target) =>
     target.price === null ? [] : [{ target, original: target.price, ...previewSalePrice(target.price, rule) }],
   );
@@ -322,5 +332,18 @@ export function salePreview<T extends SaleTarget>(
     rows: priced.slice(0, limit),
     total: priced.length,
     notCheaper: priced.filter((row) => !row.applies).length,
+    deep: priced.filter((row) => row.applies && row.price * 2 <= row.original).length,
   };
+}
+
+/** What `salePreview` reports for the form as it stands, or null while the rule is unreadable. */
+export function saleFormPreview(
+  form: SaleForm,
+  designs: ReadonlyArray<SaleTarget>,
+  services: ReadonlyArray<SaleTarget>,
+): ReturnType<typeof salePreview> | null {
+  const rule = parseSaleRule(form);
+  if (!rule) return null;
+  const covered = saleCoverage(saleFormScopes(form), designs, services);
+  return salePreview([...covered.designs, ...covered.services], rule);
 }

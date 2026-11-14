@@ -20,7 +20,15 @@ export function SaleActionModal({
   action,
   onClose,
   onDone,
-}: Readonly<{ sale: AdminSale; action: SaleAction; onClose: () => void; onDone: () => void }>) {
+  onConflict,
+}: Readonly<{
+  sale: AdminSale;
+  action: SaleAction;
+  onClose: () => void;
+  onDone: () => void;
+  /** The sale changed elsewhere: swap in its fresh copy, so a retry is a fresh decision. */
+  onConflict: () => void;
+}>) {
   const t = useTranslations("admin.sales");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +50,9 @@ export function SaleActionModal({
       onClose();
     } catch (thrown) {
       const alreadyEnded = thrown instanceof ApiClientError && thrown.code === "SALE_ALREADY_ENDED";
-      // Changed in another tab: reload, so a retry carries the fresh version.
       const conflict = isVersionConflict(thrown);
-      if (alreadyEnded || conflict) onDone();
+      if (alreadyEnded) onDone();
+      if (conflict) onConflict();
       setError(
         alreadyEnded ? t("end.alreadyEnded") : conflict ? t("conflict") : action === "end" ? t("end.failed") : t("delete.failed"),
       );

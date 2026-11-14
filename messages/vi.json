@@ -15,7 +15,7 @@
         "fixed": "Đồng giá {amount}",
         "percent": "Giảm {percent}%"
       },
-      "description": "Mỗi sale giảm giá các mẫu nail hoặc dịch vụ bạn chọn trong một khoảng thời gian (giờ Nhật). Hết thời gian, giá tự trở về giá gốc.",
+      "description": "Quản lý chương trình giảm giá cho mẫu nail và dịch vụ. Có thể chọn nhiều mục ngay trong danh sách Mẫu nail hoặc Dịch vụ rồi bấm Tạo sale.",
       "create": "Tạo sale",
       "readOnly": "Bạn chỉ có quyền xem sale. Cần quyền quản lý khuyến mãi để tạo hoặc sửa sale.",
       "loading": "Đang tải danh sách sale…",
@@ -49,12 +49,18 @@
         "editLabel": "Sửa sale {name}",
         "endLabel": "Kết thúc ngay sale {name}",
         "duplicateLabel": "Nhân bản sale {name}",
-        "deleteLabel": "Xoá sale {name}"
+        "deleteLabel": "Xoá sale {name}",
+        "filterStatus": "Lọc sale theo trạng thái",
+        "all": "Tất cả",
+        "search": "Tìm theo tên sale",
+        "results": "Hiển thị {count}/{total} chương trình",
+        "noMatch": "Không tìm thấy sale phù hợp. Thử tên khác hoặc bỏ bộ lọc.",
+        "clearFilters": "Xóa bộ lọc"
       },
       "end": {
         "title": "Kết thúc sale",
         "confirmActive": "Kết thúc sale “{name}” ngay bây giờ?",
-        "hintActive": "Giá các mục trở về giá gốc ngay lập tức.",
+        "hintActive": "Mục đang áp dụng sale này sẽ dùng sale khác còn hiệu lực, hoặc trở về giá gốc nếu không còn sale.",
         "confirmUpcoming": "Sale “{name}” chưa bắt đầu. Kết thúc ngay sẽ huỷ sale này.",
         "hintUpcoming": "Sale sẽ không bắt đầu nữa. Muốn chạy lại, hãy nhân bản sale.",
         "action": "Kết thúc sale",
@@ -102,7 +108,7 @@
         },
         "fixedValue": "Giá sale (¥)",
         "fixedPlaceholder": "Ví dụ: 5500",
-        "fixedHint": "Mọi mục được áp dụng đều bán đúng giá này. Mục đã rẻ hơn thì giữ giá của nó.",
+        "fixedHint": "Đây là giá sau giảm, không phải số tiền trừ đi. Ví dụ: giá gốc ¥7.000, đồng giá ¥5.000 → giá sau giảm ¥5.000.",
         "percentValue": "Giảm bao nhiêu %",
         "percentPlaceholder": "Ví dụ: 20",
         "percentHint": "Giá sau giảm được làm tròn xuống đến từng yên.",
@@ -146,24 +152,43 @@
         "create": "Tạo sale",
         "save": "Lưu sale",
         "saving": "Đang lưu…",
+        "conflict": "Sale này vừa được sửa ở nơi khác nên thay đổi của bạn chưa được lưu. Tải bản mới nhất để xem, rồi sửa lại.",
+        "reload": "Tải bản mới nhất",
+        "deepConfirm": "{count} mục bị giảm còn một nửa giá hoặc thấp hơn. Kiểm tra lại giá sale, đúng rồi thì bấm “Vẫn lưu”.",
+        "deepSave": "Vẫn lưu",
         "created": "Đã tạo sale {name}",
-        "updated": "Đã lưu sale {name}"
+        "updated": "Đã lưu sale {name}",
+        "guide": "Điền 3 phần bên dưới. Kiểm tra số mục và mức giảm ở cuối form trước khi lưu."
       },
       "picker": {
         "selectAll": "Chọn tất cả {count} mục đang hiện",
         "selected": "Đã chọn {count}",
         "noMatch": "Không có mục phù hợp. Thử từ khoá khác.",
-        "noPrice": "Chưa có giá"
+        "noPrice": "Chưa có giá",
+        "selectedOnly": "Chỉ xem mục đã chọn ({count})",
+        "noneSelected": "Bạn chưa chọn mục nào. Xem tất cả để bắt đầu chọn.",
+        "showAll": "Xem tất cả mục"
       },
       "preview": {
-        "title": "Xem trước",
+        "title": "Giá theo chương trình này",
         "empty": "Chọn mẫu nail hoặc dịch vụ để xem giá sau khi giảm.",
         "needRule": "Nhập giá sale để xem giá sau khi giảm.",
         "total": "Áp dụng cho {count} mục",
         "more": "và {count} mục khác",
         "keepsPrice": "giữ giá",
         "notCheaper": "{count} mục có giá gốc thấp hơn hoặc bằng giá sale nên giữ nguyên giá.",
-        "unpriced": "{count} mẫu nail chưa có giá nên không được giảm."
+        "deep": "{count} mục bị giảm còn một nửa giá hoặc thấp hơn. Kiểm tra xem có gõ nhầm giá không.",
+        "unpriced": "{count} mẫu nail chưa có giá nên không được giảm.",
+        "ruleOnly": "Tính theo mức giảm đang nhập. Nếu trùng nhiều sale, hệ thống chọn giá thấp nhất; giá thực tế có thể thấp hơn phần xem trước này."
+      },
+      "quickGuide": "Bắt đầu: bấm Tạo sale → chọn thời gian, mức giảm và các mục áp dụng → kiểm tra rồi lưu.",
+      "availability": "Giá sale hiện được quản lý và xem trước trong admin. Giá đặt lịch và thanh toán chưa áp dụng sale này.",
+      "summary": {
+        "title": "Kiểm tra trước khi lưu",
+        "scope": "Đã chọn {designs} mẫu nail · {services} dịch vụ",
+        "lowered": "{count} mục được giảm giá",
+        "unavailable": "Chưa xác định được số mục áp dụng. Kiểm tra danh sách trước khi lưu.",
+        "timezone": "giờ Nhật"
       }
     },
     "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
@@ -713,6 +738,8 @@
           "amountInvalid": "Nhập số nguyên từ 1 trở lên.",
           "cancel": "Hủy",
           "saving": "Đang lưu…",
+          "conflict": "Mức giá này vừa được sửa ở nơi khác nên thay đổi của bạn chưa được lưu. Tải bản mới nhất để xem, rồi sửa lại.",
+          "reload": "Tải bản mới nhất",
           "save": "Lưu mức giá",
           "add": "Thêm mức giá",
           "saveFailed": "Không lưu được mức giá. Hãy tải lại và thử lại.",

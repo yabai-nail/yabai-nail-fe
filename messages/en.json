@@ -15,7 +15,7 @@
         "fixed": "Flat price {amount}",
         "percent": "{percent}% off"
       },
-      "description": "Each sale lowers the price of the nail designs or services you pick for a set time (Japan time). When it ends, prices go back by themselves.",
+      "description": "Manage sales for nail designs and services. You can also select items in Nail designs or Services, then choose Create sale.",
       "create": "Create sale",
       "readOnly": "You can only view sales. Creating or editing a sale needs the promotion management permission.",
       "loading": "Loading sales…",
@@ -49,12 +49,18 @@
         "editLabel": "Edit sale {name}",
         "endLabel": "End now: sale {name}",
         "duplicateLabel": "Duplicate sale {name}",
-        "deleteLabel": "Delete sale {name}"
+        "deleteLabel": "Delete sale {name}",
+        "filterStatus": "Filter sales by status",
+        "all": "All",
+        "search": "Search by sale name",
+        "results": "Showing {count} of {total} sales",
+        "noMatch": "No matching sales. Try another name or clear the filters.",
+        "clearFilters": "Clear filters"
       },
       "end": {
         "title": "End sale",
         "confirmActive": "End the sale “{name}” now?",
-        "hintActive": "Prices go back to the original right away.",
+        "hintActive": "Items will use another eligible sale, or return to their original price if no sale remains.",
         "confirmUpcoming": "The sale “{name}” has not started. Ending it now cancels it.",
         "hintUpcoming": "It will not start. To run it later, duplicate it.",
         "action": "End sale",
@@ -102,7 +108,7 @@
         },
         "fixedValue": "Sale price (¥)",
         "fixedPlaceholder": "For example: 5500",
-        "fixedHint": "Every item it applies to sells at this price. Items that already cost less keep their own price.",
+        "fixedHint": "This is the final price, not an amount deducted. Example: original ¥7,000, fixed price ¥5,000 → discounted price ¥5,000.",
         "percentValue": "Percent off",
         "percentPlaceholder": "For example: 20",
         "percentHint": "The discounted price is rounded down to the yen.",
@@ -146,24 +152,43 @@
         "create": "Create sale",
         "save": "Save sale",
         "saving": "Saving…",
+        "conflict": "This sale was just changed somewhere else, so your changes were not saved. Load the latest version to see it, then edit again.",
+        "reload": "Load latest version",
+        "deepConfirm": "{count, plural, one {# item drops} other {# items drop}} to half price or less. Check the sale price; if it is right, press “Save anyway”.",
+        "deepSave": "Save anyway",
         "created": "Sale {name} created",
-        "updated": "Sale {name} saved"
+        "updated": "Sale {name} saved",
+        "guide": "Complete the three sections below. Check the item count and discount at the bottom before saving."
       },
       "picker": {
         "selectAll": "Select all {count} shown",
         "selected": "{count} selected",
         "noMatch": "Nothing matches. Try another word.",
-        "noPrice": "No price"
+        "noPrice": "No price",
+        "selectedOnly": "Show selected items only ({count})",
+        "noneSelected": "No items selected yet. Show all items to start choosing.",
+        "showAll": "Show all items"
       },
       "preview": {
-        "title": "Preview",
+        "title": "Prices under this sale",
         "empty": "Choose nail designs or services to see their sale prices.",
         "needRule": "Enter the sale price to see the discounted prices.",
         "total": "{count, plural, one {Applies to # item} other {Applies to # items}}",
         "more": "and {count} more",
         "keepsPrice": "keeps its price",
         "notCheaper": "{count, plural, one {# item already costs} other {# items already cost}} the sale price or less, so they keep their own price.",
-        "unpriced": "{count, plural, one {# nail design has} other {# nail designs have}} no price, so they are not discounted."
+        "deep": "{count, plural, one {# item drops} other {# items drop}} to half price or less. Check the price for a typo.",
+        "unpriced": "{count, plural, one {# nail design has} other {# nail designs have}} no price, so they are not discounted.",
+        "ruleOnly": "Based on the rule entered here. When sales overlap, the lowest price wins, so the effective price may be lower than this preview."
+      },
+      "quickGuide": "Start here: Create sale → choose dates, pricing and items → review and save.",
+      "availability": "Sale prices are currently managed and previewed in admin. Booking and checkout prices do not yet apply these sales.",
+      "summary": {
+        "title": "Review before saving",
+        "scope": "Selected: {designs} nail designs · {services} services",
+        "lowered": "{count} items discounted",
+        "unavailable": "Item counts are unavailable. Check the lists before saving.",
+        "timezone": "Japan time"
       }
     },
     "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
@@ -713,6 +738,8 @@
           "amountInvalid": "Enter a whole number of 1 or more.",
           "cancel": "Cancel",
           "saving": "Saving…",
+          "conflict": "This price tier was just changed somewhere else, so your changes were not saved. Load the latest version to see it, then edit again.",
+          "reload": "Load latest version",
           "save": "Save price tier",
           "add": "Add price tier",
           "saveFailed": "Could not save the price tier. Reload and try again.",

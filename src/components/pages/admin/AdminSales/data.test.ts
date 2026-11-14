@@ -6,6 +6,7 @@ import {
   designTarget,
   duplicateSaleForm,
   filterSaleTargets,
+  filterSales,
   fromTokyoParts,
   newSaleForm,
   previewSalePrice,
@@ -139,6 +140,25 @@ const sale: AdminSale = {
   status: "UPCOMING",
   version: 3,
 };
+
+describe("sale list search and status", () => {
+  const rows = [
+    { ...sale, id: "a", name: "Ưu đãi cuối tuần", status: "ACTIVE" as const },
+    { ...sale, id: "b", name: "Ưu đãi mùa đông", status: "UPCOMING" as const },
+    { ...sale, id: "c", name: "Sale cũ", status: "ENDED" as const },
+  ];
+
+  it("combines accent-insensitive search with status without changing the source order", () => {
+    expect(filterSales(rows, "  UU DAI  ", "ALL").map(row => row.id)).toEqual(["a", "b"]);
+    expect(filterSales(rows, "uu dai", "UPCOMING").map(row => row.id)).toEqual(["b"]);
+    expect(filterSales(rows, "cuoi tuan", "ENDED")).toEqual([]);
+  });
+
+  it("includes history when filters are cleared", () => {
+    expect(filterSales(rows, "", "ALL")).toEqual(rows);
+    expect(filterSales([], "", "ACTIVE")).toEqual([]);
+  });
+});
 
 describe("sale form state", () => {
   it("starts a new sale on the 7-day window with nothing covered", () => {
@@ -281,6 +301,17 @@ describe("saleCoverage and salePreview", () => {
     expect(preview.rows).toHaveLength(4);
   });
 
+  it("counts items cut to half price or less, so a mistyped price stands out", () => {
+    const deep = (rule: AdminSale["rule"]) => salePreview([...designs, ...services], rule).deep;
+    // ¥3,300 is exactly half of D1's ¥6,600; ¥550 (a missing zero) halves every priced item.
+    expect(deep({ type: "FIXED", value: 3300 })).toBe(2);
+    expect(deep({ type: "FIXED", value: 550 })).toBe(4);
+    expect(deep({ type: "PERCENT", value: 49 })).toBe(0);
+    expect(deep({ type: "PERCENT", value: 50 })).toBe(4);
+    // An item a fixed price does not lower is never a deep cut.
+    expect(deep({ type: "FIXED", value: 9000 })).toBe(0);
+  });
+
   it("counts only the items a sale actually lowers, like the tables' SALE chips", () => {
     const counts = (rule: AdminSale["rule"]) =>
       saleLoweredCounts({ rule, designs: { mode: "ALL", ids: [] }, services: { mode: "ALL", ids: [] } }, designs, services);
@@ -306,12 +337,13 @@ describe("saleOptionsStatus", () => {
 });
 
 describe("salesOnTier", () => {
-  it("counts the sales that pick designs by that tier", () => {
-    const sales: Array<Pick<AdminSale, "designs">> = [
-      { designs: { mode: "TIERS", ids: ["t1", "t2"] } },
-      { designs: { mode: "TIERS", ids: ["t2"] } },
-      { designs: { mode: "ITEMS", ids: ["t1"] } },
-      { designs: { mode: "ALL", ids: [] } },
+  it("counts the sales that pick designs by that tier and have not ended", () => {
+    const sales: Array<Pick<AdminSale, "designs" | "status">> = [
+      { status: "ACTIVE", designs: { mode: "TIERS", ids: ["t1", "t2"] } },
+      { status: "UPCOMING", designs: { mode: "TIERS", ids: ["t2"] } },
+      { status: "ENDED", designs: { mode: "TIERS", ids: ["t1", "t2"] } },
+      { status: "ACTIVE", designs: { mode: "ITEMS", ids: ["t1"] } },
+      { status: "ACTIVE", designs: { mode: "ALL", ids: [] } },
     ];
     expect(salesOnTier(sales, "t1")).toBe(1);
     expect(salesOnTier(sales, "t2")).toBe(2);

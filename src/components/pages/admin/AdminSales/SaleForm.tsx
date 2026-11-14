@@ -1,5 +1,6 @@
 "use client";
 
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -10,10 +11,12 @@ import { adminService, ApiClientError, type AdminSale } from "@/service";
 import { SalePreview } from "./SalePreview";
 import { SaleScopeFields, type SaleGroupOption } from "./SaleScopeFields";
 import { SaleWindowFields } from "./SaleWindowFields";
+import { SaleSummary } from "./SaleSummary";
 import {
   buildSaleInput,
   SALE_NAME_MAX,
   saleFormErrors,
+  saleFormPreview,
   type SaleField,
   type SaleForm as SaleFormState,
   type SaleFormStatus,
@@ -50,6 +53,9 @@ function FieldError({ id, children }: Readonly<{ id: string; children: ReactNode
 /**
  * Create or edit a sale (`sale` set) in one wide modal: name and time, the price rule, and what
  * it applies to, with a live preview beside the form (below it on narrow screens).
+ *
+ * An edit saves against the version it opened with. If the sale changed elsewhere meanwhile the
+ * API refuses it, and the form offers `onReload` (open the fresh copy) instead of overwriting.
  */
 export function SaleForm({
   sale,
@@ -61,6 +67,7 @@ export function SaleForm({
   status,
   onClose,
   onSaved,
+  onReload,
 }: Readonly<{
   sale: AdminSale | null;
   initial: SaleFormState;
@@ -71,6 +78,7 @@ export function SaleForm({
   status: SaleFormStatus;
   onClose: () => void;
   onSaved: () => void;
+  onReload: () => void;
 }>) {
   const t = useTranslations("admin.sales");
   const [form, setForm] = useState(initial);
@@ -78,7 +86,11 @@ export function SaleForm({
   const [attempted, setAttempted] = useState(false);
   const [serverField, setServerField] = useState<SaleField | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(false);
+  // A price that cuts items to half or less is usually a typo, so the first save only asks; the
+  // key is what was asked about, and changing the price or scope asks again.
+  const [deepAsked, setDeepAsked] = useState<string | null>(null);
   // Set when a save is blocked or refused; the effect brings that error into view once it shows,
   // since it may sit below the fold of the scrolling modal. A new object each time re-runs it.
   const [reveal, setReveal] = useState<{ target: SaleField | "general" } | null>(null);
@@ -94,6 +106,9 @@ export function SaleForm({
   }, [reveal]);
 
   const errors = saleFormErrors(form);
+  const deep = saleFormPreview(form, designTargets, serviceTargets)?.deep ?? 0;
+  const deepKey = deep > 0 ? JSON.stringify([form.ruleType, form.ruleValue, form.designs, form.services]) : null;
+  const confirmingDeep = deepKey !== null && deepAsked === deepKey;
   const shows = (field: SaleField) => serverField === field || (attempted && Boolean(errors[field]));
   const update = (patch: Partial<SaleFormState>, ...fields: SaleField[]) => {
     setForm((current) => ({ ...current, ...patch }));
@@ -110,8 +125,15 @@ export function SaleForm({
       if (first) setReveal({ target: first });
       return;
     }
+    if (deepKey !== null && !confirmingDeep) {
+      setDeepAsked(deepKey);
+      setError(null);
+      setReveal({ target: "general" });
+      return;
+    }
     setBusy(true);
     setError(null);
+    setConflict(false);
     setServerField(null);
     try {
       if (sale) await adminService.updateSale(sale.id, input, sale.version);
@@ -121,11 +143,10 @@ export function SaleForm({
       onClose();
     } catch (thrown) {
       const field = refusedField(thrown);
-      const conflict = isVersionConflict(thrown);
-      // Changed in another tab: reload, so the next save carries the fresh version.
-      if (conflict) onSaved();
+      const changedElsewhere = isVersionConflict(thrown);
+      setConflict(changedElsewhere);
       setServerField(field);
-      setError(field ? null : conflict ? t("conflict") : t("form.errors.saveFailed"));
+      setError(field ? null : changedElsewhere ? t("form.conflict") : t("form.errors.saveFailed"));
       setReveal({ target: field ?? "general" });
     } finally {
       setBusy(false);
@@ -136,14 +157,15 @@ export function SaleForm({
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center" scroll="inside">
-          <Modal.Dialog>
+          <Modal.Dialog className="p-0">
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
                 {sale ? t("form.editTitle") : t("form.createTitle")}
               </Modal.Heading>
+              <p className="mt-2 text-sm leading-5 text-admin-muted">{t("form.guide")}</p>
             </Modal.Header>
             <form ref={formRef} noValidate className="contents" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
-              <Modal.Body className="grid gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+              <Modal.Body className="mx-0 grid min-w-0 gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
                 <div className="grid min-w-0 content-start gap-6">
                   <Section step={1} title={t("form.basics")}>
                     <label className="flex flex-col gap-2 text-sm">
@@ -236,13 +258,28 @@ export function SaleForm({
                 </div>
 
                 <SalePreview form={form} designTargets={designTargets} serviceTargets={serviceTargets} status={status.preview} />
-                {error ? <p data-sale-field="general" role="alert" className="text-sm text-admin-danger lg:col-span-2">{error}</p> : null}
+                {error ? (
+                  <div data-sale-field="general" className="flex flex-wrap items-center gap-3 lg:col-span-2">
+                    <p role="alert" className="text-sm text-admin-danger">{error}</p>
+                    {conflict ? (
+                      <Button variant="secondary" size="sm" className="rounded-lg" onPress={onReload}>{t("form.reload")}</Button>
+                    ) : null}
+                  </div>
+                ) : confirmingDeep ? (
+                  <p data-sale-field="general" role="alert" className="flex gap-2 rounded-lg border border-admin-warning/40 bg-admin-surface px-3 py-2 text-sm leading-5 text-admin-ink lg:col-span-2">
+                    <ExclamationTriangleIcon aria-hidden className="size-5 shrink-0 text-admin-warning" />
+                    {t("form.deepConfirm", { count: deep })}
+                  </p>
+                ) : null}
               </Modal.Body>
-              <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
-                <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{t("form.cancel")}</Button>
-                <Button type="submit" variant="primary" className="rounded-lg" isDisabled={busy}>
-                  {busy ? t("form.saving") : sale ? t("form.save") : t("form.create")}
-                </Button>
+              <Modal.Footer className="flex flex-col gap-3 border-t border-admin-border bg-admin-surface px-5 py-3 sm:flex-row sm:items-end sm:justify-between">
+                <SaleSummary form={form} designs={designTargets} services={serviceTargets} status={status.preview} />
+                <div className="flex w-full shrink-0 justify-end gap-2 sm:w-auto">
+                  <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{t("form.cancel")}</Button>
+                  <Button type="submit" variant="primary" className="rounded-lg" isDisabled={busy}>
+                    {busy ? t("form.saving") : confirmingDeep ? t("form.deepSave") : sale ? t("form.save") : t("form.create")}
+                  </Button>
+                </div>
               </Modal.Footer>
             </form>
           </Modal.Dialog>

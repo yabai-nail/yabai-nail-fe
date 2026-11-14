@@ -23,6 +23,7 @@ import { SaleItemPicker } from "./SaleItemPicker";
 import { SaleList } from "./SaleList";
 import { SalePreview } from "./SalePreview";
 import { SaleScopeFields } from "./SaleScopeFields";
+import { SaleSummary } from "./SaleSummary";
 import { newSaleForm } from "./data";
 
 const NOW = new Date("2026-11-13T10:00:00+09:00");
@@ -32,6 +33,21 @@ const designs = Array.from({ length: 8 }, (_, index) => ({
   name: `Design ${index}`,
   price: index === 0 ? 4000 : 7000,
 }));
+
+describe("SaleSummary", () => {
+  const form = { ...newSaleForm(NOW), ruleValue: "5000", designs: { mode: "ALL" as const, groupIds: [], itemIds: [] } };
+  it("distinguishes the selected scope from the items actually discounted", () => {
+    const html = renderToStaticMarkup(createElement(SaleSummary, { form, designs, services: [], status: "ready" }));
+    expect(html).toContain("scope(designs=8,services=0)");
+    expect(html).toContain("lowered(count=7)");
+    expect(html).toContain("rule.fixed(amount=");
+  });
+  it("does not present missing catalogue data as zero affected items", () => {
+    const html = renderToStaticMarkup(createElement(SaleSummary, { form, designs: [], services: [], status: "failed" }));
+    expect(html).toContain("unavailable");
+    expect(html).not.toContain("scope(designs=0");
+  });
+});
 
 describe("SalePreview", () => {
   const form = { ...newSaleForm(NOW), ruleValue: "5000", designs: { mode: "ALL" as const, groupIds: [], itemIds: [] } };
@@ -43,6 +59,15 @@ describe("SalePreview", () => {
     expect(html).toContain("more(count=2)");
     expect(html).toContain("notCheaper(count=1)");
     expect(html).toContain("keepsPrice");
+  });
+
+  it("warns when a price cuts items to half or less", () => {
+    const html = (ruleValue: string) =>
+      renderToStaticMarkup(createElement(SalePreview, { form: { ...form, ruleValue }, designTargets: designs, serviceTargets: [], status: "ready" }));
+    // ¥2,000 halves Design 0 (¥4,000) and cuts the ¥7,000 designs further.
+    expect(html("2000")).toContain("deep(count=8)");
+    expect(html("3500")).toContain("deep(count=7)");
+    expect(html("5000")).not.toContain("deep(");
   });
 
   it("does not warn for a percent rule", () => {

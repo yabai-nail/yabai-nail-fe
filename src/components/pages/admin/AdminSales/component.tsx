@@ -79,9 +79,6 @@ export function AdminSalesComponent() {
     categories: saleOptionsStatus(categories),
     preview: saleOptionsStatus(designs, services),
   };
-  // After a reload (e.g. on a version conflict) a retry must send the sale's fresh version.
-  const latest = (sale: AdminSale) => sales.data?.items.find((item) => item.id === sale.id) ?? sale;
-
   // "/admin/sales?new=1&designs=…" (the tables' "Tạo sale" bar) opens the form with those picks.
   const [editor, setEditor] = useState<Editor | null>(() =>
     searchParams.get("new") === "1" ? { sale: null, initial: newSaleForm(new Date(), salePrefill(searchParams)) } : null,
@@ -94,6 +91,21 @@ export function AdminSalesComponent() {
     if (searchParams.has("new")) router.replace(pathname);
   };
   const refresh = () => void sales.mutate();
+  // The dialogs keep the copy of the sale they opened with, so a background refresh never slips
+  // a newer version under the owner's edit. Only after the API refused a stale version do they
+  // take the fresh copy (null when the sale is gone).
+  const freshSale = async (id: string) => (await sales.mutate())?.items.find((item) => item.id === id) ?? null;
+  const reloadEditor = async () => {
+    if (!editor?.sale) return;
+    const fresh = await freshSale(editor.sale.id);
+    if (fresh) setEditor({ sale: fresh, initial: saleFormFromSale(fresh) });
+    else closeEditor();
+  };
+  const reloadPending = async () => {
+    if (!pending) return;
+    const fresh = await freshSale(pending.sale.id);
+    setPending(fresh ? { sale: fresh, action: pending.action } : null);
+  };
   const createButton = (
     <Button
       variant="primary"
@@ -110,6 +122,8 @@ export function AdminSalesComponent() {
       <div className="mb-4 flex flex-col gap-3 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-2xl space-y-1 text-xs leading-5 text-admin-muted">
           <p>{t("description")}</p>
+          <p className="font-medium text-admin-ink">{t("quickGuide")}</p>
+          <p>{t("availability")}</p>
           {canWrite ? null : <p role="status">{t("readOnly")}</p>}
         </div>
         {createButton}
@@ -133,7 +147,9 @@ export function AdminSalesComponent() {
 
       {canWrite && editor ? (
         <SaleForm
-          sale={editor.sale && latest(editor.sale)}
+          // A reloaded copy starts the form afresh.
+          key={editor.sale ? `${editor.sale.id}:${editor.sale.version}` : "new"}
+          sale={editor.sale}
           initial={editor.initial}
           designTargets={designTargets}
           serviceTargets={serviceTargets}
@@ -142,10 +158,17 @@ export function AdminSalesComponent() {
           status={formStatus}
           onClose={closeEditor}
           onSaved={refresh}
+          onReload={() => void reloadEditor()}
         />
       ) : null}
       {canWrite && pending ? (
-        <SaleActionModal sale={latest(pending.sale)} action={pending.action} onClose={() => setPending(null)} onDone={refresh} />
+        <SaleActionModal
+          sale={pending.sale}
+          action={pending.action}
+          onClose={() => setPending(null)}
+          onDone={refresh}
+          onConflict={() => void reloadPending()}
+        />
       ) : null}
     </AdminPageLayout>
   );

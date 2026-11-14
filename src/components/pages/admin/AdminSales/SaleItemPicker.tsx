@@ -16,8 +16,8 @@ function SelectAll({ checked, mixed, disabled, label, onChange }: Readonly<{ che
   }, [mixed]);
   return (
     <label className="flex items-center gap-2 text-sm font-medium text-admin-ink">
-      <input ref={ref} type="checkbox" className="size-4 accent-admin-accent" checked={checked} disabled={disabled} onChange={onChange} />
-      {label}
+      <input ref={ref} type="checkbox" className="size-4 shrink-0 accent-admin-accent" checked={checked} disabled={disabled} onChange={onChange} />
+      <span className="min-w-0 break-words">{label}</span>
     </label>
   );
 }
@@ -43,10 +43,17 @@ export function SaleItemPicker({
 }>) {
   const t = useTranslations("admin.sales.picker");
   const [query, setQuery] = useState("");
+  const [selectedOnly, setSelectedOnly] = useState(false);
   const picked = new Set(selected);
-  const shown = filterSaleTargets(items, query);
+  const candidates = selectedOnly ? items.filter(item => picked.has(item.id)) : items;
+  const shown = filterSaleTargets(candidates, query);
   const shownPicked = shown.filter((item) => picked.has(item.id)).length;
   const allShown = shown.length > 0 && shownPicked === shown.length;
+
+  const showAll = () => {
+    setQuery("");
+    setSelectedOnly(false);
+  };
 
   const toggle = (id: string) => {
     const next = new Set(picked);
@@ -66,9 +73,13 @@ export function SaleItemPicker({
   if (items.length === 0) return <p role="status" className="text-xs text-admin-muted">{emptyText}</p>;
 
   return (
-    <fieldset className="grid gap-2 rounded-lg border border-admin-border p-3">
+    <fieldset className="grid min-w-0 gap-2 rounded-lg border border-admin-border p-3">
       <legend className="px-1 text-xs font-semibold text-admin-muted">{label}</legend>
       <AdminSearchField label={searchLabel} placeholder={searchLabel} value={query} onChange={setQuery} fullWidth />
+      <label className="flex min-h-11 min-w-0 cursor-pointer items-center gap-2 text-sm text-admin-ink">
+        <input type="checkbox" className="size-4 shrink-0 accent-admin-accent" checked={selectedOnly} onChange={event => setSelectedOnly(event.target.checked)} />
+        <span className="min-w-0 break-words">{t("selectedOnly", { count: picked.size })}</span>
+      </label>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <SelectAll
           checked={allShown}
@@ -80,7 +91,10 @@ export function SaleItemPicker({
         <span aria-live="polite" className="text-xs font-semibold text-admin-accent">{t("selected", { count: picked.size })}</span>
       </div>
       {shown.length === 0 ? (
-        <p role="status" className="py-4 text-center text-xs text-admin-muted">{t("noMatch")}</p>
+        <div className="grid justify-items-center gap-2 py-4">
+          <p role="status" className="text-center text-xs text-admin-muted">{t(selectedOnly && picked.size === 0 ? "noneSelected" : "noMatch")}</p>
+          <button type="button" className="min-h-11 rounded-lg px-3 text-sm font-semibold text-admin-accent focus-visible:ring-2 focus-visible:ring-admin-accent" onClick={showAll}>{t("showAll")}</button>
+        </div>
       ) : (
         <ul className="max-h-72 divide-y divide-admin-border overflow-y-auto rounded-lg border border-admin-border">
           {shown.map((item) => (
@@ -94,7 +108,7 @@ export function SaleItemPicker({
                   onChange={() => toggle(item.id)}
                 />
                 <AdminNailDesignThumbnail imageUrl={item.imageUrl} alt="" />
-                <span className="min-w-0 flex-1 truncate text-sm text-admin-ink">{item.name}</span>
+                <span className="min-w-0 flex-1 break-words text-sm text-admin-ink">{item.name}</span>
                 <span className="shrink-0 text-xs tabular-nums text-admin-muted">
                   {item.price === null ? t("noPrice") : formatMoney(item.price)}
                 </span>
