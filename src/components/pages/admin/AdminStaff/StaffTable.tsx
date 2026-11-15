@@ -1,9 +1,11 @@
 import { useTranslations } from "next-intl";
-import { NoSymbolIcon, CheckCircleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { NoSymbolIcon, CheckCircleIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button, Chip } from "@heroui/react";
 import { AdminAvatarZoom } from "@/components/blocks/admin/AdminAvatarField";
+import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
 import { formatMoney } from "@/lib/admin-format";
-import type { StaffMember } from "./data";
+import type { AdminTableSort } from "@/lib/admin-table-sort";
+import type { StaffMember, StaffSortKey } from "./data";
 
 type StaffTableProps = {
   readonly staff: ReadonlyArray<StaffMember>;
@@ -13,6 +15,10 @@ type StaffTableProps = {
   readonly busyId: string | null;
   readonly onEdit: (member: StaffMember) => void;
   readonly onToggleActive: (member: StaffMember) => void;
+  /** Owner-only hard delete; omitted for everyone else, which hides the button. */
+  readonly onDelete?: (member: StaffMember) => void;
+  readonly sort: AdminTableSort<StaffSortKey> | null;
+  readonly onSortChange: (next: AdminTableSort<StaffSortKey> | null) => void;
 };
 
 const MISSING = "—";
@@ -21,22 +27,24 @@ function formatOptionalMoney(value: number | null): string {
   return typeof value === "number" ? formatMoney(value) : MISSING;
 }
 
-export function StaffTable({ staff, selectedId, onSelect, canWrite, busyId, onEdit, onToggleActive }: StaffTableProps) {
+export function StaffTable({ staff, selectedId, onSelect, canWrite, busyId, onEdit, onToggleActive, onDelete, sort, onSortChange }: StaffTableProps) {
   const t = useTranslations("admin.staff");
+  const sortProps = { sort, onSortChange };
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[920px] text-left text-sm">
         <caption className="sr-only">{t("table.caption")}</caption>
-        <thead className="border-b border-admin-border text-xs text-admin-muted">
+        {/* Same header as the services tables: click a title to sort, carets show the direction. */}
+        <thead className="border-b border-admin-border bg-admin-soft/60 text-xs font-semibold text-admin-ink">
           <tr>
-            <th scope="col" className="px-4 py-3">{t("table.staff")}</th>
-            <th scope="col" className="px-3 py-3">{t("orders.status")}</th>
-            <th scope="col" className="px-3 py-3">{t("table.branch")}</th>
-            <th scope="col" className="px-3 py-3">Doanh thu</th>
-            <th scope="col" className="px-3 py-3">{t("compensation.commission")}</th>
-            <th scope="col" className="px-3 py-3">{t("detail.payout")}</th>
-            <th scope="col" className="px-3 py-3">{t("performance.orders")}</th>
-            <th scope="col" className="px-3 py-3 text-right">{t("table.actions")}</th>
+            <AdminSortableHeader sortKey="name" className="px-4" {...sortProps}>{t("table.staff")}</AdminSortableHeader>
+            <AdminSortableHeader>{t("orders.status")}</AdminSortableHeader>
+            <AdminSortableHeader>{t("table.branch")}</AdminSortableHeader>
+            <AdminSortableHeader sortKey="revenue" {...sortProps}>{t("table.revenue")}</AdminSortableHeader>
+            <AdminSortableHeader sortKey="commissionRate" {...sortProps}>{t("compensation.commission")}</AdminSortableHeader>
+            <AdminSortableHeader sortKey="commissionAmount" {...sortProps}>{t("detail.payout")}</AdminSortableHeader>
+            <AdminSortableHeader sortKey="orders" {...sortProps}>{t("performance.orders")}</AdminSortableHeader>
+            <th scope="col" className="whitespace-nowrap px-3 py-2 text-right">{t("table.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">
@@ -88,6 +96,19 @@ export function StaffTable({ staff, selectedId, onSelect, canWrite, busyId, onEd
                       {member.status === "working" ? <NoSymbolIcon className="size-4" /> : <CheckCircleIcon className="size-4" />}
                       {member.status === "working" ? t("actionDeactivate") : t("actionActivate")}
                     </Button>
+                    {onDelete ? (
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-lg text-admin-danger"
+                        aria-label={t("delete.ariaLabel", { name: member.name })}
+                        isDisabled={busyId === member.id}
+                        onPress={() => onDelete(member)}
+                      >
+                        <TrashIcon className="size-4" />
+                      </Button>
+                    ) : null}
                   </div>
                 ) : (
                   <span className="block text-right text-admin-muted">{MISSING}</span>

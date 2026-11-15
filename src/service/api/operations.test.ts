@@ -33,6 +33,7 @@ const expectedFeatureOperationIds = [
   "GET /api/v1/admin/notification-campaigns",
   "DELETE /api/v1/admin/services/{serviceId}",
   "DELETE /api/v1/admin/branches/{branchId}",
+  "DELETE /api/v1/admin/staff/{staffId}",
   "GET /api/v1/admin/services/{serviceId}/add-ons",
   "PUT /api/v1/admin/services/{serviceId}/add-ons",
   "GET /api/v1/branches/{branchId}/services/{serviceId}/add-ons",
@@ -53,6 +54,15 @@ const expectedFeatureOperationIds = [
   "POST /api/v1/admin/payroll/{branchId}/{staffId}/{period}/unlock",
   "GET /api/v1/admin/me/payroll",
   "GET /api/v1/admin/accounts/roles",
+  "GET /api/v1/admin/price-tiers",
+  "POST /api/v1/admin/price-tiers",
+  "PATCH /api/v1/admin/price-tiers/{tierId}",
+  "DELETE /api/v1/admin/price-tiers/{tierId}",
+  "GET /api/v1/admin/sales",
+  "POST /api/v1/admin/sales",
+  "PATCH /api/v1/admin/sales/{saleId}",
+  "POST /api/v1/admin/sales/{saleId}/end",
+  "DELETE /api/v1/admin/sales/{saleId}",
 ] as const;
 
 describe("backend API operation catalog", () => {
@@ -78,11 +88,11 @@ describe("backend API operation catalog", () => {
         stability: "feature",
       });
     }
-    expect(runtimeApiOperations).toHaveLength(229);
+    expect(runtimeApiOperations).toHaveLength(239);
     expect(
       new Set(runtimeApiOperations.map(({ id }) => id)).size,
-    ).toBe(229);
-    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(220);
+    ).toBe(239);
+    expect(runtimeApiOperations.filter(({ audience }) => audience === "app")).toHaveLength(230);
     expect(runtimeApiOperations.filter(({ audience }) => audience !== "app")).toHaveLength(9);
     for (const operation of runtimeApiOperations) {
       expect(getApiOperation(operation.id)).toBe(operation);

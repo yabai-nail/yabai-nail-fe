@@ -1,116 +1,104 @@
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Button, Chip } from "@heroui/react";
 
+import { AdminColumnFilter, type ColumnFilterOption } from "@/components/blocks/admin/AdminColumnFilter";
+import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
 import { formatMoney } from "@/lib/admin-format";
 
-import { groupAddonCatalog } from "./addon-groups";
+import { UNGROUPED } from "./addon-groups";
+import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader } from "./ServiceTableCells";
 import type { SalonService } from "./data";
+import type { ServiceListState } from "./useServiceListState";
 
 /**
- * The add-on catalogue, grouped the way a customer meets it.
- *
- * The group is a property of the add-on itself (`addonGroup`), so this is the only screen on
- * which a salon sees its groups as groups. It shows the raw code because there is nowhere to
- * store a display name for one yet — the backend keys the group by that code alone.
+ * The add-on catalogue as one table, built like the services table beside it: sortable
+ * headers, a group column that filters the way the category column does, and the same
+ * show/hide switch. The group is a property of the add-on itself (`addonGroup`) and has no
+ * display name of its own yet, so the raw code is what the column shows.
  */
 export function AddonTable({
   services,
+  list,
+  groupOptions,
+  emptyText,
+  busyIds,
+  onToggleStatus,
   onEdit,
   onDelete,
 }: Readonly<{
   services: ReadonlyArray<SalonService>;
+  /** The tab's sort and column filters, which the headers read and change. */
+  list: ServiceListState;
+  /** The group column's checklist, with each group's add-on count. */
+  groupOptions: ReadonlyArray<ColumnFilterOption>;
+  /** "None yet" for an empty catalogue, "no match" when a filter or search emptied it. */
+  emptyText: string;
+  /** Add-ons with a status change in flight; their switch stays disabled until it lands. */
+  busyIds: ReadonlySet<string>;
+  /** Each handler is omitted for an admin who may not write, which leaves its control read-only. */
+  onToggleStatus?: (service: SalonService) => void;
   onEdit?: (service: SalonService) => void;
   onDelete?: (service: SalonService) => void;
 }>) {
   const t = useTranslations("admin.services");
-  const grouped = useMemo(() => groupAddonCatalog(services), [services]);
-
-  if (services.length === 0) {
-    return <p role="status" className="p-12 text-center text-sm text-admin-muted">{t("addonsTab.empty")}</p>;
-  }
-
+  const sortProps = { sort: list.sort, onSortChange: list.setSort };
   return (
-    <div className="grid gap-5">
-      {grouped.map(([code, addons]) => (
-        <section key={code} className="grid gap-2">
-          <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-admin-ink">
-            <span className="rounded-md bg-admin-soft px-2 py-1 font-mono text-xs">{code}</span>
-            <span className="font-normal text-xs text-admin-muted">{t("addonsTab.groupCount", { count: addons.length })}</span>
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <caption className="sr-only">{t("addonsTab.caption", { group: code })}</caption>
-              <thead className="border-b border-admin-border text-xs text-admin-muted">
-                <tr>
-                  <th scope="col" className="px-4 py-3">{t("addonsTab.name")}</th>
-                  <th scope="col" className="px-3 py-3">{t("table.price")}</th>
-                  <th scope="col" className="px-3 py-3">{t("table.duration")}</th>
-                  <th scope="col" className="px-3 py-3">{t("table.status")}</th>
-                  <th scope="col" className="px-3 py-3">{t("table.actions")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-admin-border">
-                {addons.map((addon) => (
-                  <tr key={addon.id}>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-3">
-                        {addon.imageUrl ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={addon.imageUrl}
-                            alt=""
-                            className="size-11 shrink-0 rounded-lg border border-admin-border object-cover"
-                          />
-                        ) : (
-                          <span aria-hidden="true" className="size-11 shrink-0 rounded-lg border border-admin-border bg-admin-soft" />
-                        )}
-                        <strong>{addon.name}</strong>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(addon.price)}</td>
-                    <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: addon.durationMinutes })}</td>
-                    {/* Same one-line rule as ServiceTable: this table is narrower today, but the
-                        status chip is the same width and breaks the same way once a group holds a
-                        long add-on name. */}
-                    <td className="whitespace-nowrap px-3 py-2">
-                      <Chip size="sm" variant="soft" color={addon.isVisible ? "success" : "default"}>
-                        <Chip.Label>{addon.isVisible ? t("table.visible") : t("table.hidden")}</Chip.Label>
-                      </Chip>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2">
-                      <div className="flex gap-1">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="ghost"
-                          aria-label={t("table.editService", { name: addon.name })}
-                          isDisabled={!onEdit || addon.version === undefined}
-                          onPress={onEdit ? () => onEdit(addon) : undefined}
-                        >
-                          <PencilSquareIcon className="size-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="ghost"
-                          className="text-admin-danger"
-                          aria-label={t("table.deleteService", { name: addon.name })}
-                          isDisabled={!onDelete || addon.version === undefined}
-                          onPress={onDelete ? () => onDelete(addon) : undefined}
-                        >
-                          <TrashIcon className="size-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ))}
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[760px] text-left text-sm">
+        <caption className="sr-only">{t("addonsTab.label")}</caption>
+        <thead className="border-b border-admin-border bg-admin-soft/60 text-xs font-semibold text-admin-ink">
+          <tr>
+            <AdminSortableHeader sortKey="name" className="px-4" {...sortProps}>{t("addonsTab.name")}</AdminSortableHeader>
+            <AdminSortableHeader
+              sortKey="group"
+              {...sortProps}
+              filter={
+                <AdminColumnFilter
+                  label={t("addonsTab.filterGroup")}
+                  options={groupOptions}
+                  selected={list.filters.groups}
+                  onApply={(groups) => list.setFilters({ ...list.filters, groups })}
+                  searchable={groupOptions.length > 6}
+                />
+              }
+            >
+              {t("addonsTab.group")}
+            </AdminSortableHeader>
+            <AdminSortableHeader sortKey="price" {...sortProps}>{t("table.price")}</AdminSortableHeader>
+            <AdminSortableHeader sortKey="duration" {...sortProps}>{t("table.duration")}</AdminSortableHeader>
+            <ServiceStatusHeader list={list} />
+            <AdminSortableHeader>{t("table.actions")}</AdminSortableHeader>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-admin-border">
+          {services.map((addon) => (
+            <tr key={addon.id}>
+              <td className="px-4 py-2">
+                <div className="flex items-center gap-3">
+                  {addon.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={addon.imageUrl}
+                      alt=""
+                      className="size-11 shrink-0 rounded-lg border border-admin-border object-cover"
+                    />
+                  ) : (
+                    <span aria-hidden="true" className="size-11 shrink-0 rounded-lg border border-admin-border bg-admin-soft" />
+                  )}
+                  <strong>{addon.name}</strong>
+                </div>
+              </td>
+              <td className="whitespace-nowrap px-3 py-2">
+                <span className="rounded-md bg-admin-soft px-2 py-1 font-mono text-xs text-admin-ink">{addon.addonGroup ?? UNGROUPED}</span>
+              </td>
+              <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(addon.price)}</td>
+              <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: addon.durationMinutes })}</td>
+              <ServiceStatusCell service={addon} onToggle={onToggleStatus} isBusy={busyIds.has(addon.id)} />
+              <ServiceRowActions service={addon} onEdit={onEdit} onDelete={onDelete} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {services.length === 0 ? <p role="status" className="p-12 text-center text-sm text-admin-muted">{emptyText}</p> : null}
     </div>
   );
 }

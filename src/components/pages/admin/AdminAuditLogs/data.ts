@@ -116,22 +116,7 @@ export function filterAuditEntries(
   );
 }
 
-export function paginate<T>(
-  items: ReadonlyArray<T>,
-  requestedPage: number,
-  pageSize: number,
-) {
-  if (!Number.isInteger(pageSize) || pageSize <= 0) {
-    throw new RangeError("Page size must be a positive integer.");
-  }
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const page = Math.min(Math.max(1, requestedPage), pageCount);
-  return {
-    items: items.slice((page - 1) * pageSize, page * pageSize),
-    page,
-    pageCount,
-  } as const;
-}
+export { paginate } from "@/lib/admin-pagination";
 
 export function formatAuditTime(iso: string): string {
   const date = new Date(iso);

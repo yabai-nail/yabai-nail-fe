@@ -34,7 +34,7 @@ export type AddonSource = {
 };
 
 /** Group code fallback for an add-on service created without one. */
-const UNGROUPED = "OTHER";
+export const UNGROUPED = "OTHER";
 
 const numberOrNull = (value: string) => (value.trim() === "" ? null : Number(value));
 

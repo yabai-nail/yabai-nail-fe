@@ -8,10 +8,21 @@ describe("isAdminPhone", () => {
     expect(isAdminPhone("  0900000010  ")).toBe(true);
   });
 
+  // The backend's CUSTOMER_PHONE_PATTERN: Japanese mobiles are eleven digits, and both
+  // countries' international forms are accepted. Refusing them here left the staff form's
+  // submit disabled for a number the API would have taken.
+  it("accepts the Japanese and international forms the backend takes", () => {
+    expect(isAdminPhone("09012345678")).toBe(true);
+    expect(isAdminPhone("+84901234567")).toBe(true);
+    expect(isAdminPhone("+819012345678")).toBe(true);
+  });
+
   it("rejects anything the backend would refuse", () => {
     expect(isAdminPhone("900000010")).toBe(false);
-    expect(isAdminPhone("09000000101")).toBe(false);
+    expect(isAdminPhone("090000000101")).toBe(false);
     expect(isAdminPhone("090000001a")).toBe(false);
+    expect(isAdminPhone("090-1234-5678")).toBe(false);
+    expect(isAdminPhone("+8490123456")).toBe(false);
     expect(isAdminPhone("")).toBe(false);
   });
 });

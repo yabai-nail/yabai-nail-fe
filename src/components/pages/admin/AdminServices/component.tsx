@@ -1,42 +1,44 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { Autocomplete, Button, Card, ListBox, SearchField, Tabs } from "@heroui/react";
-import { useMemo, useState } from "react";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Button, Card, Tabs } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminPageLayout } from "@/components/blocks/admin/AdminPageLayout";
+import { AdminSelectionBar } from "@/components/blocks/admin/AdminSelectionBar";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
-import { AdminSplitLayout } from "@/components/blocks/admin/AdminSplitLayout";
 import { AdminTabLabel } from "@/components/blocks/admin/AdminTabLabel";
+import { notifySuccess } from "@/lib/app-toast";
 import {
+  adminService,
   useAdminServiceCategories,
   useAdminBranch,
   useAdminBranchList,
   useAdminServices,
   useAdminPermission,
   type AdminServiceItem as ServerService,
+  type AdminServiceItemPatch,
 } from "@/service";
 import { AddonTable } from "./AddonTable";
+import { groupAddonCatalog } from "./addon-groups";
 import { CategoryTable } from "./CategoryTable";
 import { ServiceCreateModal } from "./ServiceCreateModal";
 import { ServiceDeleteModal } from "./ServiceDeleteModal";
 import { ServiceEditModal } from "./ServiceEditModal";
-import { ServiceSidebar } from "./ServiceSidebar";
+import { ServiceSummaryCards } from "./ServiceSummaryCards";
 import { ServiceTable } from "./ServiceTable";
 import {
-  filterServices,
   getPopularityWindow,
-  paginate,
+  listServices,
   selectAddonServices,
   selectBaseServices,
+  UNCATEGORIZED,
   type SalonService,
-  type ServiceFilter,
 } from "./data";
-
-const pageSize = 8;
+import { useServiceListState, type ServiceListState } from "./useServiceListState";
 
 // The category now comes from the backend, which resolves the stored key to the public one and
 // sends the name alongside it. A null category means a row older than the NOT NULL column.
@@ -55,24 +57,79 @@ function toScreenService(server: ServerService): SalonService {
     isVisible: server.active,
     soldCount: server.soldCount ?? 0,
     isFeatured: server.isFeatured ?? false,
+    isPinned: server.isPinned ?? false,
     serviceType: server.serviceType ?? "BASE",
     addonGroup: server.addonGroup ?? null,
     bookableStandalone: server.bookableStandalone ?? false,
     representsNoSelection: server.representsNoSelection ?? false,
     version: server.version,
+    sale: server.sale ?? null,
   };
+}
+
+/** The row above a list: search and "clear filters" on the left, the create action on the right. */
+function ListToolbar({
+  list,
+  searchLabel,
+  searchPlaceholder,
+  leading,
+  action,
+}: Readonly<{ list: ServiceListState; searchLabel: string; searchPlaceholder: string; leading?: ReactNode; action: ReactNode }>) {
+  const tc = useTranslations("admin.common");
+  return (
+    <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        {leading}
+        {/* Wider than the admin default and as tall as the select that can sit beside it. */}
+        <AdminSearchField
+          label={searchLabel}
+          placeholder={searchPlaceholder}
+          value={list.query}
+          onChange={list.setQuery}
+          className="min-h-11 w-full rounded-lg sm:w-80 lg:w-[26rem]"
+        />
+        {list.isFiltered ? (
+          <Button variant="ghost" className="rounded-lg text-admin-muted" onPress={list.clear}>
+            <XMarkIcon className="size-4" />{tc("columnFilter.clearAll")}
+          </Button>
+        ) : null}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+/** A list's table in its card, with the "showing x of y" line and the pagination underneath. */
+function ListCard({
+  summary,
+  page,
+  pageCount,
+  onPageChange,
+  children,
+}: Readonly<{ summary: string; page: number; pageCount: number; onPageChange: (page: number) => void; children: ReactNode }>) {
+  return (
+    <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
+      <Card.Content className="min-w-0 p-0">{children}</Card.Content>
+      <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
+        <span>{summary}</span>
+        <AdminPagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
+      </Card.Footer>
+    </Card>
+  );
 }
 
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
   const tBranch = useTranslations("admin.branchSelector");
+  const router = useRouter();
   const { branchIds } = useAdminBranch();
   // Service/category CRUD changes the chain-wide catalogue. Branch-level
   // catalogue write is reserved for appointment actual-service adjustments.
   const canWrite = useAdminPermission("catalog.write.all");
   const popularityWindow = useMemo(() => getPopularityWindow(), []);
-  const [filter, setFilter] = useState<ServiceFilter>("all");
-  const [query, setQuery] = useState("");
+  // Each tab keeps its own search, filters, sort and page.
+  const serviceList = useServiceListState();
+  const addonList = useServiceListState();
   // The catalogue is org-wide, but a service is hidden for a branch its category excludes, so the
   // list needs its own branch scope. It opens on "every branch" — otherwise the console's active
   // branch can silently empty the table when its categories are scoped elsewhere — and the branch
@@ -83,31 +140,25 @@ export function AdminServicesComponent() {
     () => new Map((branches.data?.items ?? []).map((branch) => [branch.id, branch.name] as const)),
     [branches.data],
   );
+  // Column filters narrow this list on the client, so it stays unfiltered by category and also
+  // serves the per-category counts in the filter checklist. Add-ons are read separately below.
   const { data, isLoading, error, mutate: mutateServices } = useAdminServices({
     branchId: branchFilter || undefined,
-    categoryId: filter === "all" ? undefined : filter,
     from: popularityWindow.from,
     limit: 100,
-    q: query.trim() || undefined,
-    to: popularityWindow.to,
-  });
-  // Keep the current branch/search scope for category badges while leaving out
-  // only the selected category. The full-catalogue query below serves add-ons.
-  const countQuery = useAdminServices({
-    branchId: branchFilter || undefined,
-    from: popularityWindow.from,
-    limit: 100,
-    q: query.trim() || undefined,
+    q: serviceList.query.trim() || undefined,
     to: popularityWindow.to,
   });
   const categories = useAdminServiceCategories();
-  const categoryItems = categories.data?.items ?? [];
+  const categoryItems = useMemo(() => categories.data?.items ?? [], [categories.data]);
   // Two jobs, two surfaces: browsing the catalogue, and maintaining the categories it is filed
   // under. Sharing one screen keeps the counts honest without cramming both into one layout.
   const [view, setView] = useState<"services" | "categories" | "addons">("services");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
   const [deleting, setDeleting] = useState<SalonService | null>(null);
+  // Ticked services for "create a sale"; kept across search, filter, sort and page.
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const source = useMemo<ReadonlyArray<SalonService>>(
     () => (data?.items ?? []).map(toScreenService),
     [data],
@@ -128,34 +179,87 @@ export function AdminServicesComponent() {
   );
   // Add-ons have their own tab, so they are not rows of the service catalogue any more.
   const baseServices = useMemo(() => selectBaseServices(source), [source]);
-  const countBaseServices = useMemo(
-    () => selectBaseServices((countQuery.data?.items ?? []).map(toScreenService)),
-    [countQuery.data],
-  );
   const allBaseServices = useMemo(() => selectBaseServices(allServices), [allServices]);
 
-  const [page, setPage] = useState(1);
-  const filtered = useMemo(
-    () => filterServices(baseServices, filter, query),
-    [baseServices, filter, query],
+  // Pinned services go first whatever the sort, which is what pinning is for.
+  const servicePage = listServices(baseServices, serviceList, { pinned: true });
+  const addonPage = listServices(addonServices, addonList);
+  const unfiledCount = baseServices.filter((service) => service.category === null).length;
+  const categoryOptions = useMemo(
+    () => [
+      ...categoryItems.map((category) => ({
+        value: category.id,
+        label: category.nameVi ?? category.name,
+        count: baseServices.filter((service) => service.category?.id === category.id).length,
+      })),
+      // Offered only while such rows exist: it is how an admin finds them to file them.
+      ...(unfiledCount > 0 ? [{ value: UNCATEGORIZED, label: t("table.uncategorized"), count: unfiledCount }] : []),
+    ],
+    [categoryItems, baseServices, unfiledCount, t],
   );
-  const {
-    items: visible,
-    page: currentPage,
-    pageCount,
-  } = paginate(filtered, page, pageSize);
-  const changeFilter = (value: ServiceFilter) => {
-    setFilter(value);
-    setPage(1);
-  };
-  const unfiledCount = countBaseServices.filter((service) => service.category === null).length;
-  const countIn = (categoryId: string) => countBaseServices.filter((service) => service.category?.id === categoryId).length;
+  const addonGroupOptions = useMemo(
+    () =>
+      groupAddonCatalog(addonServices)
+        .map(([code, addons]) => ({ value: code, label: code, count: addons.length }))
+        .sort((left, right) => left.value.localeCompare(right.value)),
+    [addonServices],
+  );
   // Both reads show the same rows through different filters, so a write has to refresh each.
   const refreshCatalogue = () => {
     void mutateServices();
-    void countQuery.mutate();
     void addonQuery.mutate();
   };
+
+  // A set rather than one id, so a second row can be changed while the first is still saving.
+  const [busyIds, setBusyIds] = useState<ReadonlySet<string>>(new Set());
+  const [rowError, setRowError] = useState<string | null>(null);
+  // A one-field change from a table row: the API keeps every other field from the stored row.
+  // A refusal's own message is shown as-is, because it says which rule applied.
+  const patchService = async (service: SalonService, patch: AdminServiceItemPatch, done: string, failed: string) => {
+    setBusyIds((current) => new Set(current).add(service.id));
+    setRowError(null);
+    try {
+      await adminService.updateService(service.id, patch, service.version);
+      notifySuccess(done);
+      refreshCatalogue();
+    } catch (thrown) {
+      setRowError(thrown instanceof Error && thrown.message ? thrown.message : failed);
+    } finally {
+      setBusyIds((current) => new Set([...current].filter((id) => id !== service.id)));
+    }
+  };
+  // Hiding also drops "featured" server-side, and is refused while the service has open appointments.
+  const toggleStatus = (service: SalonService) =>
+    void patchService(
+      service,
+      { status: service.isVisible ? "INACTIVE" : "ACTIVE" },
+      t(service.isVisible ? "table.hiddenSuccess" : "table.shownSuccess", { name: service.name }),
+      t("table.statusFailed"),
+    );
+  // The pin only orders this admin table.
+  const togglePin = (service: SalonService) =>
+    void patchService(
+      service,
+      { isPinned: !service.isPinned },
+      t(service.isPinned ? "table.unpinnedSuccess" : "table.pinnedSuccess", { name: service.name }),
+      t("table.pinFailed"),
+    );
+
+  const createButton = (label: string) => (
+    <Button variant="primary" className="rounded-lg" isDisabled={!canWrite} onPress={() => setIsCreateOpen(true)}>
+      <PlusIcon className="size-4" />{label}
+    </Button>
+  );
+  const notices = (loading: boolean, failed: boolean) => (
+    <>
+      {loading ? (
+        <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
+      ) : failed ? (
+        <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
+      ) : null}
+      {rowError ? <p role="alert" className="mb-3 text-xs text-admin-danger">{rowError}</p> : null}
+    </>
+  );
 
   return (
     <AdminPageLayout>
@@ -182,138 +286,90 @@ export function AdminServicesComponent() {
         <CategoryTable services={allBaseServices} canWrite={canWrite} />
       ) : view === "addons" ? (
         <>
-          <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-admin-muted">{t("addonsTab.description")}</p>
-            <Button
-              variant="primary"
-              className="rounded-lg"
-              isDisabled={!canWrite}
-              onPress={() => setIsCreateOpen(true)}
-            >
-              <PlusIcon className="size-4" />{t("addonsTab.create")}
-            </Button>
-          </div>
-          {addonQuery.isLoading ? (
-            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
-          ) : addonQuery.error ? (
-            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
-          ) : null}
-          <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-            <Card.Content className="min-w-0 p-4">
-              <AddonTable services={addonServices} onEdit={canWrite ? setEditing : undefined} onDelete={canWrite ? setDeleting : undefined} />
-            </Card.Content>
-          </Card>
+          <p className="mb-3 text-xs text-admin-muted">{t("addonsTab.description")}</p>
+          <ListToolbar
+            list={addonList}
+            searchLabel={t("addonsTab.searchLabel")}
+            searchPlaceholder={t("addonsTab.searchPlaceholder")}
+            action={createButton(t("addonsTab.create"))}
+          />
+          {notices(addonQuery.isLoading, Boolean(addonQuery.error))}
+          <ListCard
+            summary={t("addonsTab.showing", { visible: addonPage.items.length, total: addonPage.total })}
+            page={addonPage.page}
+            pageCount={addonPage.pageCount}
+            onPageChange={addonList.setPage}
+          >
+            <AddonTable
+              services={addonPage.items}
+              list={addonList}
+              groupOptions={addonGroupOptions}
+              emptyText={addonServices.length === 0 ? t("addonsTab.empty") : t("addonsTab.noMatch")}
+              busyIds={busyIds}
+              onToggleStatus={canWrite ? toggleStatus : undefined}
+              onEdit={canWrite ? setEditing : undefined}
+              onDelete={canWrite ? setDeleting : undefined}
+            />
+          </ListCard>
         </>
       ) : (
         <>
-          <div className="mb-4 flex flex-col gap-2 border-b border-admin-border pb-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            {/* Only when there is more than one branch to switch between, mirroring the header. The
-                catalogue is org-wide, so this narrows which branch's visibility the list reflects. */}
-            {branchIds.length > 1 ? (
+          <ServiceSummaryCards services={baseServices} />
+          <ListToolbar
+            list={serviceList}
+            searchLabel={t("searchLabel")}
+            searchPlaceholder={t("searchPlaceholder")}
+            // Only when there is more than one branch to switch between, mirroring the header. The
+            // catalogue is org-wide, so this narrows which branch's visibility the list reflects.
+            leading={branchIds.length > 1 ? (
               <AdminSelectField
                 label={t("branchFilter.label")}
                 value={branchFilter}
-                onChange={(value) => { setBranchFilter(value); setPage(1); }}
+                onChange={(value) => { setBranchFilter(value); setSelected(new Set()); serviceList.setPage(1); }}
                 options={[
                   { value: "", label: t("branchFilter.all") },
                   ...branchIds.map((id) => ({ value: id, label: branchNameById.get(id) ?? tBranch("unnamed") })),
                 ]}
               />
             ) : null}
-            {/*
-              One control instead of a strip of them. The open list carries its own search box, so
-              the number of categories stops mattering to the layout: the toolbar is one row whether
-              the salon keeps four categories or forty.
-            */}
-            <Autocomplete
-              aria-label={t("filterCategory")}
-              selectedKey={filter}
-              onSelectionChange={(key) => {
-                if (typeof key === "string") changeFilter(key);
-              }}
-              className="w-full sm:w-72"
-            >
-              <Autocomplete.Trigger className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-admin-border bg-admin-surface px-3 text-left text-sm font-medium text-admin-ink outline-none hover:bg-admin-soft focus-visible:ring-2 focus-visible:ring-admin-accent">
-                <span className="shrink-0 text-admin-muted">{t("categoryPrefix")}</span>
-                <Autocomplete.Value className="flex-1 truncate" />
-                <ChevronDownIcon aria-hidden className="size-4 shrink-0 text-admin-muted" />
-              </Autocomplete.Trigger>
-              {/*
-                `admin-shell` is required, not decorative: the popover portals out of the admin
-                subtree and loses every --admin-* token without it. AdminSelectField carries it for
-                the same reason.
-              */}
-              <Autocomplete.Popover placement="bottom start" className="admin-shell">
-                {/*
-                  react-aria filters nothing on its own: without this predicate the search box
-                  takes keystrokes and the list ignores them. Matching lowercases but keeps
-                  diacritics, the same rule every other admin list search follows.
-                */}
-                <Autocomplete.Filter
-                  filter={(textValue, inputValue) =>
-                    textValue
-                      .toLocaleLowerCase("vi")
-                      .includes(inputValue.trim().toLocaleLowerCase("vi"))
-                  }
-                >
-                  <SearchField aria-label={t("categorySearchLabel")} autoFocus className="p-2">
-                    <SearchField.Group>
-                      <SearchField.SearchIcon />
-                      <SearchField.Input placeholder={t("categorySearchPlaceholder")} />
-                    </SearchField.Group>
-                  </SearchField>
-                  <ListBox aria-label={t("categoriesTab")} className="max-h-64 overflow-y-auto">
-                    <ListBox.Item id="all" textValue={t("allServices")}>
-                      {t("allServices")} · {countBaseServices.length}
-                    </ListBox.Item>
-                    {categoryItems.map((category) => (
-                      <ListBox.Item
-                        key={category.id}
-                        id={category.id}
-                        textValue={category.nameVi ?? category.name}
-                      >
-                        {category.nameVi ?? category.name} · {countIn(category.id)}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Autocomplete.Filter>
-              </Autocomplete.Popover>
-            </Autocomplete>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <AdminSearchField label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-              <Button
-                variant="primary"
-                className="rounded-lg"
-                isDisabled={!canWrite}
-                onPress={() => setIsCreateOpen(true)}
-              >
-                <PlusIcon className="size-4" />{t("create.submit")}
-              </Button>
-            </div>
-          </div>
-          {isLoading ? (
-            <p className="mb-3 text-xs text-admin-muted">{t("loading")}</p>
-          ) : error ? (
-            <p className="mb-3 text-xs text-admin-danger">{t("loadFailed")}</p>
-          ) : null}
+            action={createButton(t("create.submit"))}
+          />
+          {notices(isLoading, Boolean(error))}
           {unfiledCount > 0 ? (
             <p role="status" className="mb-3 text-xs text-admin-danger">
               {t("uncategorizedWarning", { count: unfiledCount })}
             </p>
           ) : null}
-          <AdminSplitLayout asideWidth="sm" aside={<ServiceSidebar services={baseServices} />}>
-            <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
-              <Card.Content className="min-w-0 p-0">
-                <ServiceTable services={visible} onEdit={canWrite ? setEditing : undefined} onDelete={canWrite ? setDeleting : undefined} />
-              </Card.Content>
-              <Card.Footer className="flex items-center justify-between border-t border-admin-border px-4 py-3 text-xs text-admin-muted">
-                <span>{t("showing", { visible: visible.length, total: filtered.length })}</span>
-                <AdminPagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
-              </Card.Footer>
-            </Card>
-          </AdminSplitLayout>
+          <ListCard
+            summary={t("showing", { visible: servicePage.items.length, total: servicePage.total })}
+            page={servicePage.page}
+            pageCount={servicePage.pageCount}
+            onPageChange={serviceList.setPage}
+          >
+            <ServiceTable
+              services={servicePage.items}
+              list={serviceList}
+              categoryOptions={categoryOptions}
+              // The search goes to the API, so an empty result under a search is "no match".
+              emptyText={baseServices.length === 0 && !serviceList.isFiltered ? t("table.noServices") : t("table.empty")}
+              busyIds={busyIds}
+              selected={selected}
+              onSelectedChange={setSelected}
+              onToggleStatus={canWrite ? toggleStatus : undefined}
+              onTogglePin={canWrite ? togglePin : undefined}
+              onEdit={canWrite ? setEditing : undefined}
+              onDelete={canWrite ? setDeleting : undefined}
+            />
+          </ListCard>
+          {/* A direct child of the page, so its sticky bottom follows the page while it scrolls. */}
+          {selected.size > 0 ? (
+            <AdminSelectionBar
+              count={selected.size}
+              actionLabel={t("table.createSale")}
+              onAction={() => router.push("/admin/sales?new=1&services=" + [...selected].join(","))}
+              onClear={() => setSelected(new Set())}
+            />
+          ) : null}
         </>
       )}
 
@@ -335,7 +391,11 @@ export function AdminServicesComponent() {
         <ServiceDeleteModal
           service={deleting}
           onClose={() => setDeleting(null)}
-          onDeleted={refreshCatalogue}
+          onDeleted={() => {
+            const removed = deleting.id;
+            setSelected((current) => new Set([...current].filter((id) => id !== removed)));
+            refreshCatalogue();
+          }}
         />
       ) : null}
     </AdminPageLayout>

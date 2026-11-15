@@ -198,6 +198,7 @@ export function ServiceCreateModal({
               <label className="flex flex-col gap-2 text-sm">
                 <span className="font-semibold text-admin-ink">{t("form.nameJa")}</span>
                 <input className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink" value={nameJa} onChange={(event) => setNameJa(event.target.value)} />
+                <span className="text-xs text-admin-muted">{t("form.nameJaHint")}</span>
               </label>
               {serviceType === "ADD_ON" ? (
                 <label className="flex flex-col gap-2 text-sm sm:col-span-2">

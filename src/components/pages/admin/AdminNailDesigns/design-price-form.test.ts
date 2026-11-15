@@ -8,10 +8,14 @@ const directory = join(root, "src", "components", "pages", "admin", "AdminNailDe
 describe("admin nail design price CRUD", () => {
   it("loads, submits and lists indicativePrice", () => {
     const modal = readFileSync(join(directory, "DesignModal.tsx"), "utf8");
-    const screen = readFileSync(join(directory, "component.tsx"), "utf8");
+    // The design table lives in its own file since the tier column and selection joined it.
+    const screen = readFileSync(join(directory, "DesignTable.tsx"), "utf8");
 
     expect(modal).toContain("design?.indicativePrice");
     expect(modal).toContain("indicativePrice: parsedPrice!");
+    // A tier sends only its id; a typed price clears the tier.
+    expect(modal).toContain("{ priceTierId: chosenTier.id }");
+    expect(modal).toContain("{ priceTierId: null, indicativePrice: parsedPrice! }");
     expect(screen).toContain("row.indicativePrice === null");
     expect(screen).toContain('t("columns.price")');
   });

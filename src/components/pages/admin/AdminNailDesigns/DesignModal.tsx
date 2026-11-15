@@ -5,7 +5,8 @@ import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
-import { adminMediaService, adminService, type AdminNailDesign } from "@/service";
+import { adminMediaService, adminService, type AdminNailDesign, type AdminPriceTier } from "@/service";
+import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
@@ -14,13 +15,17 @@ import { parseIndicativePrice } from "./design-price";
 
 const inputClass = "min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink";
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED", "HIDDEN"];
+const priceModes = ["tier", "custom"] as const;
+type PriceMode = (typeof priceModes)[number];
 
 export function DesignModal({
   design,
+  tiers,
   onClose,
   onSaved,
 }: Readonly<{
   design: DesignRow | null;
+  tiers: ReadonlyArray<AdminPriceTier>;
   onClose: () => void;
   onSaved: (saved: AdminNailDesign) => Promise<void>;
 }>) {
@@ -31,6 +36,13 @@ export function DesignModal({
   const [name, setName] = useState(design?.title ?? "");
   const [status, setStatus] = useState(design?.status ?? "DRAFT");
   const [indicativePrice, setIndicativePrice] = useState(design?.indicativePrice === null || design?.indicativePrice === undefined ? "" : String(design.indicativePrice));
+  // A new design starts on a tier when there is one to pick; an existing one opens as saved.
+  const [priceMode, setPriceMode] = useState<PriceMode>(
+    design ? (design.priceTierId ? "tier" : "custom") : tiers.length > 0 ? "tier" : "custom",
+  );
+  const [tierId, setTierId] = useState(design?.priceTierId ?? "");
+  // Until one is picked the select shows the first tier, so that is what a save would use.
+  const chosenTier = tiers.find((tier) => tier.id === (tierId || tiers[0]?.id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -56,7 +68,8 @@ export function DesignModal({
   };
 
   const parsedPrice = parseIndicativePrice(indicativePrice);
-  const canSubmit = name.trim().length >= 2 && parsedPrice !== undefined && !imageError && !busy;
+  const priceReady = priceMode === "tier" ? chosenTier !== undefined : parsedPrice !== undefined;
+  const canSubmit = name.trim().length >= 2 && priceReady && !imageError && !busy;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -66,6 +79,10 @@ export function DesignModal({
     try {
       if (imageFile) uploadedMediaId = await adminMediaService.uploadFile(imageFile);
       const mediaIds = uploadedMediaId ? [uploadedMediaId] : design?.mediaIds;
+      // On a tier the API takes the tier's amount; a typed price clears the tier.
+      const price = priceMode === "tier" && chosenTier
+        ? { priceTierId: chosenTier.id }
+        : { priceTierId: null, indicativePrice: parsedPrice! };
       const saved = isEdit && design
         ? await adminService.updateNailDesign(
           design.id,
@@ -74,7 +91,7 @@ export function DesignModal({
           // Publishing additionally needs explicit consent.
           {
             title: name.trim(),
-            indicativePrice: parsedPrice!,
+            ...price,
             status,
             ...(mediaIds ? { mediaIds } : {}),
             ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
@@ -83,7 +100,7 @@ export function DesignModal({
         )
         : await adminService.createNailDesign({
           title: name.trim(),
-          indicativePrice: parsedPrice!,
+          ...price,
           status,
           ...(mediaIds ? { mediaIds } : {}),
           ...(status === "PUBLISHED" ? { consentToPublish: true } : {}),
@@ -120,20 +137,57 @@ export function DesignModal({
                 <span className="font-semibold text-admin-ink">{t("modal.name")}</span>
                 <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("modal.namePlaceholder")} autoFocus />
               </label>
-              <label className="flex flex-col gap-2 text-sm">
-                <span className="font-semibold text-admin-ink">{t("modal.indicativePrice")}</span>
-                <input
-                  inputMode="numeric"
-                  className={inputClass}
-                  value={indicativePrice}
-                  onChange={(event) => setIndicativePrice(event.target.value)}
-                  placeholder={t("modal.indicativePricePlaceholder")}
-                  aria-invalid={parsedPrice === undefined}
-                />
-                <span className={parsedPrice === undefined ? "text-xs text-admin-danger" : "text-xs text-admin-muted"}>
-                  {t(parsedPrice === undefined ? "modal.indicativePriceInvalid" : "modal.indicativePriceHint")}
-                </span>
-              </label>
+              <fieldset className="text-sm">
+                <legend className="mb-2 font-semibold text-admin-ink">{t("modal.indicativePrice")}</legend>
+                <div className="flex flex-col gap-2">
+                  <div role="group" aria-label={t("modal.priceMode.label")} className="flex w-fit rounded-lg border border-admin-border bg-admin-surface p-0.5">
+                    {priceModes.map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        aria-pressed={priceMode === mode}
+                        onClick={() => setPriceMode(mode)}
+                        className={`min-h-9 rounded-md px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent ${
+                          priceMode === mode ? "bg-admin-accent text-admin-on-accent" : "text-admin-muted hover:text-admin-ink"
+                        }`}
+                      >
+                        {t(`modal.priceMode.${mode}`)}
+                      </button>
+                    ))}
+                  </div>
+                  {priceMode === "tier" ? (
+                    tiers.length === 0 ? (
+                      <p role="status" className="text-xs text-admin-muted">{t("modal.priceMode.noTiers")}</p>
+                    ) : (
+                      <>
+                        <AdminSelectField
+                          label={t("modal.priceMode.tierLabel")}
+                          fullWidth
+                          value={chosenTier?.id ?? tierId}
+                          onChange={setTierId}
+                          options={tiers.map((tier) => ({ value: tier.id, label: `${tier.name} · ${formatMoney(tier.amount)}` }))}
+                        />
+                        <span className="text-xs text-admin-muted">{t("modal.priceMode.tierHint")}</span>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <input
+                        inputMode="numeric"
+                        className={inputClass}
+                        value={indicativePrice}
+                        onChange={(event) => setIndicativePrice(event.target.value)}
+                        placeholder={t("modal.indicativePricePlaceholder")}
+                        aria-label={t("modal.indicativePrice")}
+                        aria-invalid={parsedPrice === undefined}
+                      />
+                      <span className={parsedPrice === undefined ? "text-xs text-admin-danger" : "text-xs text-admin-muted"}>
+                        {t(parsedPrice === undefined ? "modal.indicativePriceInvalid" : "modal.indicativePriceHint")}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </fieldset>
               <section className="space-y-3 rounded-xl border border-admin-border bg-admin-soft p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>

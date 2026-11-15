@@ -78,9 +78,11 @@ function HomeBannersEditor({
         {items.length === 0 ? (
           <p role="status" className="rounded-xl border border-admin-border p-6 text-center text-sm text-admin-muted">{t("empty")}</p>
         ) : (
-          <ol className="grid gap-2">
+          // min-w-0 on the list and each row: grid items otherwise refuse to shrink below their
+          // content, so a long link pushed the toggle and row actions out past the card.
+          <ol className="grid min-w-0 gap-2">
             {items.map((item, index) => (
-              <li key={item.key} className={`flex items-center gap-3 rounded-xl border p-3 ${item.active ? "border-admin-border" : "border-admin-border bg-admin-soft/60"}`}>
+              <li key={item.key} className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 ${item.active ? "border-admin-border" : "border-admin-border bg-admin-soft/60"}`}>
                 <span className="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-admin-muted">{index + 1}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.imageUrl} alt="" className="h-14 w-24 shrink-0 rounded-lg border border-admin-border object-cover" />

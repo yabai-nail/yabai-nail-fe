@@ -4,12 +4,14 @@ export type PageSlot = number | "ellipsis";
 /**
  * Slices a fully-loaded list into one page. Admin lists fetch a generous single page and page
  * it in memory, so this keeps `page` in range and reports the total page count for the control.
+ * The one copy every admin list uses; the screens' `data.ts` files only re-export it.
  */
 export function paginate<T>(
   items: ReadonlyArray<T>,
   page: number,
   pageSize: number,
 ): { readonly items: ReadonlyArray<T>; readonly page: number; readonly pageCount: number } {
+  if (!Number.isInteger(pageSize) || pageSize <= 0) throw new RangeError("Page size must be a positive integer.");
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const current = Math.min(Math.max(1, page), pageCount);
   return { items: items.slice((current - 1) * pageSize, current * pageSize), page: current, pageCount };

@@ -8,10 +8,11 @@ const directory = join(root, "src", "components", "pages", "admin", "AdminNailDe
 describe("admin nail design deletion", () => {
   it("offers a translated delete action and confirmation dialog", () => {
     const screen = readFileSync(join(directory, "component.tsx"), "utf8");
+    const table = readFileSync(join(directory, "DesignTable.tsx"), "utf8");
     const dialog = readFileSync(join(directory, "DesignDeleteModal.tsx"), "utf8");
 
-    expect(screen).toContain("TrashIcon");
-    expect(screen).toContain('t("deleteDesign"');
+    expect(table).toContain("TrashIcon");
+    expect(table).toContain('t("deleteDesign"');
     expect(screen).toContain("<DesignDeleteModal");
     expect(dialog).toContain("adminService.deleteNailDesign(design.id, design.version)");
     expect(dialog).toContain('t("delete.confirm",');

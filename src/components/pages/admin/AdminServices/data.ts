@@ -1,10 +1,35 @@
+import { paginate } from "@/lib/admin-pagination";
 import { matchesSearch } from "@/lib/admin-search";
+import type { AdminTableSort } from "@/lib/admin-table-sort";
+import type { AdminAppliedSale } from "@/service";
+import { UNGROUPED } from "./addon-groups";
 
 /** The category a service belongs to, named by the admin API rather than by this file. */
 export type ServiceCategoryRef = { readonly id: string; readonly name: string };
 
-/** "all", or the id of a category the salon actually manages. */
-export type ServiceFilter = string;
+/** Filter value for the rows with no category, alongside the real category ids. */
+export const UNCATEGORIZED = "none";
+
+/**
+ * The table's column filters. An empty list means "no filter" for that column, and several
+ * ticked values match any of them, as in a spreadsheet's column filter.
+ */
+export type ServiceColumnFilters = {
+  readonly categories: ReadonlyArray<string>;
+  /** Add-on group codes; the add-ons tab's counterpart of `categories`. */
+  readonly groups: ReadonlyArray<string>;
+  readonly statuses: ReadonlyArray<ServiceStatusFilter>;
+  /** The price column's one option: only the services with a sale running. */
+  readonly onSale: ReadonlyArray<"onSale">;
+};
+
+export type ServiceStatusFilter = "visible" | "hidden";
+
+export const NO_COLUMN_FILTERS: ServiceColumnFilters = { categories: [], groups: [], statuses: [], onSale: [] };
+
+export function hasColumnFilters(filters: ServiceColumnFilters): boolean {
+  return Object.values(filters).some((values) => values.length > 0);
+}
 
 export type SalonService = {
   readonly id: string;
@@ -22,6 +47,8 @@ export type SalonService = {
   readonly isVisible: boolean;
   readonly soldCount: number;
   readonly isFeatured?: boolean;
+  /** Admin-only: kept at the top of the service table. */
+  readonly isPinned?: boolean;
   readonly serviceType?: "BASE" | "ADD_ON";
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
@@ -29,6 +56,8 @@ export type SalonService = {
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;
+  /** The sale running on this service right now, if any. */
+  readonly sale?: AdminAppliedSale | null;
 };
 
 const primary: ServiceCategoryRef = { id: "cat-primary", name: "Dịch vụ chính" };
@@ -74,14 +103,88 @@ export function selectAddonServices<T extends { readonly serviceType?: string }>
 
 export function filterServices(
   services: ReadonlyArray<SalonService>,
-  filter: ServiceFilter,
+  filters: ServiceColumnFilters,
   query: string,
 ) {
   return services.filter(
     (service) =>
-      (filter === "all" || service.category?.id === filter) &&
+      (filters.categories.length === 0 || filters.categories.includes(service.category?.id ?? UNCATEGORIZED)) &&
+      (filters.groups.length === 0 || filters.groups.includes(service.addonGroup ?? UNGROUPED)) &&
+      (filters.statuses.length === 0 || filters.statuses.includes(service.isVisible ? "visible" : "hidden")) &&
+      (filters.onSale.length === 0 || Boolean(service.sale)) &&
       matchesSearch(query, [service.name]),
   );
+}
+
+/** The table columns that can be clicked to sort. */
+export type ServiceSortKey = "name" | "category" | "group" | "price" | "duration" | "soldCount" | "status";
+
+const byName = (left: SalonService, right: SalonService) => left.name.localeCompare(right.name, "vi");
+
+/** The number each plainly numeric column sorts by. */
+const numericColumn: Record<"price" | "duration" | "soldCount" | "status", (service: SalonService) => number> = {
+  price: (service) => service.price,
+  duration: (service) => service.durationMinutes,
+  soldCount: (service) => service.soldCount,
+  // Ascending reads "visible first": the rows an admin usually wants on top.
+  status: (service) => Number(!service.isVisible),
+};
+
+/**
+ * Orders the already-filtered rows for the clicked column; null keeps the API's order. Ties fall
+ * back to the name so equal prices do not shuffle between renders, and a service with no
+ * category stays at the bottom in either direction because it is a data problem, not a value.
+ */
+export function sortServices(
+  services: ReadonlyArray<SalonService>,
+  sort: AdminTableSort<ServiceSortKey> | null,
+): ReadonlyArray<SalonService> {
+  if (!sort) return services;
+  const { key } = sort;
+  const sign = sort.direction === "asc" ? 1 : -1;
+  return [...services].sort((left, right) => {
+    if (key === "name") return sign * byName(left, right);
+    if (key === "group") {
+      return sign * (left.addonGroup ?? UNGROUPED).localeCompare(right.addonGroup ?? UNGROUPED) || byName(left, right);
+    }
+    if (key === "category") {
+      if (!left.category || !right.category) return Number(!left.category) - Number(!right.category) || byName(left, right);
+      return sign * left.category.name.localeCompare(right.category.name, "vi") || byName(left, right);
+    }
+    return sign * (numericColumn[key](left) - numericColumn[key](right)) || byName(left, right);
+  });
+}
+
+/**
+ * Pinned services first, whatever the column sort: a pin is the admin saying "keep this on
+ * top". Both halves keep the order they arrived in, so a sort still applies within each.
+ */
+export function pinnedFirst(services: ReadonlyArray<SalonService>): ReadonlyArray<SalonService> {
+  return [...services.filter((service) => service.isPinned), ...services.filter((service) => !service.isPinned)];
+}
+
+/** What one tab's list is showing: its search text, column filters, sort and page. */
+export type ServiceListView = {
+  readonly query: string;
+  readonly filters: ServiceColumnFilters;
+  readonly sort: AdminTableSort<ServiceSortKey> | null;
+  readonly page: number;
+};
+
+export const SERVICE_PAGE_SIZE = 8;
+
+/**
+ * The page a tab shows. Search, filters, sort and pinning all run before paging, so they
+ * apply across the whole list rather than within the page on screen; `total` is the count
+ * after search and filters.
+ */
+export function listServices(
+  services: ReadonlyArray<SalonService>,
+  view: ServiceListView,
+  { pinned = false }: { readonly pinned?: boolean } = {},
+) {
+  const sorted = sortServices(filterServices(services, view.filters, view.query), view.sort);
+  return { ...paginate(pinned ? pinnedFirst(sorted) : sorted, view.page, SERVICE_PAGE_SIZE), total: sorted.length };
 }
 
 export function getPopularityWindow(now: Date = new Date()) {
@@ -98,22 +201,4 @@ export function getPopularServices(services: ReadonlyArray<SalonService>) {
     .sort((left, right) => right.soldCount - left.soldCount || left.id.localeCompare(right.id));
 }
 
-/** Shared by both tables on this screen: services and, in the other view, categories. */
-export function paginate<T>(
-  items: ReadonlyArray<T>,
-  requestedPage: number,
-  pageSize: number,
-) {
-  if (!Number.isInteger(pageSize) || pageSize <= 0) {
-    throw new RangeError("Page size must be a positive integer.");
-  }
-
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const page = Math.min(Math.max(1, requestedPage), pageCount);
-
-  return {
-    items: items.slice((page - 1) * pageSize, page * pageSize),
-    page,
-    pageCount,
-  } as const;
-}
+export { paginate };

@@ -8,12 +8,12 @@
  */
 
 /**
- * `0` followed by nine digits, which is what the accounts console has always accepted. The
- * backend also takes the `+84` form; this stays with the stricter of the two so a number
- * typed one way on one screen is not rejected on the other.
+ * Mirrors the backend's `CUSTOMER_PHONE_PATTERN`, which both account creation and the
+ * own-profile update check: a local VN (10 digits) or JP (10–11 digits) number starting with
+ * `0`, or its `+84`/`+81` form. Anything stricter disables a form for a number the API accepts.
  */
 export function isAdminPhone(value: string): boolean {
-  return /^0\d{9}$/.test(value.trim());
+  return /^(?:0\d{9,10}|\+84\d{9}|\+81\d{9,10})$/.test(value.trim());
 }
 
 /** Mirrors `isStrongInternalPassword`: 8–128 characters, with lower case, upper case and a digit. */
