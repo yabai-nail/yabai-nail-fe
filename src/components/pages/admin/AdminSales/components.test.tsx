@@ -7,6 +7,9 @@ vi.mock("next-intl", () => ({
   useLocale: () => "vi",
   useTranslations: () => (key: string, values?: Record<string, unknown>) => (values ? `${key}(${Object.entries(values).map(([name, value]) => `${name}=${String(value)}`).join(",")})` : key),
 }));
+vi.mock("@/components/blocks/admin/AdminPagination", () => ({
+  AdminPagination: ({ page, pageCount }: { page: number; pageCount: number }) => pageCount > 1 ? createElement("nav", { "aria-label": "Preview pages" }, String(page) + "/" + String(pageCount)) : null,
+}));
 vi.mock("@heroui/react", () => {
   const part = (tag: string) =>
     function MockPart({ children, isDisabled, onPress, ...props }: Record<string, unknown> & { children?: ReactNode; isDisabled?: boolean; onPress?: () => void }) {
@@ -32,6 +35,7 @@ const designs = Array.from({ length: 8 }, (_, index) => ({
   groupId: "t1",
   name: `Design ${index}`,
   price: index === 0 ? 4000 : 7000,
+  imageUrl: `https://example.com/design-${index}.jpg`,
 }));
 
 describe("SaleSummary", () => {
@@ -52,11 +56,42 @@ describe("SaleSummary", () => {
 describe("SalePreview", () => {
   const form = { ...newSaleForm(NOW), ruleValue: "5000", designs: { mode: "ALL" as const, groupIds: [], itemIds: [] } };
 
-  it("lists six items, the total and the rest, and warns when a flat price does not lower one", () => {
+  it("separates selected designs and services into labelled tabs with scoped pagination", () => {
+    const html = renderToStaticMarkup(createElement(SalePreview, {
+      form: { ...form, services: { mode: "ALL", groupIds: [], itemIds: [] } },
+      designTargets: designs,
+      serviceTargets: [{ id: "s1", name: "Service only", price: 9000, groupId: "c1" }],
+      status: "ready",
+    }));
+    expect(html.match(/role="tab"/g)).toHaveLength(2);
+    expect(html).toContain('role="tabpanel"');
+    expect(html).toContain('aria-selected="true"');
+    expect(html).toContain("total(count=8)");
+    expect(html).not.toContain("Service only");
+    expect(html.match(/<li /g)).toHaveLength(6);
+  });
+
+  it("shows services directly without tabs when designs are not selected", () => {
+    const html = renderToStaticMarkup(createElement(SalePreview, {
+      form: { ...form, designs: { mode: "NONE", groupIds: [], itemIds: [] }, services: { mode: "ALL", groupIds: [], itemIds: [] } },
+      designTargets: designs,
+      serviceTargets: [{ id: "s1", name: "Service only", price: 9000, groupId: "c1" }],
+      status: "ready",
+    }));
+    expect(html).not.toContain('role="tab"');
+    expect(html).toContain("Service only");
+    expect(html).not.toContain("Design 0");
+  });
+
+  it("shows photos, full names and pagination while preserving price warnings", () => {
     const html = renderToStaticMarkup(createElement(SalePreview, { form, designTargets: designs, serviceTargets: [], status: "ready" }));
     expect(html.match(/<li /g)).toHaveLength(6);
     expect(html).toContain("total(count=8)");
-    expect(html).toContain("more(count=2)");
+    expect(html).toContain("Preview pages");
+    expect(html).toContain("1/2");
+    expect(html).toContain("https://example.com/design-0.jpg");
+    expect(html).toContain("Design 0");
+    expect(html).not.toContain("Design 6");
     expect(html).toContain("notCheaper(count=1)");
     expect(html).toContain("keepsPrice");
   });

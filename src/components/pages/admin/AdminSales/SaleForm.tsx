@@ -52,7 +52,7 @@ function FieldError({ id, children }: Readonly<{ id: string; children: ReactNode
 
 /**
  * Create or edit a sale (`sale` set) in one wide modal: name and time, the price rule, and what
- * it applies to, with a live preview beside the form (below it on narrow screens).
+ * it applies to. Target selection sits on the right, with a live preview below it.
  *
  * An edit saves against the version it opened with. If the sale changed elsewhere meanwhile the
  * API refuses it, and the form offers `onReload` (open the fresh copy) instead of overwriting.
@@ -156,8 +156,9 @@ export function SaleForm({
   return (
     <Modal isOpen onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
       <Modal.Backdrop>
-        <Modal.Container size="lg" placement="center" scroll="inside">
-          <Modal.Dialog className="p-0">
+        {/* Container takes no `style`; utilities beat HeroUI's `sm:w-fit` (components layer). */}
+        <Modal.Container placement="center" scroll="inside" className="w-full max-w-full p-3 sm:w-full sm:p-6">
+          <Modal.Dialog className="p-0" style={{ width: "100%", maxWidth: "none" }}>
             <Modal.Header className="border-b border-admin-border px-5 py-4">
               <Modal.Heading className="text-base font-bold text-admin-ink">
                 {sale ? t("form.editTitle") : t("form.createTitle")}
@@ -165,7 +166,7 @@ export function SaleForm({
               <p className="mt-2 text-sm leading-5 text-admin-muted">{t("form.guide")}</p>
             </Modal.Header>
             <form ref={formRef} noValidate className="contents" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
-              <Modal.Body className="mx-0 grid min-w-0 gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+              <Modal.Body className="mx-0 grid min-w-0 gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
                 <div className="grid min-w-0 content-start gap-6">
                   <Section step={1} title={t("form.basics")}>
                     <label className="flex flex-col gap-2 text-sm">
@@ -230,6 +231,9 @@ export function SaleForm({
                     </label>
                   </Section>
 
+                </div>
+
+                <div className="grid min-w-0 content-start gap-6">
                   <Section step={3} title={t("form.appliesTo")}>
                     <SaleScopeFields
                       kind="designs"
@@ -255,9 +259,8 @@ export function SaleForm({
                       </p>
                     ) : null}
                   </Section>
+                  <SalePreview form={form} designTargets={designTargets} serviceTargets={serviceTargets} status={status.preview} />
                 </div>
-
-                <SalePreview form={form} designTargets={designTargets} serviceTargets={serviceTargets} status={status.preview} />
                 {error ? (
                   <div data-sale-field="general" className="flex flex-wrap items-center gap-3 lg:col-span-2">
                     <p role="alert" className="text-sm text-admin-danger">{error}</p>
