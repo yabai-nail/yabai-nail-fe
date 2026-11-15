@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE_URL, adminMediaService, adminService, useAdminServiceAddons, useAdminServiceCategories, type AdminServiceItem } from "@/service";
+import { API_BASE_URL, adminMediaService, adminService, useAdminServiceAddons, useAdminServiceCategories, type AdminPriceTier, type AdminServiceItem } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import type { SalonService } from "./data";
 import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
@@ -18,6 +18,8 @@ import {
   type ServiceImageChange,
 } from "./service-image";
 import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
+import { ServicePriceFields, type TierListStatus } from "./ServicePriceFields";
+import { useServicePriceDraft } from "./useServicePriceDraft";
 import { assignableCategories, changedCategory } from "./categories";
 
 // Mirror of ServiceCreateModal, plus PATCH with If-Match so we don't clobber a concurrent
@@ -25,10 +27,16 @@ import { assignableCategories, changedCategory } from "./categories";
 // the body names, and a service can never be left without one.
 export function ServiceEditModal({
   service,
+  tiers,
+  tierStatus,
+  onTiersStale,
   onClose,
   onSaved,
 }: Readonly<{
   service: SalonService;
+  tiers: ReadonlyArray<AdminPriceTier>;
+  tierStatus: TierListStatus;
+  onTiersStale: () => void;
   onClose: () => void;
   onSaved: () => void;
 }>) {
@@ -42,7 +50,6 @@ export function ServiceEditModal({
   const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(service.serviceType ?? "BASE");
   const [addonGroup, setAddonGroup] = useState(service.addonGroup ?? "NAIL_REMOVAL");
   const [categoryId, setCategoryId] = useState(service.category?.id ?? "");
-  const [price, setPrice] = useState(String(service.price));
   const [duration, setDuration] = useState(String(service.durationMinutes));
   const [warrantyDays, setWarrantyDays] = useState(String(service.warrantyDays ?? 0));
   const [description, setDescription] = useState(service.description ?? "");
@@ -69,7 +76,14 @@ export function ServiceEditModal({
   // the form freezes and the button retries only the add-on step against the saved service.
   const [saved, setSaved] = useState<AdminServiceItem | null>(null);
 
-  const priceNum = parseCatalogInteger(price);
+  const priceDraft = useServicePriceDraft({
+    tiers,
+    tierStatus,
+    stored: { price: service.price, priceTierId: service.priceTierId ?? null },
+    serviceType,
+    representsNoSelection,
+    onTiersStale,
+  });
   const durationNum = parseCatalogInteger(duration);
   const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
@@ -91,7 +105,7 @@ export function ServiceEditModal({
     name.trim().length >= 2 &&
     (serviceType === "ADD_ON" || categoryItems.some((category) => category.id === categoryId)) &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
-    isValidServiceAmount(priceNum, serviceType) &&
+    priceDraft.ready &&
     isValidServiceAmount(durationNum, serviceType) &&
     Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
@@ -125,7 +139,8 @@ export function ServiceEditModal({
           serviceType,
           addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
           ...(serviceType === "BASE" ? changedCategory(categoryId, service.category?.id) : {}),
-          price: priceNum!,
+          // Only the price part the tier choice calls for: a linked service sends no price.
+          ...priceDraft.payload(),
           durationMinutes: durationNum!,
           warrantyDays: warrantyDaysNum,
           isFeatured: serviceType === "BASE" && isFeatured,
@@ -173,7 +188,7 @@ export function ServiceEditModal({
           // Preserve the actionable update error; cleanup can be retried later.
         }
       }
-      setError(err instanceof Error && err.message ? err.message : t("edit.failed"));
+      if (!priceDraft.explainError(err)) setError(err instanceof Error && err.message ? err.message : t("edit.failed"));
     } finally {
       setBusy(false);
     }
@@ -266,16 +281,7 @@ export function ServiceEditModal({
                 ) : null}
               </label> : null}
               <div className="contents">
-                <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">{t("create.price")}</span>
-                  <input
-                    inputMode="numeric"
-                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                    value={price}
-                    onChange={(event) => setPrice(event.target.value)}
-                    placeholder="6600"
-                  />
-                </label>
+                <ServicePriceFields {...priceDraft.fields} />
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input
