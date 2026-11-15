@@ -15,6 +15,13 @@ import type { ServiceListState } from "./useServiceListState";
 
 type RowHandler = (service: SalonService) => void;
 
+/** Under a price: the tier it follows, so a linked price reads as shared rather than typed. */
+export function ServiceTierNote({ service, tierNames }: Readonly<{ service: SalonService; tierNames: ReadonlyMap<string, string> }>) {
+  const t = useTranslations("admin.services");
+  const name = service.priceTierId ? tierNames.get(service.priceTierId) : undefined;
+  return name ? <span className="block text-xs font-normal text-admin-muted">{t("price.tableTier", { name })}</span> : null;
+}
+
 /** The Status column header: sortable, with the visible/hidden checklist. */
 export function ServiceStatusHeader({ list }: Readonly<{ list: ServiceListState }>) {
   const t = useTranslations("admin.services");

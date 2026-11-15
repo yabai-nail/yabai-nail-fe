@@ -53,6 +53,8 @@ export type SalonService = {
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
   readonly representsNoSelection?: boolean;
+  /** The price tier the price follows; null or absent when the price is typed on the service. */
+  readonly priceTierId?: string | null;
   // Present only when adapted from useAdminServices; absent for fixture
   // rows so the edit affordance stays hidden in design-time preview.
   readonly version?: number;

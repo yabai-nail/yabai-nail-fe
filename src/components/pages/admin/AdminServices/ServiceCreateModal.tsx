@@ -5,7 +5,7 @@ import { Button, Modal } from "@heroui/react";
 import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 
-import { adminMediaService, adminService, useAdminBranchList, useAdminServiceCategories, useAdminServices, type AdminServiceItem } from "@/service";
+import { adminMediaService, adminService, useAdminBranchList, useAdminServiceCategories, useAdminServices, type AdminPriceTier, type AdminServiceItem } from "@/service";
 import { notifySuccess } from "@/lib/app-toast";
 import { validateServiceImage } from "./service-image";
 import { NO_ADDON_GROUPS, ServiceAddonFields, useAddonDrafts } from "./ServiceAddonFields";
@@ -13,6 +13,8 @@ import { ServiceVisibilityFields } from "./ServiceVisibilityFields";
 import { ServiceHighlightFields } from "./ServiceHighlightFields";
 import { normalizeHighlights } from "./service-highlights";
 import { isValidServiceAmount, parseCatalogInteger } from "./service-numbers";
+import { ServicePriceFields, type TierListStatus } from "./ServicePriceFields";
+import { useServicePriceDraft } from "./useServicePriceDraft";
 import { assignableCategories } from "./categories";
 
 // Service creation is org-level (no branchId in the path). The category is required by the
@@ -21,11 +23,17 @@ import { assignableCategories } from "./categories";
 // upload into a stable public service-photo URL.
 export function ServiceCreateModal({
   lockedServiceType,
+  tiers,
+  tierStatus,
+  onTiersStale,
   onClose,
   onCreated,
 }: Readonly<{
   /** Preset and hide the type control, for a tab that only creates one kind. */
   lockedServiceType?: "ADD_ON";
+  tiers: ReadonlyArray<AdminPriceTier>;
+  tierStatus: TierListStatus;
+  onTiersStale: () => void;
   onClose: () => void;
   onCreated: () => void;
 }>) {
@@ -39,7 +47,6 @@ export function ServiceCreateModal({
   const [serviceType, setServiceType] = useState<"BASE" | "ADD_ON">(lockedServiceType ?? "BASE");
   const [addonGroup, setAddonGroup] = useState("NAIL_REMOVAL");
   const [categoryId, setCategoryId] = useState("");
-  const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("60");
   const [warrantyDays, setWarrantyDays] = useState("0");
   const [description, setDescription] = useState("");
@@ -69,7 +76,7 @@ export function ServiceCreateModal({
   // step against this service instead.
   const [created, setCreated] = useState<AdminServiceItem | null>(null);
 
-  const priceNum = parseCatalogInteger(price);
+  const priceDraft = useServicePriceDraft({ tiers, tierStatus, serviceType, representsNoSelection, onTiersStale });
   const durationNum = parseCatalogInteger(duration);
   const warrantyDaysNum = Number(warrantyDays);
   useEffect(() => {
@@ -82,7 +89,7 @@ export function ServiceCreateModal({
     name.trim().length >= 2 &&
     (serviceType === "ADD_ON" || categoryItems.some((category) => category.id === categoryId)) &&
     (serviceType === "BASE" || addonGroup.trim().length >= 2) &&
-    isValidServiceAmount(priceNum, serviceType) &&
+    priceDraft.ready &&
     isValidServiceAmount(durationNum, serviceType) &&
     Number.isInteger(warrantyDaysNum) && warrantyDaysNum >= 0 && warrantyDaysNum <= 3650 &&
     !imageError &&
@@ -98,6 +105,7 @@ export function ServiceCreateModal({
     let uploadedMediaId: string | null = null;
     try {
       if (imageFile) uploadedMediaId = await adminMediaService.uploadFile(imageFile);
+      const pricing = priceDraft.payload();
       const service = await adminService.createService({
         name: name.trim(),
         nameJa: nameJa.trim() || undefined,
@@ -107,7 +115,8 @@ export function ServiceCreateModal({
         serviceType,
         addonGroup: serviceType === "ADD_ON" ? addonGroup.trim().toUpperCase() : null,
         ...(serviceType === "BASE" ? { categoryId } : {}),
-        price: priceNum!,
+        ...pricing,
+        price: pricing.price!,
         durationMinutes: durationNum!,
         warrantyDays: warrantyDaysNum,
         ...(uploadedMediaId ? { imageMediaId: uploadedMediaId } : {}),
@@ -137,7 +146,7 @@ export function ServiceCreateModal({
           // Keep the actionable create error visible; cleanup is best-effort here.
         }
       }
-      setError(err instanceof Error && err.message ? err.message : t("create.failed"));
+      if (!priceDraft.explainError(err)) setError(err instanceof Error && err.message ? err.message : t("create.failed"));
     } finally {
       setBusy(false);
     }
@@ -231,16 +240,7 @@ export function ServiceCreateModal({
               </label>
               ) : null}
               <div className="contents">
-                <label className="flex flex-col gap-2 text-sm">
-                  <span className="font-semibold text-admin-ink">{t("create.price")}</span>
-                  <input
-                    inputMode="numeric"
-                    className="min-h-10 rounded-lg border border-admin-border bg-admin-surface px-3 text-admin-ink"
-                    value={price}
-                    onChange={(event) => setPrice(event.target.value)}
-                    placeholder="6600"
-                  />
-                </label>
+                <ServicePriceFields {...priceDraft.fields} />
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold text-admin-ink">{t("create.duration")}</span>
                   <input

@@ -5,7 +5,7 @@ import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHead
 import { formatMoney } from "@/lib/admin-format";
 
 import { UNGROUPED } from "./addon-groups";
-import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader } from "./ServiceTableCells";
+import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader, ServiceTierNote } from "./ServiceTableCells";
 import type { SalonService } from "./data";
 import type { ServiceListState } from "./useServiceListState";
 
@@ -19,6 +19,7 @@ export function AddonTable({
   services,
   list,
   groupOptions,
+  tierNames,
   emptyText,
   busyIds,
   onToggleStatus,
@@ -30,6 +31,8 @@ export function AddonTable({
   list: ServiceListState;
   /** The group column's checklist, with each group's add-on count. */
   groupOptions: ReadonlyArray<ColumnFilterOption>;
+  /** Tier names by id, for the add-ons whose price follows a tier. */
+  tierNames: ReadonlyMap<string, string>;
   /** "None yet" for an empty catalogue, "no match" when a filter or search emptied it. */
   emptyText: string;
   /** Add-ons with a status change in flight; their switch stays disabled until it lands. */
@@ -90,7 +93,7 @@ export function AddonTable({
               <td className="whitespace-nowrap px-3 py-2">
                 <span className="rounded-md bg-admin-soft px-2 py-1 font-mono text-xs text-admin-ink">{addon.addonGroup ?? UNGROUPED}</span>
               </td>
-              <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(addon.price)}</td>
+              <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(addon.price)}<ServiceTierNote service={addon} tierNames={tierNames} /></td>
               <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: addon.durationMinutes })}</td>
               <ServiceStatusCell service={addon} onToggle={onToggleStatus} isBusy={busyIds.has(addon.id)} />
               <ServiceRowActions service={addon} onEdit={onEdit} onDelete={onDelete} />

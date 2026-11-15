@@ -31,6 +31,7 @@ export function AdminTimeField({
   isInvalid,
   describedBy,
   minuteStep = 15,
+  editable = false,
   className,
 }: Readonly<{
   value: string;
@@ -40,58 +41,83 @@ export function AdminTimeField({
   isInvalid?: boolean;
   describedBy?: string;
   minuteStep?: number;
+  /** Allow direct keyboard entry in addition to the quick-pick list. */
+  editable?: boolean;
   className?: string;
 }>) {
   const [open, setOpen] = useState(false);
   const options = useMemo(() => buildOptions(minuteStep, value), [minuteStep, value]);
 
   return (
-    <Popover isOpen={open} onOpenChange={setOpen}>
-      <Button
-        id={id}
-        variant="outline"
-        onPress={() => setOpen(!open)}
-        aria-label={ariaLabel}
-        aria-invalid={isInvalid || undefined}
-        aria-describedby={describedBy}
-        className={[
-          "min-h-10 w-full justify-start gap-2 rounded-lg border-admin-border bg-admin-surface px-3 text-sm font-normal tabular-nums text-admin-ink",
-          className ?? "",
-        ].join(" ")}
-      >
-        <ClockIcon className="size-4 shrink-0 text-admin-muted" />
-        <span>{value}</span>
-      </Button>
-      <Popover.Content placement="bottom start" className="admin-shell z-50">
-        <Popover.Dialog className="w-40 rounded-xl border border-admin-border bg-admin-surface p-1 text-admin-ink shadow-atelier outline-none">
-          <div
-            ref={(element) => {
-              if (!element) return;
-              const active = element.children[options.indexOf(value)] as HTMLElement | undefined;
-              if (active) element.scrollTop = active.offsetTop - element.clientHeight / 2 + active.clientHeight / 2;
-            }}
-            className="relative max-h-64 overflow-y-auto"
-          >
-            {options.map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-current={option === value ? "time" : undefined}
-                onClick={() => {
-                  onChange(option);
-                  setOpen(false);
-                }}
-                className={[
-                  "block w-full rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors",
-                  option === value ? "bg-admin-accent font-semibold text-white" : "text-admin-ink hover:bg-admin-soft",
-                ].join(" ")}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </Popover.Dialog>
-      </Popover.Content>
-    </Popover>
+    <div className={editable ? "flex min-w-0 items-center gap-1" : "contents"}>
+      {editable ? (
+        <input
+          id={id}
+          type="time"
+          step={60}
+          value={value}
+          aria-label={ariaLabel}
+          aria-invalid={isInvalid || undefined}
+          aria-describedby={describedBy}
+          className={[
+            "min-h-10 min-w-0 w-full rounded-lg border border-admin-border bg-admin-surface px-2 text-sm tabular-nums text-admin-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent",
+            className ?? "",
+          ].join(" ")}
+          onChange={(event) => {
+            const time = event.target.value;
+            if (/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) onChange(time);
+          }}
+        />
+      ) : null}
+      <Popover isOpen={open} onOpenChange={setOpen}>
+        <Button
+          id={editable ? undefined : id}
+          variant="outline"
+          isIconOnly={editable}
+          onPress={() => setOpen(!open)}
+          aria-label={ariaLabel}
+          aria-invalid={isInvalid || undefined}
+          aria-describedby={describedBy}
+          className={[
+            "min-h-10 gap-2 rounded-lg border-admin-border bg-admin-surface text-sm font-normal tabular-nums text-admin-ink",
+            editable ? "w-9 min-w-9 shrink-0 justify-center px-0" : "w-full justify-start px-3",
+            editable ? "" : className ?? "",
+          ].join(" ")}
+        >
+          <ClockIcon className="size-4 shrink-0 text-admin-muted" />
+          {editable ? null : <span>{value}</span>}
+        </Button>
+        <Popover.Content placement="bottom start" className="admin-shell z-50">
+          <Popover.Dialog className="w-40 rounded-xl border border-admin-border bg-admin-surface p-1 text-admin-ink shadow-atelier outline-none">
+            <div
+              ref={(element) => {
+                if (!element) return;
+                const active = element.children[options.indexOf(value)] as HTMLElement | undefined;
+                if (active) element.scrollTop = active.offsetTop - element.clientHeight / 2 + active.clientHeight / 2;
+              }}
+              className="relative max-h-64 overflow-y-auto"
+            >
+              {options.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-current={option === value ? "time" : undefined}
+                  onClick={() => {
+                    onChange(option);
+                    setOpen(false);
+                  }}
+                  className={[
+                    "block w-full rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors",
+                    option === value ? "bg-admin-accent font-semibold text-white" : "text-admin-ink hover:bg-admin-soft",
+                  ].join(" ")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </Popover.Dialog>
+        </Popover.Content>
+      </Popover>
+    </div>
   );
 }

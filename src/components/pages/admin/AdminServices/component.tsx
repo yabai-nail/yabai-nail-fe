@@ -19,9 +19,11 @@ import {
   useAdminBranchList,
   useAdminServices,
   useAdminPermission,
+  useAdminPriceTiers,
   type AdminServiceItem as ServerService,
   type AdminServiceItemPatch,
 } from "@/service";
+import { PriceTierPanel } from "@/components/pages/admin/AdminNailDesigns/PriceTierPanel";
 import { AddonTable } from "./AddonTable";
 import { groupAddonCatalog } from "./addon-groups";
 import { CategoryTable } from "./CategoryTable";
@@ -62,6 +64,7 @@ function toScreenService(server: ServerService): SalonService {
     addonGroup: server.addonGroup ?? null,
     bookableStandalone: server.bookableStandalone ?? false,
     representsNoSelection: server.representsNoSelection ?? false,
+    priceTierId: server.priceTierId ?? null,
     version: server.version,
     sale: server.sale ?? null,
   };
@@ -118,6 +121,8 @@ function ListCard({
   );
 }
 
+type View = "services" | "categories" | "addons" | "tiers";
+
 export function AdminServicesComponent() {
   const t = useTranslations("admin.services");
   const tBranch = useTranslations("admin.branchSelector");
@@ -153,7 +158,7 @@ export function AdminServicesComponent() {
   const categoryItems = useMemo(() => categories.data?.items ?? [], [categories.data]);
   // Two jobs, two surfaces: browsing the catalogue, and maintaining the categories it is filed
   // under. Sharing one screen keeps the counts honest without cramming both into one layout.
-  const [view, setView] = useState<"services" | "categories" | "addons">("services");
+  const [view, setView] = useState<View>("services");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<SalonService | null>(null);
   const [deleting, setDeleting] = useState<SalonService | null>(null);
@@ -204,10 +209,19 @@ export function AdminServicesComponent() {
         .sort((left, right) => left.value.localeCompare(right.value)),
     [addonServices],
   );
-  // Both reads show the same rows through different filters, so a write has to refresh each.
+  // The shared price tiers (Mức giá) are the nail-design ones; the API reads them with the
+  // design permission, so without it the price stays a typed one and the tab is not offered.
+  const canManageTiers = useAdminPermission("design.manage.all");
+  const tierQuery = useAdminPriceTiers(canManageTiers);
+  const tiers = useMemo(() => tierQuery.data?.items ?? [], [tierQuery.data]);
+  const tierNames = useMemo(() => new Map(tiers.map((tier) => [tier.id, tier.name] as const)), [tiers]);
+  const tierStatus = !canManageTiers ? "hidden" : tierQuery.isLoading ? "loading" : tierQuery.error ? "failed" : "ready";
+  // Both reads show the same rows through different filters, so a write has to refresh each, and
+  // the tiers too: linking or detaching a service changes a tier's service count.
   const refreshCatalogue = () => {
     void mutateServices();
     void addonQuery.mutate();
+    if (canManageTiers) void tierQuery.mutate();
   };
 
   // A set rather than one id, so a second row can be changed while the first is still saving.
@@ -263,7 +277,7 @@ export function AdminServicesComponent() {
 
   return (
     <AdminPageLayout>
-      <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as "services" | "categories" | "addons")} variant="secondary">
+      <Tabs selectedKey={view} onSelectionChange={(key) => setView(String(key) as View)} variant="secondary">
         <Tabs.ListContainer className="mb-4 w-fit max-w-full overflow-x-auto">
           <Tabs.List aria-label={t("viewLabel")}>
             <Tabs.Tab id="services">
@@ -278,11 +292,20 @@ export function AdminServicesComponent() {
               <AdminTabLabel count={addonServices.length}>{t("addonsTab.label")}</AdminTabLabel>
               <Tabs.Indicator />
             </Tabs.Tab>
+            {canManageTiers ? (
+              <Tabs.Tab id="tiers">
+                <AdminTabLabel count={tiers.length}>{t("tiersTab")}</AdminTabLabel>
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ) : null}
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
 
-      {view === "categories" ? (
+      {view === "tiers" && canManageTiers ? (
+        // The panel revalidates services, designs and tiers itself after each write.
+        <PriceTierPanel tiers={tiers} isLoading={tierQuery.isLoading} failed={Boolean(tierQuery.error)} onChanged={() => undefined} />
+      ) : view === "categories" ? (
         <CategoryTable services={allBaseServices} canWrite={canWrite} />
       ) : view === "addons" ? (
         <>
@@ -303,6 +326,7 @@ export function AdminServicesComponent() {
             <AddonTable
               services={addonPage.items}
               list={addonList}
+              tierNames={tierNames}
               groupOptions={addonGroupOptions}
               emptyText={addonServices.length === 0 ? t("addonsTab.empty") : t("addonsTab.noMatch")}
               busyIds={busyIds}
@@ -349,6 +373,7 @@ export function AdminServicesComponent() {
             <ServiceTable
               services={servicePage.items}
               list={serviceList}
+              tierNames={tierNames}
               categoryOptions={categoryOptions}
               // The search goes to the API, so an empty result under a search is "no match".
               emptyText={baseServices.length === 0 && !serviceList.isFiltered ? t("table.noServices") : t("table.empty")}
@@ -376,6 +401,9 @@ export function AdminServicesComponent() {
       {canWrite && isCreateOpen ? (
         <ServiceCreateModal
           lockedServiceType={view === "addons" ? "ADD_ON" : undefined}
+          tiers={tiers}
+          tierStatus={tierStatus}
+          onTiersStale={() => void tierQuery.mutate()}
           onClose={() => setIsCreateOpen(false)}
           onCreated={refreshCatalogue}
         />
@@ -383,6 +411,9 @@ export function AdminServicesComponent() {
       {canWrite && editing ? (
         <ServiceEditModal
           service={editing}
+          tiers={tiers}
+          tierStatus={tierStatus}
+          onTiersStale={() => void tierQuery.mutate()}
           onClose={() => setEditing(null)}
           onSaved={refreshCatalogue}
         />

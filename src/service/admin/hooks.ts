@@ -1,5 +1,8 @@
 "use client";
 
+import { useCallback } from "react";
+import { useSWRConfig } from "swr";
+
 import { useApiOperation, usePaginatedApiOperation } from "../api";
 import type {
   AdminAppointment,
@@ -405,6 +408,26 @@ export function useAdminBranchSettings(branchId: string | null) {
 export function useAdminPriceTiers(enabled = true) {
   return useApiOperation<{ items: ReadonlyArray<AdminPriceTier> }>(
     enabled ? "GET /api/v1/admin/price-tiers" : null,
+  );
+}
+
+/** The reads a price-tier write changes: the tiers' counts and the prices of what sits on them. */
+const priceTierDependents: ReadonlySet<string> = new Set([
+  "GET /api/v1/admin/price-tiers",
+  "GET /api/v1/admin/nail-designs",
+  "GET /api/v1/admin/services",
+]);
+
+/**
+ * Revalidates every cached tier, design and service read, whichever screen holds it. A tier's
+ * amount is rewritten onto its designs and services, and deleting it detaches them, so both
+ * catalogues go stale together — also when the write came from the other screen.
+ */
+export function useRevalidatePriceTierDependents() {
+  const { mutate } = useSWRConfig();
+  return useCallback(
+    () => void mutate((key) => Array.isArray(key) && priceTierDependents.has(String(key[1]))),
+    [mutate],
   );
 }
 

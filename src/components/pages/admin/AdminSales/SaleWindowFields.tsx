@@ -36,7 +36,7 @@ function WhenField({
   return (
     <fieldset data-sale-field={field} className="grid gap-2 text-sm">
       <legend className="mb-2 font-semibold text-admin-ink">{legend}</legend>
-      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_10rem] gap-2">
         <AdminDateField
           value={parts.date}
           ariaLabel={dateLabel}
@@ -45,6 +45,7 @@ function WhenField({
           onChange={(date) => onChange(fromTokyoParts(date, parts.time))}
         />
         <AdminTimeField
+          editable
           value={parts.time}
           ariaLabel={timeLabel}
           isInvalid={Boolean(error)}

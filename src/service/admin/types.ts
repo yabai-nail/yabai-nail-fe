@@ -187,6 +187,8 @@ export interface AdminServiceItem {
   readonly bookableStandalone?: boolean;
   /** Marks the explicit customer choice that means no option from its add-on group. */
   readonly representsNoSelection?: boolean;
+  /** The Mức giá this service's price follows; null when the price is typed on the service. */
+  readonly priceTierId?: string | null;
   readonly active: boolean;
   /** The running sale that currently discounts this service, if any. */
   readonly sale?: AdminAppliedSale | null;
@@ -231,6 +233,8 @@ export interface AdminPriceTier {
   readonly name: string;
   readonly amount: number;
   readonly designCount: number;
+  /** Non-deleted services linked to the tier; absent from an API that predates the link. */
+  readonly serviceCount?: number;
   readonly version: number;
 }
 
@@ -784,6 +788,8 @@ export interface AdminServiceItemDraft {
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
   readonly representsNoSelection?: boolean;
+  /** A tier id links the price to it; null detaches. Omitted on PATCH keeps the stored link. */
+  readonly priceTierId?: string | null;
   readonly [field: string]: unknown;
 }
 
@@ -805,6 +811,8 @@ export interface AdminServiceItemPatch {
   readonly addonGroup?: string | null;
   readonly bookableStandalone?: boolean;
   readonly representsNoSelection?: boolean;
+  /** A tier id links the price to it; null detaches. Omitted on PATCH keeps the stored link. */
+  readonly priceTierId?: string | null;
   readonly [field: string]: unknown;
 }
 

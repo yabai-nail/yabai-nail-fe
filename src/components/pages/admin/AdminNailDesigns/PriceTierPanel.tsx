@@ -10,12 +10,14 @@ import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-
 import { salesOnTier } from "@/components/pages/admin/AdminSales/data";
 import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
-import { adminService, useAdminPermission, useAdminSales, type AdminPriceTier } from "@/service";
+import { adminService, useAdminPermission, useAdminSales, useRevalidatePriceTierDependents, type AdminPriceTier } from "@/service";
 import { PriceTierModal } from "./PriceTierModal";
 
 /**
- * The "Mức giá" tab: the short list of ready-made prices a design can sit on. `onChanged` runs
- * after every write, because a tier's amount or removal also changes the designs on it.
+ * The "Mức giá" tab: the short list of ready-made prices a design or a service can sit on. Shown
+ * on both the nail-design and the service screens. Every write revalidates the tiers, designs and
+ * services wherever they are cached, because a tier's amount or removal also changes what is on
+ * it; `onChanged` then runs for the host screen's own follow-up.
  */
 export function PriceTierPanel({
   tiers,
@@ -29,6 +31,8 @@ export function PriceTierPanel({
   onChanged: () => void;
 }>) {
   const t = useTranslations("admin.nailDesigns.tiers");
+  const revalidate = useRevalidatePriceTierDependents();
+  const changed = () => { revalidate(); onChanged(); };
   // `null` opens the form for a new tier; a tier opens it for editing.
   const [editing, setEditing] = useState<AdminPriceTier | null | undefined>(undefined);
   const [deleting, setDeleting] = useState<AdminPriceTier | null>(null);
@@ -59,13 +63,14 @@ export function PriceTierPanel({
       ) : tiers.length > 0 ? (
         <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
           <Card.Content className="min-w-0 overflow-x-auto p-0">
-            <table className="w-full min-w-[480px] text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <caption className="sr-only">{t("caption")}</caption>
               <thead className="border-b border-admin-border bg-admin-soft/60 text-xs font-semibold text-admin-ink">
                 <tr>
                   <AdminSortableHeader className="px-4">{t("columns.name")}</AdminSortableHeader>
                   <AdminSortableHeader>{t("columns.amount")}</AdminSortableHeader>
                   <AdminSortableHeader>{t("columns.designs")}</AdminSortableHeader>
+                  <AdminSortableHeader>{t("columns.services")}</AdminSortableHeader>
                   <AdminSortableHeader>{t("columns.actions")}</AdminSortableHeader>
                 </tr>
               </thead>
@@ -75,6 +80,7 @@ export function PriceTierPanel({
                     <td className="px-4 py-2 font-medium text-admin-ink">{tier.name}</td>
                     <td className="whitespace-nowrap px-3 py-2 font-semibold">{formatMoney(tier.amount)}</td>
                     <td className="whitespace-nowrap px-3 py-2 tabular-nums">{t("designCount", { count: tier.designCount })}</td>
+                    <td className="whitespace-nowrap px-3 py-2 tabular-nums">{t("serviceCount", { count: tier.serviceCount ?? 0 })}</td>
                     <td className="whitespace-nowrap px-3 py-2">
                       <div className="flex gap-1">
                         <Button isIconOnly size="sm" variant="ghost" aria-label={t("editTier", { name: tier.name })} onPress={() => setEditing(tier)}>
@@ -93,15 +99,15 @@ export function PriceTierPanel({
         </Card>
       ) : null}
 
-      {editing !== undefined ? <PriceTierModal tier={editing && latest(editing)} onClose={() => setEditing(undefined)} onSaved={onChanged} /> : null}
-      {deleting ? <PriceTierDeleteModal tier={latest(deleting)} onClose={() => setDeleting(null)} onDeleted={onChanged} /> : null}
+      {editing !== undefined ? <PriceTierModal tier={editing && latest(editing)} onClose={() => setEditing(undefined)} onSaved={changed} /> : null}
+      {deleting ? <PriceTierDeleteModal tier={latest(deleting)} onClose={() => setDeleting(null)} onDeleted={changed} /> : null}
     </>
   );
 }
 
 /**
- * Says how many designs move to a typed price, so the owner knows no design loses its price, and
- * how many sales picking designs by this tier stop covering it.
+ * Says how many designs and services move to a typed price, so the owner knows none of them loses
+ * its price, and how many sales picking designs by this tier stop covering it.
  */
 function PriceTierDeleteModal({
   tier,
@@ -152,6 +158,11 @@ function PriceTierDeleteModal({
                   ? t("delete.inUse", { count: tier.designCount, amount: formatMoney(tier.amount) })
                   : t("delete.unused")}
               </p>
+              {(tier.serviceCount ?? 0) > 0 ? (
+                <p className="rounded-lg border border-admin-border bg-admin-soft px-3 py-2 text-xs leading-5 text-admin-muted">
+                  {t("delete.servicesInUse", { count: tier.serviceCount ?? 0, amount: formatMoney(tier.amount) })}
+                </p>
+              ) : null}
               {saleCount > 0 ? (
                 <p className="rounded-lg border border-admin-border bg-admin-soft px-3 py-2 text-xs leading-5 text-admin-muted">
                   {t("delete.sales", { count: saleCount })}

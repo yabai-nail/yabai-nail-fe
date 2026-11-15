@@ -4,7 +4,7 @@ import { AdminColumnFilter, type ColumnFilterOption } from "@/components/blocks/
 import { AdminSalePrice } from "@/components/blocks/admin/AdminSalePrice";
 import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
 import { PageCheckbox } from "../AdminNailDesigns/DesignTable";
-import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader } from "./ServiceTableCells";
+import { ServiceRowActions, ServiceStatusCell, ServiceStatusHeader, ServiceTierNote } from "./ServiceTableCells";
 import type { SalonService } from "./data";
 import type { ServiceListState } from "./useServiceListState";
 
@@ -21,6 +21,7 @@ export function ServiceTable({
   services,
   list,
   categoryOptions,
+  tierNames,
   emptyText,
   busyIds,
   selected,
@@ -35,6 +36,8 @@ export function ServiceTable({
   list: ServiceListState;
   /** The category column's checklist, with each option's row count. */
   categoryOptions: ReadonlyArray<ColumnFilterOption>;
+  /** Tier names by id, for the services whose price follows a tier. */
+  tierNames: ReadonlyMap<string, string>;
   /** "None yet" for an empty catalogue, "no match" when a filter or search emptied it. */
   emptyText: string;
   /** Services with a status or pin change in flight; their controls stay disabled until it lands. */
@@ -161,7 +164,7 @@ export function ServiceTable({
                 </td>
                 {/* Pinning the short value cells to one line makes the browser take the width out
                     of the service name instead — the only column that reads fine wrapped. */}
-                <td className="whitespace-nowrap px-3 py-2 font-semibold"><AdminSalePrice original={service.price} sale={service.sale} /></td>
+                <td className="whitespace-nowrap px-3 py-2 font-semibold"><AdminSalePrice original={service.price} sale={service.sale} /><ServiceTierNote service={service} tierNames={tierNames} /></td>
                 <td className="whitespace-nowrap px-3 py-2">{t("table.durationValue", { minutes: service.durationMinutes })}</td>
                 <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums">{service.soldCount}</td>
                 <ServiceStatusCell service={service} onToggle={onToggleStatus} isBusy={busyIds.has(service.id)} />
