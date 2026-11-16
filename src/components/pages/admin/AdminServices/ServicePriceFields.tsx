@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { AdminPriceTierPicker } from "@/components/blocks/admin/AdminPriceTierPicker";
 import { formatMoney } from "@/lib/admin-format";
 import type { AdminPriceTier } from "@/service";
 import type { ServicePriceMode } from "./service-price";
@@ -107,23 +107,18 @@ export function ServicePriceFields({
             {priceInput}
             <span className="text-xs text-admin-muted">{t(isLinked ? "price.detachHint" : "price.customHint")}</span>
           </>
-        ) : tierStatus === "loading" ? (
-          <p role="status" className="text-xs text-admin-muted">{t("price.tiersLoading")}</p>
-        ) : tierStatus === "failed" ? (
-          <p role="alert" className="text-xs text-admin-danger">{t("price.tiersFailed")}</p>
-        ) : tiers.length === 0 ? (
-          <p role="status" className="text-xs text-admin-muted">{t("price.noTiers")}</p>
         ) : (
           <>
-            <AdminSelectField
+            <AdminPriceTierPicker
               label={t("price.tierLabel")}
-              fullWidth
+              tiers={tiers}
+              status={tierStatus}
+              messages={{ loading: t("price.tiersLoading"), failed: t("price.tiersFailed"), empty: t("price.noTiers") }}
               isInvalid={Boolean(tierError)}
               value={chosen?.id ?? ""}
               onChange={onTierChange}
-              options={tiers.map((tier) => ({ value: tier.id, label: `${tier.name} · ${formatMoney(tier.amount)}` }))}
             />
-            {tierError ? (
+            {tierStatus !== "ready" || tiers.length === 0 ? null : tierError ? (
               <span role="alert" className="text-xs text-admin-danger">{tierError}</span>
             ) : chosen ? (
               <span className="text-xs text-admin-muted">{t("price.tierHint", { amount: formatMoney(chosen.amount) })}</span>

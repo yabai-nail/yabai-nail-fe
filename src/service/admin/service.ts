@@ -716,11 +716,11 @@ export const adminService = {
     executeApiOperation<BackendList<AdminReview>>("GET /api/v1/admin/reviews", { query }),
   priceTiers: () =>
     executeApiOperation<{ items: ReadonlyArray<AdminPriceTier> }>("GET /api/v1/admin/price-tiers"),
-  createPriceTier: (input: { name: string; amount: number }) =>
+  createPriceTier: (input: { name: string; amount: number; isPinned?: boolean }) =>
     executeApiOperation<AdminPriceTier>("POST /api/v1/admin/price-tiers", { body: input }),
   updatePriceTier: (
     tierId: string,
-    patch: { name?: string; amount?: number },
+    patch: { name?: string; amount?: number; isPinned?: boolean },
     version?: string | number,
   ) =>
     executeApiOperation<AdminPriceTier>("PATCH /api/v1/admin/price-tiers/{tierId}", {

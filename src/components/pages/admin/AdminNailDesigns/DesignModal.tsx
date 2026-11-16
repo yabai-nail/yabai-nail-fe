@@ -6,10 +6,11 @@ import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outli
 import { useEffect, useState } from "react";
 
 import { adminMediaService, adminService, type AdminNailDesign, type AdminPriceTier } from "@/service";
-import { formatMoney } from "@/lib/admin-format";
 import { notifySuccess } from "@/lib/app-toast";
 import type { DesignRow } from "./data";
+import { AdminPriceTierPicker, type PriceTierPickerStatus } from "@/components/blocks/admin/AdminPriceTierPicker";
 import { AdminSelectField } from "@/components/blocks/admin/AdminSelectField";
+import { sortTiers } from "@/lib/price-tier-search";
 import { AdminNailDesignThumbnail } from "./AdminNailDesignThumbnail";
 import { parseIndicativePrice } from "./design-price";
 
@@ -21,11 +22,13 @@ type PriceMode = (typeof priceModes)[number];
 export function DesignModal({
   design,
   tiers,
+  tierStatus = "ready",
   onClose,
   onSaved,
 }: Readonly<{
   design: DesignRow | null;
   tiers: ReadonlyArray<AdminPriceTier>;
+  tierStatus?: PriceTierPickerStatus;
   onClose: () => void;
   onSaved: (saved: AdminNailDesign) => Promise<void>;
 }>) {
@@ -41,8 +44,8 @@ export function DesignModal({
     design ? (design.priceTierId ? "tier" : "custom") : tiers.length > 0 ? "tier" : "custom",
   );
   const [tierId, setTierId] = useState(design?.priceTierId ?? "");
-  // Until one is picked the select shows the first tier, so that is what a save would use.
-  const chosenTier = tiers.find((tier) => tier.id === (tierId || tiers[0]?.id));
+  // Until one is picked the picker shows the first tier (pinned first), so that is what a save would use.
+  const chosenTier = tiers.find((tier) => tier.id === (tierId || sortTiers(tiers)[0]?.id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -156,20 +159,19 @@ export function DesignModal({
                     ))}
                   </div>
                   {priceMode === "tier" ? (
-                    tiers.length === 0 ? (
-                      <p role="status" className="text-xs text-admin-muted">{t("modal.priceMode.noTiers")}</p>
-                    ) : (
-                      <>
-                        <AdminSelectField
-                          label={t("modal.priceMode.tierLabel")}
-                          fullWidth
-                          value={chosenTier?.id ?? tierId}
-                          onChange={setTierId}
-                          options={tiers.map((tier) => ({ value: tier.id, label: `${tier.name} · ${formatMoney(tier.amount)}` }))}
-                        />
+                    <>
+                      <AdminPriceTierPicker
+                        label={t("modal.priceMode.tierLabel")}
+                        tiers={tiers}
+                        status={tierStatus}
+                        messages={{ empty: t("modal.priceMode.noTiers") }}
+                        value={chosenTier?.id ?? tierId}
+                        onChange={setTierId}
+                      />
+                      {tierStatus === "ready" && tiers.length > 0 ? (
                         <span className="text-xs text-admin-muted">{t("modal.priceMode.tierHint")}</span>
-                      </>
-                    )
+                      ) : null}
+                    </>
                   ) : (
                     <>
                       <input

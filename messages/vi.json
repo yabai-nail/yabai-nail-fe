@@ -192,6 +192,7 @@
       }
     },
     "pagination": { "label": "Phân trang", "previous": "Trang trước", "next": "Trang sau", "page": "Trang {page}" },
+    "priceTierPicker": {"placeholder": "Tìm theo tên hoặc giá", "loading": "Đang tải mức giá…", "failed": "Không tải được mức giá. Hãy tải lại trang.", "empty": "Chưa có mức giá nào.", "noMatch": "Không có mức giá nào khớp “{query}”.", "more": "Đang hiện {shown}/{total}. Gõ thêm tên hoặc giá để thu hẹp danh sách.", "pinned": "Đã ghim", "results": "{count, plural, =0 {Không có mức giá nào khớp} other {# mức giá khớp}}"},
     "avatar": {"title":"Ảnh đại diện","requirements":"JPG, PNG hoặc WebP · tối đa 5 MB","pick":"Chọn ảnh từ máy","replace":"Đổi ảnh","remove":"Xóa ảnh","cancel":"Bỏ ảnh đã chọn","undo":"Hoàn tác","removalPending":"Ảnh sẽ bị xóa khi lưu.","alt":"Ảnh đại diện của {name}","zoomOpen":"Phóng to ảnh của {name}","close":"Đóng","errors":{"unsupportedType":"Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.","empty":"Tệp ảnh đang trống.","tooLarge":"Ảnh không được vượt quá 5 MB."}},
     "settings": {
       "language": {
@@ -728,6 +729,18 @@
         "serviceCount": "{count} dịch vụ",
         "editTier": "Sửa {name}",
         "deleteTier": "Xóa {name}",
+        "pinned": "Đã ghim",
+        "pin": "Ghim {name}",
+        "pinSuccess": "Đã ghim {name}. Mức giá này giờ luôn đứng đầu khi chọn giá.",
+        "unpinSuccess": "Đã bỏ ghim {name}",
+        "pinFailed": "Không đổi được trạng thái ghim của {name}. Hãy thử lại.",
+        "filterLabel": "Hiển thị mức giá",
+        "filter": {"all": "Tất cả", "pinned": "Đã ghim"},
+        "searchLabel": "Tìm mức giá",
+        "searchPlaceholder": "Tìm theo tên hoặc giá",
+        "noMatch": "Không có mức giá nào khớp với tìm kiếm.",
+        "noPinned": "Chưa ghim mức giá nào. Ghim các mức hay dùng để chúng đứng đầu khi chọn giá.",
+        "paginationLabel": "Phân trang mức giá",
         "modal": {
           "addTitle": "Thêm mức giá",
           "editTitle": "Sửa mức giá",

@@ -192,6 +192,7 @@
       }
     },
     "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "page": "Page {page}" },
+    "priceTierPicker": {"placeholder": "Search by name or price", "loading": "Loading price tiers…", "failed": "Couldn't load the price tiers. Reload the page.", "empty": "No price tiers yet.", "noMatch": "No price tier matches “{query}”.", "more": "Showing {shown} of {total}. Type more of the name or price to narrow the list.", "pinned": "Pinned", "results": "{count, plural, =0 {No price tiers match} one {# price tier matches} other {# price tiers match}}"},
     "avatar": {"title":"Profile photo","requirements":"JPG, PNG or WebP · up to 5 MB","pick":"Choose a file","replace":"Replace photo","remove":"Remove photo","cancel":"Discard selection","undo":"Undo","removalPending":"The photo will be removed when you save.","alt":"{name}'s profile photo","zoomOpen":"Enlarge {name}'s photo","close":"Close","errors":{"unsupportedType":"Only JPG, PNG or WebP images are supported.","empty":"The image file is empty.","tooLarge":"The image must not exceed 5 MB."}},
     "settings": {
       "language": {
@@ -728,6 +729,18 @@
         "serviceCount": "{count, plural, one {# service} other {# services}}",
         "editTier": "Edit {name}",
         "deleteTier": "Delete {name}",
+        "pinned": "Pinned",
+        "pin": "Pin {name}",
+        "pinSuccess": "Pinned {name}. It now comes first in every price tier list.",
+        "unpinSuccess": "Unpinned {name}",
+        "pinFailed": "Couldn't change the pin on {name}. Try again.",
+        "filterLabel": "Show price tiers",
+        "filter": {"all": "All", "pinned": "Pinned"},
+        "searchLabel": "Search price tiers",
+        "searchPlaceholder": "Search by name or price",
+        "noMatch": "No price tier matches this search.",
+        "noPinned": "No pinned price tiers yet. Pin the tiers you use most so they come first when picking a price.",
+        "paginationLabel": "Price tier pages",
         "modal": {
           "addTitle": "Add price tier",
           "editTitle": "Edit price tier",

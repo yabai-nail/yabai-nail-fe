@@ -235,6 +235,8 @@ export interface AdminPriceTier {
   readonly designCount: number;
   /** Non-deleted services linked to the tier; absent from an API that predates the link. */
   readonly serviceCount?: number;
+  /** Pinned tiers are listed first everywhere; absent (older API) reads as unpinned. */
+  readonly isPinned?: boolean;
   readonly version: number;
 }
 
