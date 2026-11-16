@@ -9,12 +9,14 @@ import { useMemo, useState } from "react";
 import { AdminPagination } from "@/components/blocks/admin/AdminPagination";
 import { AdminSearchField } from "@/components/blocks/admin/AdminSearchField";
 import { AdminSortableHeader } from "@/components/blocks/admin/AdminSortableHeader";
+import { AdminColumnFilter } from "@/components/blocks/admin/AdminColumnFilter";
+import type { AdminTableSort } from "@/lib/admin-table-sort";
 import { isVersionConflict } from "@/components/pages/admin/AdminMarketing/home-announcements";
 import { salesOnTier } from "@/components/pages/admin/AdminSales/data";
 import { formatMoney } from "@/lib/admin-format";
 import { paginate } from "@/lib/admin-pagination";
 import { notifySuccess } from "@/lib/app-toast";
-import { filterTiers, isPinnedTier } from "@/lib/price-tier-search";
+import { filterTiers, isPinnedTier, sortTierTable } from "@/lib/price-tier-search";
 import { adminService, useAdminPermission, useAdminSales, useRevalidatePriceTierDependents, type AdminPriceTier } from "@/service";
 import { PriceTierModal } from "./PriceTierModal";
 import { usePriceTierPin } from "./usePriceTierPin";
@@ -52,10 +54,14 @@ export function PriceTierPanel({
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<AdminTableSort<"name" | "amount"> | null>(null);
+  const [amounts, setAmounts] = useState<ReadonlyArray<string>>([]);
+  const sortProps = { sort, onSortChange: (next: AdminTableSort<"name" | "amount"> | null) => { setSort(next); setPage(1); } };
   // After a reload (e.g. on a version conflict) a retry must send the tier's fresh version.
   const latest = (tier: AdminPriceTier) => tiers.find((item) => item.id === tier.id) ?? tier;
   const pinnedCount = useMemo(() => tiers.filter(isPinnedTier).length, [tiers]);
-  const shown = useMemo(() => filterTiers(tiers, { query, pinnedOnly: filter === "pinned" }), [tiers, query, filter]);
+  const amountOptions = useMemo(() => [...new Set(tiers.map((tier) => tier.amount))].sort((a, b) => a - b).map((amount) => ({ value: String(amount), label: formatMoney(amount) })), [tiers]);
+  const shown = useMemo(() => sortTierTable(filterTiers(tiers, { query, pinnedOnly: filter === "pinned" }).filter((tier) => amounts.length === 0 || amounts.includes(String(tier.amount))), sort), [tiers, query, filter, amounts, sort]);
   const { items: visible, page: currentPage, pageCount } = paginate(shown, page, pageSize);
   const addButton = (
     <Button variant="primary" className="rounded-lg" onPress={() => setEditing(null)}>
@@ -107,7 +113,7 @@ export function PriceTierPanel({
           {pin.error ? <p role="alert" className="mb-3 text-sm text-admin-danger">{pin.error}</p> : null}
           {visible.length === 0 ? (
             <p role="status" className="rounded-lg border border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted">
-              {filter === "pinned" && query.trim() === "" ? t("noPinned") : t("noMatch")}
+              {filter === "pinned" && query.trim() === "" && amounts.length === 0 ? t("noPinned") : t("noMatch")}
             </p>
           ) : (
             <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border-admin-border bg-admin-surface p-0 shadow-none">
@@ -116,8 +122,10 @@ export function PriceTierPanel({
                   <caption className="sr-only">{t("caption")}</caption>
                   <thead className="border-b border-admin-border bg-admin-soft/60 text-xs font-semibold text-admin-ink">
                     <tr>
-                      <AdminSortableHeader className="px-4">{t("columns.name")}</AdminSortableHeader>
-                      <AdminSortableHeader>{t("columns.amount")}</AdminSortableHeader>
+                      <AdminSortableHeader sortKey="name" {...sortProps} className="px-4">{t("columns.name")}</AdminSortableHeader>
+                      <AdminSortableHeader sortKey="amount" {...sortProps} filter={
+                        <AdminColumnFilter label={t("columns.amount")} options={amountOptions} selected={amounts} searchable onApply={(values) => { setAmounts(values); setPage(1); }} />
+                      }>{t("columns.amount")}</AdminSortableHeader>
                       <AdminSortableHeader>{t("columns.designs")}</AdminSortableHeader>
                       <AdminSortableHeader>{t("columns.services")}</AdminSortableHeader>
                       <AdminSortableHeader>{t("columns.actions")}</AdminSortableHeader>

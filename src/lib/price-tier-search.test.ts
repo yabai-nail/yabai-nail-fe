@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareTiers, filterTiers, isPinnedTier, matchesTierQuery, nextActiveIndex, sortTiers, tierPickerResults } from "./price-tier-search";
+import { compareTiers, filterTiers, isPinnedTier, matchesTierQuery, nextActiveIndex, sortTiers, sortTierTable, tierPickerResults } from "./price-tier-search";
 
 const tier = (id: string, name: string, amount: number, isPinned?: boolean) => ({ id, name, amount, isPinned });
 const tiers = [
@@ -12,6 +12,14 @@ const tiers = [
 ];
 
 describe("price tier order", () => {
+  it("sorts table prices both ways within pinned groups without changing the source", () => {
+    const rows = [tier("a", "A", 100), tier("p", "P", 50, true), tier("b", "B", 200)];
+    expect(sortTierTable(rows, { key: "amount", direction: "desc" }).map((row) => row.id)).toEqual(["p", "b", "a"]);
+    expect(sortTierTable(rows, { key: "amount", direction: "asc" }).map((row) => row.id)).toEqual(["p", "a", "b"]);
+    expect(sortTierTable(rows, { key: "name", direction: "desc" }).map((row) => row.id)).toEqual(["p", "b", "a"]);
+    expect(sortTierTable(rows, null)).toEqual(sortTiers(rows));
+    expect(rows.map((row) => row.id)).toEqual(["a", "p", "b"]);
+  });
   it("puts pinned tiers first, then amount, name and id, like the API", () => {
     expect(sortTiers(tiers).map((item) => item.id)).toEqual(["p1", "p2", "legacy", "b", "a", "c"]);
   });
