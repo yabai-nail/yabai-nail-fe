@@ -52,6 +52,7 @@ export function AdminNailDesignsComponent() {
   // Tiers are read with the same permission as the catalogue they price.
   const tierQuery = useAdminPriceTiers(canManageCatalog);
   const tiers = useMemo(() => tierQuery.data?.items ?? [], [tierQuery.data]);
+  const tierStatus = tierQuery.isLoading ? "loading" : tierQuery.error ? "failed" : "ready";
   const tierNames = useMemo(() => new Map(tiers.map((tier) => [tier.id, tier.name] as const)), [tiers]);
 
   const source = useMemo<ReadonlyArray<DesignRow>>(
@@ -188,8 +189,8 @@ export function AdminNailDesignsComponent() {
         />
       ) : null}</> : <ProposalList data={proposals.data?.items ?? []} isLoading={proposals.isLoading} error={proposals.error} canReview={canReviewProposals} onReview={(proposal, decision) => setReviewing({ proposal, decision })} />}
 
-      {canManageCatalog && creating ? <DesignModal design={null} tiers={tiers} onClose={() => setCreating(false)} onSaved={syncSavedDesign} /> : null}
-      {canManageCatalog && editing ? <DesignModal design={editing} tiers={tiers} onClose={() => setEditing(null)} onSaved={syncSavedDesign} /> : null}
+      {canManageCatalog && creating ? <DesignModal design={null} tiers={tiers} tierStatus={tierStatus} onClose={() => setCreating(false)} onSaved={syncSavedDesign} /> : null}
+      {canManageCatalog && editing ? <DesignModal design={editing} tiers={tiers} tierStatus={tierStatus} onClose={() => setEditing(null)} onSaved={syncSavedDesign} /> : null}
       {canManageCatalog && deleting ? (
         <DesignDeleteModal
           design={deleting}

@@ -192,6 +192,7 @@
       }
     },
     "pagination": { "label": "ページネーション", "previous": "前のページ", "next": "次のページ", "page": "{page}ページ" },
+    "priceTierPicker": {"placeholder": "名前または価格で検索", "loading": "価格帯を読み込み中…", "failed": "価格帯を読み込めませんでした。ページを再読み込みしてください。", "empty": "価格帯がまだありません。", "noMatch": "「{query}」に一致する価格帯はありません。", "more": "{total}件中{shown}件を表示中。名前や価格をさらに入力して絞り込んでください。", "pinned": "ピン留め", "results": "{count, plural, =0 {一致する価格帯はありません} other {#件の価格帯が一致}}"},
     "avatar": {"title":"プロフィール画像","requirements":"JPG・PNG・WebP・最大5MB","pick":"画像を選択","replace":"画像を変更","remove":"画像を削除","cancel":"選択を取り消す","undo":"元に戻す","removalPending":"保存時に画像を削除します。","alt":"{name}のプロフィール画像","zoomOpen":"{name}の画像を拡大","close":"閉じる","errors":{"unsupportedType":"JPG・PNG・WebP形式のみ対応しています。","empty":"画像ファイルが空です。","tooLarge":"画像は5MBを超えられません。"}},
     "settings": {
       "language": {
@@ -728,6 +729,18 @@
         "serviceCount": "{count}件",
         "editTier": "{name} を編集",
         "deleteTier": "{name} を削除",
+        "pinned": "ピン留め",
+        "pin": "{name} をピン留め",
+        "pinSuccess": "{name} をピン留めしました。価格帯の一覧で常に先頭に表示されます。",
+        "unpinSuccess": "{name} のピン留めを解除しました",
+        "pinFailed": "{name} のピン留めを変更できませんでした。もう一度お試しください。",
+        "filterLabel": "表示する価格帯",
+        "filter": {"all": "すべて", "pinned": "ピン留め"},
+        "searchLabel": "価格帯を検索",
+        "searchPlaceholder": "名前または価格で検索",
+        "noMatch": "検索に一致する価格帯はありません。",
+        "noPinned": "ピン留めした価格帯はまだありません。よく使う価格帯をピン留めすると、価格を選ぶときに先頭に表示されます。",
+        "paginationLabel": "価格帯のページ",
         "modal": {
           "addTitle": "価格帯を追加",
           "editTitle": "価格帯を編集",
