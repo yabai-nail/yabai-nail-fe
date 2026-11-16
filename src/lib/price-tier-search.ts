@@ -29,6 +29,19 @@ export function sortTiers<T extends SearchableTier>(tiers: ReadonlyArray<T>): Re
   return [...tiers].sort(compareTiers);
 }
 
+/** Table sorting keeps pinned tiers first; picker ordering remains unchanged. */
+export function sortTierTable<T extends SearchableTier>(
+  tiers: ReadonlyArray<T>,
+  sort: { readonly key: "name" | "amount"; readonly direction: "asc" | "desc" } | null,
+): ReadonlyArray<T> {
+  if (!sort) return sortTiers(tiers);
+  return [...tiers].sort((a, b) => {
+    const pinned = Number(isPinnedTier(b)) - Number(isPinnedTier(a));
+    const compared = sort.key === "amount" ? a.amount - b.amount : a.name.localeCompare(b.name);
+    return pinned || compared * (sort.direction === "asc" ? 1 : -1) || compareTiers(a, b);
+  });
+}
+
 /** Lower case without accents, so "muc gia" finds "Mức giá" and full-width input matches. */
 function fold(text: string): string {
   return text.normalize("NFKC").normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/gi, "d").toLocaleLowerCase().trim();
