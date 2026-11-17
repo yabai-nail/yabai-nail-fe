@@ -53,9 +53,9 @@ export function ServiceHighlightFields({ value, onChange, disabled }: Readonly<{
           <button
             ref={addButton}
             type="button"
+            onClick={() => { onChange([...value, ""]); focusRow(value.length); }}
             disabled={disabled || value.length >= MAX_HIGHLIGHTS}
             className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-admin-border bg-admin-surface px-3 text-sm font-semibold text-admin-accent hover:border-admin-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => { onChange([...value, ""]); focusRow(value.length); }}
           ><PlusIcon aria-hidden className="size-4" />{t("add")} <span className="font-normal text-admin-muted">({value.length}/{MAX_HIGHLIGHTS})</span></button>
         </div>
         <div className="min-w-0 self-start rounded-lg border border-admin-border bg-admin-surface p-4">
