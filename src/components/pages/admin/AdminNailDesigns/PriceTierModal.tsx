@@ -19,19 +19,24 @@ function refusedField(thrown: unknown): Field | null {
   return field === "name" || field === "amount" ? field : null;
 }
 
-/** Add a price tier, or edit one (`tier` set). Same rules as the API: name 1–60, whole yen ≥ 1. */
+/**
+ * Add a price tier, or edit one (`tier` set). Same rules as the API: name 1–60, whole yen ≥ 1.
+ * An edit saves against the version it opened with; if the tier changed elsewhere meanwhile, the
+ * form offers `onReload` (open the fresh copy) instead of overwriting it.
+ */
 export function PriceTierModal({
   tier,
   onClose,
   onSaved,
-}: Readonly<{ tier: AdminPriceTier | null; onClose: () => void; onSaved: () => void }>) {
+  onReload,
+}: Readonly<{ tier: AdminPriceTier | null; onClose: () => void; onSaved: () => void; onReload: () => void }>) {
   const t = useTranslations("admin.nailDesigns.tiers.modal");
-  const tTiers = useTranslations("admin.nailDesigns.tiers");
   const [name, setName] = useState(tier?.name ?? "");
   const [amount, setAmount] = useState(tier ? String(tier.amount) : "");
   const [touched, setTouched] = useState<ReadonlySet<Field>>(new Set());
   const [serverField, setServerField] = useState<Field | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const trimmed = name.trim();
@@ -47,6 +52,7 @@ export function PriceTierModal({
     if (!nameValid || !amountValid || busy) return;
     setBusy(true);
     setError(null);
+    setConflict(false);
     setServerField(null);
     try {
       const input = { name: trimmed, amount: parsedAmount };
@@ -57,11 +63,10 @@ export function PriceTierModal({
       onClose();
     } catch (thrown) {
       const field = refusedField(thrown);
-      // Changed in another tab: reload, so a retry carries the fresh version.
-      const conflict = isVersionConflict(thrown);
-      if (conflict) onSaved();
+      const changedElsewhere = isVersionConflict(thrown);
+      setConflict(changedElsewhere);
       setServerField(field);
-      setError(field ? null : conflict ? tTiers("conflict") : t("saveFailed"));
+      setError(field ? null : changedElsewhere ? t("conflict") : t("saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -115,7 +120,14 @@ export function PriceTierModal({
                     </span>
                   ) : null}
                 </label>
-                {error ? <p role="alert" className="text-sm text-admin-danger">{error}</p> : null}
+                {error ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p role="alert" className="text-sm text-admin-danger">{error}</p>
+                    {conflict ? (
+                      <Button variant="secondary" size="sm" className="rounded-lg" onPress={onReload}>{t("reload")}</Button>
+                    ) : null}
+                  </div>
+                ) : null}
               </Modal.Body>
               <Modal.Footer className="flex justify-end gap-2 border-t border-admin-border px-5 py-3">
                 <Button variant="ghost" className="rounded-lg" isDisabled={busy} onPress={onClose}>{t("cancel")}</Button>

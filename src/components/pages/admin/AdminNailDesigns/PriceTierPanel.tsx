@@ -57,8 +57,20 @@ export function PriceTierPanel({
   const [sort, setSort] = useState<AdminTableSort<"name" | "amount"> | null>(null);
   const [amounts, setAmounts] = useState<ReadonlyArray<string>>([]);
   const sortProps = { sort, onSortChange: (next: AdminTableSort<"name" | "amount"> | null) => { setSort(next); setPage(1); } };
-  // After a reload (e.g. on a version conflict) a retry must send the tier's fresh version.
-  const latest = (tier: AdminPriceTier) => tiers.find((item) => item.id === tier.id) ?? tier;
+  // The dialogs keep the copy they opened with, so a background refresh never slips a newer
+  // version under the owner's edit; only a version conflict swaps in the fresh copy (null = gone).
+  const freshTier = async (id: string) => {
+    revalidate();
+    return (await adminService.priceTiers()).items.find((item) => item.id === id) ?? null;
+  };
+  const reloadEditing = async () => {
+    if (!editing) return;
+    setEditing((await freshTier(editing.id)) ?? undefined);
+  };
+  const reloadDeleting = async () => {
+    if (!deleting) return;
+    setDeleting(await freshTier(deleting.id));
+  };
   const pinnedCount = useMemo(() => tiers.filter(isPinnedTier).length, [tiers]);
   const amountOptions = useMemo(() => [...new Set(tiers.map((tier) => tier.amount))].sort((a, b) => a - b).map((amount) => ({ value: String(amount), label: formatMoney(amount) })), [tiers]);
   const shown = useMemo(() => sortTierTable(filterTiers(tiers, { query, pinnedOnly: filter === "pinned" }).filter((tier) => amounts.length === 0 || amounts.includes(String(tier.amount))), sort), [tiers, query, filter, amounts, sort]);
@@ -160,7 +172,7 @@ export function PriceTierPanel({
                                 aria-busy={pinning}
                                 isDisabled={pinning}
                                 className={pinned ? "text-admin-accent" : undefined}
-                                onPress={() => void pin.toggle(latest(tier))}
+                                onPress={() => void pin.toggle(tier)}
                               >
                                 {pinned ? <BookmarkSolidIcon className="size-4" /> : <BookmarkIcon className="size-4" />}
                               </Button>
@@ -186,8 +198,19 @@ export function PriceTierPanel({
         </>
       ) : null}
 
-      {editing !== undefined ? <PriceTierModal tier={editing && latest(editing)} onClose={() => setEditing(undefined)} onSaved={changed} /> : null}
-      {deleting ? <PriceTierDeleteModal tier={latest(deleting)} onClose={() => setDeleting(null)} onDeleted={changed} /> : null}
+      {editing !== undefined ? (
+        <PriceTierModal
+          // A reloaded copy starts the form afresh.
+          key={editing ? `${editing.id}:${editing.version}` : "new"}
+          tier={editing}
+          onClose={() => setEditing(undefined)}
+          onSaved={changed}
+          onReload={() => void reloadEditing()}
+        />
+      ) : null}
+      {deleting ? (
+        <PriceTierDeleteModal tier={deleting} onClose={() => setDeleting(null)} onDeleted={changed} onConflict={() => void reloadDeleting()} />
+      ) : null}
     </>
   );
 }
@@ -200,7 +223,8 @@ function PriceTierDeleteModal({
   tier,
   onClose,
   onDeleted,
-}: Readonly<{ tier: AdminPriceTier; onClose: () => void; onDeleted: () => void }>) {
+  onConflict,
+}: Readonly<{ tier: AdminPriceTier; onClose: () => void; onDeleted: () => void; onConflict: () => void }>) {
   const t = useTranslations("admin.nailDesigns.tiers");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -218,9 +242,9 @@ function PriceTierDeleteModal({
       onDeleted();
       onClose();
     } catch (thrown) {
-      // Changed in another tab: reload, so a retry carries the fresh version.
+      // Changed elsewhere: show the fresh copy, so a retry is a fresh decision.
       const conflict = isVersionConflict(thrown);
-      if (conflict) onDeleted();
+      if (conflict) onConflict();
       setError(conflict ? t("conflict") : t("delete.failed"));
     } finally {
       setBusy(false);
